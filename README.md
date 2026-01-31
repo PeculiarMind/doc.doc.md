@@ -10,7 +10,7 @@ Early-stage repository. The vision and documentation exist, and the bash tooling
 No installation steps are documented yet. The intended usage looks like this:
 
 ```
-./analyze.sh -d <directory_to_analyze> -m <report_template> -v
+./doc.doc.sh -d <directory_to_analyze> -m <report_template> -v
 ```
 
 When the scripts are added, update this section with prerequisites, installation steps, and concrete examples.
