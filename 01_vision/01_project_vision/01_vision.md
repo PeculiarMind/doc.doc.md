@@ -7,6 +7,7 @@ Provide a simple, scriptable toolkit that orchestrates existing CLI tools to ext
 - **Stay composable** by integrating with common UNIX tools instead of reinventing them.
 - **Remain lightweight** and easy to run in local environments. 
 - **Usability** by providing scripts that verify required tools are installed and, if not, prompt the user to install them.
+- **Process data locally and offline**: All text analysis, metadata extraction, and content processing must be performed exclusively with local tools. No file content or sensitive data may be transmitted to online tools, LLMs, or external services. Network access is permitted only for tool installation and updates.
 
 # Non‑Goals
 - Building a full GUI application.
@@ -24,6 +25,8 @@ Example command:
 
 Behavior:
 - Recursively scans the target directory.
-- Extracts metadata/content signals using existing CLI tools.
+- Extracts metadata and content using existing CLI tools.
 - Renders a Markdown summary per analyzed file and/or an aggregated report.
 - Uses `-v` for verbose logging during analysis.
+
+
