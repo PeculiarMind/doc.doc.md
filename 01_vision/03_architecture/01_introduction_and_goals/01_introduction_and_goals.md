@@ -16,7 +16,7 @@ arc42-chapter: 1
 
 | Stakeholder | Role | Concerns / Goals |
 | --- | --- | --- |
-| | | |
+| User | User | wants to analyze its files/documents to generate categorized and searchable summaries of the files/documents content. |
 
 ## 1.4 Context Summary
 <!-- One-paragraph overview of system context and boundaries. -->
