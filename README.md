@@ -45,10 +45,6 @@ doc.doc.md/
 
 ## Setup / Usage
 
-<<<<<<< HEAD
-```
-./doc.doc.sh -d <directory_to_analyze> -m <report_template> -v
-=======
 ### Prerequisites
 - Bash 4.0+
 - Common UNIX utilities: `file`, `stat`, `grep`, `find`
@@ -62,7 +58,6 @@ cd doc.doc.md
 
 # Make scripts executable (when ready)
 chmod +x scripts/doc.doc.sh
->>>>>>> d244bdf (derived requirements from project vision)
 ```
 
 ### Intended Usage
