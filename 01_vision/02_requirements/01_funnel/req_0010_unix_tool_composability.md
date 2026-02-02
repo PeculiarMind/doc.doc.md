@@ -7,13 +7,13 @@
 **Category**: Non-Functional
 
 ## Overview
-The system shall be designed to integrate seamlessly with common UNIX tools and command-line workflows.
+The system shall be designed to integrate seamlessly with common Linux tools and command-line workflows.
 
 ## Description
 The toolkit must follow UNIX philosophy principles: do one thing well, work with text streams, and compose with other tools. It should accept input from standard input, produce output to standard output, support piping and redirection, and integrate naturally into shell scripts and command-line workflows.
 
 ## Motivation
-From the vision: "Stay composable by integrating with common UNIX tools instead of reinventing them."
+From the vision: "Stay composable by integrating with common Linux tools instead of reinventing them."
 
 Composability enables users to integrate the toolkit into existing workflows, combine it with other utilities, and build custom automation pipelines without artificial constraints.
 

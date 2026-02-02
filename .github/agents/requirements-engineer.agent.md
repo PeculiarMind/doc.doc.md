@@ -43,7 +43,7 @@ For each requirement identified, create a markdown file:
 ID: req_<4-digit-id>
 
 ## Status
-State: [Funnel | Analyze | Accepted | Active | Obsolete]
+State: [Funnel | Analyze | Accepted | Obsolete]
 Created: <date>
 Last Updated: <date>
 
@@ -57,7 +57,7 @@ Last Updated: <date>
 <Link back to vision section(s) that motivate this requirement>
 
 ## Category
-- Type: [Functional | Non-Functional | Quality | Constraint]
+- Type: [Functional | Non-Functional]
 - Priority: [Unset | Low | Medium | High | Critical]
 
 ## Acceptance Criteria
@@ -67,6 +67,10 @@ Last Updated: <date>
 
 ## Related Requirements
 <!-- Links to other req_XXXX files -->
+
+## Transition History
+- [Date] Moved to <new-state> by <agent/user> 
+-- Comment: <optional notes>
 
 ```
 
@@ -109,5 +113,19 @@ Expected: New requirement req_00XX created in 01_funnel
 | **Funnel** | 01_funnel | Newly identified requirements pending initial review |
 | **Analyze** | 02_analyze | Requirements under detailed analysis and refinement |
 | **Accepted** | 03_accepted | Requirements approved by stakeholders, ready for implementation |
-| **Active** | 04_active | Requirements currently being implemented or in-flight |
 | **Obsolete** | 05_obsolete | Requirements no longer relevant; archived for historical reference |
+
+## Additional Rules
+
+### Read-Only States
+Requirements in the following states must be treated as read-only:
+- **Accepted**
+- **Obsolete**
+- **Rejected**
+
+#### Allowed Modifications
+- **Comments**: Additional comments can be appended in a designated comment section.
+- **Metadata Updates**: New metadata, such as dependencies or links to other requirements, may be added.
+
+#### Prohibited Modifications
+- **Content Changes**: The core content of the requirement must not be altered in any way.

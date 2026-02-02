@@ -38,7 +38,7 @@ doc.doc.md/
 
 - **Automated File Analysis**: Recursively scan directories and analyze file collections
 - **Template-Based Reporting**: Generate consistent Markdown reports using customizable templates
-- **CLI Tool Integration**: Leverage existing UNIX tools (`file`, `stat`, `grep`) instead of reinventing functionality
+- **CLI Tool Integration**: Leverage existing Linux tools (`file`, `stat`, `grep`) instead of reinventing functionality
 - **Metadata Extraction**: Capture file ownership, timestamps, paths, and content summaries
 - **Lightweight Design**: Minimal dependencies, runs locally without heavy runtimes
 - **Privacy & Security**: All text analysis and processing performed offline with local tools only; no data transmitted to external services
@@ -65,14 +65,28 @@ chmod +x scripts/doc.doc.sh
 
 ```bash
 # Analyze a directory and generate reports
-./scripts/doc.doc.sh -d <directory_to_analyze> -m scripts/template.doc.doc.md -v
+./scripts/doc.doc.sh -d <directory_to_analyze> -m <markdown_template> -t <target_directory> -w <workspace_directory> [-v]
 
 # Options:
-#   -d : Target directory for analysis
-#   -m : Markdown template file
+#   -d : Source directory to analyze (required)
+#   -m : Markdown template file (required)
+#   -t : Target directory for output reports (required)
+#   -w : Workspace directory for metadata storage (required)
+#        Stores scan state, metadata, and timestamps in JSON format
+#        Enables incremental analysis and downstream tool integration
 #   -v : Verbose output
 #   -h : Show help
+
+# Example:
+./scripts/doc.doc.sh -d ./src -m ./scripts/template.doc.doc.md -t ./analysis_output -w ./.doc.doc_workspace -v
 ```
+
+### Workspace Directory
+The workspace (`-w`) directory is a persistent data layer that stores:
+- Document metadata and extracted information in JSON format
+- Last scan timestamps for detecting changes
+- Document summaries and file information
+- State information consumable by other tools in your pipeline
 
 ### Template Variables
 The [template.doc.doc.md](scripts/template.doc.doc.md) supports these placeholders:
@@ -109,6 +123,7 @@ The project uses two parallel lifecycle processes:
 3. **03_accepted**: Approved by stakeholders, ready for implementation
 4. **04_active**: Currently being implemented
 5. **05_obsolete**: No longer relevant; archived
+6. **06_rejected**: Explicitly rejected; rationale documented
 
 **Agile Work Tracking** (`02_agile_board/`):
 1. **01_funnel**: New work items

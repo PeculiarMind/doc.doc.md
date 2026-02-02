@@ -4,10 +4,11 @@ Provide a simple, scriptable toolkit that orchestrates existing CLI tools to ext
 # Goals
 - **Automate analysis** of directories and file collections with a single command.
 - **Standardize reports** using templates for repeatable Markdown output per analyzed file.
-- **Stay composable** by integrating with common UNIX tools instead of reinventing them.
+- **Stay composable** by integrating with common Linux tools instead of reinventing them.
 - **Remain lightweight** and easy to run in local environments. 
 - **Usability** by providing scripts that verify required tools are installed and, if not, prompt the user to install them.
 - **Process data locally and offline**: All text analysis, metadata extraction, and content processing must be performed exclusively with local tools. No file content or sensitive data may be transmitted to online tools, LLMs, or external services. Network access is permitted only for tool installation and updates.
+- **Toolkit extensibility**: Enable users to customize and extend the analysis workflow by adding or substituting CLI tools as needed. Therefore, a lightweight plugin architecture should be considered.
 
 # Non‑Goals
 - Building a full GUI application.
@@ -20,13 +21,23 @@ The primary entry point is a single script that analyzes a directory and renders
 Example command:
 
 ```
-./doc.doc.sh -d <directory_to_analyze> -m <report_template> [-v]
+./doc.doc.sh -d <directory_to_analyze> -m <markdown_template> -t <target_directory> -w <workspace_directory> [-v]
 ```
 
 Behavior:
-- Recursively scans the target directory.
+- Recursively scans the source directory (`-d`).
 - Extracts metadata and content using existing CLI tools.
-- Renders a Markdown summary per analyzed file and/or an aggregated report.
-- Uses `-v` for verbose logging during analysis.
+- Stores document metadata and scan state in the workspace directory (`-w`) as JSON files for later processing.
+- Records timestamps and metadata (last scan time, document information) for incremental analysis and tool integration.
+- Renders Markdown reports to the target directory (`-t`) per analyzed file and/or an aggregated report.
+- Uses the specified template (`-m`) for report formatting.
+- Uses `-v` flag to enable verbose logging during analysis.
+
+Note on Workspace Directory:
+The workspace (`-w`) serves as a persistent data layer that stores:
+- Scan metadata and document information in JSON format
+- Last scan timestamps for incremental analysis support
+- Document summaries and extracted metadata
+- State information that can be consumed by downstream tools and processes
 
 

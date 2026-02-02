@@ -2,7 +2,7 @@
 
 **ID**: req_0002  
 **Title**: Recursive Directory Scanning  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Functional
 

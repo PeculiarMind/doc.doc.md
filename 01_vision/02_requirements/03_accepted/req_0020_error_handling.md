@@ -2,7 +2,7 @@
 
 **ID**: req_0020  
 **Title**: Error Handling  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Non-Functional
 
