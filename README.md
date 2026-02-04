@@ -11,7 +11,7 @@ This project provides a lightweight, scriptable toolkit that orchestrates CLI to
 - ✅ Template structure defined ([scripts/template.doc.doc.md](scripts/template.doc.doc.md))
 - ✅ Core bash script skeleton created ([scripts/doc.doc.sh](scripts/doc.doc.sh))
 - ✅ 21 requirements extracted from vision and documented
-- ✅ 5 requirements accepted and moved to [accepted](01_vision/02_requirements/03_accepted/)
+- ✅ 17 requirements accepted and moved to [accepted](01_vision/02_requirements/03_accepted/)
 - ✅ Quality goals defined (Efficiency, Reliability, Usability, Security, Extensibility)
 - ✅ Architecture constraints documented
 - 🚧 Requirements analysis and acceptance in progress
@@ -141,12 +141,12 @@ The project uses two parallel lifecycle processes:
 8. **08_done**: Completed work
 
 The Requirements Engineer Agent has extracted 21 formal requirements from the [vision document](01_vision/01_project_vision/01_vision.md), covering:
-- Functional requirements (directory scanning, metadata extraction, reporting, error handling)
-- Usability requirements (tool verification, installation prompts)
+- Functional requirements (directory scanning, metadata extraction, reporting, error handling, plugin architecture)
+- Usability requirements (tool verification, installation prompts, verbose logging)
 - Non-functional requirements (lightweight, composability, offline operation, extensibility)
-- Constraint requirements (local-only processing, no GUI, minimal dependencies)
+- Constraint requirements (local-only processing, no GUI, minimal dependencies, network access limits)
 
-5 requirements have been accepted and moved to the [accepted](01_vision/02_requirements/03_accepted/) state. Remaining requirements are undergoing analysis and stakeholder review.
+17 requirements have been accepted and moved to the [accepted](01_vision/02_requirements/03_accepted/) state, including the new plugin-based extensibility and data-driven execution flow capabilities. Remaining requirements are undergoing analysis and stakeholder review.
 
 ## Contributing
 

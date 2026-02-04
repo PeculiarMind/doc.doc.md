@@ -21,13 +21,25 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 ## 1.1 Requirements Overview
 
 ### Requirements
-The project currently has five accepted requirements that define the core functionality:
+The project currently has 17 accepted requirements that define the core functionality:
 
 - **req_0001**: [Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md)
 - **req_0002**: [Recursive Directory Scanning](../../02_requirements/03_accepted/req_0002_recursive_directory_scanning.md)
 - **req_0003**: [Metadata Extraction with CLI Tools](../../02_requirements/03_accepted/req_0003_metadata_extraction_with_cli_tools.md)
+- **req_0004**: [Markdown Report Generation](../../02_requirements/03_accepted/req_0004_markdown_report_generation.md)
+- **req_0005**: [Template-Based Reporting](../../02_requirements/03_accepted/req_0005_template_based_reporting.md)
+- **req_0006**: [Verbose Logging Mode](../../02_requirements/03_accepted/req_0006_verbose_logging_mode.md)
+- **req_0007**: [Tool Availability Verification](../../02_requirements/03_accepted/req_0007_tool_availability_verification.md)
+- **req_0008**: [Installation Prompts](../../02_requirements/03_accepted/req_0008_installation_prompts.md)
+- **req_0009**: [Lightweight Implementation](../../02_requirements/03_accepted/req_0009_lightweight_implementation.md)
+- **req_0011**: [Local Only Processing](../../02_requirements/03_accepted/req_0011_local_only_processing.md)
+- **req_0012**: [Network Access for Tools Only](../../02_requirements/03_accepted/req_0012_network_access_for_tools_only.md)
+- **req_0016**: [Offline Operation](../../02_requirements/03_accepted/req_0016_offline_operation.md)
+- **req_0018**: [Per-File Reports](../../02_requirements/03_accepted/req_0018_per_file_reports.md)
 - **req_0020**: [Error Handling](../../02_requirements/03_accepted/req_0020_error_handling.md)
 - **req_0021**: [Toolkit Extensibility and Plugin Architecture](../../02_requirements/03_accepted/req_0021_toolkit_extensibility_and_plugin_architecture.md)
+- **req_0022**: [Plugin-based Extensibility](../../02_requirements/03_accepted/req_0022_plugin_based_extensibility.md)
+- **req_0023**: [Data-driven Execution Flow](../../02_requirements/03_accepted/req_0023_data_driven_execution_flow.md)
 
 ## 1.2 Quality Goals
 
