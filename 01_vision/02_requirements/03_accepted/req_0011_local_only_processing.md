@@ -2,7 +2,7 @@
 
 **ID**: req_0011  
 **Title**: Local-Only Processing  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Constraint
 

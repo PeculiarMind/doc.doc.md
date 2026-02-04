@@ -7,10 +7,13 @@ This project provides a lightweight, scriptable toolkit that orchestrates CLI to
 **Early Development Stage**
 
 - ✅ Vision and architecture documented ([01_vision/](01_vision/))
-- ✅ Agent system established for workflow automation
+- ✅ Agent system established for workflow automation (README Maintainer, License Governance, Requirements Engineer, Architect)
 - ✅ Template structure defined ([scripts/template.doc.doc.md](scripts/template.doc.doc.md))
 - ✅ Core bash script skeleton created ([scripts/doc.doc.sh](scripts/doc.doc.sh))
-- ✅ 20 requirements extracted from vision and documented in [funnel](01_vision/02_requirements/01_funnel/)
+- ✅ 21 requirements extracted from vision and documented
+- ✅ 17 requirements accepted and moved to [accepted](01_vision/02_requirements/03_accepted/)
+- ✅ Quality goals defined (Efficiency, Reliability, Usability, Security, Extensibility)
+- ✅ Architecture constraints documented
 - 🚧 Requirements analysis and acceptance in progress
 - 🚧 Tool integration and implementation in progress
 
@@ -36,18 +39,19 @@ doc.doc.md/
 
 ## Key Features (Planned)
 
-- **Automated File Analysis**: Recursively scan directories and analyze file collections
-- **Template-Based Reporting**: Generate consistent Markdown reports using customizable templates
-- **CLI Tool Integration**: Leverage existing UNIX tools (`file`, `stat`, `grep`) instead of reinventing functionality
-- **Metadata Extraction**: Capture file ownership, timestamps, paths, and content summaries
-- **Lightweight Design**: Minimal dependencies, runs locally without heavy runtimes
-- **Privacy & Security**: All text analysis and processing performed offline with local tools only; no data transmitted to external services
+- **Automated File Analysis**: Recursively scan directories and analyze file collections.
+- **Template-Based Reporting**: Generate consistent Markdown reports using customizable templates.
+- **Linux Tool Integration**: Leverage existing Linux tools (`file`, `stat`, `grep`) instead of reinventing functionality.
+- **Metadata Extraction**: Capture file ownership, timestamps, paths, and content summaries.
+- **Lightweight Design**: Minimal dependencies, runs locally without heavy runtimes.
+- **Privacy & Security**: All text analysis and processing performed offline with local tools only; no data transmitted to external services.
+- **Extensibility**: Support for a lightweight plugin architecture, enabling users to customize and extend the analysis workflow.
 
 ## Setup / Usage
 
 ### Prerequisites
 - Bash 4.0+
-- Common UNIX utilities: `file`, `stat`, `grep`, `find`
+- Common Linux utilities: `file`, `stat`, `grep`, `find`
 - Git (for version control)
 
 ### Installation
@@ -65,14 +69,28 @@ chmod +x scripts/doc.doc.sh
 
 ```bash
 # Analyze a directory and generate reports
-./scripts/doc.doc.sh -d <directory_to_analyze> -m scripts/template.doc.doc.md -v
+./scripts/doc.doc.sh -d <directory_to_analyze> -m <markdown_template> -t <target_directory> -w <workspace_directory> [-v]
 
 # Options:
-#   -d : Target directory for analysis
-#   -m : Markdown template file
+#   -d : Source directory to analyze (required)
+#   -m : Markdown template file (required)
+#   -t : Target directory for output reports (required)
+#   -w : Workspace directory for metadata storage (required)
+#        Stores scan state, metadata, and timestamps in JSON format
+#        Enables incremental analysis and downstream tool integration
 #   -v : Verbose output
 #   -h : Show help
+
+# Example:
+./scripts/doc.doc.sh -d ./src -m ./scripts/template.doc.doc.md -t ./analysis_output -w ./.doc.doc_workspace -v
 ```
+
+### Workspace Directory
+The workspace (`-w`) directory is a persistent data layer that stores:
+- Document metadata and extracted information in JSON format
+- Last scan timestamps for detecting changes
+- Document summaries and file information
+- State information consumable by other tools in your pipeline
 
 ### Template Variables
 The [template.doc.doc.md](scripts/template.doc.doc.md) supports these placeholders:
@@ -97,6 +115,7 @@ This project uses specialized agents for complex tasks. Available agents:
 - **[README Maintainer Agent](.github/agents/readme-maintainer.agent.md)**: Documentation maintenance
 - **[License Governance Agent](.github/agents/license-governance.agent.md)**: License compliance verification
 - **[Requirements Engineer Agent](.github/agents/requirements-engineer.agent.md)**: Requirements lifecycle management
+- **[Architect Agent](.github/agents/architect.agent.md)**: Architecture documentation and design
 
 See [AGENTS.md](AGENTS.md) for complete documentation.
 
@@ -109,6 +128,7 @@ The project uses two parallel lifecycle processes:
 3. **03_accepted**: Approved by stakeholders, ready for implementation
 4. **04_active**: Currently being implemented
 5. **05_obsolete**: No longer relevant; archived
+6. **06_rejected**: Explicitly rejected; rationale documented
 
 **Agile Work Tracking** (`02_agile_board/`):
 1. **01_funnel**: New work items
@@ -120,13 +140,13 @@ The project uses two parallel lifecycle processes:
 7. **07_reviewing**: Under review process
 8. **08_done**: Completed work
 
-The Requirements Engineer Agent has extracted 20 formal requirements from the [vision document](01_vision/01_project_vision/01_vision.md), covering:
-- 10 functional requirements (directory scanning, metadata extraction, reporting)
-- 2 usability requirements (tool verification, installation prompts)
-- 4 non-functional requirements (lightweight, composability, offline operation)
-- 5 constraint requirements (local-only processing, no GUI, minimal dependencies)
+The Requirements Engineer Agent has extracted 21 formal requirements from the [vision document](01_vision/01_project_vision/01_vision.md), covering:
+- Functional requirements (directory scanning, metadata extraction, reporting, error handling, plugin architecture)
+- Usability requirements (tool verification, installation prompts, verbose logging)
+- Non-functional requirements (lightweight, composability, offline operation, extensibility)
+- Constraint requirements (local-only processing, no GUI, minimal dependencies, network access limits)
 
-These requirements are ready for analysis and stakeholder review.
+17 requirements have been accepted and moved to the [accepted](01_vision/02_requirements/03_accepted/) state, including the new plugin-based extensibility and data-driven execution flow capabilities. Remaining requirements are undergoing analysis and stakeholder review.
 
 ## Contributing
 

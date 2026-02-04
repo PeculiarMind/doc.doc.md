@@ -2,7 +2,7 @@
 
 **ID**: req_0009  
 **Title**: Lightweight Implementation  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Non-Functional
 

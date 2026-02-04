@@ -2,7 +2,7 @@
 
 **ID**: req_0012  
 **Title**: Network Access for Tools Only  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Constraint
 

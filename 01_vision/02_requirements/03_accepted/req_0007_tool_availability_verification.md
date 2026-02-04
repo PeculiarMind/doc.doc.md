@@ -2,7 +2,7 @@
 
 **ID**: req_0007  
 **Title**: Tool Availability Verification  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Usability
 
