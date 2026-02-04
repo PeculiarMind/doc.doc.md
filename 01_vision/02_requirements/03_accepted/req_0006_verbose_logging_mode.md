@@ -2,7 +2,7 @@
 
 **ID**: req_0006  
 **Title**: Verbose Logging Mode  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Functional
 

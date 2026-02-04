@@ -19,7 +19,15 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 - **Customizable and Extensible Architecture**: Facilitate user-driven customization and extensibility through a lightweight plugin architecture, enabling the integration or replacement of CLI tools within the workflow.
 
 ## 1.1 Requirements Overview
-<!-- Short summary of key functional and quality requirements. -->
+
+### Requirements
+The project currently has five accepted requirements that define the core functionality:
+
+- **req_0001**: [Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md)
+- **req_0002**: [Recursive Directory Scanning](../../02_requirements/03_accepted/req_0002_recursive_directory_scanning.md)
+- **req_0003**: [Metadata Extraction with CLI Tools](../../02_requirements/03_accepted/req_0003_metadata_extraction_with_cli_tools.md)
+- **req_0020**: [Error Handling](../../02_requirements/03_accepted/req_0020_error_handling.md)
+- **req_0021**: [Toolkit Extensibility and Plugin Architecture](../../02_requirements/03_accepted/req_0021_toolkit_extensibility_and_plugin_architecture.md)
 
 ## 1.2 Quality Goals
 
@@ -49,14 +57,16 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 - **Trade-offs Considered**: May require additional effort to design and maintain a flexible plugin interface.
 
 ## 1.3 Stakeholders
-<!-- List key stakeholders, their roles, and primary concerns. -->
 
 | Stakeholder | Role | Concerns / Goals |
 | --- | --- | --- |
-| User | User | wants to analyze its files/documents to generate categorized and searchable summaries of the files/documents content. |
+| **End Users** | Primary users of the toolkit | Want to analyze files/documents to generate categorized, searchable summaries; need simple, reliable operation; require customizable output formats; expect fast performance on commodity hardware |
+| **System Administrators** | Deploy and maintain in server environments | Need easy installation and updates; require integration with scheduled tasks (cron); expect reliable unattended operation; need clear error reporting |
+| **Contributors** | Extend and improve toolkit | Need clear architecture documentation; require well-structured code; expect comprehensive testing; want contribution guidelines |
 
 ## 1.4 Context Summary
-<!-- One-paragraph overview of system context and boundaries. -->
+
+The doc.doc toolkit operates as a local command-line utility designed for nonserver environments such as NAS and other small Linux systems. Execution is typically triggered manually by users or automatically via schedulers (cron jobs, systemd timers, task schedulers). The system processes files entirely locally using installed CLI tools, with no runtime network dependencies except for tool installation and updates. Input consists of directory paths and configuration parameters; output includes Markdown reports written to a target directory and JSON metadata stored in a persistent workspace directory. The workspace serves as a state layer enabling incremental analysis, tool integration, and downstream processing. The toolkit integrates seamlessly with the broader Linux ecosystem, consuming and producing standard formats (JSON, Markdown) that can be processed by other tools in automated workflows.
 
 ## 1.5 Business Goals
 <!-- Business drivers, success criteria, and expected outcomes. -->

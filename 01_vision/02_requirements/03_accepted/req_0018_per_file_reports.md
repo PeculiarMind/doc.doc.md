@@ -2,7 +2,7 @@
 
 **ID**: req_0018  
 **Title**: Per-File Reports  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Functional
 

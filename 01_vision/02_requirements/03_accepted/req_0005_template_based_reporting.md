@@ -2,7 +2,7 @@
 
 **ID**: req_0005  
 **Title**: Template-Based Reporting  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Functional
 

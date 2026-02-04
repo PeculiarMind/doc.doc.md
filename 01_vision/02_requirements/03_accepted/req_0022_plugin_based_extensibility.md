@@ -2,7 +2,7 @@
 
 **ID**: req_0022  
 **Title**: Plugin-based Extensibility  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-02-04  
 **Category**: Functional
 

@@ -2,7 +2,7 @@
 
 **ID**: req_0004  
 **Title**: Markdown Report Generation  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Functional
 

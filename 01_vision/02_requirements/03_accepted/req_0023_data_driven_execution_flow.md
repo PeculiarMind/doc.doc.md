@@ -2,7 +2,7 @@
 
 **ID**: req_0023  
 **Title**: Data-driven Execution Flow  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-02-04  
 **Category**: Functional
 
