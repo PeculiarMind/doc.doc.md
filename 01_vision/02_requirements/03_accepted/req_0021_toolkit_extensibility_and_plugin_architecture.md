@@ -40,9 +40,11 @@ Extensibility is critical because:
 ## Dependencies
 - req_0001 (Single Command Directory Analysis) - must support configuration
 - req_0003 (Metadata Extraction with CLI Tools) - custom tools participate in extraction
-- req_0026 (Configuration File Support) - if implemented, provides extension mechanism
 
 ## Notes
 - Consider lightweight approaches: environment variables, configuration files, or simple plugin directories
 - Avoid complex frameworks; keep it UNIX-like and scriptable
 - Document tool interface/contract requirements clearly
+- This high-level requirement is implemented by:
+  - req_0022 (Plugin-based Extensibility) - defines the plugin interface and descriptor mechanism
+  - req_0023 (Data-driven Execution Flow) - defines the automatic orchestration mechanism

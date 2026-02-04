@@ -40,4 +40,12 @@ The workspace (`-w`) serves as a persistent data layer that stores:
 - Document summaries and extracted metadata
 - State information that can be consumed by downstream tools and processes
 
+# Features
+
+## Plugin‑based extensibility
+The toolkit is designed to be extended through plugins, allowing users to integrate custom CLI tools and analysis capabilities without modifying the core system. Each plugin declares what information it consumes and what information it provides through its descriptor.
+
+## Data‑driven execution flow
+The toolkit automatically determines the optimal plugin execution order by analyzing these dependencies. Plugins execute only after the data they require becomes available, creating a data‑driven execution flow. This approach keeps the system flexible and composable while ensuring **users do not need to model or maintain an explicit workflow**—the toolkit orchestrates the pipeline intelligently based on plugin capabilities.
+
 
