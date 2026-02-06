@@ -3,7 +3,7 @@
 **ID**: req_0025
 
 ## Status
-State: Funnel  
+State: Accepted  
 Created: 2026-02-06  
 Last Updated: 2026-02-06
 

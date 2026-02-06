@@ -10,10 +10,10 @@
 The system shall generate Markdown-formatted reports containing the extracted metadata and content insights.
 
 ## Description
-After extracting metadata and analyzing files, the system must produce human-readable reports in Markdown format. Reports should be well-structured, consistently formatted, and include all relevant extracted information in an organized manner.
+After extracting metadata and analyzing files, the system must produce human-readable reports in Markdown format. Reports should be well-structured, consistently formatted, and include all relevant extracted information in an organized manner. Each file analyzed produces its own individual Markdown report.
 
 ## Motivation
-From the vision: "Produce consistent, human‑readable summaries in Markdown" and "Renders a Markdown summary per analyzed file and/or an aggregated report."
+From the vision: "Produce consistent, human‑readable summaries in Markdown" and "Renders a Markdown summary per analyzed file."
 
 Markdown provides a standardized, readable format that can be easily version-controlled, rendered in documentation systems, and processed by other tools.
 
@@ -22,10 +22,11 @@ Markdown provides a standardized, readable format that can be easily version-con
 2. Reports include at minimum: file identification, metadata summary, and content insights
 3. Markdown formatting uses appropriate elements (headers, lists, code blocks, tables) for data presentation
 4. Generated reports are human-readable without requiring additional processing
-5. The system can generate both per-file reports and aggregated directory reports
+5. The system generates one Markdown report per analyzed file (per-file reporting)
 
 ## Dependencies
 - req_0003 (Metadata Extraction with CLI Tools)
+- req_0018 (Per-File Reports) - defines the per-file reporting approach
 
 ## Notes
-The specific Markdown structure should be configurable through templates (see req_0005).
+The specific Markdown structure should be configurable through templates (see req_0005). Aggregated directory reports were considered but rejected (see req_0019).

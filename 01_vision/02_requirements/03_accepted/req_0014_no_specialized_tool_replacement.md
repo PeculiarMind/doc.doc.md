@@ -2,7 +2,7 @@
 
 **ID**: req_0014  
 **Title**: No Specialized Tool Replacement  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Constraint
 
