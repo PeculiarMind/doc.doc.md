@@ -160,8 +160,11 @@ run_command() {
   local cmd=("$@")
   
   local temp_output
-  temp_output=$("${cmd[@]}" 2>&1) || true
-  local temp_exit=$?
+  local temp_exit
+  set +e
+  temp_output=$("${cmd[@]}" 2>&1)
+  temp_exit=$?
+  set -e
   
   eval "$output_var=\$temp_output"
   eval "$exit_code_var=\$temp_exit"
