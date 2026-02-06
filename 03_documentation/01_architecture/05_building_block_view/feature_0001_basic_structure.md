@@ -29,7 +29,7 @@ SCRIPT_NAME="doc.doc.sh"
 SCRIPT_VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_COPYRIGHT="Copyright (c) 2026 doc.doc.md Project"
-SCRIPT_LICENSE="MIT License"
+SCRIPT_LICENSE="GPL-3.0"
 ```
 
 ### 2. Argument Parser Component
@@ -95,7 +95,7 @@ fi
 ```
 doc.doc.sh version 1.0.0
 Copyright (c) 2026 doc.doc.md Project
-MIT License
+GPL-3.0
 
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
