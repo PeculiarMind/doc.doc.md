@@ -10,7 +10,7 @@ This project provides a lightweight, scriptable toolkit that orchestrates CLI to
 - ✅ Agent system established for workflow automation (README Maintainer, License Governance, Requirements Engineer, Architect)
 - ✅ Template structure defined ([scripts/template.doc.doc.md](scripts/template.doc.doc.md))
 - ✅ Core bash script skeleton created ([scripts/doc.doc.sh](scripts/doc.doc.sh))
-- ✅ 21 requirements extracted from vision and documented
+- ✅ 23 requirements extracted from vision and documented
 - ✅ 17 requirements accepted and moved to [accepted](01_vision/02_requirements/03_accepted/)
 - ✅ Quality goals defined (Efficiency, Reliability, Usability, Security, Extensibility)
 - ✅ Architecture constraints documented
@@ -24,14 +24,17 @@ doc.doc.md/
 ├── 01_vision/              # Project vision, requirements, and architecture
 │   ├── 01_project_vision/  # Core vision documents
 │   ├── 02_requirements/    # Requirements lifecycle (funnel → analyze → accepted → active)
-│   └── 03_architecture/    # Arc42 architecture documentation
+│   └── 03_architecture/    # Arc42 architecture vision documentation
 ├── 02_agile_board/         # Kanban-style work tracking
+├── 03_documentation/       # Implementation documentation
+│   └── 01_architecture/    # Actual implemented architecture (maintained by Architect Agent)
 ├── .github/
 │   ├── agents/             # Specialized automation agents
 │   └── copilot-instructions.md
 ├── scripts/
 │   ├── doc.doc.sh          # Main analysis script (in development)
-│   └── template.doc.doc.md # Markdown report template
+│   ├── template.doc.doc.md # Markdown report template
+│   └── plugins/            # Plugin system
 ├── AGENTS.md               # Agent registry
 ├── LICENSE                 # GPL-3.0 license
 └── README.md
@@ -112,10 +115,10 @@ The [template.doc.doc.md](scripts/template.doc.doc.md) supports these placeholde
 ### Agent System
 This project uses specialized agents for complex tasks. Available agents:
 
-- **[README Maintainer Agent](.github/agents/readme-maintainer.agent.md)**: Documentation maintenance
-- **[License Governance Agent](.github/agents/license-governance.agent.md)**: License compliance verification
-- **[Requirements Engineer Agent](.github/agents/requirements-engineer.agent.md)**: Requirements lifecycle management
-- **[Architect Agent](.github/agents/architect.agent.md)**: Architecture documentation and design
+- **[README Maintainer Agent](.github/agents/readme-maintainer.agent.md)**: Maintains comprehensive, up-to-date README.md documentation
+- **[License Governance Agent](.github/agents/license-governance.agent.md)**: Verifies license compliance for project content and dependencies
+- **[Requirements Engineer Agent](.github/agents/requirements-engineer.agent.md)**: Analyzes project vision and manages requirements lifecycle
+- **[Architect Agent](.github/agents/architect.agent.md)**: Reviews architecture visions, maintains architecture documentation in `03_documentation/01_architecture/`, and verifies implementation compliance with architectural vision
 
 See [AGENTS.md](AGENTS.md) for complete documentation.
 
@@ -123,12 +126,12 @@ See [AGENTS.md](AGENTS.md) for complete documentation.
 The project uses two parallel lifecycle processes:
 
 **Requirements Lifecycle** (`01_vision/02_requirements/`):
-1. **01_funnel**: Initial collection (✅ 20 requirements currently in funnel)
+1. **01_funnel**: Initial collection (✅ 5 requirements currently in funnel)
 2. **02_analyze**: Detailed review and refinement
-3. **03_accepted**: Approved by stakeholders, ready for implementation
+3. **03_accepted**: Approved by stakeholders, ready for implementation (✅ 17 accepted)
 4. **04_active**: Currently being implemented
 5. **05_obsolete**: No longer relevant; archived
-6. **06_rejected**: Explicitly rejected; rationale documented
+6. **06_rejected**: Explicitly rejected; rationale documented (1 rejected)
 
 **Agile Work Tracking** (`02_agile_board/`):
 1. **01_funnel**: New work items
@@ -140,13 +143,13 @@ The project uses two parallel lifecycle processes:
 7. **07_reviewing**: Under review process
 8. **08_done**: Completed work
 
-The Requirements Engineer Agent has extracted 21 formal requirements from the [vision document](01_vision/01_project_vision/01_vision.md), covering:
+The Requirements Engineer Agent has extracted 23 formal requirements from the [vision document](01_vision/01_project_vision/01_vision.md), covering:
 - Functional requirements (directory scanning, metadata extraction, reporting, error handling, plugin architecture)
 - Usability requirements (tool verification, installation prompts, verbose logging)
 - Non-functional requirements (lightweight, composability, offline operation, extensibility)
 - Constraint requirements (local-only processing, no GUI, minimal dependencies, network access limits)
 
-17 requirements have been accepted and moved to the [accepted](01_vision/02_requirements/03_accepted/) state, including the new plugin-based extensibility and data-driven execution flow capabilities. Remaining requirements are undergoing analysis and stakeholder review.
+17 requirements have been accepted and moved to the [accepted](01_vision/02_requirements/03_accepted/) state, including the new plugin-based extensibility and data-driven execution flow capabilities. 5 requirements remain in the [funnel](01_vision/02_requirements/01_funnel/) undergoing analysis and stakeholder review, and 1 requirement has been [rejected](01_vision/02_requirements/05_rejected/).
 
 ## Contributing
 
