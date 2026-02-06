@@ -45,6 +45,32 @@ This document catalogs all specialized agents available in this repository. Agen
   - Keeping architecture documentation synchronized with implementation
   - Conducting architecture compliance audits
 
+### [Developer Agent](.github/agents/developer.agent.md)
+- **Location**: `.github/agents/developer.agent.md`
+- **Purpose**: Autonomously implements features from backlog, managing the complete workflow from branch creation through testing, architecture compliance, and pull request creation
+- **Expertise**: Software development, Git workflow, dependency analysis, test execution, architecture compliance coordination, agile board management
+- **Use When**:
+  - Implementing items from `02_agile_board/04_backlog`
+  - Starting new feature development (initiates workflow)
+  - Creating feature branches and coordinating with Tester Agent
+  - Receiving tests from Tester and implementing features to pass them
+  - Coordinating with Architect Agent for compliance verification
+  - Running tests and ensuring quality gates pass
+  - Creating pull requests after implementation complete
+  - Managing agile board state transitions (backlog → implementing → done)
+
+### [Tester Agent](.github/agents/tester.agent.md)
+- **Location**: `.github/agents/tester.agent.md`
+- **Purpose**: Creates comprehensive tests for features in implementation, supporting test-driven development (TDD)
+- **Expertise**: Test-driven development, test design, unit/integration/system testing, test frameworks, quality assurance
+- **Use When**:
+  - Receiving handover from Developer Agent after branch creation
+  - Creating test suite on feature branch for items in `02_agile_board/05_implementing`
+  - Implementing TDD approach (write tests before implementation code)
+  - Defining expected behavior through tests
+  - Creating unit, integration, and system tests
+  - Handing back to Developer Agent after tests complete
+
 ---
 
 ## How to Use Agents
