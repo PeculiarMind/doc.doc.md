@@ -41,14 +41,14 @@ graph TB
 ./doc.doc.sh -d <directory> -m <template> -t <target> -w <workspace> [OPTIONS]
 
 Options:
-  -d <dir>     Source directory to analyze
-  -m <file>    Markdown template file
-  -t <dir>     Target directory for reports
-  -w <dir>     Workspace directory for state
-  -v           Verbose logging
-  -p list      List available plugins
-  -f <format>  Output format (default: markdown)
-  -h           Show help
+  -d <dir>     Source directory to analyze (required)
+  -m <file>    Markdown template file (required)
+  -t <dir>     Target directory for reports (required)
+  -w <dir>     Workspace directory for state (required)
+  -h, --help   Display usage information and exit
+  -v, --verbose Enable verbose logging mode
+  -p list      List available plugins with descriptions and status
+  -f fullscan  Force full re-analysis of all files (default: incremental)
 ```
 
 **File System Interface**:
@@ -63,9 +63,62 @@ Options:
 - **Examples**: `stat`, `file`, `jq`, `wc`, user-defined tools
 
 **Workspace Interface**:
-- **Format**: JSON files per analyzed document
-- **Schema**: Structured metadata with timestamps, content, analysis results
-- **Purpose**: State persistence, incremental updates, downstream integration
+- **Format**: JSON files containing file metadata, timestamps, and analysis state
+- **Schema**: Structured metadata with last-analyzed timestamps, file modification times, checksums, analysis results
+- **Purpose**: State persistence for incremental analysis, tracking file changes between runs, downstream integration
+- **Incremental Analysis**: Stores last-scan timestamps to detect file modifications and skip unchanged files by default
+
+### Key Business Use Cases
+
+**UC1: Plugin Discovery**
+- **Actor**: User/Developer
+- **Trigger**: User invokes `./doc.doc.sh -p list`
+- **Flow**:
+  1. System discovers all plugins in plugins/ directory (platform-specific and generic)
+  2. System reads descriptor.json for each plugin
+  3. System extracts plugin name, description, and active status
+  4. System displays formatted list sorted alphabetically
+- **Output**: List showing plugin names, descriptions, and [ACTIVE]/[INACTIVE] status
+- **Purpose**: Enable users to discover available functionality and verify plugin activation
+
+**UC2: Incremental Analysis (Default Behavior)**
+- **Actor**: User/Scheduler
+- **Trigger**: User invokes analysis without `-f fullscan` option
+- **Precondition**: Workspace exists from previous run
+- **Flow**:
+  1. System loads last-analyzed timestamps from workspace JSON
+  2. System scans source directory for files
+  3. System compares file modification times against stored timestamps
+  4. System identifies changed/new files requiring re-analysis
+  5. System processes only changed files through plugins
+  6. System preserves reports for unchanged files
+  7. System updates workspace timestamps for processed files
+- **Output**: Reports for all files (regenerated for changed, preserved for unchanged)
+- **Purpose**: Optimize performance by avoiding redundant analysis of unchanged files
+
+**UC3: Force Full Re-analysis**
+- **Actor**: User/Administrator
+- **Trigger**: User invokes with `-f fullscan` option
+- **Flow**:
+  1. System ignores existing workspace timestamps
+  2. System scans entire source directory
+  3. System processes all files regardless of modification status
+  4. System regenerates all reports
+  5. System updates all workspace timestamps
+- **Output**: Completely regenerated report set for full directory
+- **Purpose**: Support scenarios requiring fresh analysis (after plugin updates, template changes, etc.)
+
+**UC4: First-Time Analysis**
+- **Actor**: New User
+- **Trigger**: User invokes tool on new directory without existing workspace
+- **Flow**:
+  1. System detects missing workspace
+  2. System creates workspace directory
+  3. System performs full analysis (equivalent to fullscan)
+  4. System creates initial timestamp metadata
+  5. System generates complete report set
+- **Output**: New workspace with full metadata, complete reports
+- **Purpose**: Initialize analysis for new directories
 
 ## 3.2 Technical Context
 
@@ -102,16 +155,17 @@ graph LR
 **Core Requirements**:
 - Bash shell (v4.0 or later) with process substitution support
 - POSIX-compliant utilities (find, sed, grep, etc.)
-- File system with read/write access
+- File system with read/write access for reports and workspace state
 
 **Standard Tools** (installed on most systems):
-- `stat` - File metadata extraction
+- `stat` - File metadata extraction and modification time detection
 - `file` - MIME type detection
-- `find` - Directory traversal
+- `find` - Directory traversal and file discovery
 - `mkdir`, `cp`, `mv` - File operations
+- `date` - Timestamp generation and comparison for incremental analysis
 
 **Optional Tools** (plugin-specific):
-- `jq` - JSON parsing and manipulation
+- `jq` - JSON parsing and manipulation (workspace state, plugin descriptors)
 - Platform-specific tools (defined by active plugins)
 - User-provided custom tools
 
@@ -144,30 +198,52 @@ graph LR
 ```mermaid
 flowchart LR
     Source[Source<br/>Directory] -->|Files| Scanner[File<br/>Scanner]
-    Scanner -->|File list| PluginMgr[Plugin<br/>Manager]
+    Scanner -->|File list| Incremental{Incremental<br/>Analysis?}
+    Workspace[Workspace<br/>JSON] -->|Timestamps| Incremental
+    Incremental -->|Changed files| PluginMgr[Plugin<br/>Manager]
+    Incremental -->|Unchanged files| Preserve[Preserve<br/>Reports]
     PluginMgr -->|Invoke| Tools[CLI<br/>Tools]
-    Tools -->|Metadata| Workspace[Workspace<br/>JSON]
-    Workspace -->|Data| Reporter[Report<br/>Generator]
+    Tools -->|Metadata| WSUpdate[Update<br/>Workspace]
+    WSUpdate -->|Data| Reporter[Report<br/>Generator]
+    Preserve -->|Existing| Reporter
     Template[Template<br/>File] -->|Structure| Reporter
     Reporter -->|Reports| Target[Target<br/>Directory]
 ```
 
 **Data Flow Description**:
-1. **Input**: User specifies source directory, template, and workspace
+1. **Input**: User specifies source directory, template, workspace, and options
 2. **Discovery**: File scanner recursively traverses source directory
-3. **Analysis**: Plugin manager orchestrates CLI tools based on file types
-4. **Storage**: Metadata and results written to workspace as JSON
-5. **Reporting**: Report generator merges data with template
-6. **Output**: Markdown reports written to target directory
+3. **Incremental Decision**: System checks workspace timestamps (unless `-f fullscan` specified)
+4. **Selective Analysis**: Plugin manager orchestrates CLI tools only for changed/new files
+5. **Storage**: Metadata and results written to workspace as JSON with updated timestamps
+6. **Report Preservation**: Unchanged files reuse existing reports from previous run
+7. **Reporting**: Report generator merges data with template (new + preserved reports)
+8. **Output**: Markdown reports written to target directory
 
 ### External File Formats
 
 | Format | Usage | Tools | Direction |
 |--------|-------|-------|-----------|
 | **Markdown** | Templates, reports | Template engine | Input & Output |
-| **JSON** | Workspace data, plugin descriptors | jq, bash | Input & Output |
+| **JSON** | Workspace state (timestamps, metadata), plugin descriptors | jq, bash | Input & Output |
 | **Text** | Log files, tool output | cat, grep | Output |
 | **Binary** | Source files being analyzed | file, stat | Input |
+
+**Workspace JSON Schema** (for incremental analysis):
+```json
+{
+  "workspace_version": "1.0",
+  "last_full_scan": "2026-02-06T10:30:00Z",
+  "files": {
+    "path/to/file.md": {
+      "last_analyzed": "2026-02-06T10:30:15Z",
+      "last_modified": "2026-02-05T14:22:00Z",
+      "checksum": "sha256:abc123...",
+      "report_path": "output/file.doc.doc.md"
+    }
+  }
+}
+```
 
 ### Network Isolation
 
