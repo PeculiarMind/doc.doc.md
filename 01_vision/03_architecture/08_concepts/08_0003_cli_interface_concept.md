@@ -37,7 +37,7 @@ Required (for analysis):
 
 Optional:
   -v, --verbose     Enable verbose logging
-  -f <format>       Output format (default: markdown)
+  -f fullscan       Force full re-analysis of all files (default: incremental)
   -h, --help        Show help message
   --version         Show version information
 
@@ -115,7 +115,7 @@ REQUIRED OPTIONS (for analysis):
 
 OPTIONAL FLAGS:
   -v, --verbose     Enable verbose logging (shows execution details)
-  -f <format>       Output format (default: markdown)
+  -f fullscan       Force full re-analysis of all files (default: incremental)
   -h, --help        Display this help message and exit
   --version         Display version information and exit
 
