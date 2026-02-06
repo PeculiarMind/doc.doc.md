@@ -7,7 +7,7 @@ This project provides a lightweight, scriptable toolkit that orchestrates CLI to
 **Early Development Stage**
 
 - ✅ Vision and architecture documented ([01_vision/](01_vision/))
-- ✅ Agent system established for workflow automation (README Maintainer, License Governance, Requirements Engineer, Architect)
+- ✅ Agent system established for workflow automation (README Maintainer, License Governance, Requirements Engineer, Architect, Developer, Tester)
 - ✅ Template structure defined ([scripts/template.doc.doc.md](scripts/template.doc.doc.md))
 - ✅ Core bash script skeleton created ([scripts/doc.doc.sh](scripts/doc.doc.sh))
 - ✅ 23 requirements extracted from vision and documented
@@ -25,7 +25,7 @@ doc.doc.md/
 │   ├── 01_project_vision/  # Core vision documents
 │   ├── 02_requirements/    # Requirements lifecycle (funnel → analyze → accepted → active)
 │   └── 03_architecture/    # Arc42 architecture vision documentation
-├── 02_agile_board/         # Kanban-style work tracking
+├── 02_agile_board/         # Kanban-style work tracking (funnel → analyze → ready → backlog → implementing → done)
 ├── 03_documentation/       # Implementation documentation
 │   └── 01_architecture/    # Actual implemented architecture (maintained by Architect Agent)
 ├── .github/
@@ -119,6 +119,8 @@ This project uses specialized agents for complex tasks. Available agents:
 - **[License Governance Agent](.github/agents/license-governance.agent.md)**: Verifies license compliance for project content and dependencies
 - **[Requirements Engineer Agent](.github/agents/requirements-engineer.agent.md)**: Analyzes project vision and manages requirements lifecycle
 - **[Architect Agent](.github/agents/architect.agent.md)**: Reviews architecture visions, maintains architecture documentation in `03_documentation/01_architecture/`, and verifies implementation compliance with architectural vision
+- **[Developer Agent](.github/agents/developer.agent.md)**: Implements features from backlog through complete workflow: selects items, creates branches, coordinates with Tester Agent for test creation, implements features to pass tests, verifies architecture compliance, and creates pull requests
+- **[Tester Agent](.github/agents/tester.agent.md)**: Creates comprehensive tests for features after receiving handover from Developer Agent, defines expected behavior through TDD approach, hands back to Developer after tests are complete
 
 See [AGENTS.md](AGENTS.md) for complete documentation.
 
@@ -139,9 +141,7 @@ The project uses two parallel lifecycle processes:
 3. **03_ready**: Ready for development
 4. **04_backlog**: Prioritized backlog
 5. **05_implementing**: In active development
-6. **06_review**: Code review
-7. **07_reviewing**: Under review process
-8. **08_done**: Completed work
+6. **06_done**: Completed work
 
 The Requirements Engineer Agent has extracted 23 formal requirements from the [vision document](01_vision/01_project_vision/01_vision.md), covering:
 - Functional requirements (directory scanning, metadata extraction, reporting, error handling, plugin architecture)
