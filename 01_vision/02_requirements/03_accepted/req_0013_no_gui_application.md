@@ -2,7 +2,7 @@
 
 **ID**: req_0013  
 **Title**: No GUI Application  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Constraint
 

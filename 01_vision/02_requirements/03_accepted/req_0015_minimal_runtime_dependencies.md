@@ -2,7 +2,7 @@
 
 **ID**: req_0015  
 **Title**: Minimal Runtime Dependencies  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Constraint
 

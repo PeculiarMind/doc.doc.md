@@ -2,7 +2,7 @@
 
 **ID**: req_0017  
 **Title**: Script Entry Point  
-**Status**: Funnel  
+**Status**: Accepted  
 **Created**: 2026-01-31  
 **Category**: Functional
 
