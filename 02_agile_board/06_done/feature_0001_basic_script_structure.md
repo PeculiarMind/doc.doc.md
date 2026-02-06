@@ -255,6 +255,52 @@ detect_platform() {
 - coreutils (dirname, basename, readlink)
 - /etc/os-release (optional for platform detection)
 
+## Implementation Notes
+
+### Design Decision: Use "Usage" Instead of "USAGE" in Help Text
+
+**Decision**: Use sentence case ("Usage:") instead of all caps ("USAGE:") in help text headers for improved user-friendliness and modern CLI consistency.
+
+**Rationale**:
+- **User-Friendliness**: Sentence case is less aggressive and more approachable
+- **Modern Convention**: Modern CLI tools (git, npm, cargo) use sentence case
+- **Consistency**: All help text headers use sentence case: "Usage:", "Description:", "Options:", "Exit Codes:", "Examples:"
+- **Tradition vs. Modernity**: While traditional Unix tools use all caps, this is not a hard requirement. Tool targets modern system administrators familiar with contemporary CLI conventions.
+
+**Alternatives Considered**:
+1. All caps (`USAGE:`, `OPTIONS:`): Rejected - Too aggressive, dated feel
+2. Mixed (some caps, some sentence case): Rejected - Inconsistent
+
+**Impact**: Minor deviation from traditional Unix convention, but no functional impact—purely stylistic.
+
+### Design Decision: Guide Users with "Try --help" on Errors
+
+**Decision**: All error messages related to invalid arguments include guidance: `Try 'doc.doc.sh --help' for more information.`
+
+**Rationale**:
+- **User Experience**: Provides actionable next step for users
+- **Information Balance**: Avoids cluttering terminal with full help on every error while maintaining discoverability
+- **Industry Standard**: Used by git, gcc, cargo, and other modern CLI tools—users expect this pattern
+
+**Error Message Example**:
+```
+Error: Unknown option: -x
+Try 'doc.doc.sh --help' for more information.
+```
+
+**Alternatives Considered**:
+1. Show full help on error: Rejected - Too verbose, clutters output
+2. Error only: Rejected - Leaves user without next steps
+3. Generic "See --help": Rejected - Less specific and actionable
+
+**Pattern Applied to**:
+- Unknown options (`-x`)
+- Invalid arguments (`-d` without directory)
+- Unexpected arguments
+- Conflicting options (future)
+
+**Exception**: Help explicitly requested (`-h`, `--help`) shows help without error.
+
 ## Definition of Done
 - [ ] All acceptance criteria met and verified
 - [ ] Code reviewed for quality and best practices

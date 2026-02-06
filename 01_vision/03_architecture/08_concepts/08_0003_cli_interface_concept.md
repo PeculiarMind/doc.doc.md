@@ -158,7 +158,7 @@ show_version() {
 doc.doc version 1.0.0
 
 Copyright (C) 2026 Your Name
-License: MIT License
+License: GPL-3.0
 This is free software: you are free to change and redistribute it.
 
 Written in Bash for maximum portability and simplicity.
