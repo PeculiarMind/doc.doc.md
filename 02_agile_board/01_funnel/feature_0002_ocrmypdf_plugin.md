@@ -1,6 +1,6 @@
 # Feature: OCR PDF Plugin Integration
 
-**ID**: feature_ocrmypdf_plugin  
+**ID**: 0002 
 **Type**: Feature Implementation  
 **Status**: Ready  
 **Created**: 2026-02-05  
