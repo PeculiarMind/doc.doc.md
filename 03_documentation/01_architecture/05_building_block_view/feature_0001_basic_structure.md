@@ -95,7 +95,7 @@ fi
 ```
 doc.doc.sh version 1.0.0
 Copyright (c) 2026 doc.doc.md Project
-GPL-3.0
+License: GPL-3.0
 
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
