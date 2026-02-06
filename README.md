@@ -10,8 +10,8 @@ This project provides a lightweight, scriptable toolkit that orchestrates CLI to
 - ✅ Agent system established for workflow automation (README Maintainer, License Governance, Requirements Engineer, Architect, Developer, Tester)
 - ✅ Template structure defined ([scripts/template.doc.doc.md](scripts/template.doc.doc.md))
 - ✅ Core bash script skeleton created ([scripts/doc.doc.sh](scripts/doc.doc.sh))
-- ✅ 23 requirements extracted from vision and documented
-- ✅ 17 requirements accepted and moved to [accepted](01_vision/02_requirements/03_accepted/)
+- ✅ 24 requirements extracted from vision and documented
+- ✅ 18 requirements accepted and moved to [accepted](01_vision/02_requirements/03_accepted/)
 - ✅ Quality goals defined (Efficiency, Reliability, Usability, Security, Extensibility)
 - ✅ Architecture constraints documented
 - 🚧 Requirements analysis and acceptance in progress
@@ -182,6 +182,18 @@ This project is licensed under the **GNU General Public License v3.0** (GPL-3.0)
 - [ ] Create example analysis workflows
 - [ ] Add unit tests for bash functions
 - [ ] Document integration patterns for common tools
+
+## Credits
+
+This project's architecture documentation follows the **[arc42](https://arc42.org/)** template, a practical, pragmatic, and proven framework for communicating software and system architectures.
+
+- **arc42 Template**: [https://arc42.org/](https://arc42.org/)
+- **License**: arc42 template is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+
+This project is built for and relies on **Linux** and the ecosystem of tools created by the open-source community.
+
+- **Linux**: Created by Linus Torvalds and maintained by thousands of contributors worldwide
+- **Linux Community**: Thank you to the entire open-source community for creating and maintaining the tools this project leverages (bash, coreutils, and countless others)
 
 ## Contact
 For questions or issues, please use [GitHub Issues](https://github.com/PeculiarMind/doc.doc.md/issues).

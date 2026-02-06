@@ -21,7 +21,7 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 ## 1.1 Requirements Overview
 
 ### Requirements
-The project currently has 17 accepted requirements that define the core functionality:
+The project currently has 18 accepted requirements that define the core functionality:
 
 - **req_0001**: [Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md)
 - **req_0002**: [Recursive Directory Scanning](../../02_requirements/03_accepted/req_0002_recursive_directory_scanning.md)
@@ -40,6 +40,7 @@ The project currently has 17 accepted requirements that define the core function
 - **req_0021**: [Toolkit Extensibility and Plugin Architecture](../../02_requirements/03_accepted/req_0021_toolkit_extensibility_and_plugin_architecture.md)
 - **req_0022**: [Plugin-based Extensibility](../../02_requirements/03_accepted/req_0022_plugin_based_extensibility.md)
 - **req_0023**: [Data-driven Execution Flow](../../02_requirements/03_accepted/req_0023_data_driven_execution_flow.md)
+- **req_0024**: [Plugin Listing](../../02_requirements/03_accepted/req_0024_plugin_listing.md)
 
 ## 1.2 Quality Goals
 

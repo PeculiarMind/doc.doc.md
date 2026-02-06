@@ -6,46 +6,94 @@ arc42-chapter: 2
 # 2. Architecture Constraints
 
 ## Overview
-This section defines the architecture constraints derived from the project's vision, goals, and quality requirements. These constraints ensure that the architecture aligns with the project's objectives and provides a clear framework for decision-making.
+This section documents the **true architectural constraints**—external limitations, organizational boundaries, and fixed technical conditions that restrict the design space and cannot be changed by architectural decisions. These constraints represent boundaries we must work within, not features we choose to implement.
 
-## Constraints
+**Distinction from Requirements**: Constraints are limitations imposed upon us (platform requirements, organizational policies, technical boundaries). Requirements describe what the system should do. Design decisions describe choices we make within the constrained space.
 
-### 1. Simplicity and Composability
-- **Constraint**: The system must prioritize simplicity in design and implementation, leveraging existing CLI tools wherever possible.
-- **Rationale**: Simplifies development, reduces redundancy, and ensures compatibility with established tools.
+## Technical Constraints
 
-### 2. Local-first and Secure Processing
-- **Constraint**: All processing must occur locally, with no external network dependencies during runtime, except for tool installation and updates.
-- **Rationale**: Ensures data security and privacy, aligning with the goal of offline operation.
+### TC-1: Bash/POSIX Shell Runtime Environment
+- **Constraint**: The system must execute in Bash 3.x+ or POSIX-compliant shell environments commonly available on Linux, macOS, and WSL.
+- **Source**: Target deployment platforms (standard UNIX-like systems)
+- **Rationale**: Target users operate on standard Linux/macOS systems where Bash is the ubiquitous scripting environment. Cannot assume other runtime environments (Python, Node.js, Ruby, etc.) without increasing installation burden.
+- **Impact**: Implementation language limited to shell scripting. Cannot use language features or libraries requiring compilation or runtime installation beyond standard shell utilities.
+- **Non-negotiable Because**: Target platforms only guarantee Bash/POSIX shell availability without additional installations.
 
-### 3. Lightweight Design
-- **Constraint**: The toolkit must operate efficiently on commodity hardware, including systems with limited resources such as spinning hard disks or small Linux devices.
-- **Rationale**: Enhances accessibility and usability for a broader range of users.
+### TC-2: No Network Access During Runtime
+- **Constraint**: The system cannot make network connections during the analysis and report generation phases. All processing must occur using only local resources.
+- **Source**: Security and privacy requirements (req_0011, req_0012, req_0016)
+- **Rationale**: Users may process sensitive documents in air-gapped environments, regulated industries, or offline scenarios. Data privacy policies prohibit transmitting file content or metadata to external services.
+- **Impact**: 
+  - Cannot use cloud-based analysis services, LLMs, or external APIs
+  - Cannot fetch external resources during runtime
+  - All analysis tools must be locally installed
+  - Network access permitted only for tool installation and updates (user-initiated, separate phase)
+- **Non-negotiable Because**: Organizational security policies and offline deployment requirements mandate local-only processing.
 
-### 4. Standardized Output
-- **Constraint**: All reports must adhere to a consistent Markdown format, ensuring clarity and uniformity.
-- **Rationale**: Facilitates easy sharing, readability, and integration with other tools.
+### TC-3: User-Space Execution (No Root/Sudo)
+- **Constraint**: The system must operate entirely in user-space without requiring root privileges or sudo access.
+- **Source**: Target deployment environments (shared servers, restricted user accounts, corporate workstations)
+- **Rationale**: Users may not have administrative privileges on target systems. Requiring sudo would prevent usage in many enterprise and shared hosting environments.
+- **Impact**:
+  - Cannot install system-wide packages or modify system directories
+  - Cannot access privileged system information or APIs
+  - Must use user-writable directories for workspace and output
+  - Tool installation prompts must guide users to userspace methods (package managers like Homebrew, apt without sudo, manual installation)
+- **Non-negotiable Because**: Many target environments explicitly prohibit sudo access for security and system stability.
 
-### 5. Extensibility
-- **Constraint**: The architecture must support user-driven customization and extensibility through plugins or modular components.
-- **Rationale**: Enables users to adapt the toolkit to their specific needs and workflows.
+### TC-4: Headless/SSH Environment Compatibility
+- **Constraint**: The system must function in headless environments accessible only via SSH or terminal, without graphical display capabilities.
+- **Source**: Target deployment scenarios (servers, remote systems, CI/CD pipelines, Docker containers)
+- **Rationale**: Primary use cases include server environments, automated pipelines, and remote system access where no X11/Wayland display server is available or permitted.
+- **Impact**:
+  - Cannot depend on GUI libraries, frameworks, or windowing systems
+  - No interactive graphical prompts or displays
+  - All interaction through stdin/stdout/stderr and terminal text
+  - Cannot launch GUI tools even if installed
+- **Non-negotiable Because**: Target deployment environments (production servers, CI/CD agents) do not provide graphical display capabilities.
 
-### 6. Tool Availability Verification
-- **Constraint**: The system must include mechanisms to verify the availability of required tools and provide user-friendly prompts for installing missing dependencies.
-- **Rationale**: Enhances usability and reduces setup complexity.
+### TC-5: File-Based State Management
+- **Constraint**: State persistence must use file-based storage only; database servers or daemon processes are not available.
+- **Source**: Lightweight implementation requirement and deployment environment limitations
+- **Rationale**: Target environments do not run database servers. Solution must be self-contained without assuming availability of PostgreSQL, MySQL, Redis, or similar services.
+- **Impact**:
+  - State, metadata, and workspace data stored as JSON files
+  - No ACID guarantees beyond filesystem atomicity
+  - Concurrency handled through file locking mechanisms
+  - Query performance limited by filesystem and text processing tools
+- **Non-negotiable Because**: Cannot require users to install and maintain database servers for a lightweight analysis toolkit.
 
-### 7. Error Handling and Reliability
-- **Constraint**: The system must handle errors gracefully, ensuring consistent and reliable operation even in automated or scheduled environments.
-- **Rationale**: Builds user trust and ensures dependable performance.
+## Organizational Constraints
 
-### 8. No GUI Dependency
-- **Constraint**: The toolkit must operate entirely via the command line, with no graphical user interface dependencies.
-- **Rationale**: Aligns with the vision of a scriptable and lightweight toolkit.
+### OC-1: No External Service Dependencies at Runtime
+- **Constraint**: The system cannot depend on availability of external services, APIs, or internet connectivity during operation.
+- **Source**: Offline operation requirement (vision, req_0016) and deployment in restricted networks
+- **Rationale**: Users operate in environments with intermittent connectivity, behind firewalls, in air-gapped networks, or where external service dependencies create operational risks.
+- **Impact**:
+  - All functionality must work offline after initial tool installation
+  - Cannot rely on cloud services, SaaS platforms, or external APIs
+  - Tool updates are user-initiated, separate from analysis operations
+  - Documentation and help must be available locally
+- **Non-negotiable Because**: Offline operation is a core deployment requirement; internet connectivity cannot be assumed.
 
-### 9. Minimal Runtime Dependencies
-- **Constraint**: The system must minimize runtime dependencies to reduce installation complexity and potential conflicts.
-- **Rationale**: Simplifies deployment and ensures compatibility across environments.
+## Summary
 
-### 10. Unix Philosophy Compliance
-- **Constraint**: The toolkit must adhere to the Unix philosophy of building small, focused tools that can be composed together.
-- **Rationale**: Promotes interoperability and flexibility in workflows.
+**Total Constraints**: 6 (5 Technical, 1 Organizational)
+
+These constraints define immutable boundaries for architectural decisions. They represent:
+- **Platform limitations**: What runtime environments provide (or don't provide)
+- **Deployment requirements**: Where and how the system must operate
+- **Security policies**: Privacy and network access restrictions
+- **Resource availability**: What infrastructure can be assumed
+
+**Items Removed from Previous Version** (not true constraints):
+- Simplicity and Composability → Design principle in Solution Strategy
+- Lightweight Design → Quality requirement (Efficiency)
+- Standardized Output → Functional requirement (req_0004)
+- Extensibility → Functional requirement (req_0021, req_0022)
+- Tool Availability Verification → Functional requirement (req_0007, req_0008)
+- Error Handling and Reliability → Quality requirement (req_0020)
+- Minimal Runtime Dependencies → Quality requirement (req_0009)
+- Unix Philosophy Compliance → Design principle in Solution Strategy
+
+These items are important but represent **choices we make** (design decisions, requirements, quality goals) rather than **boundaries imposed upon us** (constraints).

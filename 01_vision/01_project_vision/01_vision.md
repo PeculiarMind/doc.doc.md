@@ -32,6 +32,7 @@ Behavior:
 - Renders Markdown reports to the target directory (`-t`) per analyzed file and/or an aggregated report.
 - Uses the specified template (`-m`) for report formatting.
 - Uses `-v` flag to enable verbose logging during analysis.
+- `-p list` option to list available plugins and their capabilities.
 
 Note on Workspace Directory:
 The workspace (`-w`) serves as a persistent data layer that stores:
