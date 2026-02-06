@@ -11,14 +11,6 @@ This directory contains Architecture Decision Records (ADRs) documenting key arc
 
 ## ADR Index
 
-### ADR-0001: Use "Usage" Instead of "USAGE" in Help Text
-**File**: [adr_0001_usage_sentence_case.md](./adr_0001_usage_sentence_case.md)  
-**Decision**: Use sentence case ("Usage:") instead of all caps ("USAGE:") in help text headers for improved user-friendliness and modern CLI consistency.
-
-### ADR-0002: Guide Users with "Try --help" on Errors
-**File**: [adr_0002_help_guidance_on_errors.md](./adr_0002_help_guidance_on_errors.md)  
-**Decision**: Include `Try 'doc.doc.sh --help' for more information` guidance in all argument-related error messages to improve user experience.
-
 ### ADR-0003: Platform Detection Fallback Strategy
 **File**: [adr_0003_platform_detection_fallback.md](./adr_0003_platform_detection_fallback.md)  
 **Decision**: Implement three-tier platform detection (/etc/os-release → uname -s → "generic") to ensure portability across all POSIX systems.
@@ -69,14 +61,22 @@ Each ADR follows this structure:
 
 ## Summary
 
-All nine decisions align with vision principles:
-- **Unix Philosophy**: Clean interface, composability (AD-0002, AD-0008)
+All seven architecture decisions align with vision principles:
+- **Unix Philosophy**: Clean interface, composability (AD-0008)
 - **Lightweight**: Minimal dependencies (AD-0003)
 - **Quality**: Error handling, strictness (AD-0004, AD-0006)
 - **Extensibility**: Modular architecture (AD-0007)
-- **User-Focused**: Discoverability, guidance (AD-0001, AD-0005)
+- **User-Focused**: Discoverability, guidance (AD-0005)
 
 No decisions conflict with architecture vision. All establish patterns consistent with future feature development.
+
+## Non-Architecture Decisions
+
+Two decisions originally documented here were determined to be implementation details rather than architecture decisions:
+- **Usage Sentence Case**: Moved to feature item as implementation note
+- **Help Guidance on Errors**: Moved to feature item as implementation note
+
+These decisions remain valuable but are better documented at the feature level.
 
 ## Historical Reference
 
