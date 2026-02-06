@@ -33,6 +33,18 @@ This document catalogs all specialized agents available in this repository. Agen
   - Moving requirements through acceptance and implementation lifecycle
   - Maintaining traceability between vision and requirements
 
+### [Architect Agent](.github/agents/architect.agent.md)
+- **Location**: `.github/agents/architect.agent.md`
+- **Purpose**: Reviews architecture visions, maintains architecture documentation, and verifies implementation compliance
+- **Expertise**: Software architecture principles, arc42 documentation framework, architecture compliance verification, cross-reference management
+- **Use When**:
+  - Reviewing architecture vision in `01_vision/03_architecture`
+  - Maintaining architecture documentation in `03_documentation/01_architecture`
+  - Verifying implementation follows architecture vision
+  - Documenting architectural decisions and deviations
+  - Keeping architecture documentation synchronized with implementation
+  - Conducting architecture compliance audits
+
 ---
 
 ## How to Use Agents
