@@ -13,7 +13,7 @@ Provide a simple, scriptable toolkit that orchestrates existing CLI tools to ext
 # Non‑Goals
 - Building a full GUI application.
 - Replacing specialized analysis tools.
-- Providing heavy runtime dependencies beyond common CLI utilities.
+- Providing heavy runtime dependencies like database and web servers.
 
 # Intended Usage
 The primary entry point is a single script that analyzes a directory and renders a Markdown report using a template.
