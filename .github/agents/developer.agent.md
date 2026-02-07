@@ -106,9 +106,30 @@ Autonomously implements features from the backlog, manages the complete developm
   - Address licensing issues (remove incompatible dependencies, update attributions, etc.)
   - Re-submit for license compliance verification
 - If compliant:
-  - Proceed to workflow state management
+  - Proceed to README maintenance
 
-### 9. **Workflow State Management**
+### 9. **README Maintenance**
+- After all quality gates pass (tests, architecture, license):
+  - Assign work item to README Maintainer Agent
+  - Hand over to README Maintainer Agent for documentation review
+  - Provide context about:
+    - All changes made in the feature
+    - New functionality added
+    - User-facing changes
+    - Configuration or setup changes
+    - Dependencies added or updated
+  - Wait for README Maintainer Agent to review and update README
+  - Receive confirmation from README Maintainer Agent
+  - Verify work item has been assigned back to Developer
+  - Review README updates made
+- If updates needed:
+  - README Maintainer updates README.md and related documentation
+  - Changes committed to feature branch
+- If no updates needed:
+  - README Maintainer confirms documentation is current
+- Proceed to workflow state management
+
+### 10. **Workflow State Management**
 - Move item from `05_implementing` to `06_done` when all quality gates pass
 - Update item metadata with completion timestamp
 - Only move to done when ALL conditions met:
@@ -116,11 +137,12 @@ Autonomously implements features from the backlog, manages the complete developm
   - ✅ Architecture compliance verified by Architect Agent
   - ✅ Architecture documentation updated by Architect Agent
   - ✅ License compliance verified by License Governance Agent
+  - ✅ README and user documentation updated by README Maintainer Agent
   - ✅ Code is clean and well-documented
   - ✅ No merge conflicts with main
 - Maintain clear audit trail of development process
 
-### 10. **Pull Request Creation**
+### 11. **Pull Request Creation**
 - Create pull request from feature branch to main
 - Pull request must include:
   - Clear title describing the feature
@@ -129,6 +151,7 @@ Autonomously implements features from the backlog, manages the complete developm
   - Architecture compliance confirmation
   - Test results summary
   - License compliance confirmation
+  - README update confirmation
   - Link to updated architecture documentation
 - PR review and merge performed by humans (NOT by agent)
 
@@ -138,6 +161,7 @@ Autonomously implements features from the backlog, manages the complete developm
 - Does NOT make architectural decisions (follows existing architecture vision)
 - Does NOT skip architecture compliance verification even for small changes
 - Does NOT skip license compliance verification even for small changes
+- Does NOT skip README maintenance review even if changes seem minor
 - Does NOT proceed without passing tests
 - Does NOT work on multiple items simultaneously
 - Does NOT modify items in other board states (only reads backlog, writes to implementing/done)
@@ -211,14 +235,21 @@ The agent returns a comprehensive implementation report:
 - License compliance confirmation recorded in work item
 - Dependencies reviewed and approved
 
-### 7. **Pull Request Details**:
+### 7. **README Maintenance Report**:
+- README Maintainer Agent review result
+- Documentation status: updated/no-changes-needed
+- README updates made (if any)
+- Other documentation files updated
+- Confirmation documentation is current with implementation
+
+### 8. **Pull Request Details**:
 - PR number and URL
 - PR title and description
 - Files changed summary
 - Review checklist status
 - Next steps (awaiting review)
 
-### 8. **Final Status**:
+### 9. **Final Status**:
 - Item moved to `06_done` confirmation
 - Pull request created and ready for human review
 - Overall implementation success/failure
@@ -289,10 +320,15 @@ The agent follows this strict workflow:
 - [ ] **28. Receive compliance result** - Review license compliance recorded in work item
 - [ ] **29. Verify assignment** - Confirm work item assigned back to Developer
 - [ ] **30. Fix if needed** - Address any license compliance issues
-- [ ] **31. Verify all conditions** - All gates must be green
-- [ ] **32. Move to done** - Update board state (all quality gates passed)
-- [ ] **33. Create PR** - Submit pull request to main
-- [ ] **34. Report completion** - Provide final report and await human PR review
+- [ ] **31. Assign to README Maintainer** - Assign work item to README Maintainer Agent
+- [ ] **32. Hand over to README Maintainer** - Request README and documentation review
+- [ ] **33. Await README update** - Wait for README Maintainer to review and update
+- [ ] **34. Receive README confirmation** - Review README updates or confirmation
+- [ ] **35. Verify assignment** - Confirm work item assigned back to Developer
+- [ ] **36. Verify all conditions** - All gates must be green
+- [ ] **37. Move to done** - Update board state (all quality gates passed)
+- [ ] **38. Create PR** - Submit pull request to main
+- [ ] **39. Report completion** - Provide final report and await human PR review
 
 ## Best Practices for Invocation
 
@@ -315,6 +351,7 @@ A successful implementation includes:
 - ✅ Architecture documentation updated in `03_documentation/01_architecture/`
 - ✅ License compliance verified by License Governance Agent
 - ✅ License compliance results recorded in work item
+- ✅ README and user documentation updated by README Maintainer Agent
 - ✅ All tests pass successfully
 - ✅ Item moved to done state on agile board (all quality gates passed)
 - ✅ Pull request created with complete information ready for human review
@@ -367,12 +404,19 @@ The agent handles these error scenarios:
   - Work item assigned back to Developer after verification
   - Must pass license compliance before PR creation
   - Addresses any licensing issues identified
+
+- **README Maintainer Agent** (mandatory quality gate):
+  - Invoked after all other quality gates pass (tests, architecture, license)
+  - Developer assigns work item to README Maintainer Agent
+  - Provides context about feature changes and user-facing updates
+  - Waits for README Maintainer to review and update documentation
+  - Receives confirmation of README updates or no changes needed
+  - Work item assigned back to Developer after review
+  - Must complete README review before PR creation
+  - Ensures documentation stays current with implementation
   
 - **Requirements Engineer Agent** (reference only):
   - Reads accepted requirements for implementation guidance
-  
-- **README Maintainer Agent** (optional):
-  - May invoke if significant user-facing changes made
 
 ## Branch Naming Convention
 
