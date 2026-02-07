@@ -30,14 +30,16 @@ Autonomously implements features from the backlog, manages the complete developm
 - Set up branch tracking with remote repository
 
 ### 3. **Test Creation Handover**
+- Assign work item to Tester Agent before handover
 - Hand over to Tester Agent with feature branch and item details
 - Provide context about:
   - Item specifications and requirements
   - Feature branch name
   - Expected behavior and acceptance criteria
   - Architecture constraints
-- Wait for Tester Agent to create tests
-- Receive test suite from Tester Agent
+- Wait for Tester Agent to create tests and test plan
+- Receive test suite and test documentation from Tester Agent
+- Verify work item has been assigned back to Developer
 - Review tests to understand expected behavior
 
 ### 4. **Feature Implementation**
@@ -77,20 +79,48 @@ Autonomously implements features from the backlog, manages the complete developm
   - Analyze failures
   - Fix implementation issues
   - Re-run tests until all pass
-- Document test results
+- When implementation is complete and tests pass:
+  - Assign work item to Tester Agent
+  - Hand over to Tester Agent for formal test execution and reporting
+  - Provide context about implementation completion
+  - Wait for Tester Agent to execute tests and create test report
+  - Receive test report and verification from Tester
+  - Verify work item assigned back to Developer
+  - Review formal test results
 
-### 8. **Workflow State Management**
+### 8. **License Compliance Verification**
+- After tests pass and architecture compliance confirmed:
+  - Assign work item to License Governance Agent
+  - Hand over to License Governance Agent for compliance review
+  - Provide context about:
+    - All code changes made
+    - New dependencies or third-party code added
+    - Assets or resources included
+    - Licensing implications of changes
+  - Wait for License Governance Agent to verify compliance
+  - Receive compliance report from License Governance Agent
+  - Verify work item has been assigned back to Developer
+  - Review license compliance results recorded in work item
+- If non-compliant:
+  - Review license governance feedback
+  - Address licensing issues (remove incompatible dependencies, update attributions, etc.)
+  - Re-submit for license compliance verification
+- If compliant:
+  - Proceed to workflow state management
+
+### 9. **Workflow State Management**
 - Move item from `05_implementing` to `06_done` when all quality gates pass
 - Update item metadata with completion timestamp
 - Only move to done when ALL conditions met:
   - ✅ All tests pass
   - ✅ Architecture compliance verified by Architect Agent
   - ✅ Architecture documentation updated by Architect Agent
+  - ✅ License compliance verified by License Governance Agent
   - ✅ Code is clean and well-documented
   - ✅ No merge conflicts with main
 - Maintain clear audit trail of development process
 
-### 9. **Pull Request Creation**
+### 10. **Pull Request Creation**
 - Create pull request from feature branch to main
 - Pull request must include:
   - Clear title describing the feature
@@ -98,6 +128,7 @@ Autonomously implements features from the backlog, manages the complete developm
   - Summary of changes made
   - Architecture compliance confirmation
   - Test results summary
+  - License compliance confirmation
   - Link to updated architecture documentation
 - PR review and merge performed by humans (NOT by agent)
 
@@ -106,6 +137,7 @@ Autonomously implements features from the backlog, manages the complete developm
 - Does NOT review or approve its own code
 - Does NOT make architectural decisions (follows existing architecture vision)
 - Does NOT skip architecture compliance verification even for small changes
+- Does NOT skip license compliance verification even for small changes
 - Does NOT proceed without passing tests
 - Does NOT work on multiple items simultaneously
 - Does NOT modify items in other board states (only reads backlog, writes to implementing/done)
@@ -170,15 +202,23 @@ The agent returns a comprehensive implementation report:
 - Total test count and success rate
 - Any test failures and fixes applied
 - Confirmation all tests now pass (green phase)
+- Test plan and test report links
 
-### 6. **Pull Request Details**:
+### 6. **License Compliance Report**:
+- License Governance Agent verification result
+- Compliance status: compliant/non-compliant/needs-revision
+- Any licensing issues identified and how they were addressed
+- License compliance confirmation recorded in work item
+- Dependencies reviewed and approved
+
+### 7. **Pull Request Details**:
 - PR number and URL
 - PR title and description
 - Files changed summary
 - Review checklist status
 - Next steps (awaiting review)
-7
-### 6. **Final Status**:
+
+### 8. **Final Status**:
 - Item moved to `06_done` confirmation
 - Pull request created and ready for human review
 - Overall implementation success/failure
@@ -225,21 +265,34 @@ The agent follows this strict workflow:
 - [ ] **4. Move to implementing** - Update agile board state
 - [ ] **5. Create feature branch** - `feature/<ItemId>_<title>`
 - [ ] **6. Switch to branch** - Check out feature branch
-- [ ] **7. Hand over to Tester** - Provide context and specifications
-- [ ] **8. Await tests** - Wait for Tester Agent to create tests
-- [ ] **9. Receive tests** - Review test suite from Tester Agent
-- [ ] **10. Implement feature** - Write code to make tests pass
-- [ ] **11. Submit to Architect** - Request compliance verification
-- [ ] **12. Await compliance** - Wait for architect approval
-- [ ] **13. Fix if needed** - Address any compliance issues
-- [ ] **14. Submit for documentation** - Request architecture docs update
-- [ ] **15. Await documentation** - Wait for architect to document
-- [ ] **16. Run tests** - Execute full test suite
-- [ ] **17. Fix test failures** - If any tests fail
-- [ ] **18. Verify all conditions** - All gates must be green
-- [ ] **19. Move to done** - Update board state (all quality gates passed)
-- [ ] **20. Create PR** - Submit pull request to main
-- [ ] **21. Report completion** - Provide final report and await human PR review
+- [ ] **7. Assign to Tester** - Assign work item to Tester Agent (Phase 1)
+- [ ] **8. Hand over to Tester** - Provide context and specifications for test creation
+- [ ] **9. Await tests** - Wait for Tester Agent to create tests and test plan
+- [ ] **10. Receive tests** - Review test suite and test plan from Tester Agent
+- [ ] **11. Verify assignment** - Confirm work item assigned back to Developer
+- [ ] **12. Implement feature** - Write code to make tests pass
+- [ ] **13. Run tests locally** - Execute tests informally during development
+- [ ] **14. Fix issues** - Address any test failures during implementation
+- [ ] **15. Assign to Tester** - Assign work item to Tester Agent (Phase 2)
+- [ ] **16. Hand over to Tester** - Request formal test execution and reporting
+- [ ] **17. Await test report** - Wait for Tester to execute tests and create report
+- [ ] **18. Receive test results** - Review formal test report from Tester
+- [ ] **19. Verify assignment** - Confirm work item assigned back to Developer
+- [ ] **20. Submit to Architect** - Request compliance verification
+- [ ] **21. Await compliance** - Wait for architect approval
+- [ ] **22. Fix if needed** - Address any compliance issues
+- [ ] **23. Submit for documentation** - Request architecture docs update
+- [ ] **24. Await documentation** - Wait for architect to document
+- [ ] **25. Assign to License Governance** - Assign work item to License Governance Agent
+- [ ] **26. Hand over to License Governance** - Request license compliance verification
+- [ ] **27. Await license compliance** - Wait for license governance approval
+- [ ] **28. Receive compliance result** - Review license compliance recorded in work item
+- [ ] **29. Verify assignment** - Confirm work item assigned back to Developer
+- [ ] **30. Fix if needed** - Address any license compliance issues
+- [ ] **31. Verify all conditions** - All gates must be green
+- [ ] **32. Move to done** - Update board state (all quality gates passed)
+- [ ] **33. Create PR** - Submit pull request to main
+- [ ] **34. Report completion** - Provide final report and await human PR review
 
 ## Best Practices for Invocation
 
@@ -260,6 +313,8 @@ A successful implementation includes:
 - ✅ Implementation makes all tests pass (green phase TDD)
 - ✅ Architecture compliance verified by Architect Agent
 - ✅ Architecture documentation updated in `03_documentation/01_architecture/`
+- ✅ License compliance verified by License Governance Agent
+- ✅ License compliance results recorded in work item
 - ✅ All tests pass successfully
 - ✅ Item moved to done state on agile board (all quality gates passed)
 - ✅ Pull request created with complete information ready for human review
@@ -274,33 +329,50 @@ The agent handles these error scenarios:
 2. **All items blocked by dependencies**: Report blockers, suggest prerequisite work
 3. **Test failures**: Attempt to fix, report if unfixable
 4. **Architecture non-compliance**: Refactor and resubmit
-5. **Merge conflicts**: Resolve conflicts before PR creation
-6. **Git errors**: Report issue, suggest manual intervention
-7. **Missing dependencies**: Identify and report missing tools/libraries
+5. **License non-compliance**: Address licensing issues and resubmit
+6. **Merge conflicts**: Resolve conflicts before PR creation
+7. **Git errors**: Report issue, suggest manual intervention
+8. **Missing dependencies**: Identify and report missing tools/libraries
 
 ## Integration with Other Agents
 
 - **Tester Agent** (mandatory for TDD workflow):
-  - Hands over to Tester after feature branch creation
-  - Provides item specifications and requirements
-  - Waits for Tester to create comprehensive test suite
-  - Receives tests from Tester Agent before implementation
-  - Tests define expected behavior (should initially fail)
+  - **Phase 1 (Test Creation)**:
+    - Developer assigns work item to Tester after feature branch creation
+    - Provides item specifications and requirements
+    - Waits for Tester to create comprehensive test suite and test plan
+    - Receives tests from Tester Agent before implementation
+    - Work item assigned back to Developer
+    - Tests define expected behavior (should initially fail)
+  - **Phase 2 (Test Execution)**:
+    - After implementation, Developer assigns work item to Tester again
+    - Provides context about implementation completion
+    - Waits for Tester to execute tests and create test report
+    - Receives formal test results and report
+    - Work item assigned back to Developer
+    - Test plan and test report linked to work item
   - Implements features to make tests pass
   - Supports test-driven development approach
 
 - **Architect Agent** (critical dependency):
   - Invoked twice: compliance verification and documentation
   - Agent waits for architect responses before proceeding
+
+- **License Governance Agent** (mandatory quality gate):
+  - Invoked after tests pass and architecture compliance confirmed
+  - Developer assigns work item to License Governance Agent
+  - Provides context about code changes and dependencies
+  - Waits for license compliance verification
+  - Receives compliance report recorded in work item
+  - Work item assigned back to Developer after verification
+  - Must pass license compliance before PR creation
+  - Addresses any licensing issues identified
   
 - **Requirements Engineer Agent** (reference only):
   - Reads accepted requirements for implementation guidance
   
 - **README Maintainer Agent** (optional):
   - May invoke if significant user-facing changes made
-  
-- **License Governance Agent** (optional):
-  - May invoke if new dependencies added
 
 ## Branch Naming Convention
 
