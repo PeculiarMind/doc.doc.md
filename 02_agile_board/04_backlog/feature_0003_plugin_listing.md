@@ -2,9 +2,9 @@
 
 **ID**: 0003  
 **Type**: Feature Implementation  
-**Status**: Ready  
+**Status**: Backlog  
 **Created**: 2026-02-06  
-**Updated**: 2026-02-07 (Moved to ready after analysis)  
+**Updated**: 2026-02-07 (Moved to backlog)  
 **Priority**: High  
 **Depends On**: feature_0001
 
