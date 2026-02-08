@@ -58,19 +58,6 @@ DREAD quantifies the likelihood of threat exploitation through five factors.
 | **Affected Users** | Proportion of users impacted | 0=None, 5=Some users, 10=All users |
 | **Discoverability** | Ease of finding the vulnerability | 0=Nearly impossible, 5=Difficult, 10=Obvious |
 
-#### Damage Factor and CIA Classification
-
-The **Damage** factor MUST consider the CIA classification of affected data/assets. Use this guidance:
-
-| CIA Classification | Base Damage Range | Assessment Guidance |
-|-------------------|-------------------|---------------------|
-| **Highly Confidential** (Critical C/I/A) | 8-10 | Compromise causes critical impact: credential exposure, key material loss, complete system compromise |
-| **Confidential** (High C/I/A) | 6-8 | Compromise causes significant impact: PII exposure, proprietary data loss, privilege escalation |
-| **Internal** (Medium C/I/A) | 3-6 | Compromise causes moderate impact: configuration exposure, internal process disruption |
-| **Public** (Low C/I/A) | 0-3 | Compromise causes minimal impact: public information disclosure, non-critical service degradation |
-
-**Example**: A threat targeting authentication credentials (Highly Confidential/Critical) that could compromise the entire system would score Damage=10. The same attack vector against public documentation (Public/Low) would score Damage=1-2.
-
 ### Likelihood Calculation
 
 DREAD Likelihood is the average of all five factors:
@@ -80,18 +67,6 @@ DREAD Likelihood = (Damage + Reproducibility + Exploitability + Affected Users +
 ```
 
 Result: 0-10 scale representing probability of exploitation.
-
-## Risk Rating Calculation
-
-### Formula
-
-Risk combines DREAD likelihood with STRIDE impact, weighted by CIA classification to reflect attacker motivation:
-
-```
-Risk Rating = DREAD Likelihood × STRIDE Impact × CIA Weight Factor
-```
-
-**Scale**: 0-400 per STRIDE category (CIA weight ranges from 1x to 4x)
 
 ### CIA Weight Factor
 
@@ -106,6 +81,21 @@ CIA classification acts as a risk multiplier, reflecting that high-value assets 
 
 **Rationale**: Attackers prioritize targets based on asset value. A vulnerability in Highly Confidential data is intrinsically more dangerous than the same vulnerability in Public data, both due to impact (captured in Damage factor) and attacker motivation (captured in CIA weight). The weight factor starts at 1 (not below) to ensure CIA classification only amplifies risk, never artificially reduces it.
 
+
+## Risk Rating Calculation
+
+### Formula
+
+Risk combines DREAD likelihood with STRIDE impact and CIA classification to reflect attacker motivation:
+
+```
+Risk Rating = DREAD Likelihood × STRIDE Impact × CIA Weight Factor
+Where:
+- DREAD Likelihood = (Damage + Reproducibility + Exploitability + Affected Users + Discoverability) / 5
+- STRIDE Impact = 0-10 rating for threat category
+- CIA Weight Factor = 1x to 4x based on asset classification
+- Maximum: 10 × 10 × 4 = 400```
+
 ### Rating Scale
 
 | Risk Score | Severity | Response |
@@ -117,6 +107,19 @@ CIA classification acts as a risk multiplier, reflecting that high-value assets 
 | 0-24 | **Informational** | Consider for defense in depth |
 
 **Note**: The scale (0-400) reflects CIA weight amplification up to 4x for Highly Confidential assets, with Public assets maintaining baseline DREAD×STRIDE scores.
+
+### Example: CIA Weight Impact on Same Threat
+
+This table demonstrates how the same vulnerability receives different risk ratings based on asset classification:
+
+| Scenario | CIA Classification | DREAD Likelihood | STRIDE Impact | CIA Weight | Risk Score | Severity |
+|----------|-------------------|------------------|---------------|------------|------------|----------|
+| Command injection in SSH key management | Highly Confidential | 8.0 | 10 (Tampering) | 4x | **320** | Critical |
+| Command injection in user config parser | Confidential | 7.0 | 10 (Tampering) | 3x | **210** | High |
+| Command injection in temp file handler | Internal | 6.0 | 10 (Tampering) | 2x | **120** | Medium |
+| Command injection in help text renderer | Public | 5.0 | 10 (Tampering) | 1x | **50** | Low |
+
+**Interpretation**: The same attack vector (command injection with STRIDE Tampering=10) results in vastly different risk ratings based on the value and criticality of the affected asset. This reflects both the actual damage potential (captured in DREAD Likelihood) and attacker motivation (captured in CIA Weight).
 
 ## CIA Triad and Data Classification
 
@@ -139,8 +142,6 @@ Data is classified based on impact if compromised:
 
 Each data element is assigned a CIA classification to determine appropriate security controls.
 
-**Risk Integration**: CIA classification directly determines the DREAD Damage factor baseline. See [Damage Factor and CIA Classification](#damage-factor-and-cia-classification) for assessment guidance.
-
 ## Risk Assessment Approach
 
 Security assessment follows this workflow:
@@ -149,8 +150,6 @@ Security assessment follows this workflow:
 2. **Classify Data**: Apply CIA triad to all data processed and exchanged (Highly Confidential/Confidential/Internal/Public)
 3. **Threat Modeling**: Enumerate threats using STRIDE categories for each component and data flow
 4. **Likelihood Assessment**: Calculate DREAD likelihood for each threat
-   - **Critical**: Assess Damage factor using CIA classification of affected assets (see Damage Factor guidance)
-   - Assess remaining DREAD factors (Reproducibility, Exploitability, Affected Users, Discoverability)
    - Calculate DREAD Likelihood average
 5. **Impact Assessment**: Determine STRIDE impact ratings for each relevant category
 6. **Risk Calculation**: Compute risk ratings (DREAD × STRIDE × CIA Weight) for each threat-category combination
@@ -165,4 +164,128 @@ Security assessment follows this workflow:
 
 This dual approach ensures that threats to critical assets receive appropriately elevated risk ratings from both impact and attractiveness perspectives. The weight factor starts at 1 to ensure CIA never artificially reduces risk below the DREAD×STRIDE assessment.
 
-Each security scope in [02_scopes/](../02_scopes/) applies this methodology to specific system domains.
+## Worked Example: Complete Threat Assessment
+
+This example demonstrates the complete risk assessment workflow for a real threat.
+
+### Scenario: Command Injection in Plugin Path Loading
+
+**Context**: The doc.doc.sh script accepts plugin paths via command-line arguments and executes code from those paths. An attacker could provide a malicious path containing shell metacharacters.
+
+#### Step 1: Define Scope
+- **Component**: Plugin loading subsystem in doc.doc.sh
+- **Interface**: Command-line argument parsing (`--plugin` flag)
+- **Data Flow**: User input → argument parser → shell execution
+
+#### Step 2: Classify Data
+- **Affected Asset**: Shell execution environment (ability to run arbitrary commands with script privileges)
+- **CIA Classification**: **Highly Confidential**
+  - **Confidentiality**: Critical (could expose system credentials, SSH keys)
+  - **Integrity**: Critical (could modify any file accessible to user)
+  - **Availability**: Critical (could crash system or delete critical files)
+
+#### Step 3: Threat Modeling (STRIDE)
+Relevant STRIDE categories for this threat:
+- **Tampering**: ✓ Attacker can execute arbitrary code, modifying system state
+- **Elevation of Privilege**: ✓ Could escalate to root if script runs with sudo
+- **Information Disclosure**: ✓ Could exfiltrate sensitive files
+- **Denial of Service**: ✓ Could crash the script or consume resources
+
+#### Step 4: DREAD Likelihood Assessment
+- **Damage**: 9/10
+  - Asset is Highly Confidential (score range 8-10)
+  - Complete system compromise possible
+  - Could access SSH keys, credentials, private data
+  
+- **Reproducibility**: 9/10
+  - Attack is 100% reproducible with crafted input
+  - No randomization or timing dependencies
+  
+- **Exploitability**: 6/10
+  - Requires knowledge of shell metacharacters
+  - Requires local access or ability to influence arguments
+  - No specialized tools needed
+  
+- **Affected Users**: 10/10
+  - All users of the script are vulnerable
+  - No user-specific conditions required
+  
+- **Discoverability**: 7/10
+  - Obvious to security researchers examining shell script
+  - May not be obvious to casual users
+  - Basic penetration testing would reveal this
+
+**DREAD Likelihood**: (9 + 9 + 6 + 10 + 7) / 5 = **8.2**
+
+#### Step 5: STRIDE Impact Assessment
+For each relevant STRIDE category, assess impact (0-10):
+
+- **Tampering**: 10/10 (complete code execution, can modify anything)
+- **Elevation of Privilege**: 8/10 (could escalate if script runs privileged)
+- **Information Disclosure**: 9/10 (full file system access)
+- **Denial of Service**: 7/10 (can crash script or waste resources)
+
+#### Step 6: Risk Calculation
+
+For each STRIDE category:
+
+| STRIDE Category | Impact | DREAD Likelihood | Base Risk | CIA Weight | **Final Risk** | Severity |
+|----------------|--------|------------------|-----------|------------|----------------|----------|
+| Tampering | 10 | 8.2 | 82 | 4x | **328** | **Critical** |
+| Elevation of Privilege | 8 | 8.2 | 65.6 | 4x | **262** | **Critical** |
+| Information Disclosure | 9 | 8.2 | 73.8 | 4x | **295** | **Critical** |
+| Denial of Service | 7 | 8.2 | 57.4 | 4x | **230** | **High** |
+
+**Highest Risk**: **328** (Tampering) - **CRITICAL**
+
+#### Step 7: Mitigation Strategy
+
+Given critical risk rating:
+
+1. **Input Validation** (Primary Control):
+   - Whitelist allowed characters in plugin paths
+   - Reject paths containing shell metacharacters: `;`, `|`, `&`, `$`, `` ` ``, `(`, `)`, `<`, `>`
+   - Validate against expected path patterns
+
+2. **Path Sanitization** (Defense in Depth):
+   - Use `realpath` to resolve canonical path
+   - Verify plugin file exists and is readable
+   - Check plugin directory is within expected location
+
+3. **Secure Execution** (Defense in Depth):
+   - Use array-based command execution instead of string interpolation
+   - Avoid `eval` and `source` with user-controlled paths
+   - Quote all variables in shell expansions
+
+4. **Testing** (Validation):
+   - Write unit tests with malicious path inputs
+   - Include fuzzing test cases
+   - Test cases: `--plugin "; rm -rf /"`, `--plugin "$(whoami)"`, etc.
+
+#### Step 8: Residual Risk
+
+After implementing mitigations:
+- Input validation reduces **Exploitability** from 6 → 2 (requires bypass)
+- New DREAD Likelihood: (9 + 9 + 2 + 10 + 7) / 5 = **7.4**
+- New Tampering Risk: 7.4 × 10 × 4 = **296** (still Critical)
+
+Further mitigation needed:
+- Implement strict plugin directory whitelist
+- Reduces **Affected Users** from 10 → 3 (only users with write access to plugin dirs)
+- Reduces **Damage** from 9 → 7 (limited to plugin directory scope)
+- Final DREAD: (7 + 9 + 2 + 3 + 7) / 5 = **5.6**
+- Final Risk: 5.6 × 10 × 4 = **224** (High - acceptable with documentation)
+
+#### Step 9: Validation
+- Unit tests verify input rejection
+- Integration tests verify secure plugin loading
+- Manual penetration testing confirms no bypass
+
+#### Step 10: Documentation
+- Document accepted residual risk (224 - High)
+- Require plugin directory to be user-owned only
+- Add security warning to README
+
+---
+
+Each security scope in `01_vision/04_security/02_scopes/` applies this methodology to specific system domains.
