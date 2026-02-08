@@ -79,3 +79,26 @@ Exit codes documented in:
 - Scripts can handle specific error types
 - Clear communication of failure reason
 - Prepared for future error scenarios (codes 2-5 currently unused but ready)
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh:17-23`
+
+```bash
+EXIT_SUCCESS=0          # Successful completion
+EXIT_INVALID_ARGS=1     # Invalid command-line arguments
+EXIT_FILE_ERROR=2       # File or directory access error
+EXIT_PLUGIN_ERROR=3     # Plugin execution failed
+EXIT_REPORT_ERROR=4     # Report generation failed
+EXIT_WORKSPACE_ERROR=5  # Workspace corruption or access error
+```
+
+**Usage Locations**:
+- `show_help()`: Line 92 (EXIT_SUCCESS)
+- `show_version()`: Line 107 (EXIT_SUCCESS)
+- `parse_arguments()`: Lines 157, 178, 188, 198, 208, 218, 231, 236 (EXIT_INVALID_ARGS)
+- `main()`: Line 268 (EXIT_SUCCESS)
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented (codes 2-5 defined, not yet used)

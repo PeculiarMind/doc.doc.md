@@ -10,6 +10,32 @@
 
 This document describes the runtime behavior of the plugin listing feature (`-p list` command). It covers the complete execution flow from command invocation through plugin discovery, parsing, and display.
 
+## Table of Contents
+
+- [Runtime Scenario 1: List Plugins (Happy Path)](#runtime-scenario-1-list-plugins-happy-path)
+- [Runtime Scenario 2: No Plugins Found](#runtime-scenario-2-no-plugins-found)
+- [Runtime Scenario 3: Malformed Plugin Descriptor](#runtime-scenario-3-malformed-plugin-descriptor)
+- [Runtime Scenario 4: JSON Parser Fallback](#runtime-scenario-4-json-parser-fallback)
+- [Runtime Scenario 5: No JSON Parser Available](#runtime-scenario-5-no-json-parser-available)
+- [Runtime Scenario 6: Platform-Specific Override](#runtime-scenario-6-platform-specific-override)
+- [Runtime Scenario 7: Missing Plugin Directory](#runtime-scenario-7-missing-plugin-directory)
+- [Runtime Scenario 8: Long Plugin Description Truncation](#runtime-scenario-8-long-plugin-description-truncation)
+- [Runtime Scenario 9: Verbose Mode Plugin Listing](#runtime-scenario-9-verbose-mode-plugin-listing)
+- [Cross-Cutting Runtime Concerns](#cross-cutting-runtime-concerns)
+  - [Performance Characteristics](#performance-characteristics)
+  - [Error Recovery Strategy](#error-recovery-strategy)
+  - [State Management](#state-management)
+  - [Platform-Specific Behavior](#platform-specific-behavior)
+- [Integration with Feature 0001 Runtime](#integration-with-feature-0001-runtime)
+  - [Reused Runtime Patterns](#reused-runtime-patterns)
+  - [Runtime Extension](#runtime-extension)
+- [Testing Runtime Scenarios](#testing-runtime-scenarios)
+  - [Executable Test Cases](#executable-test-cases)
+  - [Performance Benchmarks](#performance-benchmarks)
+  - [Output Validation](#output-validation)
+- [Alignment with Vision](#alignment-with-vision)
+- [Summary](#summary)
+
 ---
 
 ## Runtime Scenario 1: List Plugins (Happy Path)

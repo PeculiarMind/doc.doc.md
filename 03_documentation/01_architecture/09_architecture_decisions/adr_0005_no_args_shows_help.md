@@ -64,3 +64,19 @@ parse_arguments() {
 - Positive user experience for exploration
 - May need refinement in future features
 - No breaking change (help already available via `-h`)
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh:154-157`
+
+```bash
+# No arguments shows help (user-friendly behavior)
+if [[ $# -eq 0 ]]; then
+  show_help
+  exit "${EXIT_SUCCESS}"
+fi
+```
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented

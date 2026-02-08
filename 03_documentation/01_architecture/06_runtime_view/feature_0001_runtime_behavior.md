@@ -9,6 +9,29 @@
 
 This document describes the runtime behavior of the `doc.doc.sh` script for basic operations implemented in feature_0001. It focuses on the execution flows for help, version, verbose mode, and error handling scenarios.
 
+## Table of Contents
+
+- [Runtime Scenario 1: Display Help](#runtime-scenario-1-display-help)
+- [Runtime Scenario 2: Display Version](#runtime-scenario-2-display-version)
+- [Runtime Scenario 3: Verbose Mode Execution](#runtime-scenario-3-verbose-mode-execution)
+- [Runtime Scenario 4: No Arguments](#runtime-scenario-4-no-arguments)
+- [Runtime Scenario 5: Invalid Option](#runtime-scenario-5-invalid-option)
+- [Runtime Scenario 6: Missing Required Argument](#runtime-scenario-6-missing-required-argument)
+- [Runtime Scenario 7: Platform Detection](#runtime-scenario-7-platform-detection)
+- [Runtime Scenario 8: Prepared Flag (Future Implementation)](#runtime-scenario-8-prepared-flag-future-implementation)
+- [Cross-Cutting Runtime Concerns](#cross-cutting-runtime-concerns)
+  - [Logging Behavior](#logging-behavior)
+  - [Exit Code Strategy](#exit-code-strategy)
+  - [State Management](#state-management)
+  - [Performance Characteristics](#performance-characteristics)
+- [Error Handling Runtime Behavior](#error-handling-runtime-behavior)
+  - [Error Exit Pattern](#error-exit-pattern)
+- [Testing Runtime Scenarios](#testing-runtime-scenarios)
+  - [Executable Test Cases](#executable-test-cases)
+  - [Platform Detection Test](#platform-detection-test)
+- [Future Runtime Extensions](#future-runtime-extensions)
+- [Alignment with Vision](#alignment-with-vision)
+
 ## Runtime Scenario 1: Display Help
 
 **Trigger**: User executes `./doc.doc.sh -h` or `./doc.doc.sh --help`

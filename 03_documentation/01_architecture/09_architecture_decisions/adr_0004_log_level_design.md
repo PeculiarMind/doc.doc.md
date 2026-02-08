@@ -80,3 +80,28 @@ $ ./doc.doc.sh -v
 - Clear separation between user messages and debug output
 - Enables troubleshooting without code modification
 - Follows industry conventions (similar to syslog levels)
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh:32-49`
+
+```bash
+log() {
+  local level="$1"
+  local message="$2"
+  
+  # Show DEBUG and INFO only in verbose mode, always show WARN and ERROR
+  if [[ "${VERBOSE}" == true ]] || [[ "${level}" == "ERROR" ]] || [[ "${level}" == "WARN" ]]; then
+    echo "[${level}] ${message}" >&2
+  fi
+}
+```
+
+**Usage Examples**:
+- `detect_platform()`: Lines 126, 128 (INFO)
+- `parse_arguments()`: Lines 170, 184 (INFO)
+- Error messages: Various locations (ERROR)
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented

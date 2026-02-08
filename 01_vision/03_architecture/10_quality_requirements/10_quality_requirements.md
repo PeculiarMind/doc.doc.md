@@ -5,6 +5,13 @@ arc42-chapter: 10
 
 # 10. Quality Requirements
 
+## Table of Contents
+
+- [Overview](#overview)
+- [10.1 Quality Tree](#101-quality-tree)
+- [10.2 Quality Scenarios](#102-quality-scenarios)
+- [10.3 Quality Priorities](#103-quality-priorities)
+
 ## Overview
 This document outlines the quality requirements for the project, defining measurable quality goals and specific scenarios that the system must satisfy. These requirements drive architectural decisions and guide trade-offs.
 

@@ -5,6 +5,18 @@ arc42-chapter: 9
 
 # 9. Architecture Decisions
 
+## Table of Contents
+
+- [Overview](#overview)
+- [9.1 ADR-001: Bash as Primary Implementation Language](#91-adr-001-bash-as-primary-implementation-language)
+- [9.2 ADR-002: JSON Workspace for State Management](#92-adr-002-json-workspace-for-state-management)
+- [9.3 ADR-003: Plugin-Based Architecture for Tool Integration](#93-adr-003-plugin-based-architecture-for-tool-integration)
+- [9.4 ADR-004: Template-Based Report Generation](#94-adr-004-template-based-report-generation)
+- [9.5 ADR-005: Incremental Analysis Strategy](#95-adr-005-incremental-analysis-strategy)
+- [9.6 ADR-006: Platform Detection and Plugin Precedence](#96-adr-006-platform-detection-and-plugin-precedence)
+- [9.7 ADR-007: No GUI, CLI Only](#97-adr-007-no-gui-cli-only)
+- [9.8 ADR-008: Local-Only Processing with Offline Operation](#98-adr-008-local-only-processing-with-offline-operation)
+
 This section documents significant architectural decisions, their rationale, alternatives considered, and implications.
 
 ## 9.1 ADR-001: Bash as Primary Implementation Language

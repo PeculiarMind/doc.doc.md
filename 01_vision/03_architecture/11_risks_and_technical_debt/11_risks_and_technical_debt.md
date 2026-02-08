@@ -5,6 +5,13 @@ arc42-chapter: 11
 
 # 11. Risks and Technical Debt
 
+## Table of Contents
+
+- [11.1 Technical Risks](#111-technical-risks)
+- [11.2 Technical Debt](#112-technical-debt)
+- [11.3 Risk Mitigation Strategies](#113-risk-mitigation-strategies)
+- [11.4 Monitoring and Review](#114-monitoring-and-review)
+
 This section identifies potential risks, technical debt, and mitigation strategies for the doc.doc toolkit.
 
 ## 11.1 Technical Risks

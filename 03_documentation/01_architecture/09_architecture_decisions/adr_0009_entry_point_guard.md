@@ -60,3 +60,28 @@ $ show_help  # Call function directly
 - Enables unit testing of individual functions
 - No impact on normal execution
 - Standard Bash testing pattern
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh:265-267`
+
+```bash
+# Only run main if script is executed directly (not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
+```
+
+**Usage in Tests**: Test scripts can source `doc.doc.sh` without triggering execution:
+```bash
+# In test script
+source ../doc.doc.sh
+
+# Now test individual functions
+VERBOSE=true
+log "INFO" "Test message"  # Call function directly
+```
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented

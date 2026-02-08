@@ -5,6 +5,18 @@ arc42-chapter: 2
 
 # 2. Architecture Constraints
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Technical Constraints](#technical-constraints)
+  - [TC-1: Bash/POSIX Shell Runtime Environment](#tc-1-bashposix-shell-runtime-environment)
+  - [TC-2: No Network Access During Runtime](#tc-2-no-network-access-during-runtime)
+  - [TC-3: User-Space Execution (No Root/Sudo)](#tc-3-user-space-execution-no-rootsudo)
+  - [TC-4: Headless/SSH Environment Compatibility](#tc-4-headlessssh-environment-compatibility)
+  - [TC-5: File-Based State Management](#tc-5-file-based-state-management)
+- [Organizational Constraints](#organizational-constraints)
+- [Conventions](#conventions)
+
 ## Overview
 This section documents the **true architectural constraints**—external limitations, organizational boundaries, and fixed technical conditions that restrict the design space and cannot be changed by architectural decisions. These constraints represent boundaries we must work within, not features we choose to implement.
 

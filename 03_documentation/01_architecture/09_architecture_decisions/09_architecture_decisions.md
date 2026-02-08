@@ -10,6 +10,15 @@ This directory contains Architecture Decision Records (ADRs) documenting key arc
 
 **Total ADRs**: 13 (ADR-0003 through ADR-0015)
 
+## Table of Contents
+
+- [ADR Index](#adr-index)
+- [ADR Format](#adr-format)
+- [Status Indicators](#status-indicators)
+- [Summary](#summary)
+- [Non-Architecture Decisions](#non-architecture-decisions)
+- [Historical Reference](#historical-reference)
+
 ## ADR Index
 
 ### ADR-0003: Platform Detection Fallback Strategy

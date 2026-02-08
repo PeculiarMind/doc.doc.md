@@ -76,3 +76,28 @@ Bash scripts can be structured as:
 - Easy to extend with new functions
 - Testable components (when sourced)
 - Aligns with vision's component architecture
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh` (entire script structure)
+
+**Function Locations**:
+- `log()`: Lines 32-49
+- `show_help()`: Lines 52-92
+- `show_version()`: Lines 98-107
+- `detect_platform()`: Lines 113-130
+- `error_exit()`: Lines 136-144
+- `parse_arguments()`: Lines 152-241
+- `main()`: Lines 247-268
+
+**Organization Pattern**:
+```bash
+# Section 1: Constants (lines 6-23)
+# Section 2: Utility functions (lines 32-144)
+# Section 3: Core logic (lines 152-241)
+# Section 4: Main orchestration (lines 247-268)
+```
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented across entire script

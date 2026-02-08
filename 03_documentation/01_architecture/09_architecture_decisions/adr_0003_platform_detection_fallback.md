@@ -79,3 +79,32 @@ detect_platform() {
 - **Granularity**: Linux distributions identified specifically
 - **Future Features**: Plugin discovery can check platform-specific directories (`plugins/ubuntu/`, `plugins/darwin/`)
 - **Robustness**: Never fails platform detection (always has value)
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh:113-130`
+
+```bash
+detect_platform() {
+  if [[ -f /etc/os-release ]]; then
+    # Tier 1: Parse /etc/os-release
+    . /etc/os-release
+    PLATFORM="${ID:-generic}"
+  else
+    # Tier 2: Fallback to uname
+    case "$(uname -s)" in
+      Linux*)   PLATFORM="linux" ;;
+      Darwin*)  PLATFORM="darwin" ;;
+      CYGWIN*)  PLATFORM="cygwin" ;;
+      MINGW*)   PLATFORM="mingw" ;;
+      *)        PLATFORM="generic" ;;  # Tier 3: Default
+    esac
+  fi
+  
+  log "INFO" "Detected platform: ${PLATFORM}"
+}
+```
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented and tested on Ubuntu

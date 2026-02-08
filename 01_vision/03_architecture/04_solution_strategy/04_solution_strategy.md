@@ -1,5 +1,14 @@
 # 4. Solution Strategy
 
+## Table of Contents
+
+- [Overview](#overview)
+- [4.1 Core Architectural Decisions](#41-core-architectural-decisions)
+- [4.2 Technology Selections](#42-technology-selections)
+- [4.3 Quality Goals Achievement Strategy](#43-quality-goals-achievement-strategy)
+- [4.4 Architectural Style](#44-architectural-style)
+- [4.5 Risk Mitigation Strategies](#45-risk-mitigation-strategies)
+
 ## Overview
 This section outlines the high-level technical approach taken to achieve the project's goals while respecting its constraints. The strategy emphasizes simplicity, composability, and alignment with UNIX philosophy.
 

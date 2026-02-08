@@ -75,3 +75,18 @@ some_command || handle_failure
 - **Maintenance**: Forces explicit error handling (good for long-term maintenance)
 
 **Vision Alignment**: Consistent with quality requirements and error handling strategy
+
+## Implementation Location
+
+**Code Reference**: `scripts/doc.doc.sh:4`
+
+```bash
+#!/usr/bin/env bash
+
+# Exit on error, undefined variables, pipe failures
+set -euo pipefail
+```
+
+**Implementation Date**: 2026-02-06  
+**Feature**: feature_0001  
+**Status**: ✅ Implemented
