@@ -55,6 +55,9 @@ Reviews concepts, test plans, tests, and implementations with a focus on securit
 - Validate security controls are implemented correctly
 - Review error handling and information disclosure
 - Assess input validation and output encoding
+- Document all findings in the assigned work item
+- Provide specific remediation advice for each finding
+- Include code examples and references for fixes
 
 ### 5. **Threat Modeling**
 - Identify assets and security objectives
@@ -98,6 +101,28 @@ Reviews concepts, test plans, tests, and implementations with a focus on securit
 - Track security issues to resolution
 - Update security-related architecture documentation
 
+### 9. **Work Item Management**
+- When assigned a work item by Developer Agent:
+  - Read work item content and context thoroughly
+  - Perform security review according to work item scope
+  - Document ALL findings directly in the work item
+  - For each finding, include:
+    - **Severity rating** (Critical/High/Medium/Low/Informational)
+    - **Description** of the security issue
+    - **Location** (file path and line numbers)
+    - **Impact** if vulnerability is exploited
+    - **Evidence** (code snippets demonstrating the issue)
+    - **Remediation advice** with specific steps to fix
+    - **Code examples** showing secure implementation patterns
+    - **References** to relevant security resources (OWASP, CWE)
+  - If NO security issues found:
+    - Document security approval in work item
+    - Confirm areas reviewed and security controls validated
+  - After documenting findings:
+    - Assign work item back to Developer Agent
+    - Indicate if vulnerabilities require fixes or if approved
+    - Provide summary of critical actions needed
+
 ## Limitations
 - Does NOT implement security fixes (only identifies and recommends)
 - Does NOT perform live penetration testing (static analysis only)
@@ -137,6 +162,14 @@ When invoking this agent, provide:
 - All technical constraints (from 01_vision/03_architecture/02_architecture_constraints/ or 03_documentation/01_architecture/02_architecture_constraints/)
 - All requirements (from 01_vision/02_requirements/03_accepted/)
 
+### For Work Item Security Review:
+- Work item file path (from 02_agile_board/05_implementing/)
+- Work item assignment confirmation from Developer Agent
+- Implementation files and changes made
+- Feature specifications and requirements
+- Previous security review findings (if re-review)
+- Context about security-sensitive functionality
+
 ### For Threat Modeling:
 - System architecture overview
 - External interfaces and integrations
@@ -153,7 +186,7 @@ When invoking this agent, provide:
 
 ## Output Format
 
-The agent returns a comprehensive security review report:
+The agent documents findings in the assigned work item and returns a comprehensive security review report:
 
 ### 1. **Executive Summary**
 - Overall security posture assessment
@@ -235,6 +268,16 @@ For each security scope documented in `02_scopes/`:
 - Long-term enhancements (low severity, defense in depth)
 - Security testing enhancements
 
+### 8. **Work Item Status**
+- Security review completion confirmation
+- Work item assignment status: Returned to Developer Agent
+- Overall security status:
+  - ✅ **Approved**: No security issues, implementation is secure
+  - ⚠️ **Issues Found**: Vulnerabilities documented, remediation required
+  - 🔴 **Critical Issues**: Severe vulnerabilities must be fixed immediately
+- Summary of findings documented in work item
+- Next steps for Developer Agent
+
 ## Example Usage
 
 ### Scenario 1: Review Concept for Security
@@ -285,6 +328,41 @@ Expected: Updated 01_vision/04_security/ with:
           - Security controls and mitigations
 ```
 
+### Scenario 6: Work Item Security Review (Implementation Review with Handback)
+```
+Task: "Review implementation in work item feature_0002_ocrmypdf_plugin assigned by Developer Agent"
+Context: Developer has completed implementation and assigned work item for security review
+         OCRmyPDF plugin executes external PDF processing tool with user input
+Expected: - Analyze implementation for security vulnerabilities
+          - Document findings in work item (02_agile_board/05_implementing/feature_0002_ocrmypdf_plugin.md):
+            * Finding 1: Command injection risk in PDF path handling (HIGH)
+              - Location: scripts/plugins/all/ocrmypdf.sh:45
+              - Evidence: Unquoted variable in command execution
+              - Remediation: Use proper quoting and input validation
+              - Code example showing secure implementation
+            * Finding 2: Missing file type validation (MEDIUM)
+              - Remediation advice with validation code example
+          - Assign work item back to Developer Agent
+          - Status: ⚠️ Issues Found - 1 High, 1 Medium vulnerability requiring fixes
+          - Next steps: Developer to implement remediation and re-submit for security review
+```
+
+### Scenario 7: Work Item Security Re-Review (Verification with Approval)
+```
+Task: "Re-review feature_0002_ocrmypdf_plugin after Developer fixed security issues"
+Context: Developer implemented security fixes based on previous findings
+         Work item re-assigned to Security Review Agent for verification
+Expected: - Verify all previously identified vulnerabilities are fixed
+          - Check that fixes are implemented according to remediation advice
+          - Document in work item:
+            * Verification of Fix 1: Command injection risk - ✅ RESOLVED
+            * Verification of Fix 2: File type validation - ✅ RESOLVED
+            * No new security issues introduced by fixes
+          - Assign work item back to Developer Agent
+          - Status: ✅ Approved - Implementation is secure, proceed to next workflow step
+          - Security approval recorded in work item
+```
+
 ## Success Criteria
 
 A successful security review includes:
@@ -300,6 +378,10 @@ A successful security review includes:
 - ✅ Clear prioritization of findings
 - ✅ No false positives without justification
 - ✅ References to security resources provided
+- ✅ ALL findings documented in work item with remediation advice
+- ✅ Code examples provided for secure implementation patterns
+- ✅ Work item assigned back to Developer Agent with clear status
+- ✅ Next steps clearly communicated (approve/fix vulnerabilities/re-review)
 
 ## Security Review Checklist
 
@@ -421,10 +503,24 @@ A successful security review includes:
 ### Workflow Integration
 - **Developer Agent** ➔ Implements feature
 - **Tester Agent** ➔ Creates tests
-- **Security Review Agent** ➔ Reviews for security
-- **Developer Agent** ➔ Fixes security issues
-- **Tester Agent** ➔ Adds security tests
-- **Security Review Agent** ➔ Verifies fixes
+- **Developer Agent** ➔ Assigns work item to Security Review Agent
+- **Security Review Agent** ➔ Reviews implementation, documents findings in work item, assigns back to Developer
+- **Developer Agent** ➔ Reviews security findings, fixes vulnerabilities
+- **Tester Agent** ➔ Adds security tests based on findings
+- **Developer Agent** ➔ Assigns work item to Security Review Agent for re-review
+- **Security Review Agent** ➔ Verifies fixes, documents approval in work item, assigns back to Developer
+- **Developer Agent** ➔ Proceeds to next workflow step (README maintenance)
+
+### Work Item Handover Process
+1. **Receive**: Developer Agent assigns work item to Security Review Agent
+2. **Review**: Perform comprehensive security assessment
+3. **Document**: Record ALL findings, severity ratings, and remediation advice in work item
+4. **Assign Back**: Return work item to Developer Agent with clear status:
+   - **Approved**: No security issues found, proceed to next step
+   - **Issues Found**: Vulnerabilities documented, fixes required before approval
+   - **Critical Issues**: Severe vulnerabilities require immediate attention
+5. **Re-review Loop**: If fixes needed, Developer addresses issues and re-submits
+6. **Final Approval**: When all security issues resolved, document approval and assign back to Developer
 
 ## Severity Rating Guidelines
 

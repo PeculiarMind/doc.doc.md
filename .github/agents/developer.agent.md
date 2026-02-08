@@ -108,8 +108,34 @@ Autonomously implements features from the backlog, manages the complete developm
 - If compliant:
   - Proceed to README maintenance
 
-### 9. **README Maintenance**
-- After all quality gates pass (tests, architecture, license):
+### 9. **Security Review**
+- After license compliance verification passes:
+  - Assign work item to Security Review Agent
+  - Hand over to Security Review Agent for security analysis
+  - Provide context about:
+    - All code changes made
+    - New functionality and features added
+    - Input handling and validation logic
+    - Authentication or authorization changes
+    - Data processing and storage
+    - External dependencies or API integrations
+    - Any security-sensitive operations
+  - Wait for Security Review Agent to analyze implementation
+  - Receive security assessment report from Security Review Agent
+  - Verify work item has been assigned back to Developer
+  - Review security findings and recommendations
+- If security issues found:
+  - Review security feedback carefully
+  - Address identified vulnerabilities
+  - Refactor code to implement security recommendations
+  - Re-submit for security review verification
+  - Repeat until security approval obtained
+- If security compliant:
+  - Security approval recorded in work item
+  - Proceed to README maintenance
+
+### 10. **README Maintenance**
+- After all quality gates pass (tests, architecture, license, security):
   - Assign work item to README Maintainer Agent
   - Hand over to README Maintainer Agent for documentation review
   - Provide context about:
@@ -129,7 +155,7 @@ Autonomously implements features from the backlog, manages the complete developm
   - README Maintainer confirms documentation is current
 - Proceed to workflow state management
 
-### 10. **Workflow State Management**
+### 11. **Workflow State Management**
 - Move item from `05_implementing` to `06_done` when all quality gates pass
 - Update item metadata with completion timestamp
 - Only move to done when ALL conditions met:
@@ -137,12 +163,13 @@ Autonomously implements features from the backlog, manages the complete developm
   - ✅ Architecture compliance verified by Architect Agent
   - ✅ Architecture documentation updated by Architect Agent
   - ✅ License compliance verified by License Governance Agent
+  - ✅ Security review completed by Security Review Agent
   - ✅ README and user documentation updated by README Maintainer Agent
   - ✅ Code is clean and well-documented
   - ✅ No merge conflicts with main
 - Maintain clear audit trail of development process
 
-### 11. **Pull Request Creation**
+### 12. **Pull Request Creation**
 - Create pull request from feature branch to main
 - Pull request must include:
   - Clear title describing the feature
@@ -151,6 +178,7 @@ Autonomously implements features from the backlog, manages the complete developm
   - Architecture compliance confirmation
   - Test results summary
   - License compliance confirmation
+  - Security review confirmation
   - README update confirmation
   - Link to updated architecture documentation
 - PR review and merge performed by humans (NOT by agent)
@@ -161,6 +189,7 @@ Autonomously implements features from the backlog, manages the complete developm
 - Does NOT make architectural decisions (follows existing architecture vision)
 - Does NOT skip architecture compliance verification even for small changes
 - Does NOT skip license compliance verification even for small changes
+- Does NOT skip security review even for small changes
 - Does NOT skip README maintenance review even if changes seem minor
 - Does NOT proceed without passing tests
 - Does NOT work on multiple items simultaneously
@@ -235,21 +264,30 @@ The agent returns a comprehensive implementation report:
 - License compliance confirmation recorded in work item
 - Dependencies reviewed and approved
 
-### 7. **README Maintenance Report**:
+### 7. **Security Review Report**:
+- Security Review Agent assessment result
+- Security status: secure/vulnerabilities-found/needs-revision
+- Any security vulnerabilities or concerns identified
+- Severity ratings for identified issues
+- Security recommendations and how they were addressed
+- Security approval recorded in work item
+- Confirmation implementation meets security requirements
+
+### 8. **README Maintenance Report**:
 - README Maintainer Agent review result
 - Documentation status: updated/no-changes-needed
 - README updates made (if any)
 - Other documentation files updated
 - Confirmation documentation is current with implementation
 
-### 8. **Pull Request Details**:
+### 9. **Pull Request Details**:
 - PR number and URL
 - PR title and description
 - Files changed summary
 - Review checklist status
 - Next steps (awaiting review)
 
-### 9. **Final Status**:
+### 10. **Final Status**:
 - Item moved to `06_done` confirmation
 - Pull request created and ready for human review
 - Overall implementation success/failure
@@ -320,15 +358,21 @@ The agent follows this strict workflow:
 - [ ] **28. Receive compliance result** - Review license compliance recorded in work item
 - [ ] **29. Verify assignment** - Confirm work item assigned back to Developer
 - [ ] **30. Fix if needed** - Address any license compliance issues
-- [ ] **31. Assign to README Maintainer** - Assign work item to README Maintainer Agent
-- [ ] **32. Hand over to README Maintainer** - Request README and documentation review
-- [ ] **33. Await README update** - Wait for README Maintainer to review and update
-- [ ] **34. Receive README confirmation** - Review README updates or confirmation
+- [ ] **31. Assign to Security Review** - Assign work item to Security Review Agent
+- [ ] **32. Hand over to Security Review** - Request security analysis
+- [ ] **33. Await security review** - Wait for security assessment
+- [ ] **34. Receive security results** - Review security findings recorded in work item
 - [ ] **35. Verify assignment** - Confirm work item assigned back to Developer
-- [ ] **36. Verify all conditions** - All gates must be green
-- [ ] **37. Move to done** - Update board state (all quality gates passed)
-- [ ] **38. Create PR** - Submit pull request to main
-- [ ] **39. Report completion** - Provide final report and await human PR review
+- [ ] **36. Fix if needed** - Address any security vulnerabilities identified
+- [ ] **37. Assign to README Maintainer** - Assign work item to README Maintainer Agent
+- [ ] **38. Hand over to README Maintainer** - Request README and documentation review
+- [ ] **39. Await README update** - Wait for README Maintainer to review and update
+- [ ] **40. Receive README confirmation** - Review README updates or confirmation
+- [ ] **41. Verify assignment** - Confirm work item assigned back to Developer
+- [ ] **42. Verify all conditions** - All gates must be green
+- [ ] **43. Move to done** - Update board state (all quality gates passed)
+- [ ] **44. Create PR** - Submit pull request to main
+- [ ] **45. Report completion** - Provide final report and await human PR review
 
 ## Best Practices for Invocation
 
@@ -351,6 +395,8 @@ A successful implementation includes:
 - ✅ Architecture documentation updated in `03_documentation/01_architecture/`
 - ✅ License compliance verified by License Governance Agent
 - ✅ License compliance results recorded in work item
+- ✅ Security review completed by Security Review Agent
+- ✅ Security assessment results recorded in work item
 - ✅ README and user documentation updated by README Maintainer Agent
 - ✅ All tests pass successfully
 - ✅ Item moved to done state on agile board (all quality gates passed)
@@ -367,9 +413,10 @@ The agent handles these error scenarios:
 3. **Test failures**: Attempt to fix, report if unfixable
 4. **Architecture non-compliance**: Refactor and resubmit
 5. **License non-compliance**: Address licensing issues and resubmit
-6. **Merge conflicts**: Resolve conflicts before PR creation
-7. **Git errors**: Report issue, suggest manual intervention
-8. **Missing dependencies**: Identify and report missing tools/libraries
+6. **Security vulnerabilities**: Address security issues and resubmit for security review
+7. **Merge conflicts**: Resolve conflicts before PR creation
+8. **Git errors**: Report issue, suggest manual intervention
+9. **Missing dependencies**: Identify and report missing tools/libraries
 
 ## Integration with Other Agents
 
@@ -405,8 +452,19 @@ The agent handles these error scenarios:
   - Must pass license compliance before PR creation
   - Addresses any licensing issues identified
 
+- **Security Review Agent** (mandatory quality gate):
+  - Invoked after license compliance verification passes
+  - Developer assigns work item to Security Review Agent
+  - Provides context about code changes, security-sensitive operations, and features
+  - Waits for security assessment and vulnerability analysis
+  - Receives security report recorded in work item
+  - Work item assigned back to Developer after review
+  - Must pass security review before PR creation
+  - Addresses any security vulnerabilities or concerns identified
+  - Refactors and re-submits if security issues found
+
 - **README Maintainer Agent** (mandatory quality gate):
-  - Invoked after all other quality gates pass (tests, architecture, license)
+  - Invoked after all other quality gates pass (tests, architecture, license, security)
   - Developer assigns work item to README Maintainer Agent
   - Provides context about feature changes and user-facing updates
   - Waits for README Maintainer to review and update documentation
