@@ -588,7 +588,7 @@ This project uses automated **License Governance** to ensure GPL-3.0 compliance:
 - All dependencies are verified for compatibility
 - Third-party attributions are maintained
 - License compliance is a required quality gate
-- Compliance reports included in feature documentation (e.g., [Feature 0003 Traceability](03_documentation/01_architecture/99_cross_references/feature_0003_traceability.md#license-compliance-report))
+- Compliance status documented in feature documentation (e.g., [Feature 0003: Plugin Listing](02_agile_board/04_backlog/feature_0003_plugin_listing.md#license-compliance))
 
 For questions about licensing, please open a GitHub Issue.
 
