@@ -5,6 +5,18 @@ arc42-chapter: 3
 
 # 3. System Scope and Context
 
+## Table of Contents
+
+- [3.1 Business Context](#31-business-context)
+  - [External Entities and Interfaces](#external-entities-and-interfaces)
+  - [Interface Details](#interface-details)
+- [3.2 Technical Context](#32-technical-context)
+  - [Technology Stack](#technology-stack)
+  - [Dependencies](#dependencies)
+  - [Platform Support](#platform-support)
+  - [Data Flow](#data-flow)
+- [3.3 Use Cases](#33-use-cases)
+
 ## 3.1 Business Context
 
 The doc.doc toolkit operates as a standalone command-line utility for local metadata extraction and report generation. It serves as an orchestrator that coordinates existing CLI tools to analyze files and produce structured documentation.

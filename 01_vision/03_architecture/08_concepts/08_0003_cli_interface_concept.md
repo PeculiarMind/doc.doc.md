@@ -5,6 +5,18 @@ arc42-chapter: 8
 
 ## 0003 CLI Interface Concept
 
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Rationale](#rationale)
+- [Command Structure](#command-structure)
+- [Arguments and Options](#arguments-and-options)
+- [Exit Codes](#exit-codes)
+- [Help System](#help-system)
+- [Logging and Verbosity](#logging-and-verbosity)
+- [Error Messages](#error-messages)
+- [Related Requirements](#related-requirements)
+
 The command-line interface provides the primary user interaction point for the doc.doc toolkit, following POSIX conventions and Unix philosophy principles.
 
 ### Purpose

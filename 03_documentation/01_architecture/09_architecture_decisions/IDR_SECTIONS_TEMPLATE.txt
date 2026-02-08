@@ -1,0 +1,12 @@
+﻿
+## Reason
+
+This implementation decision was made during Feature 0003 implementation to specify JSON parsing strategy when working with plugin descriptors. The vision (ADR-0003) requires JSON-based plugin descriptors but does not specify parsing implementation.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. ADR-0003 (Data-Driven Plugin Orchestration) and ADR-0001 (Bash as Primary Language) establish the need for JSON parsing but do not mandate specific parser choice. The dual parser strategy ensures compatibility across diverse environments.
+
+## Associated Risks
+
+No associated risks - decision aligns with vision principles. Requires at least one external tool (jq or python3), but this is acceptable as JSON parsing inherently requires a parser. Different code paths increase test complexity slightly, but this is mitigated through comprehensive test coverage.

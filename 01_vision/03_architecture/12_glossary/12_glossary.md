@@ -5,6 +5,23 @@ arc42-chapter: 12
 
 # 12. Glossary
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Terms (Alphabetical)](#terms-alphabetical)
+  - [A](#a)
+  - [B](#b)
+  - [C](#c)
+  - [D](#d)
+  - [E](#e)
+  - [F-I](#f-i)
+  - [J-M](#j-m)
+  - [N-P](#n-p)
+  - [Q-R](#q-r)
+  - [S](#s)
+  - [T-V](#t-v)
+  - [W-Z](#w-z)
+
 This glossary defines key terms and concepts used throughout the doc.doc architecture documentation.
 
 ## A

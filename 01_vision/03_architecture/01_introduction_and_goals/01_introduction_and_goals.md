@@ -5,6 +5,14 @@ arc42-chapter: 1
 
 # 1. Introduction and Goals
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Goals](#goals)
+- [1.1 Requirements Overview](#11-requirements-overview)
+- [1.2 Quality Goals](#12-quality-goals)
+- [1.3 Stakeholders](#13-stakeholders)
+
 ## Introduction
 The project aims to deliver a simple, scriptable toolkit designed to orchestrate existing CLI tools for extracting metadata and content insights from files. By leveraging these tools, the project ensures the generation of consistent, human-readable summaries in Markdown format. This approach emphasizes simplicity, composability, and the effective reuse of established CLI utilities.
 

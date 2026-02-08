@@ -5,6 +5,17 @@ arc42-chapter: 5
 
 # 5. Building Block View
 
+## Table of Contents
+
+- [5.1 Whitebox Overall System](#51-whitebox-overall-system)
+- [5.2 CLI Argument Parser](#52-cli-argument-parser)
+- [5.3 Plugin Manager](#53-plugin-manager)
+- [5.4 File Scanner](#54-file-scanner)
+- [5.5 Execution Orchestrator](#55-execution-orchestrator)
+- [5.6 Report Generator](#56-report-generator)
+- [5.7 Error Handling Module](#57-error-handling-module)
+- [5.8 Workspace Manager](#58-workspace-manager)
+
 ## 5.1 Whitebox Overall System
 
 The doc.doc toolkit consists of five major building blocks that orchestrate file analysis and report generation through a plugin-based architecture.

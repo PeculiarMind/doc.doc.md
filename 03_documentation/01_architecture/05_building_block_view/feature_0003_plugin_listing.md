@@ -10,6 +10,39 @@
 
 This document describes the implemented plugin discovery and listing system that enables users to view available plugins through the `-p list` command. The implementation provides discovery, parsing, and display capabilities for plugin metadata from platform-specific and cross-platform plugin directories.
 
+## Table of Contents
+
+- [Implemented Components](#implemented-components)
+  - [1. Plugin Descriptor Parser Component](#1-plugin-descriptor-parser-component)
+  - [2. Plugin Discovery Component](#2-plugin-discovery-component)
+  - [3. Plugin Display Component](#3-plugin-display-component)
+  - [4. Plugin List Command Component](#4-plugin-list-command-component)
+- [Component Interactions](#component-interactions)
+- [Integration with Existing Architecture](#integration-with-existing-architecture)
+  - [Integration Points](#integration-points)
+  - [Extension of Building Blocks](#extension-of-building-blocks)
+- [Architectural Decisions](#architectural-decisions)
+  - [AD-3001: Pipe-Delimited Internal Format](#ad-3001-pipe-delimited-internal-format)
+  - [AD-3002: Dual Parser Strategy (jq + python3)](#ad-3002-dual-parser-strategy-jq--python3)
+  - [AD-3003: Platform-Specific Precedence](#ad-3003-platform-specific-precedence)
+  - [AD-3004: Description Truncation at 80 Characters](#ad-3004-description-truncation-at-80-characters)
+  - [AD-3005: Continue on Malformed Descriptors](#ad-3005-continue-on-malformed-descriptors)
+- [Data Flow](#data-flow)
+  - [Complete Data Flow: User Command to Display](#complete-data-flow-user-command-to-display)
+- [Alignment with Vision](#alignment-with-vision)
+  - [Compliance ✅](#compliance-)
+  - [Implementation vs Vision Comparison](#implementation-vs-vision-comparison)
+  - [Notable Implementation Enhancements](#notable-implementation-enhancements)
+- [Testing Surface](#testing-surface)
+  - [Testable Behaviors](#testable-behaviors)
+- [Dependencies](#dependencies)
+  - [Runtime Dependencies](#runtime-dependencies)
+  - [Design Dependencies](#design-dependencies)
+- [Performance Characteristics](#performance-characteristics)
+- [Future Extension Points](#future-extension-points)
+  - [Prepared for Future Features](#prepared-for-future-features)
+- [Summary](#summary)
+
 ## Implemented Components
 
 ### 1. Plugin Descriptor Parser Component

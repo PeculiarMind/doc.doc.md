@@ -5,6 +5,17 @@ arc42-chapter: 6
 
 # 6. Runtime View
 
+## Table of Contents
+
+- [Overview](#overview)
+- [6.1 Plugin Listing Scenario](#61-plugin-listing-scenario-p-list)
+- [6.2 Incremental Analysis Scenario](#62-incremental-analysis-scenario-d-dir)
+- [6.3 Force Full Re-analysis Scenario](#63-force-full-re-analysis-scenario-d-dir-f-fullscan)
+- [6.4 First-Time Analysis Scenario](#64-first-time-analysis-scenario-fresh-workspace)
+- [6.5 Template-Based Report Generation](#65-template-based-report-generation)
+- [6.6 Error Handling Scenarios](#66-error-handling-scenarios)
+- [6.7 Verbose Logging Scenario](#67-verbose-logging-scenario)
+
 This section describes the dynamic behavior of the system, showing how components interact during key scenarios.
 
 ## 6.1 Plugin Listing Scenario (`-p list`)

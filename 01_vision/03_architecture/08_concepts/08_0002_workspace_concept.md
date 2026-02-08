@@ -5,6 +5,16 @@ arc42-chapter: 8
 
 ## 0002 Workspace Concept
 
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Rationale](#rationale)
+- [Implementation Details](#implementation-details)
+- [Workspace Operations](#workspace-operations)
+- [File Format](#file-format)
+- [Concurrency and Locking](#concurrency-and-locking)
+- [Related Requirements](#related-requirements)
+
 The workspace is a persistent data layer that stores analysis results, metadata, and state information. It enables incremental analysis, external tool integration, and recovery from interruptions.
 
 ### Purpose
