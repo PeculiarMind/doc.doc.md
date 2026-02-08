@@ -1,9 +1,10 @@
-# ADR-0012: Platform-Specific Plugin Precedence
+# IDR-0005: Platform-Specific Plugin Precedence
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0003 Implementation (Plugin Listing)  
-**Feature Reference**: [Feature 0003: Plugin Listing](../../05_building_block_view/feature_0003_plugin_listing.md)
+**ID**: IDR-0005  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0004: Platform-Specific Plugin Directories](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0004_platform_specific_plugin_directories.md)
 
 ## Decision
 
@@ -86,8 +87,21 @@ log "DEBUG" "Added platform plugin: ${plugin_name}"
 log "DEBUG" "Skipped duplicate plugin (platform version exists): ${plugin_name}"
 ```
 
-## Consequences
+## Reason
 
+Platform precedence rule necessary during Feature 0003 implementation to operationalize platform-specific plugin directories specified in vision (ADR-0004). Vision establishes the directory structure but does not specify precedence behavior when plugins exist in multiple locations. This decision enables platform optimization and customization.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. ADR-0004 (Platform-Specific Plugin Directories) establishes the directory structure but does not define precedence rules. This implementation decision extends the vision by defining predictable, intuitive precedence behavior that aligns with the vision's goals of platform optimization.
+
+## Associated Risks
+
+No associated risks - decision aligns with vision principles. Primary consideration is silent override of cross-platform plugins, which is mitigated:
+- Documented precedence rules in help text and README
+- Debug logging in verbose mode shows which plugins are skipped
+- Intentional behavior enabling platform customization
+- Users can delete platform version to use cross-platform fallback
 **Positive**:
 - ✅ Enables platform-specific optimizations
 - ✅ Allows user customization without modifying source
@@ -198,7 +212,7 @@ These would be additive features, not breaking changes.
 
 ## Related Decisions
 
-- [ADR-0003: Platform Detection Fallback](adr_0003_platform_detection_fallback.md) - Defines platform detection mechanism
+- [ADR-0016: Platform Detection Fallback](ADR_0016_platform_detection_fallback.md) - Defines platform detection mechanism
 - [ADR-0010: Pipe-Delimited Plugin Data](adr_0010_pipe_delimited_plugin_data.md) - Data format for plugins
 
 ## References

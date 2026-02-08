@@ -1,9 +1,10 @@
-# ADR-0008: Exit Code System (0-5)
+# IDR-0002: Exit Code System (0-5)
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0001 Implementation  
-**Feature Reference**: [Feature 0001: Basic Script Structure](../../../01_vision/02_features/feature_0001.md)
+**ID**: IDR-0002  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0001: Bash as Primary Language](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0001_bash_as_primary_implementation_language.md)
 
 ## Decision
 
@@ -30,6 +31,18 @@ Script needs to communicate success/failure to calling processes. Options:
 - Follows Unix convention (0=success, non-zero=failure)
 - Exit code 1 for generic errors (argument errors)
 - Codes 2-5 for specific failure domains
+
+## Reason
+
+Exit code categorization was necessary to enable calling scripts to distinguish between different failure types and implement appropriate error handling logic. Vision ADRs did not specify exit code strategy, so this implementation decision fills that detail.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. The exit code system complements ADR-0001 (Bash as Primary Language) by providing robust error communication that integrates naturally with shell scripting conventions and enables scriptable error handling.
+
+## Associated Risks
+
+No associated risks - decision aligns with vision principles and Unix conventions. Exit code system follows industry best practices and enhances scriptability without introducing technical debt or architectural concerns.
 
 ## Exit Code Definitions
 

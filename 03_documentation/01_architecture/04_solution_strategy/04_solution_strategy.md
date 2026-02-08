@@ -57,8 +57,8 @@ This document describes how the **implemented** solution achieves the project go
 
 **ADR Reference**: [ADR-0001: Bash as Implementation Language](../09_architecture_decisions/vision_adr_001_bash_implementation.md) (Vision)  
 **Implementation ADRs**: 
-- [ADR-0006: Bash Strict Mode](../09_architecture_decisions/adr_0006_bash_strict_mode.md)
-- [ADR-0007: Modular Function Architecture](../09_architecture_decisions/adr_0007_modular_function_architecture.md)
+- [ADR-0019: Bash Strict Mode](../09_architecture_decisions/ADR_0019_bash_strict_mode.md)
+- [ADR-0007: Modular Function Architecture](../09_architecture_decisions/ADR_0007_modular_function_architecture.md)
 
 ---
 
@@ -208,7 +208,7 @@ discover_plugins() {
 **Approach**: Defensive programming, comprehensive error handling
 
 **Implementation**:
-- ✅ Bash strict mode (`set -euo pipefail`) - ADR-0006
+- ✅ Bash strict mode (`set -euo pipefail`) - ADR-0019
 - ✅ Exit code system (0-5 categories) - ADR-0008
 - ✅ Input validation in argument parser
 - ✅ Graceful error messages with guidance
@@ -240,7 +240,7 @@ error_exit() {
 **Implementation**:
 - ✅ Comprehensive help text with examples
 - ✅ Clear error messages with "Try --help" guidance
-- ✅ No arguments shows help (ADR-0005)
+- ✅ No arguments shows help (ADR-0018)
 - ✅ Plugin listing for discovery
 - ✅ Version information display
 
@@ -257,8 +257,8 @@ Try './doc.doc.sh --help' for more information
 ```
 
 **Implementation ADRs**:
-- [ADR-0005: No Args Shows Help](../09_architecture_decisions/adr_0005_no_args_shows_help.md)
-- [ADR-0013: Description Truncation](../09_architecture_decisions/adr_0013_description_truncation.md)
+- [ADR-0018: No Args Shows Help](../09_architecture_decisions/ADR_0018_no_args_shows_help.md)
+- [ADR-0013: Description Truncation](../09_architecture_decisions/ADR_0013_description_truncation.md)
 
 ---
 
@@ -333,7 +333,7 @@ User Input → Argument Parser → Main Orchestrator
 | Risk | Mitigation | Implementation Status |
 |------|-----------|---------------------|
 | **Tool Unavailability** | Tool checking before execution | ✅ Implemented (check_commandline) |
-| **Shell Portability** | Platform detection + fallbacks | ✅ Implemented (ADR-0003) |
+| **Shell Portability** | Platform detection + fallbacks | ✅ Implemented (ADR-0016) |
 | **Plugin Errors** | Validation + graceful degradation | ✅ Implemented (ADR-0014) |
 | **JSON Parsing** | Dual parser (jq + python3) | ✅ Implemented (ADR-0011) |
 | **Concurrent Access** | Lockfile mechanism | 📋 Designed, not implemented |
@@ -360,7 +360,7 @@ User Input → Argument Parser → Main Orchestrator
 - ⏳ System tests pending
 
 **Quality Practices**:
-- ✅ Entry point guard for testing (ADR-0009)
+- ✅ Entry point guard for testing (ADR-0020)
 - ✅ Modular functions for testability
 - ✅ Exit code conventions for scriptability
 

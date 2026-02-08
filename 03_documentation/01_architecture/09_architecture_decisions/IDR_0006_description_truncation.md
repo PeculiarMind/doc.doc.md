@@ -1,9 +1,10 @@
-# ADR-0013: Description Truncation at 80 Characters
+# IDR-0006: Description Truncation at 80 Characters
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0003 Implementation (Plugin Listing)  
-**Feature Reference**: [Feature 0003: Plugin Listing](../../05_building_block_view/feature_0003_plugin_listing.md)
+**ID**: IDR-0006  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: None (implementation detail not specified in vision)
 
 ## Decision
 
@@ -57,6 +58,22 @@ display_plugin_list() {
 - `${#description}`: Get string length
 - `${description:0:77}`: Extract first 77 characters
 - `...`: Append ellipsis
+
+## Reason
+
+Truncation strategy necessary during Feature 0003 implementation to ensure readable plugin listing output on standard terminals. Vision does not specify display formatting requirements. Decision balances information completeness with terminal compatibility and visual consistency.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. No vision ADRs specify display formatting or UX requirements for plugin listing. This implementation decision optimizes user experience while maintaining compatibility with standard 80-column terminals.
+
+## Associated Risks
+
+No associated risks - decision aligns with UX best practices. Primary consideration is information loss in listing display, which is well-mitigated:
+- Full description available in descriptor files
+- Future `-p info <name>` command will show full details
+- Listing intended as overview, not comprehensive documentation
+- 80-character standard benefits majority of users
 
 ## Example Output
 

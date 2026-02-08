@@ -1,9 +1,10 @@
-# ADR-0010: Pipe-Delimited Internal Data Format for Plugin Data
+# IDR-0003: Pipe-Delimited Internal Data Format for Plugin Data
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0003 Implementation (Plugin Listing)  
-**Feature Reference**: [Feature 0003: Plugin Listing](../../05_building_block_view/feature_0003_plugin_listing.md)
+**ID**: IDR-0003  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0003: Data-Driven Plugin Orchestration](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0003_data_driven_plugin_orchestration.md)
 
 ## Decision
 
@@ -53,6 +54,18 @@ local active="${rest##*|}"                # Extract active
 ```bash
 echo "${name}|${description}|${active}"
 ```
+
+## Reason
+
+Pipe-delimited format chosen for internal data exchange to avoid external tool dependencies during data passing between functions. This implementation detail optimizes for performance and Bash-native operations while the vision (ADR-0003) focuses on plugin orchestration strategy without specifying internal data format.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. ADR-0003 (Data-Driven Plugin Orchestration) describes the orchestration strategy but does not mandate internal data format. The pipe-delimited approach complements the vision by providing efficient Bash-native data exchange.
+
+## Associated Risks
+
+No associated risks - decision aligns with vision principles. The primary risk (pipe character in descriptions) is mitigated through descriptor validation and is low impact. Trade-off between format simplicity and robustness is acceptable for internal data exchange.
 
 ## Consequences
 

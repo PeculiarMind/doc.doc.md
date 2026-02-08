@@ -1,9 +1,10 @@
-# ADR-0003: Platform Detection Fallback Strategy
+# IDR-0009: Platform Detection Fallback Strategy
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0001 Implementation  
-**Feature Reference**: [Feature 0001: Basic Script Structure](../../../01_vision/02_features/feature_0001.md)
+**ID**: IDR-0009  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0004: Platform-Specific Plugin Directories](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0004_platform_specific_plugin_directories.md)
 
 ## Decision
 

@@ -1,9 +1,10 @@
-# ADR-0005: No Arguments Shows Help (Not Error)
+# IDR-0011: No Arguments Shows Help (Not Error)
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0001 Implementation  
-**Feature Reference**: [Feature 0001: Basic Script Structure](../../../01_vision/02_features/feature_0001.md)
+**ID**: IDR-0011  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: None (implementation detail not specified in vision)
 
 ## Decision
 

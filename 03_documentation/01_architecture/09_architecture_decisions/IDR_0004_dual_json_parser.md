@@ -1,9 +1,10 @@
-# ADR-0011: Dual JSON Parser Strategy (jq + python3 Fallback)
+# IDR-0004: Dual JSON Parser Strategy (jq + python3 Fallback)
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0003 Implementation (Plugin Listing)  
-**Feature Reference**: [Feature 0003: Plugin Listing](../../05_building_block_view/feature_0003_plugin_listing.md)
+**ID**: IDR-0004  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0003: Data-Driven Plugin Orchestration](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0003_data_driven_plugin_orchestration.md), [ADR-0001: Bash as Primary Language](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0001_bash_as_primary_implementation_language.md)
 
 ## Decision
 
@@ -39,7 +40,21 @@ Plugin descriptors are JSON files (`descriptor.json`). The system must parse the
 - Limited edge case handling (nested objects, escaping, Unicode)
 - Security risks (eval usage, injection vulnerabilities)
 - Performance worse than python3
+## Reason
 
+Dual parser strategy necessary during Feature 0003 implementation to ensure JSON parsing works across all target environments. Vision (ADR-0003) requires JSON descriptors but does not specify parsing implementation. Decision optimizes for availability (python3 fallback) while prioritizing performance (jq primary).
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. ADR-0003 (Data-Driven Plugin Orchestration) and ADR-0001 (Bash as Primary Language) establish JSON as the descriptor format but do not mandate parser choice. The dual strategy ensures the vision's cross-platform goals are met.
+
+## Associated Risks
+
+No associated risks - decision aligns with vision principles. Primary consideration is external tool dependency (jq or python3 required), but this is acceptable and well-mitigated:
+- JSON parsing inherently requires a parser
+- jq or python3 present on 95%+ of target systems
+- Clear error messages guide users if neither available
+- Test coverage validates both paths
 ## Implementation
 
 **Detection and Fallback**:

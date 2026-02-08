@@ -19,6 +19,7 @@ This document provides an index of all Architecture Decision Records (ADRs) for 
 
 **Structure**: Each ADR is documented in a separate file following the naming pattern ADR_<FOUR_DIGIT_NUMBER>_<title>.md. This overview provides a quick reference to all decisions.
 
+**Important**: ADR IDs are globally unique across the entire project. Vision ADRs (0001-0007) are defined here, while implementation-specific ADRs (0008, 0010-0020) are in `03_documentation/01_architecture/09_architecture_decisions/`. Before assigning a new ADR number, check both locations.
 ## ADR Index
 
 | ID | Title | Status | Date | Link |
@@ -29,7 +30,7 @@ This document provides an index of all Architecture Decision Records (ADRs) for 
 | ADR-0004 | Platform-Specific Plugin Directories | Accepted | 2026-02-06 | [View](ADR_0004_platform_specific_plugin_directories.md) |
 | ADR-0005 | Template-Based Report Generation | Accepted | 2026-02-06 | [View](ADR_0005_template_based_report_generation.md) |
 | ADR-0006 | No Agent System in Product Architecture | Accepted | 2026-02-06 | [View](ADR_0006_no_agent_system_in_product_architecture.md) |
-| ADR-0009 | Modular Component-Based Script Architecture | Accepted | 2026-02-08 | [View](ADR_0009_modular_component_based_script_architecture.md) |
+| ADR-0007 | Modular Component-Based Script Architecture | Accepted | 2026-02-08 | [View](ADR_0007_modular_component_based_script_architecture.md) |
 
 ## Decision Status Legend
 

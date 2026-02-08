@@ -1,9 +1,10 @@
-# ADR-0004: Log Level Design (INFO, WARN, ERROR, DEBUG)
+# IDR-0010: Log Level Design (INFO, WARN, ERROR, DEBUG)
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0001 Implementation  
-**Feature Reference**: [Feature 0001: Basic Script Structure](../../../01_vision/02_features/feature_0001.md)
+**ID**: IDR-0010  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: None (implementation detail not specified in vision)
 
 ## Decision
 

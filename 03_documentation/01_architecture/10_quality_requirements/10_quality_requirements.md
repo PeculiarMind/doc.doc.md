@@ -61,7 +61,7 @@ This document assesses how the current implementation meets the quality goals de
 - ⏳ File access errors (pending)
 - ⏳ Workspace corruption (pending)
 
-**Related ADRs**: ADR-0006 (Strict Mode), ADR-0008 (Exit Codes)
+**Related ADRs**: ADR-0019 (Strict Mode), ADR-0008 (Exit Codes)
 
 ---
 
@@ -83,7 +83,7 @@ This document assesses how the current implementation meets the quality goals de
 - Exit codes documented in help
 - Examples included
 
-**Related ADRs**: ADR-0005 (No Args Shows Help), ADR-0013 (Truncation)
+**Related ADRs**: ADR-0018 (No Args Shows Help), ADR-0013 (Truncation)
 
 ---
 

@@ -86,7 +86,7 @@ Implement the core orchestration logic in Bash shell scripting (v4.0+).
 
 - [ADR-0002](ADR_0002_json_workspace_for_state_persistence.md) - JSON workspace complements Bash limitations
 - [ADR-0003](ADR_0003_data_driven_plugin_orchestration.md) - Plugin architecture leverages Bash's CLI integration
-- [ADR-0009](ADR_0009_modular_component_based_script_architecture.md) - Modular architecture improves Bash maintainability
+- [ADR-0007](ADR_0007_modular_component_based_script_architecture.md) - Modular architecture improves Bash maintainability
 - TC-0001: Bash Runtime Environment (technical constraint)
 
 **Trade-offs Accepted**:

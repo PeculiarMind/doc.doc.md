@@ -1,9 +1,10 @@
-# ADR-0014: Continue on Malformed Plugin Descriptors
+# IDR-0007: Continue on Malformed Plugin Descriptors
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0003 Implementation (Plugin Listing)  
-**Feature Reference**: [Feature 0003: Plugin Listing](../../05_building_block_view/feature_0003_plugin_listing.md)
+**ID**: IDR-0007  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0003: Data-Driven Plugin Orchestration](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0003_data_driven_plugin_orchestration.md)
 
 ## Decision
 
@@ -88,6 +89,22 @@ discover_plugins() {
 - `WARN`: Always shown (even without verbose)
 - Includes file path for easy identification
 - Describes specific problem clearly
+
+## Reason
+
+Error handling strategy necessary during Feature 0003 implementation to specify behavior when encountering malformed plugin descriptors. Vision (ADR-0003) emphasizes extensibility but does not specify error handling for malformed plugins. Decision prioritizes robustness and user experience over strict validation.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. ADR-0003 (Data-Driven Plugin Orchestration) focuses on orchestration strategy but does not mandate error handling behavior. This implementation follows Unix robustness principles and aligns with extensibility goals.
+
+## Associated Risks
+
+No associated risks - decision aligns with robustness principles. Primary considerations are well-mitigated:
+- Incomplete plugin list: User explicitly warned via WARN-level messages
+- Potential to mask systemic issues: Each failure logged separately (not silently ignored)
+- Better graceful degradation than catastrophic failure
+- Supports iterative plugin development
 
 ## Consequences
 

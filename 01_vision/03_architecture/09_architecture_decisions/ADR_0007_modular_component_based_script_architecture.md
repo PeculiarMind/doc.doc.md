@@ -1,6 +1,6 @@
-# ADR-0009: Modular Component-Based Script Architecture
+# ADR-0007: Modular Component-Based Script Architecture
 
-**ID**: ADR-0009  
+**ID**: ADR-0007  
 **Status**: Accepted  
 **Created**: 2026-02-08  
 **Last Updated**: 2026-02-08

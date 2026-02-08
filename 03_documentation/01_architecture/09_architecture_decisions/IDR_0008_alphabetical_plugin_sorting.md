@@ -1,9 +1,10 @@
-# ADR-0015: Alphabetical Sorting of Plugin List
+# IDR-0008: Alphabetical Sorting of Plugin List
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0003 Implementation (Plugin Listing)  
-**Feature Reference**: [Feature 0003: Plugin Listing](../../05_building_block_view/feature_0003_plugin_listing.md)
+**ID**: IDR-0008  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: None (implementation detail not specified in vision)
 
 ## Decision
 
@@ -66,6 +67,18 @@ display_plugin_list() {
 - Sorts by entire pipe-delimited string: `"name|description|active"`
 - Since name is first field, effectively sorts by name
 - Description and active status don't affect sort order
+
+## Reason
+
+Sorting strategy necessary during Feature 0003 implementation to provide consistent, predictable plugin listing output. Vision does not specify display order requirements. Decision optimizes for usability and user expectations while leveraging built-in Bash functionality.
+
+## Deviation from Vision
+
+No deviation - this decision fills implementation details not specified in vision. No vision ADRs specify plugin listing order or display requirements. Alphabetical sorting is industry standard for listing commands and aligns with user expectations.
+
+## Associated Risks
+
+No associated risks - decision aligns with usability best practices. Case-sensitive sorting (uppercase before lowercase) is standard ASCII behavior with minimal impact since plugin naming convention prefers lowercase.
 
 ## Consequences
 

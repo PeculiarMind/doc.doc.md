@@ -264,7 +264,7 @@ log() {
 - Entry point guard for testing
 - Independent testable units
 
-**Related ADRs**: ADR-0007 (Modular Function Architecture), ADR-0009 (Entry Point Guard)
+**Related ADRs**: IDR-0001 (Modular Function Architecture), IDR-0013 (Entry Point Guard)
 
 ---
 

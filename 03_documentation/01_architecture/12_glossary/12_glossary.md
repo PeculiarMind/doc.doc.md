@@ -35,7 +35,7 @@ A template for software architecture documentation with 12 standardized sections
 A file write operation that appears instantaneous using the pattern: write to temp file → validate → atomic rename. Prevents partial writes and corruption.
 
 ### Bash Strict Mode
-Bash configuration (`set -euo pipefail`) that exits on unset variables, command failures, and pipeline errors. See ADR-0006.
+Bash configuration (`set -euo pipefail`) that exits on unset variables, command failures, and pipeline errors. See ADR-0019.
 
 ---
 
@@ -67,7 +67,7 @@ A JSON file (`descriptor.json`) defining a plugin's metadata, capabilities, depe
 ---
 
 ### Entry Point Guard
-A Bash pattern (`if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then main "$@"; fi`) that prevents `main()` execution when script is sourced, enabling unit testing. See ADR-0009.
+A Bash pattern (`if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then main "$@"; fi`) that prevents `main()` execution when script is sourced, enabling unit testing. See ADR-0020.
 
 ### Exit Code
 A numeric value returned by a command: 0 = success, 1-5 = specific error categories. See ADR-0008.
@@ -109,7 +109,7 @@ Text-based data format used for plugin descriptors and workspace files. Human-re
 A temporary file (e.g., `file.json.lock`) preventing concurrent writes to the same workspace file, ensuring data consistency.
 
 ### Log Level
-Severity classification for log messages: DEBUG, INFO, WARN, ERROR. DEBUG/INFO require verbose mode (`-v`); WARN/ERROR always show. See ADR-0004.
+Severity classification for log messages: DEBUG, INFO, WARN, ERROR. DEBUG/INFO require verbose mode (`-v`); WARN/ERROR always show. See ADR-0017.
 
 ---
 

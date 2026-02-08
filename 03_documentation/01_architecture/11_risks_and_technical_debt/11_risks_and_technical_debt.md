@@ -39,7 +39,7 @@ This document tracks identified risks, documented deviations, and technical debt
 
 **Impact**: ⚠️ Medium | **Probability**: 🟡 Medium | **Status**: 🟢 MITIGATED
 
-Bash features may differ across platforms (GNU vs BSD utilities). **Mitigation**: Platform detection with fallbacks (ADR-0003), platform-specific plugin directories. **Remaining Risk**: LOW
+Bash features may differ across platforms (GNU vs BSD utilities). **Mitigation**: Platform detection with fallbacks (ADR-0016), platform-specific plugin directories. **Remaining Risk**: LOW
 
 ### Risk 2: Missing CLI Tool Dependencies
 
@@ -86,7 +86,7 @@ Command injection, path traversal, malicious plugins. **Mitigation**: Network co
 
 ### Implemented Mitigations ✅
 
-1. **Platform Detection**: Three-tier fallback system (ADR-0003)
+1. **Platform Detection**: Three-tier fallback system (ADR-0016)
 2. **Tool Checking**: Availability verification before plugin use
 3. **Error Handling**: Comprehensive with clear user-facing messages
 4. **Strict Mode**: Bash strict mode prevents silent failures

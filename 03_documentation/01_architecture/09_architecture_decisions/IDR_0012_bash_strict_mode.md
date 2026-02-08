@@ -1,9 +1,10 @@
-# ADR-0006: Bash Strict Mode (set -euo pipefail)
+# IDR-0012: Bash Strict Mode (set -euo pipefail)
 
-**Status**: ✅ Approved  
-**Date**: 2026-02-06  
-**Context**: Feature 0001 Implementation  
-**Feature Reference**: [Feature 0001: Basic Script Structure](../../../01_vision/02_features/feature_0001.md)
+**ID**: IDR-0012  
+**Status**: Accepted  
+**Created**: 2026-02-06  
+**Last Updated**: 2026-02-08  
+**Related ADRs**: [ADR-0001: Bash as Primary Language](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0001_bash_as_primary_implementation_language.md)
 
 ## Decision
 
