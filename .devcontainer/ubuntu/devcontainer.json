@@ -1,0 +1,53 @@
+{
+  "name": "doc.doc.md - Ubuntu 22.04",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  
+  "// Security: req_0030 - Non-root user": "",
+  "remoteUser": "devuser",
+  
+  "// Security: req_0027 - Secrets via mounts, never embedded": "",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/devuser/.ssh,type=bind,readonly",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/devuser/.gitconfig,type=bind,readonly"
+  ],
+  
+  "// Security: req_0030 - Privilege restriction and capability dropping": "",
+  "runArgs": [
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges"
+  ],
+  
+  "// Security: req_0027 - SSH agent forwarding for authentication": "",
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}"
+  },
+  
+  "// VS Code extensions for development": "",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "timonwong.shellcheck",
+        "foxundermoon.shell-format",
+        "mads-hartmann.bash-ide-vscode"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "shellcheck.enable": true,
+        "shellformat.flag": "-i 2 -ci"
+      }
+    }
+  },
+  
+  "// Run checks on container creation": "",
+  "postCreateCommand": "bash --version && shellcheck --version && git --version",
+  
+  "// Forward common development ports": "",
+  "forwardPorts": [8000, 8080, 3000],
+  
+  "// Features": "",
+  "features": {}
+}

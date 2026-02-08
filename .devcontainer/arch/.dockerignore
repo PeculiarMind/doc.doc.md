@@ -1,0 +1,45 @@
+# Security: Exclude sensitive files from build context
+# Critical for req_0027 (Development Container Secrets Management)
+
+# SSH keys and credentials
+.ssh/
+.ssh/*
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+id_*
+known_hosts
+
+# GPG keys
+.gnupg/
+*.gpg
+*.asc
+
+# Cloud provider credentials
+.aws/
+.azure/
+.gcloud/
+.kube/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+secrets/
+*.secret
+
+# Git credentials
+.git-credentials
+.netrc
+
+# API tokens and passwords
+*token*
+*password*
+*credential*
+.credentials
+
+# Private configuration
+private/
+confidential/
