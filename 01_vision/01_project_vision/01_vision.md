@@ -49,4 +49,28 @@ The toolkit is designed to be extended through plugins, allowing users to integr
 ## Data‑driven execution flow
 The toolkit automatically determines the optimal plugin execution order by analyzing these dependencies. Plugins execute only after the data they require becomes available, creating a data‑driven execution flow. This approach keeps the system flexible and composable while ensuring **users do not need to model or maintain an explicit workflow**—the toolkit orchestrates the pipeline intelligently based on plugin capabilities.
 
+# Developer Experience
+
+## Development Containers for Supported Platforms
+To improve developer experience and reduce environment setup friction, the project should provide development containers (devcontainers) for each supported platform. This approach offers several benefits:
+
+**Goals:**
+- **Consistent development environments** across all contributors, eliminating "works on my machine" issues
+- **Quick onboarding** for new contributors with pre-configured tooling and dependencies
+- **Platform testing** by enabling developers to easily test changes across different Linux distributions and environments
+- **Reproducible builds** with locked tool versions and consistent configurations
+- **Reduced setup time** from manual tool installation to instant development environment availability
+
+**Scope:**
+- Provide devcontainer configurations for primary supported platforms (Ubuntu, Debian, Arch, generic Linux)
+- Include all required development tools (Bash, testing frameworks, linters, documentation tools)
+- Pre-install common CLI tools used by plugins for testing
+- Configure development-specific conveniences (Git completion, shell helpers, debugging tools)
+
+**Benefits for Contributors:**
+- Single command setup: open repository in VS Code with Dev Containers extension
+- Isolated environments prevent conflicts with host system
+- Easy switching between platform environments for cross-platform testing
+- Consistent code quality checks and linting across all contributors
+
 

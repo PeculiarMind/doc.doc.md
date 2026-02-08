@@ -2,7 +2,7 @@
 
 **ID**: 0004  
 **Type**: Feature Enhancement  
-**Status**: Funnel  
+**Status**: Backlog  
 **Created**: 2026-02-08  
 **Updated**: 2026-02-08  
 **Priority**: Low
