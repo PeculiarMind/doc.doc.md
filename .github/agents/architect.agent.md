@@ -126,12 +126,18 @@ The Architect Agent assists in creating and maintaining architecture documentati
   [Links to ADRs, requirements, features]
   ```
 
-### Architecture Decision Records (ADRs)
+### Architecture Decision Records (ADRs) - Vision Only
 - **Individual Files**: Each architecture decision must be documented in a separate file
 - **Naming Pattern**: `ADR_<FOUR_DIGIT_NUMBER>_<title>.md`
   - Example: `ADR_0001_use_bash_scripting.md`
-  - Example: `ADR_0009_modular_component_based_script_architecture.md`
-- **Location**: `09_architecture_decisions/` directory
+  - Example: `ADR_0007_modular_component_based_script_architecture.md`
+- **Location**: ONLY in `01_vision/03_architecture/09_architecture_decisions/`
+  - ADRs define strategic architectural decisions made during planning/design
+  - ADRs are NOT created in documentation directory
+- **Globally Unique IDs**: ADR numbers must be unique across the project
+  - Check existing ADRs before assigning new numbers
+  - Assign next sequential number, never reuse
+  - Use uppercase `ADR_` prefix consistently
 - **Overview File**: `09_architecture_decisions.md` maintains only a summary/index of all ADRs
   - Lists all decisions with links to individual files
   - Provides decision status overview (Proposed, Accepted, Superseded, Deprecated)
@@ -176,12 +182,90 @@ The Architect Agent assists in creating and maintaining architecture documentati
   [Links to requirements, constraints, features, other ADRs]
   ```
 
+### Implementation Decision Records (IDRs) - Implementation Only
+- **Individual Files**: Each implementation decision must be documented in a separate file
+- **Naming Pattern**: `IDR_<FOUR_DIGIT_NUMBER>_<title>.md`
+  - Example: `IDR_0001_platform_detection_fallback.md`
+  - Example: `IDR_0017_log_level_design.md`
+- **Location**: ONLY in `03_documentation/01_architecture/09_architecture_decisions/`
+  - IDRs document decisions made during implementation
+  - IDRs are NOT created in vision directory
+- **Purpose**: IDRs capture implementation-level decisions that either:
+  - Fill in details not specified in architecture vision (ADRs)
+  - Deviate from the architecture vision due to implementation constraints
+- **Unique IDs**: IDR numbers are independent from ADRs
+  - Check existing IDRs in documentation before assigning new numbers
+  - Assign next sequential IDR number, never reuse
+  - Use uppercase `IDR_` prefix consistently
+- **Overview File**: `09_architecture_decisions.md` in documentation maintains index of all IDRs
+  - Lists all implementation decisions with links to individual files
+  - Separates IDRs from ADRs in the index
+  - Does NOT contain full IDR details
+- **IDR File Structure**:
+  ```markdown
+  # IDR-<NUMBER>: <Title>
+  
+  **ID**: IDR-<FOUR_DIGIT_NUMBER>
+  **Status**: Proposed | Accepted | Superseded | Deprecated
+  **Created**: <date>
+  **Last Updated**: <date>
+  **Related ADRs**: [Links to relevant ADRs from vision]
+  **Supersedes**: IDR-<NUMBER> (if applicable)
+  **Superseded By**: IDR-<NUMBER> (if applicable)
+  
+  ## Context
+  [What implementation challenge or detail needed to be decided]
+  
+  ## Decision
+  [What implementation decision was made]
+  
+  ## Reason
+  [Why this decision was necessary - must be clearly stated]
+  
+  ## Deviation from Vision
+  [Describe any deviations from architecture vision (ADRs)]
+  [If no deviation: State "No deviation - this decision fills implementation details not specified in vision"]
+  [If deviation exists: Clearly explain what differs and why]
+  
+  ## Associated Risks
+  **REQUIRED if deviation exists**: For any deviation from vision, document associated risks:
+  - **Risk ID**: Link to risk record in `11_risks_and_technical_debt/`
+  - **Risk Description**: Brief summary of the risk
+  - **Severity**: Low | Medium | High | Critical
+  - **Mitigation**: How the risk is being managed
+  [If no deviation: State "No associated risks - decision aligns with vision"]
+  
+  ## Alternatives Considered
+  [What other implementation approaches were evaluated]
+  
+  ## Consequences
+  ### Positive
+  [Benefits of this implementation decision]
+  
+  ### Negative
+  [Trade-offs and limitations]
+  
+  ## Implementation Notes
+  [Specific guidance for this implementation decision]
+  
+  ## Related Items
+  [Links to ADRs, requirements, constraints, features, risks]
+  ```
+
 ### When Creating/Updating These Records
-1. **New TC/Debt/ADR**: Create individual file with proper naming convention
-2. **Update Overview**: Update the main `.md` file with summary entry and link
-3. **Cross-References**: Update related documentation (ADRs, TCs, requirements, features, etc.)
-4. **Numbering**: Assign next sequential number, never reuse numbers
-5. **Status Tracking**: Keep status up-to-date in both individual file and overview
+1. **New TC/Debt/ADR/IDR**: Create individual file with proper naming convention
+2. **Location Check**: 
+   - ADRs go in `01_vision/03_architecture/09_architecture_decisions/`
+   - IDRs go in `03_documentation/01_architecture/09_architecture_decisions/`
+3. **Deviation and Risk Documentation (IDRs only)**:
+   - If IDR deviates from vision ADRs, clearly document the deviation
+   - For ANY deviation, create a risk record in `11_risks_and_technical_debt/`
+   - Link the risk record in the IDR
+   - Risk must assess impact of the deviation
+4. **Update Overview**: Update the main `.md` file with summary entry and link
+5. **Cross-References**: Update related documentation (ADRs, IDRs, TCs, requirements, features, risks)
+6. **Numbering**: Assign next sequential number within category (ADR or IDR), never reuse numbers
+7. **Status Tracking**: Keep status up-to-date in both individual file and overview
 
 ## Limitations
 - Does NOT implement code or technical solutions (only documents and reviews architecture)
