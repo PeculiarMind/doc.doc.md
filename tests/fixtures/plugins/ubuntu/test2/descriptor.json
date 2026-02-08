@@ -1,0 +1,6 @@
+{
+  "name": "test-plugin-duplicate",
+  "description": "This plugin exists in both ubuntu and all directories (ubuntu should win)",
+  "active": true,
+  "version": "2.0.0"
+}

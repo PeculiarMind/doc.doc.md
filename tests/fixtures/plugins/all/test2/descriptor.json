@@ -1,0 +1,6 @@
+{
+  "name": "test-plugin-duplicate",
+  "description": "This should be ignored since ubuntu version takes precedence",
+  "active": false,
+  "version": "1.0.0"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "test-plugin-all",
+  "description": "A test plugin available for all platforms",
+  "active": true,
+  "version": "1.0.0"
+}
