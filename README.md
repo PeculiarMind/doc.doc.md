@@ -8,14 +8,15 @@ A lightweight, scriptable toolkit that orchestrates existing CLI tools to extrac
 
 - ✅ Agent-driven development workflow established ([AGENTS.md](AGENTS.md))
 - ✅ Vision and architecture documented ([01_vision/](01_vision/))
-- ✅ 18 requirements accepted and ready for implementation
+- ✅ 30 requirements accepted and ready for implementation
+- ✅ Security documentation and threat modeling established ([01_vision/04_security/](01_vision/04_security/))
 - ✅ Basic script structure implemented (Feature 0001 - [Done](02_agile_board/06_done/))
 - ✅ Comprehensive test suite established ([tests/](tests/))
 - ✅ Test documentation standards implemented
 - ✅ License compliance workflow integrated
-- ✅ Plugin listing functionality implemented (Feature 0003)
+- ✅ Plugin listing functionality implemented (Feature 0003 - [Done](02_agile_board/06_done/))
 - 🚧 Core functionality implementation in progress
-- 🚧 Full plugin system development in progress
+- 🚧 Enhanced logging and development containers in backlog
 
 ## Overview
 
@@ -55,7 +56,7 @@ doc.doc.md automates file analysis and documentation generation by:
 - 📋 **Tool Verification**: Check dependencies and prompt for installation
 - 📋 **Report Generation**: Per-file Markdown reports with customizable templates
 
-See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap and [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications.
+See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap, [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications (30 requirements), and [security documentation](01_vision/04_security/) for threat modeling and security controls.
 
 ## Project Structure
 
@@ -66,25 +67,28 @@ doc.doc.md/
 │   ├── 02_requirements/                # Requirements lifecycle management
 │   │   ├── 01_funnel/                  # New requirements under consideration
 │   │   ├── 02_analyze/                 # Requirements being analyzed
-│   │   ├── 03_accepted/                # ✅ 18 approved requirements ready for implementation
+│   │   ├── 03_accepted/                # ✅ 30 approved requirements ready for implementation
 │   │   ├── 04_obsolete/                # Archived requirements
 │   │   └── 05_rejected/                # Rejected requirements with rationale
-│   └── 03_architecture/                # Arc42 architecture vision
-│       ├── 01_introduction_and_goals/  
-│       ├── 02_architecture_constraints/
-│       ├── 05_building_block_view/     # Component design
-│       ├── 06_runtime_view/            # Execution flows
-│       ├── 08_concepts/                # Plugin, workspace, CLI concepts
-│       ├── 09_architecture_decisions/  # Design decisions
-│       └── 10_quality_requirements/    # Quality goals and scenarios
+│   ├── 03_architecture/                # Arc42 architecture vision
+│   │   ├── 01_introduction_and_goals/  
+│   │   ├── 02_architecture_constraints/
+│   │   ├── 05_building_block_view/     # Component design
+│   │   ├── 06_runtime_view/            # Execution flows
+│   │   ├── 08_concepts/                # Plugin, workspace, CLI concepts
+│   │   ├── 09_architecture_decisions/  # Design decisions
+│   │   └── 10_quality_requirements/    # Quality goals and scenarios
+│   └── 04_security/                    # Security documentation
+│       ├── 01_introduction_and_risk_overview/  # Security overview
+│       └── 02_scopes/                  # Security scopes (STRIDE/DREAD threat modeling)
 │
 ├── 02_agile_board/                     # Kanban workflow tracking
 │   ├── 01_funnel/                      # New work items
 │   ├── 02_analyze/                     # Work under analysis
 │   ├── 03_ready/                       # Ready for development
-│   ├── 04_backlog/                     # Prioritized backlog
+│   ├── 04_backlog/                     # 📋 3 features ready (OCRmyPDF plugin, enhanced logging, dev containers)
 │   ├── 05_implementing/                # In active development
-│   └── 06_done/                        # ✅ Completed features
+│   └── 06_done/                        # ✅ 2 features completed
 │
 ├── 03_documentation/                   # Implementation documentation
 │   ├── 01_architecture/                # Actual implemented architecture
@@ -290,6 +294,7 @@ The project employs six specialized agents that coordinate to implement features
 | **[License Governance Agent](.github/agents/license-governance.agent.md)** | License compliance | Audits dependencies, verifies GPL-3.0 compatibility, ensures attribution |
 | **[Requirements Engineer](.github/agents/requirements-engineer.agent.md)** | Requirements management | Extracts requirements from vision, manages lifecycle, maintains traceability |
 | **[README Maintainer](.github/agents/readme-maintainer.agent.md)** | Documentation maintenance | Keeps README current, analyzes project changes, ensures documentation accuracy |
+| **[Security Review Agent](.github/agents/security-review.agent.md)** | Security validation | Reviews concepts, tests, implementations for vulnerabilities; maintains security documentation |
 
 See [AGENTS.md](AGENTS.md) for complete agent documentation and usage guidelines.
 
@@ -299,7 +304,7 @@ See [AGENTS.md](AGENTS.md) for complete agent documentation and usage guidelines
 - Requirements Engineer extracts requirements from [project vision](01_vision/01_project_vision/01_vision.md)
 - Requirements flow through lifecycle: `funnel` → `analyze` → `accepted`
 - Accepted requirements documented in [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/)
-- **Status**: ✅ 18 requirements accepted and ready
+- **Status**: ✅ 30 requirements accepted and ready
 
 #### 2. **Feature Implementation Phase**
 The Developer Agent manages a comprehensive workflow:
@@ -320,12 +325,16 @@ The Developer Agent manages a comprehensive workflow:
    ├─ Tester executes complete test suite
    ├─ Tester creates test report (testreport_<item>_<date>.md)
    └─ Tester confirms tests pass or reports failures
-7. Request license compliance verification
+7. Request security review
+   ├─ Security Review Agent analyzes implementation
+   ├─ Security Agent updates security documentation if needed
+   └─ Security Agent confirms compliance or identifies vulnerabilities
+8. Request license compliance verification
    ├─ License Governance Agent reviews changes
    ├─ Verifies GPL-3.0 compatibility
    └─ Confirms compliance or identifies issues
-8. Move item to done (02_agile_board/06_done/)
-9. Create pull request with all verification confirmations
+9. Move item to done (02_agile_board/06_done/)
+10. Create pull request with all verification confirmations
 ```
 
 #### 3. **Quality Gates**
@@ -333,6 +342,8 @@ All features must pass these gates before completion:
 - ✅ All tests pass (unit, integration, system)
 - ✅ Architecture compliance verified
 - ✅ Architecture documentation updated
+- ✅ Security review completed
+- ✅ Security documentation updated (if applicable)
 - ✅ License compliance verified
 - ✅ Code follows conventions
 - ✅ No merge conflicts
@@ -356,7 +367,7 @@ All features must pass these gates before completion:
 
 #### Current Board Status
 - ✅ **Done**: Feature 0001 (Basic Script Structure), Feature 0003 (Plugin Listing)
-- 📋 **In Funnel**: Feature 0002 (OCRmyPDF Plugin)
+- 📋 **In Backlog**: Feature 0002 (OCRmyPDF Plugin), Feature 0004 (Enhanced Logging Format), Feature 0005 (Development Containers)
 
 ### Testing Strategy
 
@@ -399,6 +410,12 @@ The project follows the **[arc42](https://arc42.org/)** architecture documentati
 - Quality requirements and constraints
 - Plugin concept and data-driven execution
 - Solution strategies
+
+**Security Documentation** ([01_vision/04_security/](01_vision/04_security/)):
+- Security scopes and boundaries
+- Threat modeling (STRIDE/DREAD analysis)
+- CIA classifications and risk assessments
+- Security controls and mitigations
 
 **Implementation Documentation** ([03_documentation/01_architecture/](03_documentation/01_architecture/)):
 - Actual implemented components
@@ -597,8 +614,10 @@ For questions about licensing, please open a GitHub Issue.
 ### Phase 1: Foundation (Current) - Q1 2026
 - [x] ✅ Project vision and architecture documented
 - [x] ✅ Agent system established and operational
-- [x] ✅ Requirements extracted and accepted (18 requirements)
+- [x] ✅ Requirements extracted and accepted (30 requirements)
+- [x] ✅ Security documentation and threat modeling established
 - [x] ✅ Basic script structure implemented (Feature 0001)
+- [x] ✅ Plugin listing functionality implemented (Feature 0003)
 - [x] ✅ Test infrastructure established
 - [x] ✅ License compliance workflow integrated
 - [ ] 🚧 Core directory scanning functionality
@@ -620,6 +639,8 @@ For questions about licensing, please open a GitHub Issue.
   - [ ] 📋 Plugin enable/disable commands
   - [ ] 📋 Plugin info command
 - [ ] 📋 Example plugins (OCRmyPDF, etc.)
+- [ ] 📋 Enhanced logging format with structured output
+- [ ] 📋 Development containers for cross-platform testing
 
 ### Phase 4: Enhancement - Q4 2026
 - [ ] 📋 Advanced content extraction
@@ -644,8 +665,9 @@ See [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed
 | Documentation | Location | Purpose |
 |--------------|----------|---------|
 | **Vision** | [01_vision/01_project_vision/](01_vision/01_project_vision/) | Project goals and purpose |
-| **Requirements** | [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/) | Detailed feature specifications |
+| **Requirements** | [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/) | Detailed feature specifications (30 requirements) |
 | **Architecture (Vision)** | [01_vision/03_architecture/](01_vision/03_architecture/) | Planned architecture and design |
+| **Security** | [01_vision/04_security/](01_vision/04_security/) | Security scopes, threat modeling, risk assessments |
 | **Architecture (Implementation)** | [03_documentation/01_architecture/](03_documentation/01_architecture/) | Actual implemented architecture |
 | **Test Plans** | [03_documentation/02_tests/](03_documentation/02_tests/) | Test strategy and test cases |
 | **Test Reports** | [03_documentation/02_tests/](03_documentation/02_tests/) | Test execution results |
@@ -723,7 +745,7 @@ This project builds upon and is inspired by excellent work from the open-source 
 
 ---
 
-**Last Updated**: February 7, 2026  
+**Last Updated**: February 8, 2026  
 **README Maintained By**: README Maintainer Agent ([.github/agents/readme-maintainer.agent.md](.github/agents/readme-maintainer.agent.md))
 
 For the latest updates, see the [commit history](https://github.com/PeculiarMind/doc.doc.md/commits) or check the [agile board](02_agile_board/) for current work items.
