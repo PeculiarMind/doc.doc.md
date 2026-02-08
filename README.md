@@ -210,12 +210,13 @@ For an instant, consistent development environment, use our pre-configured **dev
 - SSH agent forwarding configured
 - SHA256-pinned base images
 - No embedded secrets (req_0027-req_0031 compliant)
+- VS Code extensions: Only from trusted publishers (Microsoft, Canonical, Red Hat, GitHub)
 
 **Developer Experience**:
 - ✅ Environment consistency: 100% (vs ~60% on host)
 - ✅ Onboarding time: < 10 minutes (vs 2+ hours)
 - ✅ Cross-platform testing: Trivial (vs difficult)
-- ✅ VS Code extensions pre-configured
+- ✅ No pre-installed extensions (install your preferred tools manually)
 - ✅ Shell history persistence
 
 #### Platform Selection

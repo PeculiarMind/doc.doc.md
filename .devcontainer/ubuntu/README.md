@@ -123,6 +123,22 @@ sudo apt-get update
 sudo apt-get install <package-name>
 ```
 
+### VS Code Extensions
+**Security Policy**: This devcontainer does not pre-install VS Code extensions to maintain security by only using trusted publishers (Microsoft, Canonical, Red Hat, GitHub).
+
+You can manually install extensions as needed:
+```bash
+# Recommended extensions for shell development:
+# - ShellCheck (timonwong.shellcheck) - for bash linting
+# - shell-format (foxundermoon.shell-format) - for formatting
+# - Bash IDE (mads-hartmann.bash-ide-vscode) - for IDE features
+
+# Install via VS Code Extensions view or command:
+code --install-extension <extension-id>
+```
+
+**Note**: shellcheck CLI tool is pre-installed in the container and can be used directly from the terminal without requiring a VS Code extension.
+
 ### Rebuilding Container
 If you modify the Dockerfile:
 ```bash

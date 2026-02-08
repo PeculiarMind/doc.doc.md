@@ -27,17 +27,13 @@
   },
   
   "// VS Code extensions for development": "",
+  "// Security: Only extensions from trusted publishers (Microsoft, Canonical, Red Hat, GitHub)": "",
+  "// Developers can manually install additional extensions as needed": "",
   "customizations": {
     "vscode": {
-      "extensions": [
-        "timonwong.shellcheck",
-        "foxundermoon.shell-format",
-        "mads-hartmann.bash-ide-vscode"
-      ],
+      "extensions": [],
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "shellcheck.enable": true,
-        "shellformat.flag": "-i 2 -ci"
+        "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
   },
