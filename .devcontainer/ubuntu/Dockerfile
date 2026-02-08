@@ -2,7 +2,7 @@
 # Implements security requirements: req_0027, req_0028, req_0029, req_0030, req_0031
 
 # req_0028: Base Image Verification - Use Docker Official Image with SHA256 pin
-FROM ubuntu:22.04@sha256:0e5e4a57c2499249aafc3b40fcd541e9a456aab7296681a3994d631587203f97
+FROM ubuntu:22.04@sha256:09506232a8004baa32c47d68f1e5c307d648fdd59f5e7eaa42aaf87914100db3
 
 # Metadata
 LABEL maintainer="doc.doc.md contributors"
