@@ -1,0 +1,6 @@
+{
+  "name": "test-plugin-ubuntu",
+  "description": "A test plugin specific to Ubuntu platform",
+  "active": false,
+  "version": "1.0.0"
+}

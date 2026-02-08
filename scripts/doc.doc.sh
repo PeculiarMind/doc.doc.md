@@ -69,7 +69,7 @@ Options:
   -m <format>             Output format: markdown, json, html (future)
   -t <types>              Filter by document types (future)
   -w <workspace>          Specify workspace directory (future)
-  -p <subcommand>         Plugin operations: list, info, enable, disable (future)
+  -p <subcommand>         Plugin operations: list (info, enable, disable - future)
   -f                      Enable fullscan mode (future)
 
 Exit Codes:
@@ -85,7 +85,7 @@ Examples:
   ${SCRIPT_NAME} --version         Show version information
   ${SCRIPT_NAME} -v                Run with verbose logging (future)
   ${SCRIPT_NAME} -d ./docs         Analyze docs directory (future)
-  ${SCRIPT_NAME} -p list           List available plugins (future)
+  ${SCRIPT_NAME} -p list           List available plugins
 
 For more information, see the project documentation.
 EOF
@@ -143,6 +143,231 @@ error_exit() {
   
   log "ERROR" "${message}"
   exit "${exit_code}"
+}
+
+# ==============================================================================
+# Plugin Management Functions
+# ==============================================================================
+
+# Parse plugin descriptor.json file and extract metadata
+# Arguments:
+#   $1 - Path to descriptor.json file
+# Returns:
+#   Echoes a pipe-delimited string: "name|description|active"
+#   Returns empty string on error
+parse_plugin_descriptor() {
+  local descriptor_path="$1"
+  
+  if [[ ! -f "${descriptor_path}" ]]; then
+    log "WARN" "Descriptor file not found: ${descriptor_path}"
+    return 1
+  fi
+  
+  if [[ ! -r "${descriptor_path}" ]]; then
+    log "WARN" "Cannot read descriptor file: ${descriptor_path}"
+    return 1
+  fi
+  
+  log "DEBUG" "Parsing descriptor: ${descriptor_path}"
+  
+  # Use jq to parse JSON (preferred method)
+  if command -v jq >/dev/null 2>&1; then
+    local name description active
+    
+    # Extract fields using jq
+    name=$(jq -r '.name // empty' "${descriptor_path}" 2>/dev/null)
+    description=$(jq -r '.description // empty' "${descriptor_path}" 2>/dev/null)
+    active=$(jq -r '.active // false' "${descriptor_path}" 2>/dev/null)
+    
+    # Validate required fields
+    if [[ -z "${name}" ]]; then
+      log "WARN" "Plugin descriptor missing 'name' field: ${descriptor_path}"
+      return 1
+    fi
+    
+    if [[ -z "${description}" ]]; then
+      log "WARN" "Plugin descriptor missing 'description' field: ${descriptor_path}"
+      return 1
+    fi
+    
+    # Ensure active is a boolean
+    if [[ "${active}" != "true" ]] && [[ "${active}" != "false" ]]; then
+      log "DEBUG" "Invalid 'active' value, defaulting to false: ${descriptor_path}"
+      active="false"
+    fi
+    
+    echo "${name}|${description}|${active}"
+    return 0
+  else
+    # Fallback to python if jq not available
+    if command -v python3 >/dev/null 2>&1; then
+      local result
+      result=$(python3 -c "
+import json
+import sys
+try:
+    with open('${descriptor_path}', 'r') as f:
+        data = json.load(f)
+    name = data.get('name', '')
+    description = data.get('description', '')
+    active = str(data.get('active', False)).lower()
+    if not name or not description:
+        sys.exit(1)
+    print(f'{name}|{description}|{active}')
+except Exception as e:
+    sys.exit(1)
+" 2>&1)
+      
+      if [[ $? -eq 0 ]] && [[ -n "${result}" ]]; then
+        echo "${result}"
+        return 0
+      else
+        log "WARN" "Failed to parse descriptor with python: ${descriptor_path}"
+        return 1
+      fi
+    else
+      log "ERROR" "No JSON parser available (jq or python3 required)"
+      error_exit "Cannot parse plugin descriptors without jq or python3" "${EXIT_PLUGIN_ERROR}"
+    fi
+  fi
+}
+
+# Discover all plugins in the plugins directory
+# Returns:
+#   Echoes newline-separated list of pipe-delimited plugin data: "name|description|active"
+discover_plugins() {
+  local plugins_dir="${SCRIPT_DIR}/plugins"
+  
+  log "DEBUG" "Searching for plugins in: ${plugins_dir}"
+  
+  # Check if plugins directory exists
+  if [[ ! -d "${plugins_dir}" ]]; then
+    error_exit "Plugins directory not found: ${plugins_dir}" "${EXIT_FILE_ERROR}"
+  fi
+  
+  # Platform-specific directory (e.g., plugins/ubuntu/)
+  local platform_dir="${plugins_dir}/${PLATFORM}"
+  
+  # Generic/cross-platform directory (plugins/all/)
+  local all_dir="${plugins_dir}/all"
+  
+  # Array to store discovered plugin data
+  local -a plugin_list=()
+  
+  # Track plugin names to handle duplicates (platform-specific takes precedence)
+  declare -A seen_plugins
+  
+  # Discover platform-specific plugins first (higher priority)
+  if [[ -d "${platform_dir}" ]]; then
+    log "DEBUG" "Searching platform-specific plugins in: ${platform_dir}"
+    
+    while IFS= read -r -d '' descriptor_file; do
+      log "DEBUG" "Found descriptor: ${descriptor_file}"
+      
+      local plugin_data
+      if plugin_data=$(parse_plugin_descriptor "${descriptor_file}"); then
+        local plugin_name="${plugin_data%%|*}"
+        
+        if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
+          plugin_list+=("${plugin_data}")
+          seen_plugins[${plugin_name}]=1
+          log "DEBUG" "Added platform plugin: ${plugin_name}"
+        fi
+      fi
+    done < <(find "${platform_dir}" -name "descriptor.json" -type f -print0 2>/dev/null)
+  fi
+  
+  # Discover cross-platform plugins (lower priority)
+  if [[ -d "${all_dir}" ]]; then
+    log "DEBUG" "Searching cross-platform plugins in: ${all_dir}"
+    
+    while IFS= read -r -d '' descriptor_file; do
+      log "DEBUG" "Found descriptor: ${descriptor_file}"
+      
+      local plugin_data
+      if plugin_data=$(parse_plugin_descriptor "${descriptor_file}"); then
+        local plugin_name="${plugin_data%%|*}"
+        
+        # Only add if not already seen (platform-specific takes precedence)
+        if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
+          plugin_list+=("${plugin_data}")
+          seen_plugins[${plugin_name}]=1
+          log "DEBUG" "Added cross-platform plugin: ${plugin_name}"
+        else
+          log "DEBUG" "Skipped duplicate plugin (platform version exists): ${plugin_name}"
+        fi
+      fi
+    done < <(find "${all_dir}" -name "descriptor.json" -type f -print0 2>/dev/null)
+  fi
+  
+  # Return plugin list
+  if [[ ${#plugin_list[@]} -eq 0 ]]; then
+    log "DEBUG" "No valid plugins found"
+    return 0
+  fi
+  
+  printf "%s\n" "${plugin_list[@]}"
+}
+
+# Display formatted plugin list
+# Arguments:
+#   $@ - Array of plugin data strings (name|description|active)
+display_plugin_list() {
+  local -a plugins=("$@")
+  
+  if [[ ${#plugins[@]} -eq 0 ]]; then
+    echo "No plugins found."
+    return
+  fi
+  
+  echo "Available Plugins:"
+  echo "===================================="
+  echo
+  
+  # Sort plugins by name
+  local -a sorted_plugins
+  IFS=$'\n' sorted_plugins=($(sort <<<"${plugins[*]}"))
+  unset IFS
+  
+  # Display each plugin
+  for plugin_data in "${sorted_plugins[@]}"; do
+    # Parse pipe-delimited data
+    local name="${plugin_data%%|*}"
+    local rest="${plugin_data#*|}"
+    local description="${rest%%|*}"
+    local active="${rest##*|}"
+    
+    # Truncate description if too long
+    if [[ ${#description} -gt 80 ]]; then
+      description="${description:0:77}..."
+    fi
+    
+    # Display with status indicator
+    if [[ "${active}" == "true" ]]; then
+      printf "[ACTIVE]   %s\n" "${name}"
+    else
+      printf "[INACTIVE] %s\n" "${name}"
+    fi
+    printf "           %s\n\n" "${description}"
+  done
+}
+
+# List all available plugins
+list_plugins() {
+  log "INFO" "Listing available plugins"
+  
+  # Discover plugins
+  local plugin_data
+  plugin_data=$(discover_plugins)
+  
+  # Convert to array
+  local -a plugins=()
+  while IFS= read -r line; do
+    [[ -n "${line}" ]] && plugins+=("${line}")
+  done <<< "${plugin_data}"
+  
+  # Display plugin list
+  display_plugin_list "${plugins[@]}"
 }
 
 # ==============================================================================
@@ -211,15 +436,32 @@ parse_arguments() {
         log "INFO" "Workspace argument: $2 (not yet implemented)"
         shift 2
         ;;
-      -p)
-        # Future: plugin operations
+      -p|--plugin)
+        # Plugin operations
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
           echo "Error: -p requires a subcommand argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "Plugin subcommand: $2 (not yet implemented)"
+        
+        local subcommand="$2"
         shift 2
+        
+        case "${subcommand}" in
+          list)
+            list_plugins
+            exit "${EXIT_SUCCESS}"
+            ;;
+          info|enable|disable)
+            echo "Error: Plugin subcommand '${subcommand}' not yet implemented" >&2
+            exit "${EXIT_INVALID_ARGS}"
+            ;;
+          *)
+            echo "Error: Unknown plugin subcommand: ${subcommand}" >&2
+            echo "Available subcommands: list, info, enable, disable" >&2
+            exit "${EXIT_INVALID_ARGS}"
+            ;;
+        esac
         ;;
       -f)
         # Future: fullscan mode
