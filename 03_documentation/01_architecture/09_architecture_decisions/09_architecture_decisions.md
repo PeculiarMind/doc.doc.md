@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADRs)
 
-**Feature**: Feature 0001 - Basic Script Structure  
+**Features**: Feature 0001 (Basic Script Structure), Feature 0003 (Plugin Listing)  
 **Implementation Date**: 2026-02-06  
 **Status**: Implemented  
 **Vision Reference**: [Architecture Decisions](../../../01_vision/03_architecture/09_architecture_decisions/09_architecture_decisions.md)
@@ -8,6 +8,10 @@
 ## Overview
 
 This directory contains Architecture Decision Records (ADRs) documenting key architectural decisions made during the implementation of doc.doc.sh. Each ADR captures a single decision with its context, rationale, alternatives considered, and impact.
+
+**Total ADRs**: 13 (ADR-0003 through ADR-0015)
+- **Feature 0001**: ADR-0003 through ADR-0009 (7 decisions)
+- **Feature 0003**: ADR-0010 through ADR-0015 (6 decisions)
 
 ## ADR Index
 
@@ -39,6 +43,36 @@ This directory contains Architecture Decision Records (ADRs) documenting key arc
 **File**: [adr_0009_entry_point_guard.md](./adr_0009_entry_point_guard.md)  
 **Decision**: Use entry point guard pattern to prevent `main()` execution when script is sourced, enabling unit testing of individual functions.
 
+---
+
+## Feature 0003: Plugin Listing - Architecture Decisions
+
+### ADR-0010: Pipe-Delimited Internal Data Format for Plugin Data
+**File**: [adr_0010_pipe_delimited_plugin_data.md](./adr_0010_pipe_delimited_plugin_data.md)  
+**Decision**: Use pipe-delimited strings (`"name|description|active"`) for internal plugin data exchange between functions for Bash-native efficiency.
+
+### ADR-0011: Dual JSON Parser Strategy (jq + python3 Fallback)
+**File**: [adr_0011_dual_json_parser.md](./adr_0011_dual_json_parser.md)  
+**Decision**: Implement dual JSON parser strategy—jq as primary parser with python3 fallback—to ensure broad compatibility while maintaining optimal performance.
+
+### ADR-0012: Platform-Specific Plugin Precedence
+**File**: [adr_0012_platform_plugin_precedence.md](./adr_0012_platform_plugin_precedence.md)  
+**Decision**: Platform-specific plugins take precedence over cross-platform plugins when duplicate names exist, enabling platform optimizations and customization.
+
+### ADR-0013: Description Truncation at 80 Characters
+**File**: [adr_0013_description_truncation.md](./adr_0013_description_truncation.md)  
+**Decision**: Truncate plugin descriptions exceeding 80 characters to maintain terminal compatibility and visual consistency across standard terminals.
+
+### ADR-0014: Continue on Malformed Plugin Descriptors
+**File**: [adr_0014_continue_on_malformed_descriptors.md](./adr_0014_continue_on_malformed_descriptors.md)  
+**Decision**: Log warnings and skip malformed plugins during discovery, continuing to process remaining valid plugins for robust error handling.
+
+### ADR-0015: Alphabetical Sorting of Plugin List
+**File**: [adr_0015_alphabetical_plugin_sorting.md](./adr_0015_alphabetical_plugin_sorting.md)  
+**Decision**: Sort plugins alphabetically by name before displaying to provide predictable, scannable output for users.
+
+---
+
 ## ADR Format
 
 Each ADR follows this structure:
@@ -61,12 +95,13 @@ Each ADR follows this structure:
 
 ## Summary
 
-All seven architecture decisions align with vision principles:
-- **Unix Philosophy**: Clean interface, composability (AD-0008)
-- **Lightweight**: Minimal dependencies (AD-0003)
-- **Quality**: Error handling, strictness (AD-0004, AD-0006)
-- **Extensibility**: Modular architecture (AD-0007)
-- **User-Focused**: Discoverability, guidance (AD-0005)
+All thirteen architecture decisions align with vision principles:
+- **Unix Philosophy**: Clean interface, composability (ADR-0008)
+- **Lightweight**: Minimal dependencies, efficient data structures (ADR-0003, ADR-0010)
+- **Quality**: Error handling, strictness, robustness (ADR-0004, ADR-0006, ADR-0014)
+- **Extensibility**: Modular architecture, plugin system (ADR-0007, ADR-0012)
+- **User-Focused**: Discoverability, guidance, clear output (ADR-0005, ADR-0013, ADR-0015)
+- **Portability**: Platform detection, dual parser strategy (ADR-0003, ADR-0011)
 
 No decisions conflict with architecture vision. All establish patterns consistent with future feature development.
 
