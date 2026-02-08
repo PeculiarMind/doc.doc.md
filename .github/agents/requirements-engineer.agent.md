@@ -129,3 +129,27 @@ Requirements in the following states must be treated as read-only:
 
 #### Prohibited Modifications
 - **Content Changes**: The core content of the requirement must not be altered in any way.
+
+## Documentation Standards
+
+All agents must adhere to the following documentation standards when creating or modifying markdown documents:
+
+### Table of Contents (TOC) Requirement
+- **Every markdown document** must include a Table of Contents section near the beginning (after title and overview/description)
+- The TOC must list all major sections with anchor links
+- When modifying a document, **update the TOC** to reflect structural changes
+- For short documents (<200 lines), TOC may be omitted if all sections are visible without scrolling
+
+### Conciseness and Precision
+- Write **precise and concise** content - every sentence must add value
+- **Eliminate redundancy**: Do not repeat information already stated
+- **Remove fluff**: Avoid unnecessary introductions, conclusions, or filler phrases
+- **Be direct**: State facts and requirements clearly without elaboration unless complexity demands it
+- **Quality over quantity**: Shorter, clear documents are preferred over verbose ones
+
+### Document Structure
+- Use clear hierarchical headings (H1, H2, H3)
+- Include only sections that contain meaningful content
+- Break long sections into logical subsections
+- Use lists, tables, and code blocks for readability
+- Maintain consistent formatting throughout
