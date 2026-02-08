@@ -1,8 +1,7 @@
 # Architecture Decision Records (ADRs)
 
-**Features**: Feature 0001 (Basic Script Structure), Feature 0003 (Plugin Listing)  
-**Implementation Date**: 2026-02-06  
-**Status**: Implemented  
+**Status**: Active  
+**Last Updated**: 2026-02-08  
 **Vision Reference**: [Architecture Decisions](../../../01_vision/03_architecture/09_architecture_decisions/09_architecture_decisions.md)
 
 ## Overview
@@ -10,8 +9,6 @@
 This directory contains Architecture Decision Records (ADRs) documenting key architectural decisions made during the implementation of doc.doc.sh. Each ADR captures a single decision with its context, rationale, alternatives considered, and impact.
 
 **Total ADRs**: 13 (ADR-0003 through ADR-0015)
-- **Feature 0001**: ADR-0003 through ADR-0009 (7 decisions)
-- **Feature 0003**: ADR-0010 through ADR-0015 (6 decisions)
 
 ## ADR Index
 
@@ -43,10 +40,6 @@ This directory contains Architecture Decision Records (ADRs) documenting key arc
 **File**: [adr_0009_entry_point_guard.md](./adr_0009_entry_point_guard.md)  
 **Decision**: Use entry point guard pattern to prevent `main()` execution when script is sourced, enabling unit testing of individual functions.
 
----
-
-## Feature 0003: Plugin Listing - Architecture Decisions
-
 ### ADR-0010: Pipe-Delimited Internal Data Format for Plugin Data
 **File**: [adr_0010_pipe_delimited_plugin_data.md](./adr_0010_pipe_delimited_plugin_data.md)  
 **Decision**: Use pipe-delimited strings (`"name|description|active"`) for internal plugin data exchange between functions for Bash-native efficiency.
@@ -71,8 +64,6 @@ This directory contains Architecture Decision Records (ADRs) documenting key arc
 **File**: [adr_0015_alphabetical_plugin_sorting.md](./adr_0015_alphabetical_plugin_sorting.md)  
 **Decision**: Sort plugins alphabetically by name before displaying to provide predictable, scannable output for users.
 
----
-
 ## ADR Format
 
 Each ADR follows this structure:
@@ -95,13 +86,13 @@ Each ADR follows this structure:
 
 ## Summary
 
-All thirteen architecture decisions align with vision principles:
-- **Unix Philosophy**: Clean interface, composability (ADR-0008)
-- **Lightweight**: Minimal dependencies, efficient data structures (ADR-0003, ADR-0010)
-- **Quality**: Error handling, strictness, robustness (ADR-0004, ADR-0006, ADR-0014)
-- **Extensibility**: Modular architecture, plugin system (ADR-0007, ADR-0012)
-- **User-Focused**: Discoverability, guidance, clear output (ADR-0005, ADR-0013, ADR-0015)
-- **Portability**: Platform detection, dual parser strategy (ADR-0003, ADR-0011)
+All architecture decisions align with vision principles:
+- **Unix Philosophy**: Clean interface, composability, scriptability
+- **Lightweight**: Minimal dependencies, efficient data structures
+- **Quality**: Error handling, strictness, robustness
+- **Extensibility**: Modular architecture, plugin system
+- **User-Focused**: Discoverability, guidance, clear output
+- **Portability**: Platform detection, dual parser strategy
 
 No decisions conflict with architecture vision. All establish patterns consistent with future feature development.
 
