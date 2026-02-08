@@ -71,6 +71,20 @@ This document catalogs all specialized agents available in this repository. Agen
   - Creating unit, integration, and system tests
   - Handing back to Developer Agent after tests complete
 
+### [Security Review Agent](.github/agents/security-review.agent.md)
+- **Location**: `.github/agents/security-review.agent.md`
+- **Purpose**: Reviews concepts, test plans, tests, and implementations for security vulnerabilities and maintains the comprehensive security concept in `01_vision/04_security/`
+- **Expertise**: Security vulnerability identification, OWASP Top 10, CWE patterns, STRIDE+DREAD threat modeling, Bash/shell security, cryptography, authentication/authorization
+- **Use When**:
+  - Reviewing architecture concepts for security implications
+  - Assessing test plans for security test coverage
+  - Reviewing security-focused test implementations
+  - Analyzing implementation code for vulnerabilities
+  - Conducting threat modeling of features
+  - Verifying compliance with security requirements
+  - Assessing handling of sensitive data, authentication, input validation
+  - Maintaining security concept documentation in `01_vision/04_security/`
+
 ---
 
 ## How to Use Agents
