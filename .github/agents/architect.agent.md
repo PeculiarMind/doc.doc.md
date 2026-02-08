@@ -47,6 +47,92 @@ The Architect Agent assists in creating and maintaining architecture documentati
 - Propose updates to architecture documentation based on changes in project scope or requirements
 - Provide templates and examples for architecture sections
 
+## Documentation Structure Conventions
+
+### Technical Constraints (TC) Records
+- **Individual Files**: Each technical constraint must be documented in a separate file
+- **Naming Pattern**: `TC_<FOUR_DIGIT_NUMBER>_<title>.md`
+  - Example: `TC_0001_bash_runtime_environment.md`
+  - Example: `TC_0002_no_network_access.md`
+- **Location**: `02_architecture_constraints/` directory
+- **Overview File**: `02_architecture_constraints.md` maintains only a summary/index of all TC records
+  - Lists all constraints with links to individual files
+  - Provides compliance status overview
+  - Does NOT contain full constraint details
+- **TC File Structure**:
+  ```markdown
+  # TC-<NUMBER>: <Title>
+  
+  **ID**: TC-<FOUR_DIGIT_NUMBER>
+  **Status**: Active | Deprecated
+  **Created**: <date>
+  **Last Updated**: <date>
+  
+  ## Constraint
+  [Clear statement of the constraint]
+  
+  ## Source
+  [Where this constraint originates from]
+  
+  ## Rationale
+  [Why this constraint exists]
+  
+  ## Impact
+  [How this affects architecture and design]
+  
+  ## Compliance Verification
+  [How to verify compliance with this constraint]
+  
+  ## Related Constraints
+  [Links to related TC records]
+  ```
+
+### Technical Debt Records
+- **Individual Files**: Each technical debt item must be documented in a separate file
+- **Naming Pattern**: `debt_<FOUR_DIGIT_NUMBER>_<title>.md`
+  - Example: `debt_0001_simplified_log_format.md`
+  - Example: `debt_0002_missing_path_validation.md`
+- **Location**: `11_risks_and_technical_debt/` directory
+- **Overview File**: `11_risks_and_technical_debt.md` maintains only a summary/index of all debt records
+  - Lists all debt items with status and priority
+  - Provides impact assessment overview
+  - Does NOT contain full debt details
+- **Debt File Structure**:
+  ```markdown
+  # DEBT-<NUMBER>: <Title>
+  
+  **ID**: debt-<FOUR_DIGIT_NUMBER>
+  **Status**: Open | In Progress | Resolved | Accepted
+  **Priority**: Low | Medium | High | Critical
+  **Created**: <date>
+  **Last Updated**: <date>
+  
+  ## Description
+  [What technical debt exists]
+  
+  ## Impact
+  [How this affects the system]
+  
+  ## Root Cause
+  [Why this debt was incurred]
+  
+  ## Mitigation Strategy
+  [How to address this debt]
+  
+  ## Acceptance Criteria
+  [When is this debt resolved]
+  
+  ## Related Items
+  [Links to ADRs, requirements, features]
+  ```
+
+### When Creating/Updating These Records
+1. **New TC/Debt**: Create individual file with proper naming convention
+2. **Update Overview**: Update the main `.md` file with summary entry and link
+3. **Cross-References**: Update related documentation (ADRs, features, etc.)
+4. **Numbering**: Assign next sequential number, never reuse numbers
+5. **Status Tracking**: Keep status up-to-date in both individual file and overview
+
 ## Limitations
 - Does NOT implement code or technical solutions (only documents and reviews architecture)
 - Does NOT make architectural decisions (only documents and analyzes them)
