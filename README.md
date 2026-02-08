@@ -13,8 +13,9 @@ A lightweight, scriptable toolkit that orchestrates existing CLI tools to extrac
 - ✅ Comprehensive test suite established ([tests/](tests/))
 - ✅ Test documentation standards implemented
 - ✅ License compliance workflow integrated
+- ✅ Plugin listing functionality implemented (Feature 0003)
 - 🚧 Core functionality implementation in progress
-- 🚧 Plugin system development planned
+- 🚧 Full plugin system development in progress
 
 ## Overview
 
@@ -40,12 +41,16 @@ doc.doc.md automates file analysis and documentation generation by:
 - ✅ **Verbose Logging**: Multi-level logging (INFO, WARN, ERROR, DEBUG)
 - ✅ **Modular Architecture**: Function-based design ready for feature additions
 - ✅ **Test Infrastructure**: Unit, integration, and system test suites
+- ✅ **Plugin Listing**: Display available plugins with status (`-p list` command)
 
 ### Planned Features
 - 📋 **Directory Analysis**: Recursive scanning with file discovery
 - 📋 **Metadata Extraction**: File type, ownership, timestamps, permissions
 - 📋 **Template System**: Variable substitution in Markdown templates
-- 📋 **Plugin Architecture**: Data-driven extensibility with automatic workflow ordering
+- 🚧 **Plugin Architecture**: Data-driven extensibility with automatic workflow ordering
+  - ✅ Plugin listing functionality
+  - 📋 Plugin info, enable, disable commands
+  - 📋 Plugin execution and workflow integration
 - 📋 **Workspace Management**: JSON-based state storage for incremental analysis
 - 📋 **Tool Verification**: Check dependencies and prompt for installation
 - 📋 **Report Generation**: Per-file Markdown reports with customizable templates
@@ -188,12 +193,21 @@ chmod +x scripts/doc.doc.sh
     -f
 ```
 
-#### Plugin Management (Planned)
+#### Plugin Management
 ```bash
-# List available plugins
+# List available plugins (shows ACTIVE/INACTIVE status)
 ./scripts/doc.doc.sh -p list
 
-# Show plugin information
+# Example output:
+# Available plugins:
+# 
+# Platform-specific plugins (ubuntu):
+#   example_ubuntu_plugin.plugin.sh [INACTIVE]
+# 
+# Cross-platform plugins (all):
+#   example_crossplatform_plugin.plugin.sh [ACTIVE]
+
+# Show plugin information (planned)
 ./scripts/doc.doc.sh -p info <plugin_name>
 ```
 
@@ -209,7 +223,7 @@ chmod +x scripts/doc.doc.sh
 | `-t <path>` | | Target directory for output reports | 📋 Planned |
 | `-w <path>` | | Workspace directory for metadata storage | 📋 Planned |
 | `-f` | `--fullscan` | Force full rescan (ignore workspace cache) | 📋 Planned |
-| `-p <cmd>` | `--plugin <cmd>` | Plugin management (list, info) | 📋 Planned |
+| `-p <cmd>` | `--plugin <cmd>` | Plugin management: `list` (✅), `info` (📋 planned) | 🚧 Partial |
 
 ### Workspace Directory
 
@@ -341,8 +355,8 @@ All features must pass these gates before completion:
 6. **06_done/**: Completed and verified features
 
 #### Current Board Status
-- ✅ **Done**: Feature 0001 (Basic Script Structure)
-- 📋 **In Funnel**: Feature 0002 (OCRmyPDF Plugin), Feature 0003 (Plugin Listing)
+- ✅ **Done**: Feature 0001 (Basic Script Structure), Feature 0003 (Plugin Listing)
+- 📋 **In Funnel**: Feature 0002 (OCRmyPDF Plugin)
 
 ### Testing Strategy
 
@@ -574,7 +588,7 @@ This project uses automated **License Governance** to ensure GPL-3.0 compliance:
 - All dependencies are verified for compatibility
 - Third-party attributions are maintained
 - License compliance is a required quality gate
-- Compliance reports available: [LICENSE_COMPLIANCE_REPORT.md](LICENSE_COMPLIANCE_REPORT.md)
+- Compliance status documented in feature documentation (e.g., [Feature 0003: Plugin Listing](02_agile_board/04_backlog/feature_0003_plugin_listing.md#license-compliance))
 
 For questions about licensing, please open a GitHub Issue.
 
@@ -598,10 +612,13 @@ For questions about licensing, please open a GitHub Issue.
 - [ ] 📋 Per-file Markdown reports
 
 ### Phase 3: Extensibility - Q3 2026
-- [ ] 📋 Plugin architecture implementation
-- [ ] 📋 Data-driven execution flow
-- [ ] 📋 Plugin descriptor system
-- [ ] 📋 Plugin discovery and listing
+- [ ] 🚧 Plugin architecture implementation (in progress)
+  - [x] ✅ Plugin directory structure
+  - [x] ✅ Plugin discovery and listing
+  - [ ] 📋 Plugin descriptor parsing
+  - [ ] 📋 Data-driven execution flow
+  - [ ] 📋 Plugin enable/disable commands
+  - [ ] 📋 Plugin info command
 - [ ] 📋 Example plugins (OCRmyPDF, etc.)
 
 ### Phase 4: Enhancement - Q4 2026

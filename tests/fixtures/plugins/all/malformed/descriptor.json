@@ -1,0 +1,4 @@
+{
+  "name": "malformed-plugin",
+  "description": "This JSON is malformed"
+  "active": true
