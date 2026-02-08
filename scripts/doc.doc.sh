@@ -69,7 +69,7 @@ Options:
   -m <format>             Output format: markdown, json, html (future)
   -t <types>              Filter by document types (future)
   -w <workspace>          Specify workspace directory (future)
-  -p <subcommand>         Plugin operations: list, info, enable, disable (future)
+  -p <subcommand>         Plugin operations: list (info, enable, disable - future)
   -f                      Enable fullscan mode (future)
 
 Exit Codes:
@@ -85,7 +85,7 @@ Examples:
   ${SCRIPT_NAME} --version         Show version information
   ${SCRIPT_NAME} -v                Run with verbose logging (future)
   ${SCRIPT_NAME} -d ./docs         Analyze docs directory (future)
-  ${SCRIPT_NAME} -p list           List available plugins (future)
+  ${SCRIPT_NAME} -p list           List available plugins
 
 For more information, see the project documentation.
 EOF
