@@ -126,10 +126,60 @@ The Architect Agent assists in creating and maintaining architecture documentati
   [Links to ADRs, requirements, features]
   ```
 
+### Architecture Decision Records (ADRs)
+- **Individual Files**: Each architecture decision must be documented in a separate file
+- **Naming Pattern**: `ADR_<FOUR_DIGIT_NUMBER>_<title>.md`
+  - Example: `ADR_0001_use_bash_scripting.md`
+  - Example: `ADR_0009_modular_component_based_script_architecture.md`
+- **Location**: `09_architecture_decisions/` directory
+- **Overview File**: `09_architecture_decisions.md` maintains only a summary/index of all ADRs
+  - Lists all decisions with links to individual files
+  - Provides decision status overview (Proposed, Accepted, Superseded, Deprecated)
+  - Does NOT contain full ADR details
+- **ADR File Structure**:
+  ```markdown
+  # ADR-<NUMBER>: <Title>
+  
+  **ID**: ADR-<FOUR_DIGIT_NUMBER>
+  **Status**: Proposed | Accepted | Superseded | Deprecated
+  **Created**: <date>
+  **Last Updated**: <date>
+  **Supersedes**: ADR-<NUMBER> (if applicable)
+  **Superseded By**: ADR-<NUMBER> (if applicable)
+  
+  ## Context
+  [What is the issue we're seeing that is motivating this decision or change]
+  
+  ## Decision
+  [What is the change that we're actually proposing or doing]
+  
+  ## Rationale
+  [Why this decision was made - key factors and reasoning]
+  
+  ## Alternatives Considered
+  [What other options were evaluated and why they were not chosen]
+  
+  ## Consequences
+  ### Positive
+  [Benefits and advantages of this decision]
+  
+  ### Negative
+  [Trade-offs, limitations, and technical debt incurred]
+  
+  ### Risks
+  [Potential issues and mitigation strategies]
+  
+  ## Implementation Notes
+  [Guidance for implementing this decision]
+  
+  ## Related Items
+  [Links to requirements, constraints, features, other ADRs]
+  ```
+
 ### When Creating/Updating These Records
-1. **New TC/Debt**: Create individual file with proper naming convention
+1. **New TC/Debt/ADR**: Create individual file with proper naming convention
 2. **Update Overview**: Update the main `.md` file with summary entry and link
-3. **Cross-References**: Update related documentation (ADRs, features, etc.)
+3. **Cross-References**: Update related documentation (ADRs, TCs, requirements, features, etc.)
 4. **Numbering**: Assign next sequential number, never reuse numbers
 5. **Status Tracking**: Keep status up-to-date in both individual file and overview
 
