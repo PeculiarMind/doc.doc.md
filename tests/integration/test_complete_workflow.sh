@@ -23,6 +23,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SCRIPT_PATH="$PROJECT_ROOT/scripts/doc.doc.sh"
+COMPONENTS_DIR="$PROJECT_ROOT/scripts/components"
 
 source "$SCRIPT_DIR/../helpers/test_helpers.sh"
 
@@ -61,22 +62,26 @@ test_different_working_directories() {
   cd "$PROJECT_ROOT"
 }
 
-# Test 4: Script location determined dynamically
+# Test 4: Script location determined dynamically in constants.sh component
 test_dynamic_script_location() {
-  local content
-  content=$(cat "$SCRIPT_PATH")
+  local main_content component_content
+  main_content=$(cat "$SCRIPT_PATH")
+  component_content=$(cat "$COMPONENTS_DIR/core/constants.sh")
   
-  # Script should determine its own location (SCRIPT_DIR)
-  assert_contains "$content" "SCRIPT_DIR" "Script should define SCRIPT_DIR variable"
+  # Main script should load components directory
+  assert_contains "$main_content" "COMPONENTS_DIR" "Main script should define COMPONENTS_DIR"
   
-  if echo "$content" | grep -q "dirname.*BASH_SOURCE"; then
+  # constants.sh should define SCRIPT_DIR using BASH_SOURCE
+  assert_contains "$component_content" "SCRIPT_DIR" "constants.sh should define SCRIPT_DIR variable"
+  
+  if echo "$component_content" | grep -q "dirname.*BASH_SOURCE"; then
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_PASSED=$((TESTS_PASSED + 1))
     echo -e "${GREEN}✓${NC} PASS: Script determines location dynamically"
   else
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_FAILED=$((TESTS_FAILED + 1))
-    echo -e "${RED}✗${NC} FAIL: Script should determine location using BASH_SOURCE"
+    echo -e "${RED}✗${NC} FAIL: constants.sh should determine location using BASH_SOURCE"
   fi
 }
 
@@ -88,32 +93,37 @@ test_multiple_verbose_flags() {
   assert_exit_code 0 $exit_code "Multiple verbose flags should not cause error"
 }
 
-# Test 6: Script constants are properly defined
+# Test 6: Script constants properly defined in constants.sh component
 test_constants_defined() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/constants.sh")
   
-  assert_contains "$content" "SCRIPT_NAME" "SCRIPT_NAME constant should be defined"
-  assert_contains "$content" "SCRIPT_VERSION" "SCRIPT_VERSION constant should be defined"
+  assert_contains "$content" "SCRIPT_NAME" "SCRIPT_NAME constant should be defined in constants.sh"
+  assert_contains "$content" "SCRIPT_VERSION" "SCRIPT_VERSION constant should be defined in constants.sh"
 }
 
-# Test 7: Functions are modular (not monolithic)
+# Test 7: Modular architecture with component loading
 test_modular_functions() {
-  local content
-  content=$(cat "$SCRIPT_PATH")
+  local main_content
+  main_content=$(cat "$SCRIPT_PATH")
   
-  # Should have multiple function definitions
-  local func_count
-  func_count=$(echo "$content" | grep -c "^[a-z_]*() {" || true)
+  # In modular architecture, main script should be lightweight
+  # Functions should be in component files, main script orchestrates
+  local func_count component_func_count
+  func_count=$(echo "$main_content" | grep -c "^[a-z_]*() {" || true)
   
-  if [[ $func_count -ge 5 ]]; then
+  # Count functions across all component files
+  component_func_count=$(find "$COMPONENTS_DIR" -name "*.sh" -exec grep -c "^[a-z_]*() {" {} \; | awk '{s+=$1} END {print s}')
+  
+  # Main script should have few functions (source_component, main), components have the rest
+  if [[ $func_count -ge 2 ]] && [[ $component_func_count -ge 20 ]]; then
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_PASSED=$((TESTS_PASSED + 1))
-    echo -e "${GREEN}✓${NC} PASS: Script uses modular functions (found $func_count functions)"
+    echo -e "${GREEN}\u2713${NC} PASS: Modular architecture with $func_count main functions and $component_func_count component functions"
   else
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_FAILED=$((TESTS_FAILED + 1))
-    echo -e "${RED}✗${NC} FAIL: Script should have multiple functions for modularity (found $func_count)"
+    echo -e "${RED}\u2717${NC} FAIL: Expected modular architecture (main: $func_count, components: $component_func_count)"
   fi
 }
 

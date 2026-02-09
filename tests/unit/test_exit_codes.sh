@@ -23,8 +23,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SCRIPT_PATH="$PROJECT_ROOT/scripts/doc.doc.sh"
+COMPONENTS_DIR="$PROJECT_ROOT/scripts/components"
 
 source "$SCRIPT_DIR/../helpers/test_helpers.sh"
+
+# Source constants component for modular architecture
+source "$COMPONENTS_DIR/core/constants.sh"
 
 start_test_suite "Exit Codes"
 
@@ -60,10 +64,10 @@ test_exit_invalid_args_unexpected() {
   assert_exit_code 1 $exit_code "Unexpected argument should exit with EXIT_INVALID_ARGS (1)"
 }
 
-# Test 5: Exit code constants defined in script
+# Test 5: Exit code constants defined in constants.sh component
 test_exit_code_constants_defined() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/constants.sh")
   
   assert_contains "$content" "EXIT_SUCCESS=0" "EXIT_SUCCESS should be defined as 0"
   assert_contains "$content" "EXIT_INVALID_ARGS=1" "EXIT_INVALID_ARGS should be defined as 1"
@@ -76,7 +80,7 @@ test_exit_code_constants_defined() {
 # Test 6: Exit codes are readonly constants
 test_exit_codes_readonly() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/constants.sh")
   
   # Check if exit codes are defined as readonly
   if echo "$content" | grep -q "readonly.*EXIT_SUCCESS\|EXIT_SUCCESS.*readonly"; then

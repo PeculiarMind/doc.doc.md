@@ -23,31 +23,32 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SCRIPT_PATH="$PROJECT_ROOT/scripts/doc.doc.sh"
+COMPONENTS_DIR="$PROJECT_ROOT/scripts/components"
 
 source "$SCRIPT_DIR/../helpers/test_helpers.sh"
 
 start_test_suite "Verbose Logging"
 
-# Test 1: Verbose flag sets verbose mode
+# Test 1: VERBOSE variable exists in logging.sh component
 test_verbose_flag_enables_logging() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
-  assert_contains "$content" "VERBOSE" "Script should have VERBOSE variable"
+  assert_contains "$content" "VERBOSE" "logging.sh component should have VERBOSE variable"
 }
 
-# Test 2: Log function exists
+# Test 2: Log function exists in logging.sh component
 test_log_function_exists() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
-  assert_contains "$content" "log()" "Script should define log() function"
+  assert_contains "$content" "log()" "logging.sh should define log() function"
 }
 
 # Test 3: Log function checks VERBOSE flag
 test_log_checks_verbose_flag() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
   # Log function should check VERBOSE variable
   if echo "$content" | grep -A 10 "log()" | grep -q "VERBOSE"; then
@@ -64,7 +65,7 @@ test_log_checks_verbose_flag() {
 # Test 4: Log function supports multiple levels
 test_log_levels() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
   # Log function should accept level parameter (INFO, WARN, ERROR, DEBUG)
   if echo "$content" | grep -A 20 "log()" | grep -qE "INFO|WARN|ERROR|DEBUG"; then
@@ -81,7 +82,7 @@ test_log_levels() {
 # Test 5: Verbose output goes to stderr
 test_verbose_output_to_stderr() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
   # Log function should redirect to stderr (>&2)
   if echo "$content" | grep -A 20 "log()" | grep -q ">&2\|>&2"; then
@@ -98,7 +99,7 @@ test_verbose_output_to_stderr() {
 # Test 6: Log messages have consistent prefix
 test_log_prefix() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
   # Log function should add prefix like [INFO], [ERROR], etc.
   if echo "$content" | grep -A 20 "log()" | grep -qE '\[.*\]|\$\{.*\}'; then
@@ -115,7 +116,7 @@ test_log_prefix() {
 # Test 7: ERROR and WARN always shown (even without -v)
 test_error_warn_always_shown() {
   local content
-  content=$(cat "$SCRIPT_PATH")
+  content=$(cat "$COMPONENTS_DIR/core/logging.sh")
   
   # ERROR and WARN should be shown regardless of VERBOSE flag
   if echo "$content" | grep -A 20 "log()" | grep -E 'ERROR.*WARN|level.*==.*"ERROR".*level.*==.*"WARN"'; then
