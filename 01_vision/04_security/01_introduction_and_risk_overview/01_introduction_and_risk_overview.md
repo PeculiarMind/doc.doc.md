@@ -27,6 +27,31 @@ Security concept documentation is organized into:
 - **Introduction and Risk Overview** (this document): Methodology and standards
 - **Scopes**: Security analysis per system domain, covering components, interactions, data flows, and threat models
 
+### Operational Context and Threat Model Boundaries
+
+The toolkit operates in a **single-user, local-only context** as defined in [TC-0007: Single-User Operator Trust Model](../../03_architecture/02_architecture_constraints/TC_0007_single_user_operator_trust_model.md). This architectural constraint establishes critical boundaries for the security threat model:
+
+**Operator Trust Model**:
+- The **operator** (user running the toolkit) is the owner of the data being analyzed OR has explicit authorized read access to all source documents
+- The operator is a **trusted entity** with respect to data access and operations
+- Target environments: personal workstations, homelabs, NAS devices, SSH-accessible servers
+- No multi-user scenarios with privilege separation
+
+**Threats In Scope**:
+- **External Attackers**: Remote exploitation of vulnerabilities in the toolkit
+- **Malicious Input**: Crafted documents, templates, or configuration designed to exploit processing logic
+- **Malicious Plugins**: Third-party code attempting to escape sandbox, access unauthorized resources, or exfiltrate data
+- **Supply Chain Attacks**: Compromised dependencies, tools, or development containers
+- **Data Corruption**: Malicious input causing integrity failures
+
+**Threats Out of Scope**:
+- **Malicious Operator**: Intentional misuse by the user running the toolkit
+- **Information Disclosure to Operator**: Path disclosure, detailed errors, stack traces (operator already has filesystem access)
+- **Privilege Escalation from Operator**: Operator already runs toolkit with their own privileges
+- **Multi-User Access Control**: No lesser-privileged users exist in the operational model
+
+**Security Control Focus**: Protecting the operator and their data from external threats and malicious input, NOT hiding information from the operator or preventing operator actions.
+
 ## STRIDE Threat Modeling
 
 STRIDE identifies security threats across six categories, each addressing distinct attack vectors.

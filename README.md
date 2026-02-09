@@ -8,14 +8,24 @@ A lightweight, scriptable toolkit that orchestrates existing CLI tools to extrac
 
 - ✅ Agent-driven development workflow established ([AGENTS.md](AGENTS.md))
 - ✅ Vision and architecture documented ([01_vision/](01_vision/))
-- ✅ 37 requirements accepted and ready for implementation
-  - Core functionality (directory analysis, metadata extraction, reporting, plugins)
-  - Quality assurance (testing standards, documentation maintenance)  
-  - Security (input validation, development container security)
-  - Operational (workspace management, platform support, help system)
-- ✅ Security documentation and threat modeling established ([01_vision/04_security/](01_vision/04_security/))
+- ✅ **55 total requirements** (37 accepted + 18 in funnel under review)
+  - **37 accepted requirements** ready for implementation:
+    - Core functionality (directory analysis, metadata extraction, reporting, plugins)
+    - Quality assurance (testing standards, documentation maintenance)  
+    - Security (input validation, development container security)
+    - Operational (workspace management, platform support, help system)
+  - **18 new requirements** under review in funnel:
+    - 8 feature enhancements (aggregated reports, templates, modular architecture, advanced help, file filtering, workspace migration, non-interactive mode, performance metrics)
+    - **10 critical security requirements** (plugin validation, sandboxing, dependency verification, injection prevention, integrity verification, audit logging, secure defaults, error disclosure prevention, file verification, security testing)
+- ✅ **Comprehensive security architecture** established
+  - **6 security scopes** with complete threat modeling ([01_vision/04_security/](01_vision/04_security/))
+  - **~95% security coverage** across all attack surfaces
+  - **48 threats identified and mitigated** via STRIDE analysis across 28 interfaces
+  - Defense-in-depth architecture with 7 security layers
+- ✅ **9 architecture concepts** documented (6 core + 3 security-focused)
+  - Security architecture, audit/logging, dependency security newly added
 - ✅ Basic script structure implemented (Feature 0001 - [Done](02_agile_board/06_done/))
-- ✅ Comprehensive test suite established - all 13 suites passing ([tests/](tests/))
+- ✅ Comprehensive test suite established - **all 13 suites passing (136+ tests)** ([tests/](tests/))
 - ✅ Test documentation standards implemented
 - ✅ License compliance workflow integrated
 - ✅ Plugin listing functionality implemented (Feature 0003 - [Done](02_agile_board/06_done/))
@@ -64,7 +74,31 @@ doc.doc.md automates file analysis and documentation generation by:
 - 📋 **Tool Verification**: Check dependencies and prompt for installation
 - 📋 **Report Generation**: Per-file Markdown reports with customizable templates
 
-See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap, [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications (37 requirements), and [security documentation](01_vision/04_security/) for threat modeling and security controls.
+### Features Under Development Review
+The following features are currently in the requirements funnel under evaluation:
+- 🔍 **Aggregated Summary Reports**: Cross-file analysis summaries and dashboards
+- 🔍 **Template Engine Implementation**: Advanced templating with conditionals and loops
+- 🔍 **Modular Component Architecture**: Enhanced script modularity and reusability
+- 🔍 **Advanced Multi-Level Help System**: Context-sensitive help and interactive assistance
+- 🔍 **Plugin File Type Filtering**: Restrict plugin execution by file type
+- 🔍 **Workspace Format Migration**: Backward-compatible workspace version upgrades
+- 🔍 **Non-Interactive Mode Handling**: Fully automated batch processing
+- 🔍 **Performance Monitoring and Metrics**: Profile execution time and resource usage
+
+### Security Enhancements Under Review
+**10 critical security requirements** currently in security review (STRIDE threat analysis complete):
+- 🔒 **Plugin Descriptor Validation** (CRITICAL - Risk 320): Schema validation, signature verification
+- 🔒 **Plugin Execution Sandboxing** (CRITICAL - Risk 243): Isolated execution environment
+- 🔒 **Dependency Tool Security** (CRITICAL - Risk 240): Tool integrity verification
+- 🔒 **Template Injection Prevention** (HIGH - Risk 222): Safe template processing
+- 🔒 **Workspace Integrity Verification** (HIGH - Risk 204): Detect tampering and corruption
+- 🔒 **Security Logging and Audit Trail**: Comprehensive security event tracking
+- 🔒 **Secure Defaults and Configuration Hardening**: Secure-by-default settings
+- 🔒 **Error Message Information Disclosure Prevention**: Safe error handling
+- 🔒 **File Type Verification and Validation**: Prevent malicious file processing
+- 🔒 **Security Testing Requirements**: Penetration testing and fuzzing integration
+
+See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap, [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications (37 accepted), [requirements funnel](01_vision/02_requirements/01_funnel/) for features under review (18 pending), and [comprehensive security documentation](01_vision/04_security/) for threat modeling across 6 security scopes and security controls.
 
 ## Project Structure
 
@@ -73,9 +107,9 @@ doc.doc.md/
 ├── 01_vision/                          # Project vision and planning
 │   ├── 01_project_vision/              # Core vision statement and goals
 │   ├── 02_requirements/                # Requirements lifecycle management
-│   │   ├── 01_funnel/                  # New requirements under consideration
+│   │   ├── 01_funnel/                  # 🔍 18 new requirements under review (8 features + 10 security)
 │   │   ├── 02_analyze/                 # Requirements being analyzed
-│   │   ├── 03_accepted/                # ✅ 30 approved requirements ready for implementation
+│   │   ├── 03_accepted/                # ✅ 37 approved requirements ready for implementation
 │   │   ├── 04_obsolete/                # Archived requirements
 │   │   └── 05_rejected/                # Rejected requirements with rationale
 │   ├── 03_architecture/                # Arc42 architecture vision
@@ -83,12 +117,12 @@ doc.doc.md/
 │   │   ├── 02_architecture_constraints/
 │   │   ├── 05_building_block_view/     # Component design
 │   │   ├── 06_runtime_view/            # Execution flows
-│   │   ├── 08_concepts/                # Cross-cutting concepts (plugin, workspace, CLI, security, platform)
+│   │   ├── 08_concepts/                # 9 cross-cutting concepts (plugins, workspace, CLI, security, platform, audit, dependencies)
 │   │   ├── 09_architecture_decisions/  # Design decisions
 │   │   └── 10_quality_requirements/    # Quality goals and scenarios
-│   └── 04_security/                    # Security documentation
-│       ├── 01_introduction_and_risk_overview/  # Security overview
-│       └── 02_scopes/                  # Security scopes (STRIDE/DREAD threat modeling)
+│   └── 04_security/                    # Comprehensive security documentation
+│       ├── 01_introduction_and_risk_overview/  # Security overview and risk landscape
+│       └── 02_scopes/                  # 6 security scopes with complete STRIDE/DREAD threat modeling (~95% coverage)
 │
 ├── 02_agile_board/                     # Kanban workflow tracking
 │   ├── 01_funnel/                      # New work items
@@ -399,7 +433,8 @@ See [AGENTS.md](AGENTS.md) for complete agent documentation and usage guidelines
 - Requirements Engineer extracts requirements from [project vision](01_vision/01_project_vision/01_vision.md)
 - Requirements flow through lifecycle: `funnel` → `analyze` → `accepted`
 - Accepted requirements documented in [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/)
-- **Status**: ✅ 37 requirements accepted and ready
+- **Status**: ✅ 37 requirements accepted, 🔍 18 in funnel under review (55 total)
+- **Recent expansion**: 10 critical security requirements added (Risk 204-320)
 
 #### 2. **Feature Implementation Phase**
 The Developer Agent manages a comprehensive workflow:
@@ -503,14 +538,22 @@ The project follows the **[arc42](https://arc42.org/)** architecture documentati
 **Architecture Vision** ([01_vision/03_architecture/](01_vision/03_architecture/)):
 - Planned architecture and design intent
 - Quality requirements and constraints
-- Plugin concept and data-driven execution
-- Solution strategies
+- **9 architecture concepts** (plugin, workspace, CLI, security, platform, audit, dependencies)
+- Solution strategies and defense-in-depth principles
 
 **Security Documentation** ([01_vision/04_security/](01_vision/04_security/)):
-- Security scopes and boundaries
-- Threat modeling (STRIDE/DREAD analysis)
-- CIA classifications and risk assessments
-- Security controls and mitigations
+- **6 comprehensive security scopes** covering all attack surfaces:
+  - Development container security (build-time)
+  - Runtime application security (main script)
+  - Plugin execution security (highest-risk component)
+  - Template processing security
+  - Workspace data security
+  - Data flow and trust boundaries
+- **Complete threat modeling**: STRIDE analysis across 28 interfaces
+- **48 threats identified and mitigated** with ~95% security coverage
+- CIA classifications and quantitative risk assessments (DREAD scoring)
+- Defense-in-depth architecture with 7 security layers
+- Security controls and comprehensive mitigations
 
 **Implementation Documentation** ([03_documentation/01_architecture/](03_documentation/01_architecture/)):
 - Actual implemented components
@@ -709,17 +752,28 @@ For questions about licensing, please open a GitHub Issue.
 ### Phase 1: Foundation (Current) - Q1 2026
 - [x] ✅ Project vision and architecture documented
 - [x] ✅ Agent system established and operational
-- [x] ✅ Requirements extracted and accepted (37 requirements)
-- [x] ✅ Security documentation and threat modeling established
+- [x] ✅ Requirements extracted and accepted (37 accepted, 18 under review, 55 total)
+- [x] ✅ **Comprehensive security architecture** established
+  - [x] ✅ 6 security scopes with complete STRIDE threat modeling
+  - [x] ✅ ~95% security coverage across all attack surfaces
+  - [x] ✅ 48 threats identified and mitigated
+  - [x] ✅ 10 critical security requirements in review (Risk 204-320)
+- [x] ✅ **9 architecture concepts** documented (added security, audit, dependency concepts)
 - [x] ✅ Basic script structure implemented (Feature 0001)
 - [x] ✅ Plugin listing functionality implemented (Feature 0003)
-- [x] ✅ Test infrastructure established
+- [x] ✅ Test infrastructure established (13 suites, 136+ tests passing)
 - [x] ✅ License compliance workflow integrated
 - [ ] 🚧 Core directory scanning functionality
 - [ ] 🚧 Basic metadata extraction
 
 ### Phase 2: Core Features - Q2 2026
-- [ ] 📋 Recursive directory traversal
+- [ ] � **Security requirements implementation** (PRIORITY - 10 critical requirements)
+  - [ ] Plugin descriptor validation and signature verification
+  - [ ] Plugin execution sandboxing
+  - [ ] Dependency tool security verification
+  - [ ] Template injection prevention
+  - [ ] Workspace integrity verification
+- [ ] �📋 Recursive directory traversal
 - [ ] 📋 Template-based report generation
 - [ ] 📋 Workspace management system
 - [ ] 📋 Tool availability verification
@@ -729,16 +783,22 @@ For questions about licensing, please open a GitHub Issue.
 - [ ] 🚧 Plugin architecture implementation (in progress)
   - [x] ✅ Plugin directory structure
   - [x] ✅ Plugin discovery and listing
-  - [ ] 📋 Plugin descriptor parsing
+  - [ ] � Plugin descriptor parsing with validation (req_0047)
+  - [ ] 🔒 Sandboxed plugin execution (req_0048)
   - [ ] 📋 Data-driven execution flow
   - [ ] 📋 Plugin enable/disable commands
   - [ ] 📋 Plugin info command
+  - [ ] 📋 Plugin file type filtering (req_0043)
 - [ ] 📋 Example plugins (OCRmyPDF, etc.)
 - [ ] 📋 Enhanced logging format with structured output
-- [ ] 📋 Development containers for cross-platform testing
+- [x] ✅ Development containers for cross-platform testing
 
 ### Phase 4: Enhancement - Q4 2026
 - [ ] 📋 Advanced content extraction
+- [ ] 📋 Aggregated summary reports (req_0039)
+- [ ] 📋 Advanced template engine with conditionals (req_0040)
+- [ ] 📋 Performance monitoring and metrics (req_0046)
+- [ ] 🔒 Security logging and audit trail (req_0051)
 - [ ] 📋 Integration patterns documentation
 - [ ] 📋 Performance optimization
 - [ ] 📋 Comprehensive documentation
@@ -760,9 +820,10 @@ See [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed
 | Documentation | Location | Purpose |
 |--------------|----------|---------|
 | **Vision** | [01_vision/01_project_vision/](01_vision/01_project_vision/) | Project goals and purpose |
-| **Requirements** | [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/) | Detailed feature specifications (37 requirements) |
-| **Architecture (Vision)** | [01_vision/03_architecture/](01_vision/03_architecture/) | Planned architecture and design |
-| **Security** | [01_vision/04_security/](01_vision/04_security/) | Security scopes, threat modeling, risk assessments |
+| **Requirements (Accepted)** | [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/) | 37 approved requirements ready for implementation |
+| **Requirements (Funnel)** | [01_vision/02_requirements/01_funnel/](01_vision/02_requirements/01_funnel/) | 18 requirements under review (8 features + 10 security) |
+| **Architecture (Vision)** | [01_vision/03_architecture/](01_vision/03_architecture/) | Planned architecture with 9 concepts |
+| **Security** | [01_vision/04_security/](01_vision/04_security/) | 6 security scopes, STRIDE threat modeling, ~95% coverage |
 | **Architecture (Implementation)** | [03_documentation/01_architecture/](03_documentation/01_architecture/) | Actual implemented architecture |
 | **Test Plans** | [03_documentation/02_tests/](03_documentation/02_tests/) | Test strategy and test cases |
 | **Test Reports** | [03_documentation/02_tests/](03_documentation/02_tests/) | Test execution results |
@@ -776,7 +837,8 @@ See [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed
 - **How to use it?** → See [Getting Started](#getting-started) section above
 - **How to contribute?** → Read [Contributing](#contributing) section
 - **What's implemented?** → Check [02_agile_board/06_done/](02_agile_board/06_done/)
-- **What's planned?** → Browse [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/)
+- **What's planned?** → Browse [accepted requirements](01_vision/02_requirements/03_accepted/) (37) and [funnel](01_vision/02_requirements/01_funnel/) (18 under review)
+- **Security architecture?** → Study [comprehensive security documentation](01_vision/04_security/) (6 scopes, 48 threats analyzed)
 - **Architecture details?** → Study [03_documentation/01_architecture/](03_documentation/01_architecture/)
 - **How agents work?** → Read [AGENTS.md](AGENTS.md)
 - **Testing approach?** → See [tests/README.md](tests/README.md)
@@ -840,7 +902,7 @@ This project builds upon and is inspired by excellent work from the open-source 
 
 ---
 
-**Last Updated**: February 8, 2026  
+**Last Updated**: February 9, 2026  
 **README Maintained By**: README Maintainer Agent ([.github/agents/readme-maintainer.agent.md](.github/agents/readme-maintainer.agent.md))
 
 For the latest updates, see the [commit history](https://github.com/PeculiarMind/doc.doc.md/commits) or check the [agile board](02_agile_board/) for current work items.

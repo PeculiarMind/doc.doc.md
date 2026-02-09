@@ -29,8 +29,9 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 ## 1.1 Requirements Overview
 
 ### Requirements
-The project has 37 accepted requirements that define the core functionality:
+The project has 37 accepted requirements and 10 security requirements under review that define the core functionality:
 
+**Accepted Requirements (37)**:
 - **req_0001**: [Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md)
 - **req_0002**: [Recursive Directory Scanning](../../02_requirements/03_accepted/req_0002_recursive_directory_scanning.md)
 - **req_0003**: [Metadata Extraction with CLI Tools](../../02_requirements/03_accepted/req_0003_metadata_extraction_with_cli_tools.md)
@@ -70,6 +71,18 @@ The project has 37 accepted requirements that define the core functionality:
 - **req_0037**: [Documentation Maintenance](../../02_requirements/03_accepted/req_0037_documentation_maintenance.md)
 - **req_0038**: [Input Validation and Sanitization](../../02_requirements/03_accepted/req_0038_input_validation_and_sanitization.md)
 
+**Security Requirements - Under Review (10)**:
+- **req_0047**: [Plugin Descriptor Validation](../../02_requirements/01_funnel/req_0047_plugin_descriptor_validation.md) - Validate plugin descriptor JSON schema
+- **req_0048**: [Plugin Execution Sandboxing](../../02_requirements/01_funnel/req_0048_plugin_execution_sandboxing.md) - Resource limits and isolation for plugins
+- **req_0049**: [Template Injection Prevention](../../02_requirements/01_funnel/req_0049_template_injection_prevention.md) - Prevent code execution via templates
+- **req_0050**: [Workspace Integrity Verification](../../02_requirements/01_funnel/req_0050_workspace_integrity_verification.md) - Detect workspace corruption
+- **req_0051**: [Security Logging and Audit Trail](../../02_requirements/01_funnel/req_0051_security_logging_and_audit_trail.md) - Comprehensive security event logging
+- **req_0052**: [Secure Defaults and Configuration Hardening](../../02_requirements/01_funnel/req_0052_secure_defaults_and_configuration_hardening.md) - Fail-safe defaults
+- **req_0053**: [Dependency Tool Security Verification](../../02_requirements/01_funnel/req_0053_dependency_tool_security_verification.md) - Secure external tool invocation
+- **req_0054**: [Error Message Information Disclosure Prevention](../../02_requirements/01_funnel/req_0054_error_message_information_disclosure_prevention.md) - Sanitize error output
+- **req_0055**: [File Type Verification and Validation](../../02_requirements/01_funnel/req_0055_file_type_verification_and_validation.md) - Validate file types before processing
+- **req_0056**: [Security Testing Requirements](../../02_requirements/01_funnel/req_0056_security_testing_requirements.md) - Fuzzing and security test coverage
+
 ## 1.2 Quality Goals
 
 ### 1. **Efficiency**
@@ -88,9 +101,18 @@ The project has 37 accepted requirements that define the core functionality:
 - **Trade-offs Considered**: May require additional development time for UI/UX improvements.
 
 ### 4. **Security**
-- **Goal**: Ensure that all data processing and analysis are performed locally, without transmitting sensitive data to external services.
-- **Rationale**: Protects user privacy and ensures compliance with data protection standards by limiting the scope of the project to local processing only.
-- **Trade-offs Considered**: May restrict the use of cloud-based tools or services that could enhance functionality.
+- **Goal**: Ensure data processing and analysis are performed locally without transmitting sensitive data to external services, with defense-in-depth security controls protecting against injection attacks, data corruption, and unauthorized access.
+- **Rationale**: Protects user privacy and ensures compliance with data protection standards. Security architecture implements multiple defensive layers: input validation, execution isolation, integrity verification, audit logging, and dependency security. Local-only processing eliminates network-based attack vectors while comprehensive validation prevents injection and path traversal attacks.
+- **Security Properties**:
+  - **Input Validation**: All user inputs, file paths, and arguments validated against strict rules (req_0038)
+  - **Plugin Isolation**: Plugins execute with resource limits and restricted file access (req_0048)
+  - **Template Safety**: Template processing prevents code execution and injection attacks (req_0049)
+  - **Workspace Integrity**: Corruption detection and atomic operations protect persistent state (req_0050)
+  - **Audit Trail**: Security events logged to dedicated audit log for incident investigation (req_0051)
+  - **Secure Defaults**: Fail-closed security controls and configuration hardening (req_0052)
+  - **Dependency Security**: External tools verified and invoked securely without injection risk (req_0053)
+  - **Information Protection**: Error messages sanitized to prevent sensitive data disclosure (req_0054)
+- **Trade-offs Considered**: Enhanced security controls add complexity and validation overhead. May restrict use of untrusted plugins or templates. Security testing requirements increase development effort.
 
 ### 5. **Extensibility**
 - **Goal**: Enable users to customize and extend the system's functionality through a lightweight plugin architecture.

@@ -34,9 +34,15 @@ This section documents the **true architectural constraints**—external limitat
 |----|-------|------|-------------|
 | TC-0006 | No External Service Dependencies | Organizational | [TC_0006_no_external_service_dependencies.md](TC_0006_no_external_service_dependencies.md) |
 
+## Security Constraints Index
+
+| ID | Title | Type | Detail File |
+|----|-------|------|-------------|
+| TC-0007 | Single-User Operator Trust Model | Security | [TC_0007_single_user_operator_trust_model.md](TC_0007_single_user_operator_trust_model.md) |
+
 ## Summary
 
-**Total Constraints**: 6 (5 Technical, 1 Organizational)
+**Total Constraints**: 7 (5 Technical, 1 Organizational, 1 Security)
 
 These constraints define immutable boundaries for architectural decisions. They represent:
 - **Platform limitations**: What runtime environments provide (or don't provide)
