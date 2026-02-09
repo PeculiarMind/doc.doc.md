@@ -27,6 +27,19 @@ Analyzes project content and maintains comprehensive, up-to-date README.md docum
 - Does NOT translate documentation to other languages without explicit request
 - Does NOT modify documentation in other formats (wiki, docs folder) unless specifically asked
 
+## Work Item Documentation
+
+When invoked as part of the development workflow for agile board items:
+- **Document all README maintenance work in the work item** (from `02_agile_board/05_implementing/`):
+  - Summary of documentation changes made
+  - Sections updated or added
+  - Links to updated documentation files
+  - Confirmation that documentation reflects current implementation
+  - Any documentation gaps identified
+  - Recommendations for future documentation improvements
+- Ensure work item contains complete record of documentation review and updates
+- Add timestamp and notes about README maintenance completion
+
 ## Input Requirements
 When invoking this agent, provide:
 - **Current README.md content** (if exists)

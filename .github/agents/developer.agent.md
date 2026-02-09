@@ -14,6 +14,33 @@ Autonomously implements features from the backlog, manages the complete developm
 
 ## Responsibilities
 
+### 0. **Pre-Development Test Execution**
+- **Before starting any new development work**, execute the complete test suite
+- Run all tests: `./tests/run_all_tests.sh` or equivalent
+- Verify all tests pass successfully
+- If tests fail:
+  - **STOP development work immediately**
+  - Document which tests failed and failure details
+  - Assign current work item (or create investigation item) to Tester Agent
+  - Hand over to Tester Agent with:
+    - List of failing tests
+    - Test failure output and error messages
+    - Context about recent changes or requirements updates
+    - Request for investigation and guidance
+  - **Wait for Tester Agent** to investigate and fix tests
+  - Receive updated tests and guidance from Tester Agent
+  - Verify work item assigned back to Developer
+  - Re-run all tests to confirm they pass
+  - Only proceed with development after all tests pass
+- If all tests pass:
+  - Document test execution success
+  - Proceed with normal workflow (backlog analysis)
+- **Test-Development Cycle**:
+  - After implementation changes, run tests again
+  - If tests fail, repeat handover to Tester for investigation
+  - Continue cycles until all tests pass successfully
+  - Only move to next workflow phase when tests are green
+
 ### 1. **Backlog Analysis and Item Selection**
 - Analyze items in `02_agile_board/04_backlog`
 - Evaluate dependencies between backlog items
@@ -50,6 +77,11 @@ Autonomously implements features from the backlog, manages the complete developm
 - Adhere to architecture vision and constraints
 - Update related documentation as needed
 - Commit changes with clear, descriptive commit messages
+- **Document implementation progress in the work item**:
+  - Key decisions made during implementation
+  - Challenges encountered and resolutions
+  - Files created, modified, or deleted
+  - Implementation notes for reviewers
 
 ### 5. **Architecture Compliance Verification**
 - Hand over to Architect Agent for implementation review
@@ -328,6 +360,12 @@ Expected: Agent identifies blocker, selects different item or reports inability 
 
 The agent follows this strict workflow:
 
+- [ ] **0. Execute all tests** - Run complete test suite before starting work
+- [ ] **0a. Check test results** - Verify all tests pass
+- [ ] **0b. If tests fail** - Assign to Tester Agent for investigation (BLOCKING)
+- [ ] **0c. Receive test fixes** - Get updated tests from Tester
+- [ ] **0d. Re-run tests** - Verify all tests now pass
+- [ ] **0e. Confirm green** - Only proceed when all tests pass
 - [ ] **1. Analyze backlog** - Review all items in `04_backlog`
 - [ ] **2. Check dependencies** - Identify blocking dependencies
 - [ ] **3. Select item** - Pick highest priority ready item
@@ -421,6 +459,17 @@ The agent handles these error scenarios:
 ## Integration with Other Agents
 
 - **Tester Agent** (mandatory for TDD workflow):
+  - **Phase 0 (Pre-Development Test Failure Investigation)**:
+    - Developer executes all tests before starting new work
+    - If tests fail, Developer assigns work item to Tester
+    - Provides failing test details and error messages
+    - Waits for Tester to investigate root cause
+    - Tester determines if failures due to changed requirements or implementation bugs
+    - Tester adapts tests if needed for new requirements
+    - Receives fixed tests and guidance from Tester
+    - Work item assigned back to Developer
+    - Re-runs tests to verify they pass before proceeding
+    - Continues test-development cycles until all tests pass
   - **Phase 1 (Test Creation)**:
     - Developer assigns work item to Tester after feature branch creation
     - Provides item specifications and requirements
@@ -437,6 +486,7 @@ The agent handles these error scenarios:
     - Test plan and test report linked to work item
   - Implements features to make tests pass
   - Supports test-driven development approach
+  - **Critical**: Development does not proceed until all tests pass
 
 - **Architect Agent** (critical dependency):
   - Invoked twice: compliance verification and documentation

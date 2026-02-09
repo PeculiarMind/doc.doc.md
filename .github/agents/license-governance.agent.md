@@ -251,23 +251,33 @@ The agent follows this strict workflow:
 
 ## Integration with Other Agents
 
+### TDD Workflow Context
+**This project follows strict TDD (Test-Driven Development) principles**:
+- **Tester Agent creates tests FIRST** (TDD Red Phase)
+- **Developer Agent implements to pass tests** (TDD Green Phase)
+- **License Governance Agent reviews AFTER implementation and tests pass**
+- License compliance is a quality gate that happens after TDD cycle completes
+
+### Agent Integration
 - **Developer Agent** (primary coordinator):
   - Developer assigns work item to License Governance Agent
-  - Receives handover from Developer after tests pass and architecture compliance
+  - Receives handover from Developer after TDD cycle (tests created, implementation passed tests)
+  - License governance happens after architecture compliance verified
   - Reviews implementation for license compliance
   - Documents findings in work item
   - Assigns work item back to Developer
   - Hands back to Developer with compliance results
-  - Developer proceeds to PR creation if compliant
+  - Developer proceeds to security review if compliant
   - Developer fixes issues and resubmits if non-compliant
 
 - **Architect Agent** (sequencing):
   - License governance happens after architecture compliance verified
-  - Both are quality gates before PR creation
+  - Both are quality gates before security review
 
-- **Tester Agent** (reference):
-  - License governance happens after tests pass
-  - Part of complete quality gate process
+- **Tester Agent** (TDD context):
+  - Tester creates tests FIRST in the workflow (TDD principle)
+  - License governance happens after tests are created and passing
+  - Part of complete quality gate process after TDD cycle
 
 ## Error Handling
 

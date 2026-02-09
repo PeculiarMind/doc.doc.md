@@ -501,15 +501,24 @@ A successful security review includes:
 6. **Periodic Audits**: Quarterly security reviews of entire codebase
 
 ### Workflow Integration
-- **Developer Agent** ➔ Implements feature
-- **Tester Agent** ➔ Creates tests
-- **Developer Agent** ➔ Assigns work item to Security Review Agent
-- **Security Review Agent** ➔ Reviews implementation, documents findings in work item, assigns back to Developer
-- **Developer Agent** ➔ Reviews security findings, fixes vulnerabilities
-- **Tester Agent** ➔ Adds security tests based on findings
-- **Developer Agent** ➔ Assigns work item to Security Review Agent for re-review
-- **Security Review Agent** ➔ Verifies fixes, documents approval in work item, assigns back to Developer
-- **Developer Agent** ➔ Proceeds to next workflow step (README maintenance)
+
+**Note**: This project follows strict TDD (Test-Driven Development) principles where tests are created BEFORE implementation.
+
+**TDD Workflow Order**:
+1. **Developer Agent** ➔ Executes all tests (pre-development check)
+2. **Developer Agent** ➔ Creates feature branch
+3. **Tester Agent** ➔ Creates tests (defines expected behavior - TDD Red Phase)
+4. **Developer Agent** ➔ Implements feature to make tests pass (TDD Green Phase)
+5. **Tester Agent** ➔ Executes tests formally and creates test report
+6. **Developer Agent** ➔ Assigns work item to Architect Agent (architecture compliance)
+7. **Developer Agent** ➔ Assigns work item to License Governance Agent (license compliance)
+8. **Developer Agent** ➔ Assigns work item to Security Review Agent
+9. **Security Review Agent** ➔ Reviews implementation, documents findings in work item, assigns back to Developer
+10. **Developer Agent** ➔ Reviews security findings, fixes vulnerabilities
+11. **Tester Agent** ➔ Updates/adds security tests based on findings if needed
+12. **Developer Agent** ➔ Assigns work item to Security Review Agent for re-review
+13. **Security Review Agent** ➔ Verifies fixes, documents approval in work item, assigns back to Developer
+14. **Developer Agent** ➔ Proceeds to next workflow step (README maintenance)
 
 ### Work Item Handover Process
 1. **Receive**: Developer Agent assigns work item to Security Review Agent

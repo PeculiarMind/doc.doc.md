@@ -15,6 +15,53 @@ Creates comprehensive tests for features in implementation, ensuring test covera
 
 ## Responsibilities
 
+### 0. **Test Failure Investigation and Adaptation**
+- **When Developer encounters test failures before starting development**:
+  - Receive handover from Developer Agent with:
+    - List of failing tests
+    - Test failure output and error messages
+    - Context about recent changes or requirements
+  - Verify work item assigned to Tester Agent
+  - Investigate root cause of test failures:
+    - Analyze failing test code
+    - Review recent requirement changes in `01_vision/02_requirements/`
+    - Review recent architecture changes in `01_vision/03_architecture/`
+    - Determine if failures are due to:
+      - **Changed/new requirements**: Tests are outdated and need updating
+      - **Implementation bugs**: Code broke previously working tests
+      - **Test bugs**: Tests themselves have errors
+      - **Environment issues**: Test infrastructure problems
+  - **If tests broke due to changed requirements** (not Developer's fault):
+    - Adapt and update tests to match currently valid requirements
+    - Ensure tests properly validate new requirement specifications
+    - Update test documentation to reflect requirement changes
+    - Add comments explaining why tests were updated
+    - Verify updated tests accurately test current requirements
+    - Run updated tests to ensure they work correctly
+    - Commit updated tests with clear messages
+  - **If implementation bugs caused failures**:
+    - Provide detailed failure analysis to Developer
+    - Explain which requirements are violated
+    - Recommend implementation fixes
+    - Do NOT modify tests (tests are correct)
+  - **If test bugs found**:
+    - Fix test code errors
+    - Ensure tests correctly validate requirements
+    - Document test fixes  - **Document investigation findings in the work item**:
+    - Root cause analysis of test failures
+    - Whether failures due to changed requirements or implementation bugs
+    - Tests updated and why
+    - Requirements changes that necessitated test updates
+    - Investigation timestamp and summary  - Document investigation findings and actions taken
+  - Assign work item back to Developer Agent
+  - Hand back to Developer with:
+    - Investigation results
+    - Updated tests (if requirements changed)
+    - Guidance on next steps
+    - Confirmation tests now correctly validate current requirements
+  - Developer re-runs tests to confirm they pass
+  - **Test-Development Cycle**: If tests fail again after Developer implementation, repeat investigation process
+
 ### 1. **Receive Handover from Developer**
 - Accept handover from Developer Agent with:
   - Feature branch name
@@ -215,6 +262,29 @@ The agent returns comprehensive reports depending on the phase:
 
 ## Example Usage
 
+### Phase 0 Scenarios: Test Failure Investigation
+
+### Scenario 1: Test Failures Due to Changed Requirements
+```
+Task: Receive handover from Developer - test suite failing before starting new work
+Context: 5 tests failing related to plugin loading; Requirements recently updated to change plugin descriptor format
+Expected: Investigate failures, determine requirements changed, update tests to match new plugin descriptor format, hand back to Developer with updated tests
+```
+
+### Scenario 2: Test Failures Due to Implementation Bug
+```
+Task: Receive handover from Developer - integration tests failing
+Context: Error handling tests failing; No requirement changes; Previous commit broke error handling logic
+Expected: Investigate failures, identify implementation bug, provide detailed failure analysis to Developer, recommend fixes, do NOT modify tests, hand back with guidance
+```
+
+### Scenario 3: Iterative Test-Development Cycle
+```
+Task: Receive second handover from Developer - tests still failing after first fix attempt
+Context: Developer fixed some issues but tests still fail; Some requirements still not met
+Expected: Re-investigate, determine if tests need further updates or implementation needs more fixes, adapt tests if requirements evolved, hand back with clear guidance, repeat until all tests pass
+```
+
 ### Phase 1 Scenarios: Test Creation
 
 ### Scenario 1: Create Tests After Developer Handover
@@ -250,6 +320,23 @@ Expected: Run all tests, document results, update execution history, link report
 ## Workflow Checklist
 
 The agent follows this strict workflow:
+
+### Phase 0: Test Failure Investigation (Pre-Development)
+- [ ] **0.1. Receive failure handover** - Accept handover from Developer with failing tests (work item assigned to Tester)
+- [ ] **0.2. Review failure details** - Analyze which tests failed and error messages
+- [ ] **0.3. Investigate root cause** - Determine why tests failed
+- [ ] **0.4. Check requirements** - Review if requirements changed in `01_vision/02_requirements/`
+- [ ] **0.5. Check architecture** - Review if architecture changed in `01_vision/03_architecture/`
+- [ ] **0.6. Determine cause** - Classify as: changed requirements / implementation bug / test bug / environment issue
+- [ ] **0.7. If requirements changed** - Update tests to match current valid requirements
+- [ ] **0.8. If implementation bug** - Provide failure analysis and recommendations (do NOT modify tests)
+- [ ] **0.9. If test bug** - Fix test code errors
+- [ ] **0.10. Document findings** - Record investigation results and actions taken
+- [ ] **0.11. Verify test updates** - Run updated tests to ensure they work
+- [ ] **0.12. Commit changes** - Commit test updates with clear messages
+- [ ] **0.13. Assign to Developer** - Assign work item back to Developer Agent
+- [ ] **0.14. Hand back to Developer** - Provide investigation results and updated tests
+- [ ] **0.15. Cycle continues** - Ready to receive handover again if tests still fail
 
 ### Phase 1: Test Creation (TDD Red Phase)
 - [ ] **1. Receive handover** - Accept handover from Developer Agent (work item assigned to Tester)
@@ -356,6 +443,18 @@ The agent handles these error scenarios:
 ## Integration with Other Agents
 
 - **Developer Agent** (primary coordinator):
+  - **Phase 0 (Pre-Development Test Failure Investigation)**:
+    - Developer executes all tests before starting new development work
+    - If tests fail, Developer assigns work item (or creates investigation item) to Tester
+    - Tester receives handover with failing test details
+    - Tester investigates root cause of failures
+    - If requirements changed: Tester adapts tests to match current requirements
+    - If implementation bug: Tester provides failure analysis (does not modify tests)
+    - Tester assigns work item back to Developer
+    - Tester hands back updated tests and investigation results
+    - Developer re-runs tests to verify they pass
+    - **Cycle repeats** until all tests pass successfully
+    - Developer only proceeds with new work when all tests are green
   - **Phase 1 (Test Creation)**:
     - Developer assigns work item to Tester
     - Tester receives handover from Developer at workflow start
