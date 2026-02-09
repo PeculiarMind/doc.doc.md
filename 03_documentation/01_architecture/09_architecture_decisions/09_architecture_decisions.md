@@ -1,7 +1,7 @@
 # Implementation Decision Records (IDRs)
 
 **Status**: Active  
-**Last Updated**: 2026-02-08  
+**Last Updated**: 2026-02-10  
 **Vision Reference**: [Architecture Decisions (ADRs)](../../../01_vision/03_architecture/09_architecture_decisions/09_architecture_decisions.md)
 
 ## Overview
@@ -10,7 +10,7 @@ This directory contains Implementation Decision Records (IDRs) documenting key i
 
 **Important**: IDRs are separate from ADRs (Architecture Decision Records). ADRs (0001-0007) define strategic architectural decisions in the vision directory, while IDRs document implementation-level decisions made during development.
 
-**Total IDRs**: 13 (IDR-0001 through IDR-0013)
+**Total IDRs**: 14 (IDR-0001 through IDR-0014)
 
 ## Table of Contents
 
@@ -73,6 +73,10 @@ This directory contains Implementation Decision Records (IDRs) documenting key i
 ### IDR-0013: Entry Point Guard for Sourcing
 **File**: [IDR_0013_entry_point_guard.md](./IDR_0013_entry_point_guard.md)  
 **Decision**: Use entry point guard pattern to prevent `main()` execution when script is sourced, enabling unit testing of individual functions.
+
+### IDR-0014: Modular Component Architecture Implementation
+**File**: [IDR_0014_modular_component_architecture_implementation.md](./IDR_0014_modular_component_architecture_implementation.md)  
+**Decision**: Implement modular component architecture with 16 components across 4 domains (core, ui, plugin, orchestration), transforming the 509-line monolithic script into a maintainable, testable component-based system with an 83-line entry script.
 
 ## ADR vs IDR Distinction
 
