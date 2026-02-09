@@ -22,7 +22,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-SCRIPT_PATH="$PROJECT_ROOT/doc.doc.sh"
+SCRIPT_PATH="$PROJECT_ROOT/scripts/doc.doc.sh"
 
 # Source test helpers
 source "$SCRIPT_DIR/../helpers/test_helpers.sh"
