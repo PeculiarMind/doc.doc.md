@@ -189,8 +189,8 @@ These would be optional flags, preserving default alphabetical behavior.
 
 ## Related Decisions
 
-- [ADR-0010: Pipe-Delimited Plugin Data](adr_0010_pipe_delimited_plugin_data.md) - Data format being sorted
-- [ADR-0013: Description Truncation](adr_0013_description_truncation.md) - Affects display but not sort
+- [IDR-0003: Pipe-Delimited Plugin Data](IDR_0003_pipe_delimited_plugin_data.md) - Data format being sorted
+- [IDR-0006: Description Truncation](IDR_0006_description_truncation.md) - Affects display but not sort
 
 ## References
 

@@ -212,8 +212,8 @@ These would be additive features, not breaking changes.
 
 ## Related Decisions
 
-- [ADR-0016: Platform Detection Fallback](ADR_0016_platform_detection_fallback.md) - Defines platform detection mechanism
-- [ADR-0010: Pipe-Delimited Plugin Data](adr_0010_pipe_delimited_plugin_data.md) - Data format for plugins
+- [IDR-0009: Platform Detection Fallback](IDR_0009_platform_detection_fallback.md) - Defines platform detection mechanism
+- [IDR-0003: Pipe-Delimited Plugin Data](IDR_0003_pipe_delimited_plugin_data.md) - Data format for plugins
 
 ## References
 

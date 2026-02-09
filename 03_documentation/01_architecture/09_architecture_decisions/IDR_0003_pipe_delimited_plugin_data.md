@@ -119,8 +119,8 @@ No associated risks - decision aligns with vision principles. The primary risk (
 
 ## Related Decisions
 
-- [ADR-0011: Dual JSON Parser Strategy](adr_0011_dual_json_parser.md) - Handles parsing of plugin descriptor files
-- [ADR-0014: Continue on Malformed Descriptors](adr_0014_continue_on_malformed_descriptors.md) - Error handling for malformed data
+- [IDR-0004: Dual JSON Parser Strategy](IDR_0004_dual_json_parser.md) - Handles parsing of plugin descriptor files
+- [IDR-0007: Continue on Malformed Descriptors](IDR_0007_continue_on_malformed_descriptors.md) - Error handling for malformed data
 
 ## References
 

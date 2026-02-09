@@ -2,7 +2,7 @@
 
 **Status**: Not Implemented (Design Complete)  
 **Last Updated**: 2026-02-08  
-**Vision Reference**: [Workspace Concept](../../../../01_vision/03_architecture/08_concepts/08_0002_workspace_concept.md)
+**Vision Reference**: [Workspace Concept](../../../01_vision/03_architecture/08_concepts/08_0002_workspace_concept.md)
 
 ## Purpose
 

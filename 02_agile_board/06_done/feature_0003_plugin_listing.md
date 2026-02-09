@@ -363,12 +363,12 @@ The following Architecture Decision Records (ADRs) document key design decisions
 
 | ADR | Decision | Rationale |
 |-----|----------|-----------|
-| [ADR-0010](../../03_documentation/01_architecture/09_architecture_decisions/adr_0010_pipe_delimited_plugin_data.md) | Pipe-Delimited Plugin Data Format | Bash-native, efficient internal data exchange |
-| [ADR-0011](../../03_documentation/01_architecture/09_architecture_decisions/adr_0011_dual_json_parser.md) | Dual JSON Parser Strategy | jq for performance, python3 fallback for compatibility |
-| [ADR-0012](../../03_documentation/01_architecture/09_architecture_decisions/adr_0012_platform_plugin_precedence.md) | Platform-Specific Plugin Precedence | Enables platform optimization and customization |
-| [ADR-0013](../../03_documentation/01_architecture/09_architecture_decisions/adr_0013_description_truncation.md) | Description Truncation at 80 Characters | Terminal compatibility and visual consistency |
-| [ADR-0014](../../03_documentation/01_architecture/09_architecture_decisions/adr_0014_continue_on_malformed_descriptors.md) | Continue on Malformed Descriptors | Robust discovery, helpful error messages |
-| [ADR-0015](../../03_documentation/01_architecture/09_architecture_decisions/adr_0015_alphabetical_plugin_sorting.md) | Alphabetical Sorting of Plugin List | Predictable, scannable output |
+| [IDR-0003](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0003_pipe_delimited_plugin_data.md) | Pipe-Delimited Plugin Data Format | Bash-native, efficient internal data exchange |
+| [IDR-0004](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0004_dual_json_parser.md) | Dual JSON Parser Strategy | jq for performance, python3 fallback for compatibility |
+| [IDR-0005](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0005_platform_plugin_precedence.md) | Platform-Specific Plugin Precedence | Enables platform optimization and customization |
+| [IDR-0006](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0006_description_truncation.md) | Description Truncation at 80 Characters | Terminal compatibility and visual consistency |
+| [IDR-0007](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0007_continue_on_malformed_descriptors.md) | Continue on Malformed Descriptors | Robust discovery, helpful error messages |
+| [IDR-0008](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0008_alphabetical_plugin_sorting.md) | Alphabetical Sorting of Plugin List | Predictable, scannable output |
 
 ### Key Design Choices
 
@@ -585,12 +585,12 @@ This implementation provides foundation for:
 ### Architecture Documentation
 - [Building Block View](../../03_documentation/01_architecture/05_building_block_view/feature_0003_plugin_listing.md) - Component design (23,473 bytes)
 - [Runtime View](../../03_documentation/01_architecture/06_runtime_view/feature_0003_plugin_listing.md) - Execution scenarios (23,117 bytes)
-- [ADR-0010](../../03_documentation/01_architecture/09_architecture_decisions/adr_0010_pipe_delimited_plugin_data.md) - Data format decision
-- [ADR-0011](../../03_documentation/01_architecture/09_architecture_decisions/adr_0011_dual_json_parser.md) - Parser strategy
-- [ADR-0012](../../03_documentation/01_architecture/09_architecture_decisions/adr_0012_platform_plugin_precedence.md) - Platform precedence
-- [ADR-0013](../../03_documentation/01_architecture/09_architecture_decisions/adr_0013_description_truncation.md) - Display truncation
-- [ADR-0014](../../03_documentation/01_architecture/09_architecture_decisions/adr_0014_continue_on_malformed_descriptors.md) - Error handling
-- [ADR-0015](../../03_documentation/01_architecture/09_architecture_decisions/adr_0015_alphabetical_plugin_sorting.md) - Sorting strategy
+- [IDR-0003](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0003_pipe_delimited_plugin_data.md) - Data format decision
+- [IDR-0004](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0004_dual_json_parser.md) - Parser strategy
+- [IDR-0005](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0005_platform_plugin_precedence.md) - Platform precedence
+- [IDR-0006](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0006_description_truncation.md) - Display truncation
+- [IDR-0007](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0007_continue_on_malformed_descriptors.md) - Error handling
+- [IDR-0008](../../03_documentation/01_architecture/09_architecture_decisions/IDR_0008_alphabetical_plugin_sorting.md) - Sorting strategy
 
 ### Requirements
 - [req_0024: Plugin Listing](../../01_vision/02_requirements/03_accepted/req_0024_plugin_listing.md) - Primary requirement

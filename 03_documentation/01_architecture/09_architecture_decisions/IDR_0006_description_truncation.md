@@ -177,8 +177,8 @@ These would build on existing behavior without breaking changes.
 
 ## Related Decisions
 
-- [ADR-0015: Alphabetical Sorting](adr_0015_alphabetical_plugin_sorting.md) - Affects display order
-- [ADR-0010: Pipe-Delimited Plugin Data](adr_0010_pipe_delimited_plugin_data.md) - Data format containing descriptions
+- [IDR-0008: Alphabetical Sorting](IDR_0008_alphabetical_plugin_sorting.md) - Affects display order
+- [IDR-0003: Pipe-Delimited Plugin Data](IDR_0003_pipe_delimited_plugin_data.md) - Data format containing descriptions
 
 ## References
 

@@ -2,7 +2,7 @@
 
 **Status**: Partially Implemented (~60%)  
 **Last Updated**: 2026-02-08  
-**Vision Reference**: [Plugin Concept](../../../../01_vision/03_architecture/08_concepts/08_0001_plugin_concept.md)
+**Vision Reference**: [Plugin Concept](../../../01_vision/03_architecture/08_concepts/08_0001_plugin_concept.md)
 
 ## Purpose
 

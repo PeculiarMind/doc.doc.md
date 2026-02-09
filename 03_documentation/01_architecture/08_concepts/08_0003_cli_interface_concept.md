@@ -2,7 +2,7 @@
 
 **Status**: Implemented (~90%)  
 **Last Updated**: 2026-02-08  
-**Vision Reference**: [CLI Interface Concept](../../../../01_vision/03_architecture/08_concepts/08_0003_cli_interface_concept.md)
+**Vision Reference**: [CLI Interface Concept](../../../01_vision/03_architecture/08_concepts/08_0003_cli_interface_concept.md)
 
 ## Purpose
 

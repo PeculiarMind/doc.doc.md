@@ -55,10 +55,10 @@ This document describes how the **implemented** solution achieves the project go
 - Error handling → Bash strict mode + defensive programming
 - Portability → Platform detection + fallbacks
 
-**ADR Reference**: [ADR-0001: Bash as Implementation Language](../09_architecture_decisions/vision_adr_001_bash_implementation.md) (Vision)  
+**ADR Reference**: [ADR-0001: Bash as Implementation Language](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0001_bash_as_primary_implementation_language.md) (Vision)  
 **Implementation ADRs**: 
-- [ADR-0019: Bash Strict Mode](../09_architecture_decisions/ADR_0019_bash_strict_mode.md)
-- [ADR-0007: Modular Function Architecture](../09_architecture_decisions/ADR_0007_modular_function_architecture.md)
+- [IDR-0012: Bash Strict Mode](../09_architecture_decisions/IDR_0012_bash_strict_mode.md)
+- [IDR-0001: Modular Function Architecture](../09_architecture_decisions/IDR_0001_modular_function_architecture.md)
 
 ---
 
@@ -84,8 +84,8 @@ This document describes how the **implemented** solution achieves the project go
 ```
 
 **Implementation ADRs**:
-- [ADR-0010: Pipe-Delimited Plugin Data](../09_architecture_decisions/adr_0010_pipe_delimited_plugin_data.md)
-- [ADR-0011: Dual JSON Parser Strategy](../09_architecture_decisions/adr_0011_dual_json_parser.md)
+- [IDR-0003: Pipe-Delimited Plugin Data](../09_architecture_decisions/IDR_0003_pipe_delimited_plugin_data.md)
+- [IDR-0004: Dual JSON Parser Strategy](../09_architecture_decisions/IDR_0004_dual_json_parser.md)
 
 ---
 
@@ -124,10 +124,10 @@ workspace/
 └── metadata.json          # Optional workspace-level data
 ```
 
-**ADR Reference**: [ADR-0002: JSON Workspace](../09_architecture_decisions/vision_adr_002_json_workspace.md) (Vision)
+**ADR Reference**: [ADR-0002: JSON Workspace](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0002_json_workspace_for_state_persistence.md) (Vision)
 
 **Implementation Preparation**:
-- [ADR-0011: Dual JSON Parser](../09_architecture_decisions/adr_0011_dual_json_parser.md) - Ensures JSON support
+- [IDR-0004: Dual JSON Parser](../09_architecture_decisions/IDR_0004_dual_json_parser.md) - Ensures JSON support
 
 ---
 
@@ -164,10 +164,10 @@ discover_plugins() {
 - ✅ `install_commandline` - Installation guidance
 
 **Implementation ADRs**:
-- [ADR-0010: Pipe-Delimited Plugin Data](../09_architecture_decisions/adr_0010_pipe_delimited_plugin_data.md)
-- [ADR-0012: Platform-Specific Plugin Precedence](../09_architecture_decisions/adr_0012_platform_plugin_precedence.md)
-- [ADR-0014: Continue on Malformed Descriptors](../09_architecture_decisions/adr_0014_continue_on_malformed_descriptors.md)
-- [ADR-0015: Alphabetical Plugin Sorting](../09_architecture_decisions/adr_0015_alphabetical_plugin_sorting.md)
+- [IDR-0003: Pipe-Delimited Plugin Data](../09_architecture_decisions/IDR_0003_pipe_delimited_plugin_data.md)
+- [IDR-0005: Platform-Specific Plugin Precedence](../09_architecture_decisions/IDR_0005_platform_plugin_precedence.md)
+- [IDR-0007: Continue on Malformed Descriptors](../09_architecture_decisions/IDR_0007_continue_on_malformed_descriptors.md)
+- [IDR-0008: Alphabetical Plugin Sorting](../09_architecture_decisions/IDR_0008_alphabetical_plugin_sorting.md)
 
 ---
 
@@ -257,8 +257,8 @@ Try './doc.doc.sh --help' for more information
 ```
 
 **Implementation ADRs**:
-- [ADR-0018: No Args Shows Help](../09_architecture_decisions/ADR_0018_no_args_shows_help.md)
-- [ADR-0013: Description Truncation](../09_architecture_decisions/ADR_0013_description_truncation.md)
+- [IDR-0011: No Args Shows Help](../09_architecture_decisions/IDR_0011_no_args_shows_help.md)
+- [IDR-0006: Description Truncation](../09_architecture_decisions/IDR_0006_description_truncation.md)
 
 ---
 
@@ -324,7 +324,7 @@ User Input → Argument Parser → Main Orchestrator
                                              Output Files
 ```
 
-**Implementation ADR**: [ADR-0007: Modular Function Architecture](../09_architecture_decisions/adr_0007_modular_function_architecture.md)
+**Implementation ADR**: [IDR-0001: Modular Function Architecture](../09_architecture_decisions/IDR_0001_modular_function_architecture.md)
 
 ---
 

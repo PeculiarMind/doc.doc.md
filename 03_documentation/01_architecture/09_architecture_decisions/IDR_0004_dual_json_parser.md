@@ -161,8 +161,8 @@ fi
 
 ## Related Decisions
 
-- [ADR-0010: Pipe-Delimited Plugin Data](adr_0010_pipe_delimited_plugin_data.md) - Defines format for parsed data
-- [ADR-0014: Continue on Malformed Descriptors](adr_0014_continue_on_malformed_descriptors.md) - Handles parse failures
+- [IDR-0003: Pipe-Delimited Plugin Data](IDR_0003_pipe_delimited_plugin_data.md) - Defines format for parsed data
+- [IDR-0007: Continue on Malformed Descriptors](IDR_0007_continue_on_malformed_descriptors.md) - Handles parse failures
 
 ## References
 

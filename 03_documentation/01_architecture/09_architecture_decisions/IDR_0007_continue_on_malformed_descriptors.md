@@ -205,8 +205,8 @@ Test cases verify correct behavior:
 
 ## Related Decisions
 
-- [ADR-0011: Dual JSON Parser](adr_0011_dual_json_parser.md) - Parser failure handling
-- [ADR-0004: Log Level Design](adr_0004_log_level_design.md) - Defines WARN level behavior
+- [IDR-0004: Dual JSON Parser](IDR_0004_dual_json_parser.md) - Parser failure handling
+- [IDR-0010: Log Level Design](IDR_0010_log_level_design.md) - Defines WARN level behavior
 
 ## References
 

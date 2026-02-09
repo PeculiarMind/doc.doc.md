@@ -696,7 +696,7 @@ This project uses automated **License Governance** to ensure GPL-3.0 compliance:
 - All dependencies are verified for compatibility
 - Third-party attributions are maintained
 - License compliance is a required quality gate
-- Compliance status documented in feature documentation (e.g., [Feature 0003: Plugin Listing](02_agile_board/04_backlog/feature_0003_plugin_listing.md#license-compliance))
+- Compliance status documented in feature documentation (e.g., [Feature 0003: Plugin Listing](02_agile_board/06_done/feature_0003_plugin_listing.md#license-compliance))
 
 For questions about licensing, please open a GitHub Issue.
 
@@ -762,7 +762,7 @@ See [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed
 | **Architecture (Implementation)** | [03_documentation/01_architecture/](03_documentation/01_architecture/) | Actual implemented architecture |
 | **Test Plans** | [03_documentation/02_tests/](03_documentation/02_tests/) | Test strategy and test cases |
 | **Test Reports** | [03_documentation/02_tests/](03_documentation/02_tests/) | Test execution results |
-| **Agent System** | [.github/agents/](. github/agents/) & [AGENTS.md](AGENTS.md) | Development workflow agents |
+| **Agent System** | [.github/agents/](.github/agents/) & [AGENTS.md](AGENTS.md) | Development workflow agents |
 | **API Documentation** | [scripts/doc.doc.sh](scripts/doc.doc.sh) | Inline code documentation |
 
 ### Quick Reference

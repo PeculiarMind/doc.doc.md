@@ -210,7 +210,7 @@ docker history <image-id>  # Review layers for sensitive data
 
 For issues specific to this devcontainer:
 1. Check [main README.md](../../README.md) for general setup
-2. Review [CONTRIBUTING.md](../../CONTRIBUTING.md) for development guidelines
+2. Review [AGENTS.md](../../AGENTS.md) for development workflow
 3. Open issue on GitHub with devcontainer logs
 
 ## License
