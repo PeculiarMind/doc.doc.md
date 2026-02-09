@@ -29,7 +29,7 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 ## 1.1 Requirements Overview
 
 ### Requirements
-The project currently has 18 accepted requirements that define the core functionality:
+The project has 37 accepted requirements that define the core functionality:
 
 - **req_0001**: [Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md)
 - **req_0002**: [Recursive Directory Scanning](../../02_requirements/03_accepted/req_0002_recursive_directory_scanning.md)
@@ -40,15 +40,35 @@ The project currently has 18 accepted requirements that define the core function
 - **req_0007**: [Tool Availability Verification](../../02_requirements/03_accepted/req_0007_tool_availability_verification.md)
 - **req_0008**: [Installation Prompts](../../02_requirements/03_accepted/req_0008_installation_prompts.md)
 - **req_0009**: [Lightweight Implementation](../../02_requirements/03_accepted/req_0009_lightweight_implementation.md)
+- **req_0010**: [Unix Tool Composability](../../02_requirements/03_accepted/req_0010_unix_tool_composability.md)
 - **req_0011**: [Local Only Processing](../../02_requirements/03_accepted/req_0011_local_only_processing.md)
 - **req_0012**: [Network Access for Tools Only](../../02_requirements/03_accepted/req_0012_network_access_for_tools_only.md)
+- **req_0013**: [No GUI Application](../../02_requirements/03_accepted/req_0013_no_gui_application.md)
+- **req_0014**: [No Specialized Tool Replacement](../../02_requirements/03_accepted/req_0014_no_specialized_tool_replacement.md)
+- **req_0015**: [Minimal Runtime Dependencies](../../02_requirements/03_accepted/req_0015_minimal_runtime_dependencies.md)
 - **req_0016**: [Offline Operation](../../02_requirements/03_accepted/req_0016_offline_operation.md)
+- **req_0017**: [Script Entry Point](../../02_requirements/03_accepted/req_0017_script_entry_point.md)
 - **req_0018**: [Per-File Reports](../../02_requirements/03_accepted/req_0018_per_file_reports.md)
+- **req_0019**: [Exit Code Reporting](../../02_requirements/03_accepted/req_0019_exit_code_reporting.md)
 - **req_0020**: [Error Handling](../../02_requirements/03_accepted/req_0020_error_handling.md)
 - **req_0021**: [Toolkit Extensibility and Plugin Architecture](../../02_requirements/03_accepted/req_0021_toolkit_extensibility_and_plugin_architecture.md)
 - **req_0022**: [Plugin-based Extensibility](../../02_requirements/03_accepted/req_0022_plugin_based_extensibility.md)
 - **req_0023**: [Data-driven Execution Flow](../../02_requirements/03_accepted/req_0023_data_driven_execution_flow.md)
 - **req_0024**: [Plugin Listing](../../02_requirements/03_accepted/req_0024_plugin_listing.md)
+- **req_0025**: [Incremental Analysis](../../02_requirements/03_accepted/req_0025_incremental_analysis.md)
+- **req_0026**: [Development Containers](../../02_requirements/03_accepted/req_0026_development_containers.md)
+- **req_0027**: [Development Container Secrets Management](../../02_requirements/03_accepted/req_0027_development_container_secrets_management.md)
+- **req_0028**: [Development Container Base Image Verification](../../02_requirements/03_accepted/req_0028_development_container_base_image_verification.md)
+- **req_0029**: [Development Container Package Integrity](../../02_requirements/03_accepted/req_0029_development_container_package_integrity.md)
+- **req_0030**: [Development Container Privilege Restriction](../../02_requirements/03_accepted/req_0030_development_container_privilege_restriction.md)
+- **req_0031**: [Development Container Build Security](../../02_requirements/03_accepted/req_0031_development_container_build_security.md)
+- **req_0032**: [Workspace Directory Management](../../02_requirements/03_accepted/req_0032_workspace_directory_management.md)
+- **req_0033**: [Platform Support Definition](../../02_requirements/03_accepted/req_0033_platform_support.md)
+- **req_0034**: [Default Template Provision](../../02_requirements/03_accepted/req_0034_default_template_provision.md)
+- **req_0035**: [Comprehensive Help System](../../02_requirements/03_accepted/req_0035_comprehensive_help_system.md)
+- **req_0036**: [Testing Standards and Coverage](../../02_requirements/03_accepted/req_0036_testing_standards_and_coverage.md)
+- **req_0037**: [Documentation Maintenance](../../02_requirements/03_accepted/req_0037_documentation_maintenance.md)
+- **req_0038**: [Input Validation and Sanitization](../../02_requirements/03_accepted/req_0038_input_validation_and_sanitization.md)
 
 ## 1.2 Quality Goals
 

@@ -241,6 +241,327 @@ wait
 # File-level locking ensures no conflicts
 ```
 
+### Workspace Management Operations
+
+#### Initialization
+
+**Purpose**: Create workspace directory structure when specified directory doesn't exist or validate existing workspace.
+
+**Initialization Logic**:
+```bash
+initialize_workspace() {
+    local workspace_dir="$1"
+    
+    # Create workspace directory if it doesn't exist
+    if [[ ! -d "$workspace_dir" ]]; then
+        log_info "Creating workspace directory: $workspace_dir"
+        mkdir -p "$workspace_dir" || {
+            log_error "Failed to create workspace directory: $workspace_dir"
+            return 1
+        }
+    fi
+    
+    # Set restrictive permissions (user read/write only)
+    chmod 700 "$workspace_dir" || {
+        log_error "Failed to set workspace permissions"
+        return 1
+    }
+    
+    # Create workspace metadata file
+    local metadata_file="$workspace_dir/workspace.json"
+    if [[ ! -f "$metadata_file" ]]; then
+        cat > "$metadata_file" <<EOF
+{
+  "version": "1.0",
+  "created": "$(date -Iseconds)",
+  "last_updated": "$(date -Iseconds)",
+  "tool_version": "${TOOL_VERSION}"
+}
+EOF
+    fi
+    
+    # Create subdirectories if needed
+    mkdir -p "$workspace_dir/files" || true
+    mkdir -p "$workspace_dir/plugins" || true
+    mkdir -p "$workspace_dir/corruption" || true
+    
+    # Write version marker
+    echo "1.0" > "$workspace_dir/.workspace_version"
+    
+    log_info "Workspace initialized successfully: $workspace_dir"
+    return 0
+}
+```
+
+**Initialization Requirements**:
+- Atomic operation (completes fully or fails cleanly)
+- Creates workspace.json with version and timestamp
+- Sets permissions to user-only (700)
+- Creates standard subdirectories (files/, plugins/, corruption/)
+- Writes .workspace_version marker file
+
+#### Validation
+
+**Purpose**: Verify workspace structure integrity on startup before analysis begins.
+
+**Validation Logic**:
+```bash
+validate_workspace() {
+    local workspace_dir="$1"
+    local errors=0
+    
+    log_verbose "Validating workspace: $workspace_dir"
+    
+    # Check workspace directory exists and is accessible
+    if [[ ! -d "$workspace_dir" ]]; then
+        log_error "Workspace directory does not exist: $workspace_dir"
+        return 1
+    fi
+    
+    if [[ ! -r "$workspace_dir" || ! -w "$workspace_dir" ]]; then
+        log_error "Workspace directory not accessible: $workspace_dir"
+        return 1
+    fi
+    
+    # Check version file exists
+    local version_file="$workspace_dir/.workspace_version"
+    if [[ ! -f "$version_file" ]]; then
+        log_warning "Workspace version file missing, recreating..."
+        echo "1.0" > "$version_file"
+    fi
+    
+    # Validate version compatibility
+    local workspace_version=$(cat "$version_file")
+    if [[ "$workspace_version" != "1.0" ]]; then
+        log_error "Incompatible workspace version: $workspace_version (expected 1.0)"
+        log_error "Run migration tool or delete workspace to recreate"
+        return 1
+    fi
+    
+    # Recreate missing subdirectories with warnings
+    for subdir in files plugins corruption; do
+        if [[ ! -d "$workspace_dir/$subdir" ]]; then
+            log_warning "Missing subdirectory $subdir, recreating..."
+            mkdir -p "$workspace_dir/$subdir" || ((errors++))
+        fi
+    done
+    
+    # Check workspace metadata file
+    local metadata_file="$workspace_dir/workspace.json"
+    if [[ ! -f "$metadata_file" ]]; then
+        log_warning "Workspace metadata missing, recreating..."
+        initialize_workspace "$workspace_dir"
+    else
+        # Validate JSON syntax
+        if ! jq empty "$metadata_file" 2>/dev/null; then
+            log_warning "Workspace metadata corrupted, recreating..."
+            mv "$metadata_file" "$workspace_dir/corruption/workspace.json.$(date +%s)"
+            initialize_workspace "$workspace_dir"
+        fi
+    fi
+    
+    if [[ $errors -gt 0 ]]; then
+        log_error "Workspace validation failed with $errors errors"
+        return 1
+    fi
+    
+    log_verbose "Workspace validation completed successfully"
+    return 0
+}
+```
+
+**Validation Checks**:
+- Directory exists and has correct permissions
+- Version file exists and version is compatible
+- Required subdirectories exist (recreate if missing)
+- workspace.json exists and is valid JSON
+- Stale lock files cleaned up (optional)
+
+#### Corruption Detection and Recovery
+
+**Purpose**: Detect and recover from corrupted workspace files without losing all data.
+
+**Corruption Handling Logic**:
+```bash
+check_workspace_file() {
+    local json_file="$1"
+    local workspace_dir="$2"
+    
+    # Try to parse JSON
+    if ! jq empty "$json_file" 2>/dev/null; then
+        log_warning "Corrupted workspace file detected: $json_file"
+        
+        # Quarantine corrupted file
+        local filename=$(basename "$json_file")
+        local quarantine_dir="$workspace_dir/corruption"
+        local quarantine_file="${quarantine_dir}/${filename}.corrupted.$(date +%Y%m%d_%H%M%S)"
+        
+        mkdir -p "$quarantine_dir"
+        mv "$json_file" "$quarantine_file"
+        
+        log_info "Corrupted file quarantined: $quarantine_file"
+        log_info "File will be re-analyzed in next scan"
+        
+        return 1  # Indicates corruption found
+    fi
+    
+    return 0  # File is valid
+}
+
+scan_workspace_corruption() {
+    local workspace_dir="$1"
+    local corrupted_count=0
+    
+    log_info "Scanning workspace for corrupted files..."
+    
+    # Check all JSON files
+    for json_file in "$workspace_dir"/*.json; do
+        [[ ! -f "$json_file" ]] && continue
+        [[ "$json_file" == */workspace.json ]] && continue  # Skip metadata
+        
+        if ! check_workspace_file "$json_file" "$workspace_dir"; then
+            ((corrupted_count++))
+        fi
+    done
+    
+    if [[ $corrupted_count -gt 0 ]]; then
+        log_warning "Found $corrupted_count corrupted files (quarantined to corruption/)"
+        log_info "Affected files will be re-analyzed automatically"
+    else
+        log_verbose "No corrupted workspace files found"
+    fi
+    
+    return 0  # Continue analysis with healthy files
+}
+```
+
+**Corruption Recovery Process**:
+1. **Detection**: Attempt to parse JSON, catch syntax errors
+2. **Quarantine**: Move corrupted file to `corruption/` subdirectory with timestamp
+3. **Continue**: Process remaining valid workspace files
+4. **Re-analyze**: Missing workspace files automatically re-analyzed in next scan
+5. **Logging**: Document corruption detection and recovery actions
+
+**Quarantine Naming**:
+- Pattern: `<original_name>.corrupted.<timestamp>`
+- Example: `abc123def456.json.corrupted.20260209_143022`
+- Preserves original file for forensic analysis
+- Never automatically deletes corrupted data
+
+#### Cleanup Operations
+
+**Purpose**: Remove workspace entries for deleted source files and manage workspace size.
+
+**Cleanup Logic**:
+```bash
+cleanup_workspace() {
+    local workspace_dir="$1"
+    local source_dir="$2"
+    local dry_run="${3:-false}"
+    local removed_count=0
+    
+    log_info "Starting workspace cleanup..."
+    
+    for json_file in "$workspace_dir"/*.json; do
+        [[ ! -f "$json_file" ]] && continue
+        [[ "$json_file" == */workspace.json ]] && continue
+        
+        # Extract original file path
+        local file_path=$(jq -r '.file_path' "$json_file" 2>/dev/null)
+        
+        if [[ -z "$file_path" || "$file_path" == "null" ]]; then
+            log_warning "Workspace file missing file_path: $json_file"
+            continue
+        fi
+        
+        # Check if source file still exists
+        if [[ ! -f "$file_path" ]]; then
+            if [[ "$dry_run" == "true" ]]; then
+                log_info "[DRY RUN] Would remove: $json_file (source deleted: $file_path)"
+            else
+                log_verbose "Removing workspace file: $json_file (source deleted)"
+                rm -f "$json_file"
+                rm -f "${json_file}.lock"  # Clean up any stale locks
+            fi
+            ((removed_count++))
+        fi
+    done
+    
+    if [[ "$dry_run" == "true" ]]; then
+        log_info "Dry run complete: $removed_count files would be removed"
+    else
+        log_info "Cleanup complete: $removed_count workspace files removed"
+    fi
+    
+    return 0
+}
+
+workspace_size_report() {
+    local workspace_dir="$1"
+    
+    local total_size=$(du -sh "$workspace_dir" 2>/dev/null | cut -f1)
+    local file_count=$(find "$workspace_dir" -name "*.json" -type f | wc -l)
+    local corruption_count=$(find "$workspace_dir/corruption" -type f 2>/dev/null | wc -l)
+    
+    echo "Workspace Statistics:"
+    echo "  Location: $workspace_dir"
+    echo "  Total Size: $total_size"
+    echo "  JSON Files: $file_count"
+    echo "  Quarantined: $corruption_count"
+}
+
+reset_workspace() {
+    local workspace_dir="$1"
+    local confirm="${2:-false}"
+    
+    if [[ "$confirm" != "true" ]]; then
+        log_error "Workspace reset requires explicit confirmation"
+        log_error "Pass 'true' as second argument to confirm"
+        return 1
+    fi
+    
+    log_warning "Resetting workspace: $workspace_dir"
+    
+    # Remove all JSON files except metadata
+    find "$workspace_dir" -name "*.json" -type f -not -name "workspace.json" -delete
+    find "$workspace_dir" -name "*.lock" -type f -delete
+    
+    # Clear corruption directory
+    rm -rf "$workspace_dir/corruption/"*
+    
+    # Update metadata
+    if [[ -f "$workspace_dir/workspace.json" ]]; then
+        jq '.last_updated = "'$(date -Iseconds)'" | .reset_count = (.reset_count // 0) + 1' \
+            "$workspace_dir/workspace.json" > "$workspace_dir/workspace.json.tmp"
+        mv "$workspace_dir/workspace.json.tmp" "$workspace_dir/workspace.json"
+    fi
+    
+    log_info "Workspace reset complete"
+    return 0
+}
+```
+
+**Cleanup Operations**:
+- **Orphan Removal**: Delete workspace files for non-existent source files
+- **Size Query**: Report workspace disk usage and file counts
+- **Reset**: Clear all workspace data while preserving structure
+- **Dry Run**: Preview cleanup actions without making changes
+
+**Command-Line Integration**:
+```bash
+# Cleanup deleted files
+./doc.doc.sh --workspace-cleanup -w workspace/
+
+# Workspace size report
+./doc.doc.sh --workspace-info -w workspace/
+
+# Force full workspace reset (with confirmation)
+./doc.doc.sh --workspace-reset -w workspace/
+
+# Dry run cleanup
+./doc.doc.sh --workspace-cleanup --dry-run -w workspace/
+```
+
 ### Workspace Maintenance
 
 **Cleanup Old Data**:
@@ -339,3 +660,12 @@ migrate_workspace() {
 - Workspace statistics and health checks
 - Automatic cleanup of orphaned entries
 - Workspace backup and restore utilities
+
+### Related Requirements
+
+- [req_0001: Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md) - requires `-w` workspace parameter
+- [req_0003: Metadata Extraction](../../02_requirements/03_accepted/req_0003_metadata_extraction_with_cli_tools.md) - stores metadata in workspace as JSON
+- [req_0018: Per-File Reports](../../02_requirements/03_accepted/req_0018_per_file_reports.md) - stores file metadata in workspace JSON files
+- [req_0023: Data-driven Execution Flow](../../02_requirements/03_accepted/req_0023_data_driven_execution_flow.md) - plugins read/write workspace data
+- [req_0025: Incremental Analysis](../../02_requirements/03_accepted/req_0025_incremental_analysis.md) - depends on workspace timestamp tracking
+- [req_0032: Workspace Directory Management](../../02_requirements/03_accepted/req_0032_workspace_directory_management.md) - defines workspace lifecycle operations
