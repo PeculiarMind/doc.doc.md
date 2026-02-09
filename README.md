@@ -1,180 +1,242 @@
 # doc.doc.md
 
-A lightweight, scriptable toolkit that orchestrates existing CLI tools to extract metadata and content insights from files, producing consistent Markdown reports using customizable templates.
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Shell Script](https://img.shields.io/badge/Shell-Bash-green.svg)](https://www.gnu.org/software/bash/)
+[![Version](https://img.shields.io/badge/Version-0.1.0-orange.svg)](scripts/doc.doc.sh)
 
-## Project Status
+Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata and generate Markdown documentation reports. Pure local processing, plugin-extensible, development foundation complete.
 
-**Early Development - Foundation Complete** 🚧
+## Table of Contents
 
-- ✅ Agent-driven development workflow established ([AGENTS.md](AGENTS.md))
-- ✅ Vision and architecture documented ([01_vision/](01_vision/))
-- ✅ **55 total requirements** (37 accepted + 18 in funnel under review)
-  - **37 accepted requirements** ready for implementation:
-    - Core functionality (directory analysis, metadata extraction, reporting, plugins)
-    - Quality assurance (testing standards, documentation maintenance)  
-    - Security (input validation, development container security)
-    - Operational (workspace management, platform support, help system)
-  - **18 new requirements** under review in funnel:
-    - 8 feature enhancements (aggregated reports, templates, modular architecture, advanced help, file filtering, workspace migration, non-interactive mode, performance metrics)
-    - **10 critical security requirements** (plugin validation, sandboxing, dependency verification, injection prevention, integrity verification, audit logging, secure defaults, error disclosure prevention, file verification, security testing)
-- ✅ **Comprehensive security architecture** established
-  - **6 security scopes** with complete threat modeling ([01_vision/04_security/](01_vision/04_security/))
-  - **~95% security coverage** across all attack surfaces
-  - **48 threats identified and mitigated** via STRIDE analysis across 28 interfaces
-  - Defense-in-depth architecture with 7 security layers
-- ✅ **9 architecture concepts** documented (6 core + 3 security-focused)
-  - Security architecture, audit/logging, dependency security newly added
-- ✅ Basic script structure implemented (Feature 0001 - [Done](02_agile_board/06_done/))
-- ✅ Comprehensive test suite established - **all 13 suites passing (136+ tests)** ([tests/](tests/))
-- ✅ Test documentation standards implemented
-- ✅ License compliance workflow integrated
-- ✅ Plugin listing functionality implemented (Feature 0003 - [Done](02_agile_board/06_done/))
-- ✅ Development containers implemented (Feature 0005 - [Done](02_agile_board/06_done/))
-  - Ubuntu 22.04, Debian 12, Arch Linux, Generic (Alpine)
-  - All security requirements (req_0027-req_0031) verified
-  - 109 tests passing (41 structure + 68 security)
-- 🚧 Core functionality implementation in progress
-- 🚧 Enhanced logging in backlog
+- [Overview](#overview)
+- [Current Status](#current-status)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Development Setup](#development-setup)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
-### Purpose
-doc.doc.md automates file analysis and documentation generation by:
-- **Orchestrating** existing Linux/Unix CLI tools instead of reinventing functionality
-- **Extracting** comprehensive metadata (ownership, timestamps, content insights)
-- **Generating** consistent Markdown reports using customizable templates
-- **Processing** everything locally with no external dependencies or data transmission
+**doc.doc.md** automates file analysis by orchestrating existing Unix/Linux CLI tools (`file`, `stat`, etc.) to extract metadata and generate consistent Markdown reports using customizable templates.
 
-### Core Philosophy
-- **Composability**: Leverage existing proven tools (`file`, `stat`, `grep`, etc.)
-- **Extensibility**: Plugin architecture allows adding custom analysis capabilities
-- **Privacy**: 100% local processing - no cloud services, no data transmission
-- **Simplicity**: Bash-based, minimal dependencies, runs anywhere Unix tools exist
-- **Standards**: Follows Unix conventions, POSIX compliance, semantic versioning
+**Core Principles:**
+- **Composability**: Leverages proven Unix tools instead of reimplementing functionality
+- **Extensibility**: Plugin architecture for custom analysis capabilities
+- **Privacy**: 100% local processing - no cloud services or data transmission
+- **Simplicity**: Pure Bash, minimal dependencies, runs anywhere Unix tools exist
 
-## Features
+## Current Status
 
-### Current Capabilities (v0.1.0)
-- ✅ **Script Foundation**: Argument parsing, help system, error handling, platform detection
-- ✅ **Exit Code System**: Standard codes for different failure modes
-- ✅ **Verbose Logging**: Multi-level logging (INFO, WARN, ERROR, DEBUG)
-- ✅ **Modular Architecture**: Function-based design ready for feature additions
-- ✅ **Test Infrastructure**: Unit, integration, and system test suites
-- ✅ **Plugin Listing**: Display available plugins with status (`-p list` command)
+**v0.1.0 - Foundation Complete** 🚧
 
-### Planned Features
-- 📋 **Directory Analysis**: Recursive scanning with file discovery
-- 📋 **Metadata Extraction**: File type, ownership, timestamps, permissions
-- 📋 **Template System**: Variable substitution in Markdown templates
-- 🚧 **Plugin Architecture**: Data-driven extensibility with automatic workflow ordering
-  - ✅ Plugin listing functionality
-  - 📋 Plugin info, enable, disable commands
-  - 📋 Plugin execution and workflow integration
-- 📋 **Workspace Management**: JSON-based state storage for incremental analysis
-- 📋 **Tool Verification**: Check dependencies and prompt for installation
-- 📋 **Report Generation**: Per-file Markdown reports with customizable templates
+Three core features implemented and tested:
 
-### Features Under Development Review
-The following features are currently in the requirements funnel under evaluation:
-- 🔍 **Aggregated Summary Reports**: Cross-file analysis summaries and dashboards
-- 🔍 **Template Engine Implementation**: Advanced templating with conditionals and loops
-- 🔍 **Modular Component Architecture**: Enhanced script modularity and reusability
-- 🔍 **Advanced Multi-Level Help System**: Context-sensitive help and interactive assistance
-- 🔍 **Plugin File Type Filtering**: Restrict plugin execution by file type
-- 🔍 **Workspace Format Migration**: Backward-compatible workspace version upgrades
-- 🔍 **Non-Interactive Mode Handling**: Fully automated batch processing
-- 🔍 **Performance Monitoring and Metrics**: Profile execution time and resource usage
+- ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
+- ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
+- ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
 
-### Security Enhancements Under Review
-**10 critical security requirements** currently in security review (STRIDE threat analysis complete):
-- 🔒 **Plugin Descriptor Validation** (CRITICAL - Risk 320): Schema validation, signature verification
-- 🔒 **Plugin Execution Sandboxing** (CRITICAL - Risk 243): Isolated execution environment
-- 🔒 **Dependency Tool Security** (CRITICAL - Risk 240): Tool integrity verification
-- 🔒 **Template Injection Prevention** (HIGH - Risk 222): Safe template processing
-- 🔒 **Workspace Integrity Verification** (HIGH - Risk 204): Detect tampering and corruption
-- 🔒 **Security Logging and Audit Trail**: Comprehensive security event tracking
-- 🔒 **Secure Defaults and Configuration Hardening**: Secure-by-default settings
-- 🔒 **Error Message Information Disclosure Prevention**: Safe error handling
-- 🔒 **File Type Verification and Validation**: Prevent malicious file processing
-- 🔒 **Security Testing Requirements**: Penetration testing and fuzzing integration
+**Testing**: Comprehensive test suite with 136+ passing tests across 13 suites (unit, integration, system)
 
-See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap, [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications (37 accepted), [requirements funnel](01_vision/02_requirements/01_funnel/) for features under review (18 pending), and [comprehensive security documentation](01_vision/04_security/) for threat modeling across 6 security scopes and security controls.
+**Architecture**: 37 accepted requirements, 9 documented cross-cutting concepts, complete security threat modeling
+
+**Next**: Features 0006-0007 (directory scanning, workspace management) prioritized for implementation
+
+## Installation
+
+### Prerequisites
+
+- Bash 4.0+ (check: `bash --version`)
+- Standard Unix tools: `file`, `stat`, `grep`, `find`
+
+### Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/doc.doc.md.git
+cd doc.doc.md
+
+# Make script executable
+chmod +x scripts/doc.doc.sh
+
+# Verify installation
+./scripts/doc.doc.sh --version
+```
+
+## Usage
+
+### Current Commands
+
+**Display help:**
+```bash
+./scripts/doc.doc.sh --help
+```
+
+**Show version:**
+```bash
+./scripts/doc.doc.sh --version
+```
+
+**List available plugins:**
+```bash
+./scripts/doc.doc.sh -p list
+```
+
+**Enable verbose logging:**
+```bash
+./scripts/doc.doc.sh --verbose -p list
+```
+
+### Exit Codes
+
+- `0` - Success
+- `1` - Invalid arguments
+- `2` - File/directory error
+- `3` - Plugin execution failure
+- `4` - Report generation failure
+- `5` - Workspace error
+
+### Planned Usage (Roadmap)
+
+When directory analysis is implemented:
+
+```bash
+# Analyze directory with template
+./scripts/doc.doc.sh -d /path/to/docs -m template.md -t ./output -w ./workspace
+
+# Options (not yet implemented):
+#   -d <directory>   Directory to analyze
+#   -m <template>    Markdown template file
+#   -t <target>      Output directory for reports
+#   -w <workspace>   Workspace directory for state storage
+#   -f               Enable fullscan mode
+```
+
+## Development Setup
+
+### Using Development Containers (Recommended)
+
+The project provides pre-configured dev containers for all supported platforms:
+
+1. **Prerequisites**: [VS Code](https://code.visualstudio.com/) + [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+2. **Available Containers:**
+   - **Ubuntu 22.04** (`.devcontainer/ubuntu/`) - Primary development environment
+   - **Debian 12** (`.devcontainer/debian/`) - Debian-based testing
+   - **Arch Linux** (`.devcontainer/arch/`) - Rolling release testing
+   - **Generic Alpine** (`.devcontainer/generic/`) - Minimal environment
+
+3. **Launch:**
+   - Open repository in VS Code
+   - Run: `Dev Containers: Reopen in Container`
+   - Select desired platform
+   - Container builds and provisions automatically
+
+4. **Included Tools:**
+   - Bash 5.x with completion
+   - Git, curl, jq (JSON parsing)
+   - Testing frameworks
+   - Common CLI tools for plugin development
+
+**Benefits**: Consistent environments, instant setup, platform-specific testing, no host system conflicts.
+
+### Manual Setup
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/doc.doc.md.git
+cd doc.doc.md
+
+# Verify Bash version
+bash --version  # Requires 4.0+
+
+# Run tests to verify environment
+./tests/run_all_tests.sh
+```
+
+## Testing
+
+### Test Structure
+
+```
+tests/
+├── run_all_tests.sh              # Execute all test suites
+├── helpers/test_helpers.sh       # Shared utilities and assertions
+├── unit/                         # Component tests (8 suites)
+│   ├── test_script_structure.sh
+│   ├── test_help_system.sh
+│   ├── test_argument_parsing.sh
+│   └── ...
+├── integration/                  # Multi-component tests
+│   └── test_complete_workflow.sh
+└── system/                       # End-to-end scenarios
+    └── test_user_scenarios.sh
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+./tests/run_all_tests.sh
+
+# Run specific suite
+./tests/unit/test_help_system.sh
+./tests/integration/test_complete_workflow.sh
+
+# Run with verbose output
+VERBOSE=true ./tests/run_all_tests.sh
+```
+
+**Current Status**: 136+ tests passing across 13 suites. See [tests/README.md](tests/README.md) for details.
 
 ## Project Structure
 
 ```
 doc.doc.md/
-├── 01_vision/                          # Project vision and planning
-│   ├── 01_project_vision/              # Core vision statement and goals
-│   ├── 02_requirements/                # Requirements lifecycle management
-│   │   ├── 01_funnel/                  # 🔍 18 new requirements under review (8 features + 10 security)
-│   │   ├── 02_analyze/                 # Requirements being analyzed
-│   │   ├── 03_accepted/                # ✅ 37 approved requirements ready for implementation
-│   │   ├── 04_obsolete/                # Archived requirements
-│   │   └── 05_rejected/                # Rejected requirements with rationale
-│   ├── 03_architecture/                # Arc42 architecture vision
-│   │   ├── 01_introduction_and_goals/  
-│   │   ├── 02_architecture_constraints/
-│   │   ├── 05_building_block_view/     # Component design
-│   │   ├── 06_runtime_view/            # Execution flows
-│   │   ├── 08_concepts/                # 9 cross-cutting concepts (plugins, workspace, CLI, security, platform, audit, dependencies)
-│   │   ├── 09_architecture_decisions/  # Design decisions
-│   │   └── 10_quality_requirements/    # Quality goals and scenarios
-│   └── 04_security/                    # Comprehensive security documentation
-│       ├── 01_introduction_and_risk_overview/  # Security overview and risk landscape
-│       └── 02_scopes/                  # 6 security scopes with complete STRIDE/DREAD threat modeling (~95% coverage)
-│
-├── 02_agile_board/                     # Kanban workflow tracking
-│   ├── 01_funnel/                      # New work items
-│   ├── 02_analyze/                     # Work under analysis
-│   ├── 03_ready/                       # Ready for development
-│   ├── 04_backlog/                     # 📋 2 features ready (OCRmyPDF plugin, enhanced logging)
-│   ├── 05_implementing/                # In active development
-│   └── 06_done/                        # ✅ 3 features completed
-│
-├── 03_documentation/                   # Implementation documentation
-│   ├── 01_architecture/                # Actual implemented architecture
-│   │   ├── 05_building_block_view/     # Implemented components
-│   │   ├── 06_runtime_view/            # Runtime behavior
-│   │   ├── 09_architecture_decisions/  # Implementation decisions (ADRs)
-│   │   └── 99_cross_references/        # Traceability between vision and implementation
-│   └── 02_tests/                       # Test documentation
-│       ├── testplan_*.md               # Test plans (created by Tester Agent)
-│       └── testreport_*.md             # Test execution reports
-│
-├── .github/
-│   ├── agents/                         # Specialized automation agents
-│   │   ├── developer.agent.md          # Feature implementation workflow
-│   │   ├── tester.agent.md             # TDD test creation and execution
-│   │   ├── architect.agent.md          # Architecture compliance verification
-│   │   ├── license-governance.agent.md # License compliance validation
-│   │   ├── requirements-engineer.agent.md
-│   │   └── readme-maintainer.agent.md  
-│   └── copilot-instructions.md         # Agent system documentation
-│
-├── .devcontainer/                      # Development containers (Feature 0005)
-│   ├── ubuntu/                         # Ubuntu 22.04 LTS devcontainer
-│   ├── debian/                         # Debian 12 stable devcontainer
-│   ├── arch/                           # Arch Linux rolling devcontainer
-│   └── generic/                        # Alpine minimal devcontainer
-│
 ├── scripts/
-│   ├── doc.doc.sh                      # Main analysis script
-│   ├── template.doc.doc.md             # Default Markdown report template
-│   └── plugins/                        # Plugin directory structure
-│       ├── all/                        # Cross-platform plugins
-│       └── ubuntu/                     # Platform-specific plugins
+│   ├── doc.doc.sh              # Main executable (510 lines)
+│   ├── template.doc.doc.md     # Default report template
+│   └── plugins/                # Plugin directory structure
+│       ├── all/                # Cross-platform plugins
+│       └── ubuntu/             # Ubuntu-specific plugins
 │
-├── tests/                              # Comprehensive test suite
-│   ├── run_all_tests.sh                # Master test runner
-│   ├── helpers/                        # Shared test utilities
-│   ├── unit/                           # Unit tests
-│   ├── integration/                    # Integration tests
-│   └── system/                         # End-to-end tests
+├── tests/                      # Comprehensive test suite
+│   ├── run_all_tests.sh        # Master test runner
+│   ├── unit/                   # Component tests
+│   ├── integration/            # Multi-component tests
+│   └── system/                 # End-to-end tests
 │
-├── AGENTS.md                           # Agent registry and usage guide
-├── LICENSE                             # GNU General Public License v3.0
-└── README.md                           # This file
+├── 01_vision/                  # Project vision and requirements
+│   ├── 01_project_vision/      # Vision document
+│   ├── 02_requirements/        # Requirements lifecycle (37 accepted)
+│   ├── 03_architecture/        # Arc42 architecture documentation
+│   └── 04_security/            # Security architecture and threat models
+│
+├── 02_agile_board/             # Kanban workflow
+│   ├── 04_backlog/             # Prioritized work items
+│   └── 06_done/                # Completed features (0001, 0003, 0005)
+│
+├── 03_documentation/           # Implementation docs
+│   ├── 01_architecture/        # Architecture Decision Records (ADRs)
+│   └── 02_tests/               # Test plans and reports
+│
+├── .devcontainer/              # Development containers
+│   ├── ubuntu/                 # Ubuntu 22.04 environment
+│   ├── debian/                 # Debian 12 environment
+│   ├── arch/                   # Arch Linux environment
+│   └── generic/                # Alpine-based minimal environment
+│
+└── .github/agents/             # Specialized automation agents
+    ├── developer.agent.md
+    ├── tester.agent.md
+    ├── architect.agent.md
+    ├── license-governance.agent.md
+    ├── requirements-engineer.agent.md
+    ├── readme-maintainer.agent.md
+    └── security-review.agent.md
 ```
 
 ## Getting Started
