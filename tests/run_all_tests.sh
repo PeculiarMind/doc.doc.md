@@ -36,7 +36,7 @@ PASSED_SUITES=0
 FAILED_SUITES=0
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║      doc.doc.sh Test Suite - TDD Red Phase            ║${NC}"
+echo -e "${BLUE}║      doc.doc.sh Test Suite - TDD Red Phase             ║${NC}"
 echo -e "${BLUE}║  All tests expected to FAIL (no implementation yet)    ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
