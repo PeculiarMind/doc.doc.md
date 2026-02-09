@@ -8,10 +8,14 @@ A lightweight, scriptable toolkit that orchestrates existing CLI tools to extrac
 
 - ✅ Agent-driven development workflow established ([AGENTS.md](AGENTS.md))
 - ✅ Vision and architecture documented ([01_vision/](01_vision/))
-- ✅ 30 requirements accepted and ready for implementation
+- ✅ 37 requirements accepted and ready for implementation
+  - Core functionality (directory analysis, metadata extraction, reporting, plugins)
+  - Quality assurance (testing standards, documentation maintenance)  
+  - Security (input validation, development container security)
+  - Operational (workspace management, platform support, help system)
 - ✅ Security documentation and threat modeling established ([01_vision/04_security/](01_vision/04_security/))
 - ✅ Basic script structure implemented (Feature 0001 - [Done](02_agile_board/06_done/))
-- ✅ Comprehensive test suite established ([tests/](tests/))
+- ✅ Comprehensive test suite established - all 13 suites passing ([tests/](tests/))
 - ✅ Test documentation standards implemented
 - ✅ License compliance workflow integrated
 - ✅ Plugin listing functionality implemented (Feature 0003 - [Done](02_agile_board/06_done/))
@@ -60,7 +64,7 @@ doc.doc.md automates file analysis and documentation generation by:
 - 📋 **Tool Verification**: Check dependencies and prompt for installation
 - 📋 **Report Generation**: Per-file Markdown reports with customizable templates
 
-See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap, [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications (30 requirements), and [security documentation](01_vision/04_security/) for threat modeling and security controls.
+See [vision document](01_vision/01_project_vision/01_vision.md) for complete feature roadmap, [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed specifications (37 requirements), and [security documentation](01_vision/04_security/) for threat modeling and security controls.
 
 ## Project Structure
 
@@ -79,7 +83,7 @@ doc.doc.md/
 │   │   ├── 02_architecture_constraints/
 │   │   ├── 05_building_block_view/     # Component design
 │   │   ├── 06_runtime_view/            # Execution flows
-│   │   ├── 08_concepts/                # Plugin, workspace, CLI concepts
+│   │   ├── 08_concepts/                # Cross-cutting concepts (plugin, workspace, CLI, security, platform)
 │   │   ├── 09_architecture_decisions/  # Design decisions
 │   │   └── 10_quality_requirements/    # Quality goals and scenarios
 │   └── 04_security/                    # Security documentation
@@ -395,7 +399,7 @@ See [AGENTS.md](AGENTS.md) for complete agent documentation and usage guidelines
 - Requirements Engineer extracts requirements from [project vision](01_vision/01_project_vision/01_vision.md)
 - Requirements flow through lifecycle: `funnel` → `analyze` → `accepted`
 - Accepted requirements documented in [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/)
-- **Status**: ✅ 30 requirements accepted and ready
+- **Status**: ✅ 37 requirements accepted and ready
 
 #### 2. **Feature Implementation Phase**
 The Developer Agent manages a comprehensive workflow:
@@ -705,7 +709,7 @@ For questions about licensing, please open a GitHub Issue.
 ### Phase 1: Foundation (Current) - Q1 2026
 - [x] ✅ Project vision and architecture documented
 - [x] ✅ Agent system established and operational
-- [x] ✅ Requirements extracted and accepted (30 requirements)
+- [x] ✅ Requirements extracted and accepted (37 requirements)
 - [x] ✅ Security documentation and threat modeling established
 - [x] ✅ Basic script structure implemented (Feature 0001)
 - [x] ✅ Plugin listing functionality implemented (Feature 0003)
@@ -756,7 +760,7 @@ See [accepted requirements](01_vision/02_requirements/03_accepted/) for detailed
 | Documentation | Location | Purpose |
 |--------------|----------|---------|
 | **Vision** | [01_vision/01_project_vision/](01_vision/01_project_vision/) | Project goals and purpose |
-| **Requirements** | [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/) | Detailed feature specifications (30 requirements) |
+| **Requirements** | [01_vision/02_requirements/03_accepted/](01_vision/02_requirements/03_accepted/) | Detailed feature specifications (37 requirements) |
 | **Architecture (Vision)** | [01_vision/03_architecture/](01_vision/03_architecture/) | Planned architecture and design |
 | **Security** | [01_vision/04_security/](01_vision/04_security/) | Security scopes, threat modeling, risk assessments |
 | **Architecture (Implementation)** | [03_documentation/01_architecture/](03_documentation/01_architecture/) | Actual implemented architecture |
