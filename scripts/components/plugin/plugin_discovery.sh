@@ -15,7 +15,7 @@
 discover_plugins() {
   local plugins_dir="${SCRIPT_DIR}/plugins"
   
-  log "DEBUG" "Searching for plugins in: ${plugins_dir}"
+  log "DEBUG" "PLUGIN" "Searching for plugins in: ${plugins_dir}"
   
   # Check if plugins directory exists
   if [[ ! -d "${plugins_dir}" ]]; then
@@ -36,10 +36,10 @@ discover_plugins() {
   
   # Discover platform-specific plugins first (higher priority)
   if [[ -d "${platform_dir}" ]]; then
-    log "DEBUG" "Searching platform-specific plugins in: ${platform_dir}"
+    log "DEBUG" "PLUGIN" "Searching platform-specific plugins in: ${platform_dir}"
     
     while IFS= read -r -d '' descriptor_file; do
-      log "DEBUG" "Found descriptor: ${descriptor_file}"
+      log "DEBUG" "PLUGIN" "Found descriptor: ${descriptor_file}"
       
       local plugin_data
       if plugin_data=$(parse_plugin_descriptor "${descriptor_file}"); then
@@ -48,7 +48,7 @@ discover_plugins() {
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
           plugin_list+=("${plugin_data}")
           seen_plugins[${plugin_name}]=1
-          log "DEBUG" "Added platform plugin: ${plugin_name}"
+          log "DEBUG" "PLUGIN" "Added platform plugin: ${plugin_name}"
         fi
       fi
     done < <(find "${platform_dir}" -name "descriptor.json" -type f -print0 2>/dev/null)
@@ -56,10 +56,10 @@ discover_plugins() {
   
   # Discover cross-platform plugins (lower priority)
   if [[ -d "${all_dir}" ]]; then
-    log "DEBUG" "Searching cross-platform plugins in: ${all_dir}"
+    log "DEBUG" "PLUGIN" "Searching cross-platform plugins in: ${all_dir}"
     
     while IFS= read -r -d '' descriptor_file; do
-      log "DEBUG" "Found descriptor: ${descriptor_file}"
+      log "DEBUG" "PLUGIN" "Found descriptor: ${descriptor_file}"
       
       local plugin_data
       if plugin_data=$(parse_plugin_descriptor "${descriptor_file}"); then
@@ -69,9 +69,9 @@ discover_plugins() {
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
           plugin_list+=("${plugin_data}")
           seen_plugins[${plugin_name}]=1
-          log "DEBUG" "Added cross-platform plugin: ${plugin_name}"
+          log "DEBUG" "PLUGIN" "Added cross-platform plugin: ${plugin_name}"
         else
-          log "DEBUG" "Skipped duplicate plugin (platform version exists): ${plugin_name}"
+          log "DEBUG" "PLUGIN" "Skipped duplicate plugin (platform version exists): ${plugin_name}"
         fi
       fi
     done < <(find "${all_dir}" -name "descriptor.json" -type f -print0 2>/dev/null)
@@ -79,7 +79,7 @@ discover_plugins() {
   
   # Return plugin list
   if [[ ${#plugin_list[@]} -eq 0 ]]; then
-    log "DEBUG" "No valid plugins found"
+    log "DEBUG" "PLUGIN" "No valid plugins found"
     return 0
   fi
   

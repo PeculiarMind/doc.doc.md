@@ -14,16 +14,22 @@ VERBOSE=false
 # Logging Functions
 # ==============================================================================
 
-# Log message with level
+# Log message with level, timestamp, and component
 # Arguments:
 #   $1 - Log level (INFO, WARN, ERROR, DEBUG)
-#   $2 - Message to log
+#   $2 - Component identifier (e.g., MAIN, PARSER, PLUGIN)
+#   $3 - Message to log
 log() {
   local level="$1"
-  local message="$2"
+  local component="$2"
+  local message="$3"
+  
+  # Generate ISO 8601 timestamp in UTC
+  local timestamp
+  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
   
   if [[ "${VERBOSE}" == true ]] || [[ "${level}" == "ERROR" ]] || [[ "${level}" == "WARN" ]]; then
-    echo "[${level}] ${message}" >&2
+    echo "[${timestamp}] [${level}] [${component}] ${message}" >&2
   fi
 }
 

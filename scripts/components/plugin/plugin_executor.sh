@@ -19,7 +19,7 @@ execute_plugin() {
   local plugin_name="$1"
   local plugin_dir="$2"
   
-  log "INFO" "Executing plugin: ${plugin_name}"
+  log "INFO" "PLUGIN" "Executing plugin: ${plugin_name}"
   # Placeholder for plugin execution logic
   return 0
 }
@@ -30,7 +30,7 @@ execute_plugin() {
 # Returns:
 #   Dependency graph data structure
 build_dependency_graph() {
-  log "DEBUG" "Building plugin dependency graph"
+  log "DEBUG" "PLUGIN" "Building plugin dependency graph"
   # Placeholder for dependency graph building
   return 0
 }
@@ -41,7 +41,7 @@ build_dependency_graph() {
 # Returns:
 #   0 on success, non-zero on failure
 orchestrate_plugins() {
-  log "INFO" "Orchestrating plugin execution"
+  log "INFO" "PLUGIN" "Orchestrating plugin execution"
   # Placeholder for plugin orchestration
   return 0
 }

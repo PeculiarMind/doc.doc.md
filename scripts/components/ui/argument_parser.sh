@@ -31,7 +31,7 @@ parse_arguments() {
         ;;
       -v|--verbose)
         set_log_level true
-        log "INFO" "Verbose mode enabled"
+        log "INFO" "PARSER" "Verbose mode enabled"
         shift
         ;;
       --version)
@@ -45,7 +45,7 @@ parse_arguments() {
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "Directory argument: $2 (not yet implemented)"
+        log "INFO" "PARSER" "Directory argument: $2 (not yet implemented)"
         shift 2
         ;;
       -m)
@@ -55,7 +55,7 @@ parse_arguments() {
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "Format argument: $2 (not yet implemented)"
+        log "INFO" "PARSER" "Format argument: $2 (not yet implemented)"
         shift 2
         ;;
       -t)
@@ -65,7 +65,7 @@ parse_arguments() {
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "Type filter: $2 (not yet implemented)"
+        log "INFO" "PARSER" "Type filter: $2 (not yet implemented)"
         shift 2
         ;;
       -w)
@@ -75,7 +75,7 @@ parse_arguments() {
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "Workspace argument: $2 (not yet implemented)"
+        log "INFO" "PARSER" "Workspace argument: $2 (not yet implemented)"
         shift 2
         ;;
       -p|--plugin)
@@ -107,7 +107,7 @@ parse_arguments() {
         ;;
       -f)
         # Future: fullscan mode
-        log "INFO" "Fullscan mode (not yet implemented)"
+        log "INFO" "PARSER" "Fullscan mode (not yet implemented)"
         shift
         ;;
       -*)

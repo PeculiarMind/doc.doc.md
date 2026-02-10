@@ -50,21 +50,31 @@ test_is_verbose_function_exists() {
 test_log_error_messages_always_shown() {
   set_log_level false
   local output
-  output=$(log "ERROR" "Test error message" 2>&1)
-  assert_contains "${output}" "[ERROR] Test error message" "Error message shown"
+  output=$(log "ERROR" "TEST" "Test error message" 2>&1)
+  # Check for timestamp, level, component, and message
+  if [[ "${output}" =~ \[[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\]\ \[ERROR\]\ \[TEST\]\ Test\ error\ message ]]; then
+    echo -e "${GREEN}✓${NC} PASS: Error message shown"
+  else
+    echo -e "${RED}✗${NC} FAIL: Error message should be shown with correct format"
+  fi
 }
 
 test_log_warn_messages_always_shown() {
   set_log_level false
   local output
-  output=$(log "WARN" "Test warning message" 2>&1)
-  assert_contains "${output}" "[WARN] Test warning message" "Warning message shown"
+  output=$(log "WARN" "TEST" "Test warning message" 2>&1)
+  # Check for timestamp, level, component, and message
+  if [[ "${output}" =~ \[[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\]\ \[WARN\]\ \[TEST\]\ Test\ warning\ message ]]; then
+    echo -e "${GREEN}✓${NC} PASS: Warning message shown"
+  else
+    echo -e "${RED}✗${NC} FAIL: Warning message should be shown with correct format"
+  fi
 }
 
 test_log_info_messages_hidden_without_verbose() {
   set_log_level false
   local output
-  output=$(log "INFO" "Test info message" 2>&1)
+  output=$(log "INFO" "TEST" "Test info message" 2>&1)
   if [[ -z "${output}" ]]; then
     echo -e "${GREEN}✓${NC} PASS: Info message hidden without verbose"
   else
@@ -75,14 +85,19 @@ test_log_info_messages_hidden_without_verbose() {
 test_log_info_messages_shown_with_verbose() {
   set_log_level true
   local output
-  output=$(log "INFO" "Test info message" 2>&1)
-  assert_contains "${output}" "[INFO] Test info message" "Info message shown with verbose"
+  output=$(log "INFO" "TEST" "Test info message" 2>&1)
+  # Check for timestamp, level, component, and message
+  if [[ "${output}" =~ \[[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\]\ \[INFO\]\ \[TEST\]\ Test\ info\ message ]]; then
+    echo -e "${GREEN}✓${NC} PASS: Info message shown with verbose"
+  else
+    echo -e "${RED}✗${NC} FAIL: Info message should be shown with correct format"
+  fi
 }
 
 test_log_debug_messages_hidden_without_verbose() {
   set_log_level false
   local output
-  output=$(log "DEBUG" "Test debug message" 2>&1)
+  output=$(log "DEBUG" "TEST" "Test debug message" 2>&1)
   if [[ -z "${output}" ]]; then
     echo -e "${GREEN}✓${NC} PASS: Debug message hidden without verbose"
   else
@@ -93,8 +108,13 @@ test_log_debug_messages_hidden_without_verbose() {
 test_log_debug_messages_shown_with_verbose() {
   set_log_level true
   local output
-  output=$(log "DEBUG" "Test debug message" 2>&1)
-  assert_contains "${output}" "[DEBUG] Test debug message" "Debug message shown with verbose"
+  output=$(log "DEBUG" "TEST" "Test debug message" 2>&1)
+  # Check for timestamp, level, component, and message
+  if [[ "${output}" =~ \[[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\]\ \[DEBUG\]\ \[TEST\]\ Test\ debug\ message ]]; then
+    echo -e "${GREEN}✓${NC} PASS: Debug message shown with verbose"
+  else
+    echo -e "${RED}✗${NC} FAIL: Debug message should be shown with correct format"
+  fi
 }
 
 test_is_verbose_returns_correct_status() {

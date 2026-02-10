@@ -19,16 +19,16 @@ parse_plugin_descriptor() {
   local descriptor_path="$1"
   
   if [[ ! -f "${descriptor_path}" ]]; then
-    log "WARN" "Descriptor file not found: ${descriptor_path}"
+    log "WARN" "PLUGIN" "Descriptor file not found: ${descriptor_path}"
     return 1
   fi
   
   if [[ ! -r "${descriptor_path}" ]]; then
-    log "WARN" "Cannot read descriptor file: ${descriptor_path}"
+    log "WARN" "PLUGIN" "Cannot read descriptor file: ${descriptor_path}"
     return 1
   fi
   
-  log "DEBUG" "Parsing descriptor: ${descriptor_path}"
+  log "DEBUG" "PLUGIN" "Parsing descriptor: ${descriptor_path}"
   
   # Use jq to parse JSON (preferred method)
   if command -v jq >/dev/null 2>&1; then
@@ -41,18 +41,18 @@ parse_plugin_descriptor() {
     
     # Validate required fields
     if [[ -z "${name}" ]]; then
-      log "WARN" "Plugin descriptor missing 'name' field: ${descriptor_path}"
+      log "WARN" "PLUGIN" "Plugin descriptor missing 'name' field: ${descriptor_path}"
       return 1
     fi
     
     if [[ -z "${description}" ]]; then
-      log "WARN" "Plugin descriptor missing 'description' field: ${descriptor_path}"
+      log "WARN" "PLUGIN" "Plugin descriptor missing 'description' field: ${descriptor_path}"
       return 1
     fi
     
     # Ensure active is a boolean
     if [[ "${active}" != "true" ]] && [[ "${active}" != "false" ]]; then
-      log "DEBUG" "Invalid 'active' value, defaulting to false: ${descriptor_path}"
+      log "DEBUG" "PLUGIN" "Invalid 'active' value, defaulting to false: ${descriptor_path}"
       active="false"
     fi
     
@@ -82,11 +82,11 @@ except Exception as e:
         echo "${result}"
         return 0
       else
-        log "WARN" "Failed to parse descriptor with python: ${descriptor_path}"
+        log "WARN" "PLUGIN" "Failed to parse descriptor with python: ${descriptor_path}"
         return 1
       fi
     else
-      log "ERROR" "No JSON parser available (jq or python3 required)"
+      log "ERROR" "PLUGIN" "No JSON parser available (jq or python3 required)"
       error_exit "Cannot parse plugin descriptors without jq or python3" "${EXIT_PLUGIN_ERROR}"
     fi
   fi
@@ -105,7 +105,7 @@ extract_plugin_field() {
   if command -v jq >/dev/null 2>&1; then
     jq -r ".${field_name} // empty" "${descriptor_path}" 2>/dev/null
   else
-    log "ERROR" "extract_plugin_field requires jq"
+    log "ERROR" "PLUGIN" "extract_plugin_field requires jq"
     return 1
   fi
 }

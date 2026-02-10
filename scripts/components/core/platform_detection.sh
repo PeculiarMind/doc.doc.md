@@ -33,5 +33,5 @@ detect_platform() {
     esac
   fi
   
-  log "INFO" "Detected platform: ${PLATFORM}"
+  log "INFO" "PLATFORM" "Detected platform: ${PLATFORM}"
 }

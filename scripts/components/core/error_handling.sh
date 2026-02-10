@@ -17,7 +17,7 @@ error_exit() {
   local message="$1"
   local exit_code="${2:-${EXIT_FILE_ERROR}}"
   
-  log "ERROR" "${message}"
+  log "ERROR" "ERROR" "${message}"
   exit "${exit_code}"
 }
 
@@ -26,13 +26,13 @@ error_exit() {
 #   $1 - Error message (optional)
 handle_error() {
   local message="${1:-An error occurred}"
-  log "ERROR" "${message}"
+  log "ERROR" "ERROR" "${message}"
 }
 
 # Cleanup function (can be called on exit)
 cleanup() {
   # Placeholder for cleanup operations
-  log "DEBUG" "Cleanup called"
+  log "DEBUG" "CLEANUP" "Cleanup called"
 }
 
 # Set exit trap for cleanup
