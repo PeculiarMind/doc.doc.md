@@ -122,6 +122,36 @@ The JSON looks like this:
 - Plugin directory with executable scripts following naming convention
 - Tool definition files specifying invocation patterns and output parsing
 
+### 6. Mode-Aware Behavioral Adaptation
+
+**Decision**: Detect execution context (interactive vs. non-interactive) using POSIX terminal tests and adapt behavior accordingly throughout the system.
+
+**Rationale:**
+- Single binary must serve both interactive users and automated systems (cron, CI/CD)
+- Blocking on user input in automated contexts causes indefinite hangs and failures
+- Rich user experience (progress bars, prompts, colors) inappropriate for log files
+- Reliability quality goal R1 explicitly requires successful cron job execution
+- Industry standard pattern used by mature CLI tools (git, docker, npm)
+
+**Behavioral Adaptations:**
+- **Interactive mode** (`[ -t 0 ] && [ -t 1 ]`): Display live progress bars, prompt for confirmations, use ANSI colors, show concise human-friendly messages
+- **Non-interactive mode** (pipes, redirects, cron): Use structured logging with timestamps, apply sensible defaults, no prompts or blocking, machine-parseable output
+
+**Implementation:**
+- Early mode detection during initialization before any user-facing output
+- Global `IS_INTERACTIVE` variable accessible by all components
+- Environment variable override (`DOC_DOC_INTERACTIVE`) for testing and explicit control
+- Every component checks mode before producing output or requesting input
+- Default to non-interactive on detection failure (fail-safe)
+
+**Benefits:**
+- Prevents operational failures in automation (hangs, timeouts, mysterious errors)
+- Enables comprehensive logging for unattended troubleshooting
+- Maintains excellent interactive user experience
+- Supports both use cases without code duplication
+
+See [ADR-0008](../09_architecture_decisions/ADR_0008_posix_terminal_test_for_mode_detection.md) and [concept document](../08_concepts/08_0010_mode_aware_behavior.md) for complete analysis.
+
 ## 4.2 Technology Selection
 
 | Component | Technology Choice | Justification |
@@ -142,12 +172,21 @@ The JSON looks like this:
 - **Implementation**: Batch tool invocations, efficient directory traversal, lazy loading of metadata
 
 ### Reliability
-- **Approach**: Defensive programming, comprehensive error handling, transaction-like workspace updates
-- **Implementation**: Input validation, tool availability checks, atomic file writes, exit code consistency
+- **Approach**: Defensive programming, comprehensive error handling, transaction-like workspace updates, mode-aware non-blocking operation
+- **Implementation**: 
+  - Input validation, tool availability checks, atomic file writes, exit code consistency
+  - **Mode detection**: Early terminal attachment test prevents blocking in automation
+  - **Automatic defaults**: Sensible fallback decisions in non-interactive contexts
+  - **Structured logging**: Complete audit trail for troubleshooting unattended execution
+  - **No blocking operations**: Strict prohibition on user input requests in non-interactive mode
 
 ### Usability
-- **Approach**: Clear error messages, helpful prompts, sensible defaults, comprehensive documentation
-- **Implementation**: Tool installation prompts, verbose logging mode, example templates, usage documentation
+- **Approach**: Clear error messages, helpful prompts in interactive mode, sensible defaults for automation, comprehensive documentation
+- **Implementation**: 
+  - Tool installation prompts (interactive only), verbose logging mode, example templates, usage documentation
+  - **Live progress display**: Real-time feedback when user is present
+  - **Concise messaging**: Human-friendly output in interactive sessions
+  - **Context-appropriate formatting**: ANSI colors and formatting only when supported
 
 ### Security
 - **Approach**: Local-only processing, no network operations at runtime, no external data transmission

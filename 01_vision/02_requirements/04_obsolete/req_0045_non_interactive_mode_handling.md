@@ -3,9 +3,11 @@
 **ID**: req_0045
 
 ## Status
-State: Accepted  
+State: Obsolete  
 Created: 2026-02-09  
-Last Updated: 2026-02-09
+Last Updated: 2026-02-10
+
+**Obsoleted By**: req_0057 (Interactive Mode Behavior), req_0058 (Non-Interactive Mode Behavior)
 
 ## Overview
 The system shall detect whether it is running in interactive or non-interactive mode and adjust behavior accordingly, particularly for prompts, confirmations, progress display, and error handling.
@@ -109,6 +111,8 @@ Executing plugin: ocrmypdf
 - [ ] CI/CD pipelines test non-interactive mode exclusively
 
 ## Related Requirements
+- **req_0057 (Interactive Mode Behavior)** - replacement requirement for interactive mode
+- **req_0058 (Non-Interactive Mode Behavior)** - replacement requirement for non-interactive mode
 - req_0008 (Installation Prompts) - prompts only in interactive mode
 - req_0044 (Workspace Format Migration) - migration prompts only in interactive mode
 - req_0006 (Verbose Logging Mode) - logging behavior adapts to mode
@@ -268,3 +272,5 @@ fi
 - [2026-02-09] Enhanced progress display with 40-char progress bar specification (percentage centered in bar)
 - [2026-02-09] Moved to analyze for detailed analysis
 - [2026-02-09] Moved to accepted by user - ready for implementation
+- [2026-02-10] Split into req_0057 (Interactive Mode Behavior) and req_0058 (Non-Interactive Mode Behavior) for clearer separation of concerns
+- [2026-02-10] Moved to obsolete by Requirements Engineer Agent - replaced by req_0057 and req_0058

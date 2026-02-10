@@ -18,31 +18,55 @@ arc42-chapter: 5
 
 ## 5.1 Whitebox Overall System
 
-The doc.doc toolkit consists of five major building blocks that orchestrate file analysis and report generation through a plugin-based architecture.
+The doc.doc toolkit consists of major building blocks organized into functional layers that orchestrate file analysis and report generation through a plugin-based, mode-aware architecture.
 
 ```mermaid
 graph TB
     subgraph "doc.doc.sh"
-        CLI[CLI Argument Parser]
-        PluginMgr[Plugin Manager]
-        Scanner[File Scanner]
-        Orchestrator[Execution Orchestrator]
-        Reporter[Report Generator]
+        subgraph "Core Infrastructure"
+            Mode[Mode Detection]
+            Log[Logging System]
+            Error[Error Handler]
+            Platform[Platform Detection]
+        end
+        
+        subgraph "User Interface"
+            CLI[CLI Argument Parser]
+            Help[Help System]
+            Progress[Progress Display]
+            Prompt[Prompt System]
+        end
+        
+        subgraph "Analysis Engine"
+            PluginMgr[Plugin Manager]
+            Scanner[File Scanner]
+            Orchestrator[Execution Orchestrator]
+            Reporter[Report Generator]
+        end
     end
     
     User[User/Scheduler]
     FS[File System]
     Tools[External CLI Tools]
+    Terminal[Terminal]
     
     User -->|Arguments| CLI
+    Terminal -->|Terminal test| Mode
+    Mode -->|IS_INTERACTIVE| Progress
+    Mode -->|IS_INTERACTIVE| Prompt
+    Mode -->|IS_INTERACTIVE| Log
     CLI -->|Config| PluginMgr
     CLI -->|Paths| Scanner
     Scanner -->|File list| Orchestrator
+    Scanner -->|Progress| Progress
     PluginMgr -->|Plugin info| Orchestrator
+    PluginMgr -->|Prompts| Prompt
     Orchestrator -->|Execute| Tools
+    Orchestrator -->|Progress| Progress
     Tools -->|Results| Orchestrator
     Orchestrator -->|Data| Reporter
     Reporter -->|Reports| FS
+    Log -->|Structured logs| FS
     
     FS <-->|Read/Write| Scanner
     FS <-->|Workspace| Orchestrator
@@ -51,9 +75,28 @@ graph TB
 
 ### Contained Building Blocks
 
+#### Core Infrastructure Layer
+
+| Component | Responsibility | Key Interfaces |
+|-----------|---------------|----------------|
+| **Mode Detection** | Detect interactive vs. non-interactive execution context | `detect_interactive_mode()`, `IS_INTERACTIVE` global |
+| **Logging System** | Provide mode-aware structured logging with timestamps | `log()`, `set_log_level()`, `is_verbose()` |
+| **Error Handler** | Centralized error management and exit code handling | `error_exit()`, `handle_error()` |
+| **Platform Detection** | Identify operating system and platform-specific paths | `detect_platform()`, `PLATFORM` global |
+
+#### User Interface Layer
+
 | Component | Responsibility | Key Interfaces |
 |-----------|---------------|----------------|
 | **CLI Argument Parser** | Parse command-line arguments, validate inputs, show help | `parse_arguments()`, `validate_config()`, `show_help()` |
+| **Help System** | Display usage information and documentation | `show_help()`, `show_version()`, `show_examples()` |
+| **Progress Display** | Show live progress bars and status (interactive mode only) | `show_progress()`, `clear_progress()`, `render_progress_bar()` |
+| **Prompt System** | Interactive user confirmations and decisions | `prompt_yes_no()`, `prompt_tool_installation()` |
+
+#### Analysis Engine Layer
+
+| Component | Responsibility | Key Interfaces |
+|-----------|---------------|----------------|
 | **Plugin Manager** | Discover plugins, load descriptors, validate capabilities | `discover_plugins()`, `load_descriptor()`, `check_tool_availability()` |
 | **File Scanner** | Traverse directories, detect file types, filter files | `scan_directory()`, `detect_mime_type()`, `filter_by_type()` |
 | **Execution Orchestrator** | Build dependency graph, schedule plugins, manage workspace | `build_dependency_graph()`, `execute_plugin()`, `update_workspace()` |
@@ -492,26 +535,301 @@ sequenceDiagram
 - Invalid data format → log warning, use raw value
 - Write failure → log error, continue with other files
 
-## 5.7 Cross-Cutting Concepts
+## 5.7 Level 1: Mode Detection
+
+### Purpose
+Determines execution context (interactive vs. non-interactive) early in initialization to enable mode-aware behavioral adaptation throughout the system.
+
+### Responsibilities
+- Detect terminal attachment using POSIX tests (`-t 0` and `-t 1`)
+- Support environment variable override (`DOC_DOC_INTERACTIVE`)
+- Store detection result in global `IS_INTERACTIVE` variable
+- Log detected mode for debugging
+- Enable all other components to adapt behavior based on context
+
+### Interface
+
+**Input**:
+```bash
+stdin (file descriptor 0)    # Terminal test: [ -t 0 ]
+stdout (file descriptor 1)   # Terminal test: [ -t 1 ]
+DOC_DOC_INTERACTIVE          # Optional environment variable override
+```
+
+**Output**:
+```bash
+IS_INTERACTIVE               # Global boolean: true/false
+```
+
+**Functions**:
+- `detect_interactive_mode()` - Main detection logic with override support
+
+### Detection Algorithm
+
+```mermaid
+flowchart TD
+    Start[Start Detection] --> CheckEnv{DOC_DOC_INTERACTIVE<br/>set?}
+    CheckEnv -->|Yes| UseEnv[Use environment value]
+    CheckEnv -->|No| TestStdin[Test stdin: [ -t 0 ]]
+    TestStdin --> StdinResult{Is terminal?}
+    StdinResult -->|No| NonInteractive[IS_INTERACTIVE=false]
+    StdinResult -->|Yes| TestStdout[Test stdout: [ -t 1 ]]
+    TestStdout --> StdoutResult{Is terminal?}
+    StdoutResult -->|No| NonInteractive
+    StdoutResult -->|Yes| Interactive[IS_INTERACTIVE=true]
+    UseEnv --> Interactive
+    Interactive --> LogMode[Log: Interactive mode]
+    NonInteractive --> LogMode2[Log: Non-interactive mode]
+    LogMode --> Export[Export IS_INTERACTIVE]
+    LogMode2 --> Export
+    Export --> Done[Detection complete]
+```
+
+### Mode Classification Examples
+
+| Execution Context | stdin | stdout | Mode | Rationale |
+|------------------|-------|--------|------|-----------|
+| `./doc.doc.sh` | Terminal | Terminal | Interactive | User present at terminal |
+| `./doc.doc.sh > log.txt` | Terminal | File | Non-Interactive | Output redirected, user can't see |
+| `echo \| ./doc.doc.sh` | Pipe | Terminal | Non-Interactive | Input piped, can't read user response |
+| `./doc.doc.sh &` | None | None | Non-Interactive | Background process |
+| `cron: ./doc.doc.sh` | None | None | Non-Interactive | Scheduled task |
+| `ssh host "./doc.doc.sh"` | Pseudo-TTY | Pseudo-TTY | Interactive | SSH with PTY allocation |
+
+### Integration Points
+- **Logging Component**: Adapts log format based on `IS_INTERACTIVE`
+- **Progress Display**: Only activates when `IS_INTERACTIVE=true`
+- **Prompt System**: Only prompts when `IS_INTERACTIVE=true`
+- **Plugin Manager**: Tool installation decisions based on mode
+- **Error Handler**: Error message format adapts to mode
+
+### Error Handling
+- Detection failure → default to non-interactive (fail-safe)
+- Invalid environment variable value → log warning, use auto-detection
+- Terminal test failure → assume non-interactive
+
+## 5.8 Level 1: Progress Display
+
+### Purpose
+Provides live, in-place progress feedback during long-running operations in interactive mode only.
+
+### Responsibilities
+- Render 40-character progress bar with centered percentage
+- Display file counters (processed, skipped, total)
+- Show current file being processed and executing plugin
+- Update display in place using ANSI escape codes
+- Suppress entirely in non-interactive mode
+- Clean up display on completion
+
+### Interface
+
+**Input**:
+```bash
+IS_INTERACTIVE          # Mode detection result
+percent                 # Progress percentage (0-100)
+processed               # Files processed count
+total                   # Total files count
+skipped                 # Files skipped count
+current_file            # Currently processing file path
+current_plugin          # Currently executing plugin name
+```
+
+**Output**:
+```bash
+# Terminal display (in-place update)
+Progress: ████████████████░░░░░░░░░░░░░░░░░░░░░░░░ 42%
+Files processed: 64/152
+Files skipped: 3
+Processing: documents/reports/quarterly_review_2025.pdf
+Executing plugin: ocrmypdf
+```
+
+**Functions**:
+- `show_progress(percent, processed, total, skipped, file, plugin)` - Update display
+- `render_progress_bar(percent)` - Generate progress bar string
+- `clear_progress()` - Clear display on completion
+- `get_terminal_width()` - Detect terminal width for path truncation
+- `truncate_path(path, max_width)` - Shorten file paths to fit
+
+### Progress Bar Rendering
+
+```bash
+# 40-character bar with centered percentage
+# Filled: ████████████████ (16 chars = 40%)
+# Empty:  ░░░░░░░░░░░░░░░░░░░░░░░░ (24 chars = 60%)
+# Result: ████████████████ 40% ░░░░░░░░░░░░░░░░░░░░░░░░
+
+filled_width = (percent * 40) / 100
+empty_width = 40 - filled_width
+```
+
+### Display Update Strategy
+
+```mermaid
+sequenceDiagram
+    participant Orchestrator
+    participant Progress
+    participant Terminal
+    
+    Orchestrator->>Progress: show_progress(42%, 64/152, ...)
+    Progress->>Progress: Check IS_INTERACTIVE
+    alt IS_INTERACTIVE=true
+        Progress->>Progress: render_progress_bar(42%)
+        Progress->>Terminal: printf "\r\033[K" (clear line)
+        Progress->>Terminal: printf progress_bar
+        Progress->>Terminal: printf file_counter
+        Progress->>Terminal: printf current_info
+        Progress->>Terminal: printf "\033[5A" (cursor up 5 lines)
+    else IS_INTERACTIVE=false
+        Progress->>Progress: Return immediately (no display)
+    end
+```
+
+### ANSI Escape Codes Used
+- `\r` - Carriage return (move cursor to line start)
+- `\033[K` - Clear line from cursor to end
+- `\033[nA` - Move cursor up n lines
+- `\033[nB` - Move cursor down n lines
+
+### Terminal Compatibility
+- Requires ANSI escape code support (most modern terminals)
+- Graceful degradation: progress suppressed if terminal width unavailable
+- Tested on: bash, zsh, xterm, gnome-terminal, iTerm2, tmux, screen
+
+## 5.9 Level 1: Prompt System
+
+### Purpose
+Enables interactive users to make decisions about optional operations through yes/no confirmations while ensuring non-interactive mode never blocks on user input.
+
+### Responsibilities
+- Provide standardized yes/no prompts with clear defaults
+- Validate and re-prompt on invalid responses (max 3 attempts)
+- Return default immediately in non-interactive mode
+- Log all user decisions for audit trail
+- Support custom prompts for specific scenarios
+
+### Interface
+
+**Input**:
+```bash
+IS_INTERACTIVE          # Mode detection result
+message                 # Prompt message to display
+default                 # Default option: "y" or "n"
+```
+
+**Output**:
+```bash
+exit_code              # 0=yes/approved, 1=no/declined
+```
+
+**Functions**:
+- `prompt_yes_no(message, default)` - Generic yes/no prompt
+- `prompt_tool_installation(tool_name, install_cmd)` - Tool installation prompt
+- `prompt_workspace_migration(current_ver, target_ver, breaking)` - Migration prompt
+- `prompt_directory_creation(dir_path)` - Directory creation prompt
+
+### Prompt Flow
+
+```mermaid
+flowchart TD
+    Start[Prompt requested] --> CheckMode{IS_INTERACTIVE?}
+    CheckMode -->|false| ReturnDefault[Return default immediately]
+    CheckMode -->|true| DisplayPrompt[Display prompt with default]
+    DisplayPrompt --> WaitInput[Wait for user input]
+    WaitInput --> ParseInput{Valid response?}
+    ParseInput -->|y/yes| ReturnYes[Log decision, return 0]
+    ParseInput -->|n/no| ReturnNo[Log decision, return 1]
+    ParseInput -->|empty| UseDefault{Use default}
+    ParseInput -->|invalid| CheckAttempts{Attempts < 3?}
+    CheckAttempts -->|Yes| Reprompt[Show guidance, re-prompt]
+    CheckAttempts -->|No| UseDefault
+    Reprompt --> WaitInput
+    UseDefault --> DefaultYes{Default = y?}
+    DefaultYes -->|Yes| ReturnYes
+    DefaultYes -->|No| ReturnNo
+    ReturnDefault --> Done
+    ReturnYes --> Done[Done]
+    ReturnNo --> Done
+```
+
+### Prompt Format Examples
+
+**Tool Installation**:
+```
+Interactive mode:
+  Tool 'ocrmypdf' not found. Install? [y/N] _
+
+Non-interactive mode:
+  [WARN] [TOOL] ocrmypdf not found, skipping plugin (non-interactive mode)
+```
+
+**Workspace Migration**:
+```
+Interactive mode:
+  Migrate workspace from v2.0 to v2.1? [Y/n] _
+
+Non-interactive mode:
+  [INFO] [WORKSPACE] Auto-migrating workspace v2.0 → v2.1 (compatible)
+```
+
+**Breaking Migration**:
+```
+Interactive mode:
+  Breaking migration v2.0 → v3.0 required. Migrate? [y/N] _
+
+Non-interactive mode:
+  [ERROR] [WORKSPACE] Breaking migration required, cannot proceed (non-interactive)
+  Exit code: 1
+```
+
+### Response Validation
+
+**Accepted Affirmative**: `y`, `Y`, `yes`, `Yes`, `YES`  
+**Accepted Negative**: `n`, `N`, `no`, `No`, `NO`  
+**Empty Response**: Use default  
+**Invalid Response**: Re-prompt with guidance (max 3 attempts)
+
+### Testing Support
+
+**Mock Prompt Responses**:
+```bash
+# Force all prompts to answer "yes"
+export DOC_DOC_PROMPT_RESPONSE="y"
+
+# Force all prompts to answer "no"
+export DOC_DOC_PROMPT_RESPONSE="n"
+
+# Test uses this to verify prompt logic without manual input
+```
+
+## 5.10 Cross-Cutting Concepts
+
+### Mode-Aware Behavior
+All components that produce user-facing output or require decisions adapt behavior based on execution context:
+- **Interactive mode**: Rich feedback (prompts, live progress, colors, suggestions)
+- **Non-interactive mode**: Automated operation (structured logs, defaults, no blocking)
+- Mode detection performed early, result stored in `IS_INTERACTIVE` global
+- Every component checks mode before choosing behavior pattern
 
 ### Error Handling Strategy
 All components follow consistent error handling:
 - Validate inputs before processing
 - Use exit codes (0=success, 1=error)
 - Log errors to stderr
-- Provide clear error messages to user
+- Error messages adapt to mode (user-facing vs. machine-parseable)
 - Fail gracefully without corrupting state
 
 ### Logging Strategy
-- Controlled by `-v` verbose flag
-- Informational messages to stdout
-- Errors to stderr
-- Structured log format: `[TIMESTAMP] [LEVEL] [COMPONENT] Message`
-- Levels: DEBUG, INFO, WARN, ERROR
+Multi-format logging adapts to execution context:
+- **Interactive mode**: Concise, human-friendly, optional timestamps, ANSI colors
+- **Non-interactive mode**: Structured with ISO 8601 timestamps, component tags, full context
+- Controlled by `-v` verbose flag (increases detail in both modes)
+- Log levels: DEBUG, INFO, WARN, ERROR
+- Component tagging for filtering and monitoring
 
 ### Configuration Management
 - Command-line arguments override defaults
-- Environment variables for advanced configuration
+- Environment variables for mode override and testing (`DOC_DOC_INTERACTIVE`)
 - No separate config file (keeps it simple)
 - Sensible defaults for optional parameters
 
@@ -521,7 +839,7 @@ All components follow consistent error handling:
 - Timeout on lock acquisition
 - Automatic lock cleanup on exit
 
-## 5.8 Design Decisions
+## 5.11 Design Decisions
 
 ### Why Bash?
 - ✅ Native process orchestration and CLI tool invocation
@@ -535,6 +853,20 @@ All components follow consistent error handling:
 - ✅ Supports incremental development
 - ✅ Easy to extend individual components
 - ✅ Facilitates future refactoring if needed
+
+### Why Mode-Aware Behavior?
+- ✅ Single binary serves both interactive users and automation
+- ✅ Prevents script hangs in cron jobs, CI/CD pipelines
+- ✅ Provides rich UX when user is present
+- ✅ Meets reliability quality goal R1 (unattended operation)
+- ✅ Industry standard pattern (git, docker, npm use same approach)
+
+### Why POSIX Terminal Tests for Mode Detection?
+- ✅ Reliable: Direct kernel check via `isatty()` system call
+- ✅ Standard: POSIX sh standard, works across all shells
+- ✅ Fast: Nanosecond-level overhead, no external process
+- ✅ Portable: Linux, macOS, BSD, WSL without modification
+- See [ADR-0008](../09_architecture_decisions/ADR_0008_posix_terminal_test_for_mode_detection.md) for full rationale
 
 ### Why Data-Driven Orchestration?
 - ✅ Automatic workflow adaptation as plugins change

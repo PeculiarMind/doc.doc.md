@@ -31,6 +31,7 @@ This document provides an index of all Architecture Decision Records (ADRs) for 
 | ADR-0005 | Template-Based Report Generation | Accepted | 2026-02-06 | [View](ADR_0005_template_based_report_generation.md) |
 | ADR-0006 | No Agent System in Product Architecture | Accepted | 2026-02-06 | [View](ADR_0006_no_agent_system_in_product_architecture.md) |
 | ADR-0007 | Modular Component-Based Script Architecture | Accepted | 2026-02-08 | [View](ADR_0007_modular_component_based_script_architecture.md) |
+| ADR-0008 | POSIX Terminal Test for Mode Detection | Accepted | 2026-02-10 | [View](ADR_0008_posix_terminal_test_for_mode_detection.md) |
 
 ## Decision Status Legend
 

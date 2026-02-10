@@ -29,9 +29,9 @@ The project aims to deliver a simple, scriptable toolkit designed to orchestrate
 ## 1.1 Requirements Overview
 
 ### Requirements
-The project has 37 accepted requirements and 10 security requirements under review that define the core functionality:
+The project has 39 accepted requirements and 10 security requirements under review that define the core functionality:
 
-**Accepted Requirements (37)**:
+**Accepted Requirements (39)**:
 - **req_0001**: [Single Command Directory Analysis](../../02_requirements/03_accepted/req_0001_single_command_directory_analysis.md)
 - **req_0002**: [Recursive Directory Scanning](../../02_requirements/03_accepted/req_0002_recursive_directory_scanning.md)
 - **req_0003**: [Metadata Extraction with CLI Tools](../../02_requirements/03_accepted/req_0003_metadata_extraction_with_cli_tools.md)
@@ -70,6 +70,8 @@ The project has 37 accepted requirements and 10 security requirements under revi
 - **req_0036**: [Testing Standards and Coverage](../../02_requirements/03_accepted/req_0036_testing_standards_and_coverage.md)
 - **req_0037**: [Documentation Maintenance](../../02_requirements/03_accepted/req_0037_documentation_maintenance.md)
 - **req_0038**: [Input Validation and Sanitization](../../02_requirements/03_accepted/req_0038_input_validation_and_sanitization.md)
+- **req_0057**: [Interactive Mode Behavior](../../02_requirements/03_accepted/req_0057_interactive_mode_behavior.md)
+- **req_0058**: [Non-Interactive Mode Behavior](../../02_requirements/03_accepted/req_0058_non_interactive_mode_behavior.md)
 
 **Security Requirements - Under Review (10)**:
 - **req_0047**: [Plugin Descriptor Validation](../../02_requirements/01_funnel/req_0047_plugin_descriptor_validation.md) - Validate plugin descriptor JSON schema

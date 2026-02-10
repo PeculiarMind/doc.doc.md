@@ -28,26 +28,32 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 - **Extensibility**: Plugin architecture for custom analysis capabilities
 - **Privacy**: 100% local processing - no cloud services or data transmission
 - **Simplicity**: Pure Bash, minimal dependencies, runs anywhere Unix tools exist
+- **Adaptability**: Mode-aware behavior automatically adjusts UX for interactive users and reliable automation for scripts/cron jobs
 
 ## Current Status
 
-**v0.1.0 - Modular Architecture Complete** 🚧
+**v0.1.0 - Modular Architecture with Mode-Aware Capabilities** 🚧
 
-Five core features implemented:
+Six core features implemented:
 
 - ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
 - ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
 - ✅ **Feature 0004**: Enhanced logging format with timestamps (ISO 8601, component identifiers)
 - ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
+- ✅ **Feature 0006**: Directory scanner component with recursive traversal
 - ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 16 components)
 
-**Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration). Enhanced logging system with timestamps resolves architecture deviation.
+**Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration). New mode-aware behavior concept (08_0010) and ADR_0008 define intelligent terminal detection for optimal interactive and automated execution.
 
 **Testing**: 14 of 15 test suites passing; 1 unrelated failure in template engine tests.
 
-**Requirements**: 37 accepted requirements, 9 documented cross-cutting concepts, complete security threat modeling
+**Requirements**: 50 accepted requirements (including new req_0057 interactive mode, req_0058 non-interactive mode behavior), 10 documented cross-cutting concepts, complete security threat modeling
 
-**Ready for Implementation**: Feature 0002 (OCR PDF plugin) ready; Features 0006-0007 (directory scanning, workspace management) in backlog
+**Features in Progress**: 21 total features across development lifecycle:
+- **Done** (6): Core structure, plugin listing, logging, dev containers, directory scanner, modular architecture
+- **Ready** (1): OCR PDF plugin (Feature 0002)
+- **Backlog** (8): Mode detection (0016), interactive progress (0017), user prompts (0018), structured logging (0019), stat plugin (0020), workspace management (0007), workspace security (0013), advanced help (0014)
+- **Analyze** (6): Template engine (0008), plugin execution (0009), report generator (0010), tool verification (0011), plugin security (0012)
 
 ## Installation
 
@@ -126,6 +132,40 @@ The script uses a structured logging format with timestamps and component identi
 - `3` - Plugin execution failure
 - `4` - Report generation failure
 - `5` - Workspace error
+
+### Mode-Aware Behavior
+
+The toolkit automatically adapts its behavior based on execution context:
+
+**Interactive Mode** (terminal attached):
+- Live progress indicators and real-time feedback
+- Colored output for improved readability
+- User prompts for confirmation and control
+- Rich error messages with suggestions
+
+**Non-Interactive Mode** (automated/scripted):
+- Structured, machine-parseable log output
+- Non-blocking execution (no user prompts)
+- Predictable exit codes for integration
+- Suitable for cron jobs, CI/CD pipelines, background processes
+
+**Mode Detection**: Automatic via terminal attachment test (`-t 0` and `-t 1`)
+
+**Manual Override**: Set `DOC_DOC_INTERACTIVE=true` or `false` to force a specific mode
+
+**Examples**:
+```bash
+# Interactive mode (default when run at terminal)
+./scripts/doc.doc.sh -d ./docs -t ./reports
+
+# Non-interactive mode (automatic in pipes/redirects)
+./scripts/doc.doc.sh -d ./docs -t ./reports > output.log
+
+# Force non-interactive mode (testing)
+DOC_DOC_INTERACTIVE=false ./scripts/doc.doc.sh -d ./docs -t ./reports
+```
+
+See [08_0010_mode_aware_behavior.md](01_vision/03_architecture/08_concepts/08_0010_mode_aware_behavior.md) for architecture details.
 
 ### Planned Usage (Roadmap)
 
@@ -260,15 +300,16 @@ doc.doc.md/
 │
 ├── 01_vision/                  # Project vision and requirements
 │   ├── 01_project_vision/      # Vision document
-│   ├── 02_requirements/        # Requirements lifecycle (37 accepted)
+│   ├── 02_requirements/        # Requirements lifecycle (50 accepted)
 │   ├── 03_architecture/        # Arc42 architecture documentation
 │   └── 04_security/            # Security architecture and threat models
 │
-├── 02_agile_board/             # Kanban workflow
-│   ├── 03_ready/               # Ready for implementation (0002)
-│   ├── 04_backlog/             # Prioritized work items (5 features)
-│   ├── 05_implementing/        # In progress (0015)
-│   └── 06_done/                # Completed features (0001, 0003, 0005)
+├── 02_agile_board/             # Kanban workflow (21 features total)
+│   ├── 02_analyze/             # Analysis phase (6 features)
+│   ├── 03_ready/               # Ready for implementation (1: 0002)
+│   ├── 04_backlog/             # Prioritized backlog (8 features: 0007,0013-0020)
+│   ├── 05_implementing/        # In progress (0 features)
+│   └── 06_done/                # Completed (6: 0001,0003-0006,0015)
 │
 ├── 03_documentation/           # Implementation docs
 │   ├── 01_architecture/        # Architecture Decision Records, compliance reviews
@@ -298,31 +339,40 @@ doc.doc.md/
 - ✅ Enhanced logging with timestamps and component identifiers
 - ✅ Development containers for 4 platforms
 - ✅ Test infrastructure (15 suites, 14 passing)
-- ✅ 37 accepted requirements
+- ✅ 50 accepted requirements with complete lifecycle traceability
 - ✅ Modular component architecture (Feature 0015) - 84% code reduction
 - ✅ Architecture compliance framework (ARCH_REVIEW_0015 approved)
+- ✅ Directory scanner component (Feature 0006)
+- ✅ Mode-aware behavior architecture (Concept 08_0010, ADR_0008)
 
-### Phase 2: Core Analysis (Ready to Start)
+### Phase 2: Mode-Aware Execution (In Progress)
+- 🔜 Mode detection - automatic terminal detection (Feature 0016, High Priority)
+- 🔜 Structured logging enhancement (Feature 0019, High Priority)
+- 🔜 Interactive progress display with live feedback (Feature 0017)
+- 🔜 User prompt system for interactive control (Feature 0018)
+- 🔄 Workspace management - JSON state storage (Feature 0007)
+- 🔄 Tool availability verification (Feature 0011)
+
+### Phase 3: Core Analysis (Ready to Start)
 - 🔜 OCR PDF plugin (Feature 0002) - ready for implementation
-- Directory traversal and file discovery (Feature 0006)
-- Metadata extraction (file type, ownership, timestamps)
+- 🔜 Stat plugin - basic file metadata extraction (Feature 0020, High Priority)
+- ✅ Directory traversal and file discovery (Feature 0006) - complete
 - Template-based report generation (Feature 0010)
-- Workspace management - JSON state storage (Feature 0007)
-- Tool availability verification (Feature 0011)
+- Plugin execution engine (Feature 0009)
 
-### Phase 3: Plugin Extensibility (Planned)
-- Plugin descriptor validation and security
-- Plugin execution engine
+### Phase 4: Plugin Extensibility (Planned)
+- Plugin descriptor validation and security (Feature 0012)
 - Data-driven workflow orchestration
 - Plugin management commands (info, enable, disable)
-- Example plugins (OCR, PDF analysis)
+- Advanced help system with examples (Feature 0014)
+- Example plugins (OCR, PDF analysis, stat)
 
-### Phase 4: Advanced Features (Future)
+### Phase 5: Advanced Features (Future)
 - Aggregated summary reports
-- Advanced template engine (conditionals, loops)
+- Advanced template engine (conditionals, loops) (Feature 0008)
 - Performance monitoring and metrics
 - Security audit logging
-- Non-interactive batch mode
+- Workspace security enhancements (Feature 0013)
 
 **See**: [Accepted Requirements](01_vision/02_requirements/03_accepted/) for detailed specifications
 
