@@ -116,6 +116,10 @@ scan_directory() {
   # Get absolute path for source directory
   source_dir="$(cd "$source_dir" && pwd)"
   
+  # Get canonical path for boundary checking
+  local canonical_source
+  canonical_source=$(readlink -f "$source_dir" 2>/dev/null || realpath "$source_dir" 2>/dev/null || echo "$source_dir")
+  
   log "INFO" "SCANNER" "Scanning directory: $source_dir"
   
   # Load workspace timestamp for incremental analysis
@@ -147,6 +151,24 @@ scan_directory() {
     # Skip directories
     if [[ -d "$filepath" ]]; then
       log "DEBUG" "SCANNER" "Skipping directory: $filepath"
+      files_skipped=$((files_skipped + 1))
+      continue
+    fi
+    
+    # Security: Check for symlinks and skip them (CWE-59 - Symlink Path Traversal)
+    if [[ -L "$filepath" ]]; then
+      log "WARN" "SCANNER" "Skipping symlink: $filepath"
+      files_skipped=$((files_skipped + 1))
+      continue
+    fi
+    
+    # Security: Validate path stays within source directory bounds (CWE-22 - Path Traversal)
+    local canonical_file
+    canonical_file=$(readlink -f "$filepath" 2>/dev/null || realpath "$filepath" 2>/dev/null || echo "$filepath")
+    
+    # Check if canonical path starts with canonical source path
+    if [[ "$canonical_file" != "$canonical_source"* ]]; then
+      log "WARN" "SCANNER" "Skipping file outside source directory bounds: $filepath"
       files_skipped=$((files_skipped + 1))
       continue
     fi
