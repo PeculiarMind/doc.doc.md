@@ -30,7 +30,8 @@ Options:
   -m <format>             Output format: markdown, json, html (future)
   -t <types>              Filter by document types (future)
   -w <workspace>          Specify workspace directory (future)
-  -p <subcommand>         Plugin operations: list (info, enable, disable - future)
+  -p, --plugin <cmd>      Plugin operations: list, info, enable, disable
+                          (only 'list' currently implemented)
   -f                      Enable fullscan mode (future)
 
 Exit Codes:
@@ -42,11 +43,13 @@ Exit Codes:
   5  Workspace corruption or access error
 
 Examples:
+  ${SCRIPT_NAME}                   Show this help message (no arguments)
   ${SCRIPT_NAME} -h                Show this help message
   ${SCRIPT_NAME} --version         Show version information
-  ${SCRIPT_NAME} -v                Run with verbose logging (future)
+  ${SCRIPT_NAME} -v                Run with verbose logging
   ${SCRIPT_NAME} -d ./docs         Analyze docs directory (future)
   ${SCRIPT_NAME} -p list           List available plugins
+  ${SCRIPT_NAME} --plugin list     List available plugins (long form)
 
 For more information, see the project documentation.
 EOF
