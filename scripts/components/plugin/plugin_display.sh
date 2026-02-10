@@ -54,7 +54,7 @@ display_plugin_list() {
 
 # List all available plugins
 list_plugins() {
-  log "INFO" "Listing available plugins"
+  log "INFO" "PLUGIN" "Listing available plugins"
   
   # Discover plugins
   local plugin_data
