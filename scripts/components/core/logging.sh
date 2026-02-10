@@ -1,4 +1,20 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 doc.doc.md Project
+# This file is part of doc.doc.md.
+#
+# doc.doc.md is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# doc.doc.md is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with doc.doc.md. If not, see <https://www.gnu.org/licenses/>.
+
 # Component: logging.sh
 # Purpose: Logging infrastructure with levels and formatting
 # Dependencies: constants.sh
@@ -14,16 +30,22 @@ VERBOSE=false
 # Logging Functions
 # ==============================================================================
 
-# Log message with level
+# Log message with level, timestamp, and component
 # Arguments:
 #   $1 - Log level (INFO, WARN, ERROR, DEBUG)
-#   $2 - Message to log
+#   $2 - Component identifier (e.g., MAIN, PARSER, PLUGIN)
+#   $3 - Message to log
 log() {
   local level="$1"
-  local message="$2"
+  local component="$2"
+  local message="$3"
+  
+  # Generate ISO 8601 timestamp in UTC
+  local timestamp
+  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
   
   if [[ "${VERBOSE}" == true ]] || [[ "${level}" == "ERROR" ]] || [[ "${level}" == "WARN" ]]; then
-    echo "[${level}] ${message}" >&2
+    echo "[${timestamp}] [${level}] [${component}] ${message}" >&2
   fi
 }
 

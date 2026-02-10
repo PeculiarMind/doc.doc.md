@@ -68,7 +68,7 @@ main() {
   parse_arguments "$@"
   
   # If we get here, no action was taken (all flags processed but no work done)
-  log "INFO" "Script initialization complete"
+  log "INFO" "MAIN" "Script initialization complete"
   
   exit "${EXIT_SUCCESS}"
 }
