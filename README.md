@@ -33,16 +33,17 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 **v0.1.0 - Modular Architecture Complete** 🚧
 
-Four core features implemented:
+Five core features implemented:
 
 - ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
 - ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
+- ✅ **Feature 0004**: Enhanced logging format with timestamps (ISO 8601, component identifiers)
 - ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
 - ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 16 components)
 
-**Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration).
+**Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration). Enhanced logging system with timestamps resolves architecture deviation.
 
-**Testing**: 10 of 15 test suites passing; 5 suites being updated for modular architecture compatibility.
+**Testing**: 14 of 15 test suites passing; 1 unrelated failure in template engine tests.
 
 **Requirements**: 37 accepted requirements, 9 documented cross-cutting concepts, complete security threat modeling
 
@@ -92,6 +93,30 @@ chmod +x scripts/doc.doc.sh
 ```bash
 ./scripts/doc.doc.sh --verbose -p list
 ```
+
+### Logging Format
+
+The script uses a structured logging format with timestamps and component identifiers:
+
+**Format**: `[TIMESTAMP] [LEVEL] [COMPONENT] Message`
+
+**Example output:**
+```
+[2026-02-10T14:30:45] [INFO] [MAIN] Script initialization complete
+[2026-02-10T14:30:45] [INFO] [PARSER] Verbose mode enabled
+[2026-02-10T14:30:46] [INFO] [PLATFORM] Detected platform: ubuntu
+[2026-02-10T14:30:46] [ERROR] [PLUGIN] Plugin execution failed: missing descriptor
+```
+
+**Log Levels**:
+- `DEBUG` - Detailed diagnostic information (verbose mode only)
+- `INFO` - General informational messages (verbose mode only)
+- `WARN` - Warning messages (always shown)
+- `ERROR` - Error messages (always shown)
+
+**Timestamps**: ISO 8601 format in UTC (e.g., `2026-02-10T14:30:45`)
+
+**Components**: Identifies the source of each log entry (e.g., `MAIN`, `PARSER`, `PLUGIN`, `SCANNER`)
 
 ### Exit Codes
 
@@ -193,7 +218,7 @@ tests/
 VERBOSE=true ./tests/run_all_tests.sh
 ```
 
-**Current Status**: 10 of 15 test suites passing. 5 suites being updated for modular component architecture compatibility. See [tests/README.md](tests/README.md) for details.
+**Current Status**: 14 of 15 test suites passing. 1 unrelated failure in template engine tests. See [tests/README.md](tests/README.md) for details.
 
 ## Project Structure
 
@@ -267,15 +292,15 @@ doc.doc.md/
 
 ## Roadmap
 
-### Phase 1: Foundation (95% Complete)
+### Phase 1: Foundation (Complete)
 - ✅ Script structure with CLI parsing and help system  
 - ✅ Plugin listing functionality
+- ✅ Enhanced logging with timestamps and component identifiers
 - ✅ Development containers for 4 platforms
-- ✅ Test infrastructure (15 suites, 10 passing)
+- ✅ Test infrastructure (15 suites, 14 passing)
 - ✅ 37 accepted requirements
 - ✅ Modular component architecture (Feature 0015) - 84% code reduction
 - ✅ Architecture compliance framework (ARCH_REVIEW_0015 approved)
-- 🚧 Test suite updates for modular architecture (5 suites in progress)
 
 ### Phase 2: Core Analysis (Ready to Start)
 - 🔜 OCR PDF plugin (Feature 0002) - ready for implementation
@@ -335,7 +360,10 @@ This project uses **agent-driven development**:
 - POSIX-compliant where possible
 - Function-based modular design
 - Comprehensive error handling
-- Multi-level logging (DEBUG, INFO, WARN, ERROR)
+- Multi-level logging with timestamps and component identifiers
+  - Format: `[TIMESTAMP] [LEVEL] [COMPONENT] Message`
+  - ISO 8601 timestamps in UTC
+  - Log levels: DEBUG, INFO, WARN, ERROR
 - Comments for complex logic
 
 ### Testing
