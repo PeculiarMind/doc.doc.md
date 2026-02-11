@@ -31,8 +31,6 @@ Determine if agent delegation is appropriate:
    - User explicitly mentions or tags an agent (e.g., `#security-agent`)
 
    **Handle directly when:**
-   - Simple, single-step operations (create one file, fix one bug)
-   - Quick informational queries
    - No matching agent expertise available
 
 ### 3. **Agent Selection Process**
