@@ -377,7 +377,7 @@ validate_processes_field() {
 
   if [[ -n "${extensions}" ]]; then
     while IFS= read -r ext; do
-      if [[ "${ext}" != "*" ]] && [[ "${ext}" != .* ]]; then
+      if [[ "${ext}" != "*" ]] && [[ ! "${ext}" =~ ^\. ]]; then
         log "ERROR" "VALIDATOR" "Invalid file extension '${ext}': must start with . or be *"
         validation_failed=1
       fi

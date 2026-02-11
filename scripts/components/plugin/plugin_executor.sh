@@ -200,10 +200,16 @@ should_execute_plugin() {
 
   # Check file extension
   local file_ext
-  file_ext=".${file_path##*.}"
+  local file_basename
+  file_basename=$(basename "$file_path")
+  if [[ "$file_basename" == *.* ]]; then
+    file_ext=".${file_basename##*.}"
+  else
+    file_ext=""
+  fi
   local extensions
   extensions=$(jq -r '.processes.file_extensions[]? // empty' "$descriptor_file" 2>/dev/null || true)
-  if [[ -n "$extensions" ]]; then
+  if [[ -n "$extensions" ]] && [[ -n "$file_ext" ]]; then
     while IFS= read -r ext; do
       if [[ "$ext" == "$file_ext" ]]; then
         return 0
@@ -268,9 +274,9 @@ substitute_variables_secure() {
       local value
       value=$(echo "$variable_json" | jq -r --arg k "$key" '.[$k] // empty' 2>/dev/null)
 
-      # Security: reject values with injection characters
-      if [[ "$value" == *";"* ]] || [[ "$value" == *"|"* ]] || [[ "$value" == *"&"* ]] || [[ "$value" == *'`'* ]] || [[ "$value" == *'$'* ]]; then
-        log "ERROR" "PLUGIN" "Injection characters detected in variable '${key}' value"
+      # Security: reject values with injection characters and control characters
+      if [[ "$value" == *";"* ]] || [[ "$value" == *"|"* ]] || [[ "$value" == *"&"* ]] || [[ "$value" == *'`'* ]] || [[ "$value" == *'$('* ]] || [[ "$value" =~ [[:cntrl:]] ]]; then
+        log "ERROR" "PLUGIN" "Injection or control characters detected in variable '${key}' value"
         return 1
       fi
 
