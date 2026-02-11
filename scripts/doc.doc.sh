@@ -47,6 +47,8 @@ source_component "ui/argument_parser.sh"
 # Plugin components (depend on core)
 source_component "plugin/plugin_parser.sh"
 source_component "plugin/plugin_discovery.sh"
+source_component "plugin/plugin_validator.sh"
+source_component "plugin/plugin_tool_checker.sh"
 source_component "plugin/plugin_display.sh"
 
 # Orchestration components (depend on core and plugin)

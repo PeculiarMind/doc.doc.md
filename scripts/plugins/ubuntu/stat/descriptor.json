@@ -10,7 +10,7 @@
         "file_path_absolute": {
             "type": "string",
             "description": "Absolute path to the file to be analyzed."
-        }    
+        }
     },
     "provides": {
         "file_last_modified": {
@@ -18,7 +18,7 @@
             "description": "Last modified time as Unix timestamp."
         },
         "file_size": {
-            "type": "integer", 
+            "type": "integer",
             "description": "Size of the file in bytes."
         },
         "file_owner": {
@@ -26,7 +26,7 @@
             "description": "Owner of the file."
         }
     },
-    "commandline": "read -r file_last_modified file_size file_owner < <(stat -c '%Y,%s,%U' '${file_path_absolute}')",
-    "check_commandline": "read -r plugin_works < <(which stat > /dev/null 2>&1 && echo 'true' || echo 'false')",
-    "install_commandline": "read -r plugin_successfully_installed < <(echo 'true')"
+    "commandline": "stat -c '%Y,%s,%U' '${file_path_absolute}'",
+    "check_commandline": "command -v stat >/dev/null 2>&1",
+    "install_commandline": "apt install -y coreutils"
 }
