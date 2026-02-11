@@ -73,7 +73,6 @@ Incremental analysis is essential for efficient repeated analysis of large codeb
 ### Timestamp Storage Format
 ```json
 {
-  "workspace_version": "1.0",
   "last_full_scan": "2026-02-06T10:30:00Z",
   "files": {
     "path/to/file1.md": {

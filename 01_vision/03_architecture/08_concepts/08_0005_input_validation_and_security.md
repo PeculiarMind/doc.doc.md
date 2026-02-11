@@ -288,7 +288,7 @@ validation_error() {
 - [req_0011: Local Only Processing](../../02_requirements/03_accepted/req_0011_local_only_processing.md) - validation prevents network exfiltration
 - [req_0020: Error Handling](../../02_requirements/03_accepted/req_0020_error_handling.md) - validation errors handled gracefully
 - [req_0022: Plugin-based Extensibility](../../02_requirements/03_accepted/req_0022_plugin_based_extensibility.md) - plugin security
-- [req_0032: Workspace Directory Management](../../02_requirements/03_accepted/req_0032_workspace_directory_management.md) - workspace path validation
+- [req_0059: Workspace Recovery and Rescan](../../02_requirements/03_accepted/req_0059_workspace_recovery_and_rescan.md) - workspace path validation
 
 ### Related Architecture Decisions
 

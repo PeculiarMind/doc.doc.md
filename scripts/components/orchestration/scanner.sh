@@ -20,6 +20,8 @@
 # Dependencies: core/logging.sh, orchestration/workspace.sh
 # Exports: scan_directory(), detect_file_type(), filter_files()
 # Side Effects: Reads filesystem
+# Size Note: 269 lines (exceeds 200-line guideline). Accepted per ARCH-REVIEW-2026-02-11-001
+#            due to cohesive file discovery logic. Refactor considered for future cleanup.
 
 # ==============================================================================
 # Configuration Constants

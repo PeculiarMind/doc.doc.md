@@ -3,9 +3,11 @@
 **ID**: req_0032
 
 ## Status
-State: Accepted  
+State: Obsoleted  
 Created: 2026-02-09  
-Last Updated: 2026-02-09
+Last Updated: 2026-02-11
+
+**Obsoleted By**: req_0059 (Workspace Recovery and Rescan)
 
 ## Overview
 The system shall provide workspace directory management including initialization, structure creation, validation, corruption recovery, and cleanup operations.
@@ -100,3 +102,5 @@ workspace/
 -- Comment: Gap identified - workspace extensively referenced but management operations not formalized
 - [2026-02-09] Moved to Accepted by user  
 -- Comment: Accepted as operational requirement for workspace lifecycle management
+- [2026-02-11] Moved to obsoleted by user  
+-- Comment: Replaced by req_0059 (rescan-based recovery, no migrations)

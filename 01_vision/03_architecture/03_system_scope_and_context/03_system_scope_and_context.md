@@ -244,7 +244,6 @@ flowchart LR
 **Workspace JSON Schema** (for incremental analysis):
 ```json
 {
-  "workspace_version": "1.0",
   "last_full_scan": "2026-02-06T10:30:00Z",
   "files": {
     "path/to/file.md": {

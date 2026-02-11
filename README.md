@@ -34,7 +34,7 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 **v0.1.0 - Modular Architecture with Mode-Aware Capabilities** 🚧
 
-Six core features implemented:
+Seven core features implemented:
 
 - ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
 - ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
@@ -42,17 +42,18 @@ Six core features implemented:
 - ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
 - ✅ **Feature 0006**: Directory scanner component with recursive traversal
 - ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 16 components)
+- ✅ **Feature 0016**: Interactive/Non-interactive mode detection (terminal detection, DOC_DOC_INTERACTIVE override)
 
 **Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration). New mode-aware behavior concept (08_0010) and ADR_0008 define intelligent terminal detection for optimal interactive and automated execution.
 
-**Testing**: 14 of 15 test suites passing; 1 unrelated failure in template engine tests.
+**Testing**: 15 of 16 test suites passing; 1 unrelated failure in template engine tests.
 
 **Requirements**: 50 accepted requirements (including new req_0057 interactive mode, req_0058 non-interactive mode behavior), 10 documented cross-cutting concepts, complete security threat modeling
 
 **Features in Progress**: 21 total features across development lifecycle:
-- **Done** (6): Core structure, plugin listing, logging, dev containers, directory scanner, modular architecture
+- **Done** (7): Core structure, plugin listing, logging, dev containers, directory scanner, modular architecture, mode detection
 - **Ready** (1): OCR PDF plugin (Feature 0002)
-- **Backlog** (8): Mode detection (0016), interactive progress (0017), user prompts (0018), structured logging (0019), stat plugin (0020), workspace management (0007), workspace security (0013), advanced help (0014)
+- **Backlog** (7): Interactive progress (0017), user prompts (0018), structured logging (0019), stat plugin (0020), workspace management (0007), workspace security (0013), advanced help (0014)
 - **Analyze** (6): Template engine (0008), plugin execution (0009), report generator (0010), tool verification (0011), plugin security (0012)
 
 ## Installation
@@ -258,7 +259,7 @@ tests/
 VERBOSE=true ./tests/run_all_tests.sh
 ```
 
-**Current Status**: 14 of 15 test suites passing. 1 unrelated failure in template engine tests. See [tests/README.md](tests/README.md) for details.
+**Current Status**: 15 of 16 test suites passing. 1 unrelated failure in template engine tests. See [tests/README.md](tests/README.md) for details.
 
 ## Project Structure
 
@@ -272,6 +273,7 @@ doc.doc.md/
 │   │   ├── core/               # Core utilities (foundation layer)
 │   │   │   ├── constants.sh    # Global constants and configuration
 │   │   │   ├── logging.sh      # Logging infrastructure
+│   │   │   ├── mode_detection.sh   # Interactive mode detection
 │   │   │   ├── error_handling.sh  # Error handling and cleanup
 │   │   │   └── platform_detection.sh  # Platform detection
 │   │   ├── ui/                 # User interface (presentation layer)
@@ -307,9 +309,11 @@ doc.doc.md/
 ├── 02_agile_board/             # Kanban workflow (21 features total)
 │   ├── 02_analyze/             # Analysis phase (6 features)
 │   ├── 03_ready/               # Ready for implementation (1: 0002)
-│   ├── 04_backlog/             # Prioritized backlog (8 features: 0007,0013-0020)
+│   ├── 04_backlog/             # Prioritized backlog (7 features: 0007,0013-0014,0017-0020)
 │   ├── 05_implementing/        # In progress (0 features)
-│   └── 06_done/                # Completed (6: 0001,0003-0006,0015)
+│   ├── 06_done/                # Completed (7: 0001,0003-0006,0015-0016)
+│   ├── 07_obsoleted/           # Obsoleted items
+│   └── 08_rejected/            # Rejected items
 │
 ├── 03_documentation/           # Implementation docs
 │   ├── 01_architecture/        # Architecture Decision Records, compliance reviews
@@ -338,15 +342,16 @@ doc.doc.md/
 - ✅ Plugin listing functionality
 - ✅ Enhanced logging with timestamps and component identifiers
 - ✅ Development containers for 4 platforms
-- ✅ Test infrastructure (15 suites, 14 passing)
+- ✅ Test infrastructure (16 suites, 15 passing)
 - ✅ 50 accepted requirements with complete lifecycle traceability
 - ✅ Modular component architecture (Feature 0015) - 84% code reduction
 - ✅ Architecture compliance framework (ARCH_REVIEW_0015 approved)
 - ✅ Directory scanner component (Feature 0006)
 - ✅ Mode-aware behavior architecture (Concept 08_0010, ADR_0008)
+- ✅ Interactive/non-interactive mode detection (Feature 0016)
 
 ### Phase 2: Mode-Aware Execution (In Progress)
-- 🔜 Mode detection - automatic terminal detection (Feature 0016, High Priority)
+- ✅ Mode detection - automatic terminal detection (Feature 0016) - COMPLETE
 - 🔜 Structured logging enhancement (Feature 0019, High Priority)
 - 🔜 Interactive progress display with live feedback (Feature 0017)
 - 🔜 User prompt system for interactive control (Feature 0018)

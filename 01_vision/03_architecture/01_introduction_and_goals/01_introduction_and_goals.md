@@ -63,7 +63,7 @@ The project has 39 accepted requirements and 10 security requirements under revi
 - **req_0029**: [Development Container Package Integrity](../../02_requirements/03_accepted/req_0029_development_container_package_integrity.md)
 - **req_0030**: [Development Container Privilege Restriction](../../02_requirements/03_accepted/req_0030_development_container_privilege_restriction.md)
 - **req_0031**: [Development Container Build Security](../../02_requirements/03_accepted/req_0031_development_container_build_security.md)
-- **req_0032**: [Workspace Directory Management](../../02_requirements/03_accepted/req_0032_workspace_directory_management.md)
+- **req_0059**: [Workspace Recovery and Rescan](../../02_requirements/03_accepted/req_0059_workspace_recovery_and_rescan.md)
 - **req_0033**: [Platform Support Definition](../../02_requirements/03_accepted/req_0033_platform_support.md)
 - **req_0034**: [Default Template Provision](../../02_requirements/03_accepted/req_0034_default_template_provision.md)
 - **req_0035**: [Comprehensive Help System](../../02_requirements/03_accepted/req_0035_comprehensive_help_system.md)

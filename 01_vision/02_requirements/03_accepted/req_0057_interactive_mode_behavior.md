@@ -11,7 +11,7 @@ Last Updated: 2026-02-10
 The system shall detect when running in interactive mode (user at terminal) and provide enhanced user experience through prompts, confirmations, live progress displays, and human-friendly messages.
 
 ## Description
-When the toolkit runs in interactive mode (user present at terminal), it provides a rich user experience with real-time feedback, confirmation prompts for potentially disruptive operations, and dynamic progress displays. Interactive mode is detected by verifying both stdin and stdout are connected to terminals using POSIX tests (`[ -t 0 ] && [ -t 1 ]`). This mode prioritizes user control and visibility through prompts for missing tool installation, workspace migration confirmations, live progress bars showing current execution status, and helpful error messages with actionable suggestions.
+When the toolkit runs in interactive mode (user present at terminal), it provides a rich user experience with real-time feedback, confirmation prompts for potentially disruptive operations, and dynamic progress displays. Interactive mode is detected by verifying both stdin and stdout are connected to terminals using POSIX tests (`[ -t 0 ] && [ -t 1 ]`). This mode prioritizes user control and visibility through prompts for missing tool installation, live progress bars showing current execution status, and helpful error messages with actionable suggestions.
 
 ## Motivation
 From CLI Interface Concept (08_0003_cli_interface_concept.md) which describes detecting interactive mode and adapting behavior for optimal user experience. Users running commands manually expect immediate feedback, progress visibility, and the ability to intervene in operations.
@@ -34,7 +34,6 @@ Split from req_0045 (Non-Interactive Mode Detection and Handling) to separate in
 
 ### User Prompts and Confirmations
 - [ ] Missing tool installation prompts user for confirmation
-- [ ] Workspace migration prompts user for confirmation if migration is complex
 - [ ] Prompts include clear options (e.g., [y/N] for yes/no with default)
 - [ ] User can decline optional operations gracefully
 - [ ] Invalid prompt responses re-prompt user with guidance
@@ -77,7 +76,6 @@ Executing plugin: ocrmypdf
 - req_0058 (Non-Interactive Mode Behavior) - complementary requirement for automation
 - req_0045 (Non-Interactive Mode Detection and Handling) - obsoleted parent requirement
 - req_0008 (Installation Prompts) - implements prompts only in interactive mode
-- req_0044 (Workspace Format Migration) - migration prompts only in interactive mode
 - req_0006 (Verbose Logging Mode) - logging behavior adapts to mode
 
 ## Technical Considerations

@@ -252,7 +252,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Document plugin output format and security requirements
 - Future: Consider write-only directory permissions for plugins
 
-**Related Requirements**: req_0023 (Data-Driven Execution), req_0032 (Workspace Management), req_0053 (Plugin Output Validation)
+**Related Requirements**: req_0023 (Data-Driven Execution), req_0059 (Workspace Recovery and Rescan), req_0053 (Plugin Output Validation)
 
 ### Interface 5: Plugin → CLI Tools (Dependencies)
 **Description**: Plugin invokes external CLI tools to analyze files (e.g., ocrmypdf, pdfinfo, exiftool).
@@ -451,7 +451,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 | Threat Category | Key Threats | Risk Level | Related Requirements |
 |----------------|-------------|------------|---------------------|
 | **Spoofing** | Malicious plugin masquerades as legitimate, fake CLI tools | HIGH | req_0021, req_0053 |
-| **Tampering** | Plugin modifies source files, corrupts workspace, injects malicious data | CRITICAL | req_0023, req_0032, req_0048 |
+| **Tampering** | Plugin modifies source files, corrupts workspace, injects malicious data | CRITICAL | req_0023, req_0059, req_0048 |
 | **Repudiation** | Plugin actions difficult to trace or attribute | LOW | req_0052 |
 | **Information Disclosure** | Plugin exfiltrates code, credentials, or metadata | CRITICAL | req_0047, req_0051, req_0054 |
 | **Denial of Service** | Plugin hangs, crashes, or exhausts resources | HIGH | req_0048, req_0053 |

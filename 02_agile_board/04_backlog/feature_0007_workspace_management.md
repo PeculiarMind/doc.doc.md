@@ -11,7 +11,7 @@
 Implement the workspace directory management system that creates, maintains, and validates workspace structures for storing analysis metadata, scan timestamps, and plugin results as JSON files.
 
 ## Description
-Create the workspace management subsystem that handles all operations related to the workspace directory: initialization, directory structure creation, JSON file read/write with atomic operations and locking, timestamp tracking, version management, integrity verification, and corruption recovery. The workspace serves as the persistent data layer enabling incremental analysis, plugin data exchange, and downstream tool integration.
+Create the workspace management subsystem that handles all operations related to the workspace directory: initialization, directory structure creation, JSON file read/write with atomic operations and locking, timestamp tracking, integrity verification, and corruption recovery via rescan. The workspace serves as the persistent data layer enabling incremental analysis, plugin data exchange, and downstream tool integration.
 
 This feature implements the foundation for stateful operation, allowing the toolkit to track what has been analyzed, store incremental results, and provide a consumable data format for external tools.
 
@@ -23,18 +23,16 @@ This feature implements the foundation for stateful operation, allowing the tool
 - Critical dependency for core workflow functionality
 
 ## Related Requirements
-- [req_0032](../../01_vision/02_requirements/03_accepted/req_0032_workspace_directory_management.md) - Workspace Directory Management (PRIMARY)
+- [req_0059](../../01_vision/02_requirements/03_accepted/req_0059_workspace_recovery_and_rescan.md) - Workspace Recovery and Rescan (PRIMARY)
 - [req_0025](../../01_vision/02_requirements/03_accepted/req_0025_incremental_analysis.md) - Incremental Analysis Support
 - [req_0050](../../01_vision/02_requirements/03_accepted/req_0050_workspace_integrity_verification.md) - Workspace Integrity Verification
-- [req_0044](../../01_vision/02_requirements/03_accepted/req_0044_workspace_format_migration.md) - Workspace Format Migration
 - [req_0023](../../01_vision/02_requirements/03_accepted/req_0023_data_driven_execution_flow.md) - Data-driven Execution (uses workspace)
 
 ## Acceptance Criteria
 
 ### Workspace Initialization
 - [ ] System creates workspace directory if it doesn't exist
-- [ ] System creates standard subdirectory structure: `files/`, `plugins/`, `corruption/`, `.workspace_version`
-- [ ] System writes workspace version file with current schema version
+- [ ] System creates standard subdirectory structure: `files/` and `plugins/`
 - [ ] System validates workspace directory is writable
 - [ ] System handles existing workspace gracefully (no reinitialize if valid)
 
@@ -70,7 +68,7 @@ This feature implements the foundation for stateful operation, allowing the tool
 - [ ] System validates JSON syntax when loading
 - [ ] System returns structured data (associative array in bash or equivalent)
 - [ ] System handles missing workspace files gracefully (empty data)
-- [ ] System handles corrupted JSON gracefully (quarantine, return empty data)
+- [ ] System handles corrupted JSON by removing the file and treating it as unscanned
 
 ### Write Operations
 - [ ] System writes complete workspace JSON atomically
@@ -81,16 +79,10 @@ This feature implements the foundation for stateful operation, allowing the tool
 
 ### Integrity Verification
 - [ ] System detects corrupted JSON files (parsing errors)
-- [ ] System quarantines corrupted files to `corruption/` directory with timestamp
+- [ ] System removes corrupted files and logs the removal
 - [ ] System logs corruption detection events
 - [ ] System continues operation with remaining valid files
-- [ ] System provides repair/recovery guidance in logs
-
-### Version Management
-- [ ] System reads `.workspace_version` file on initialization
-- [ ] System compares workspace version against expected version
-- [ ] System provides compatibility checking (major/minor version comparison)
-- [ ] System logs version information in verbose mode
+- [ ] System provides recovery guidance in logs (rescan behavior)
 
 ### Error Handling
 - [ ] System validates workspace directory exists and is writable
@@ -104,7 +96,6 @@ This feature implements the foundation for stateful operation, allowing the tool
 ### Workspace Structure
 ```
 workspace/
-├── .workspace_version          # Schema version (e.g., "1.0")
 ├── workspace.json              # Optional: workspace-level metadata
 ├── files/                      # Per-file analysis results
 │   ├── abc123def456.json      # Content hash as filename
@@ -113,8 +104,6 @@ workspace/
 ├── plugins/                    # Plugin-specific persistent data
 │   ├── metadata-extractor/
 │   └── content-analyzer/
-└── corruption/                 # Quarantined corrupted files
-    └── abc123def456.json.corrupted.20260209-143022
 ```
 
 ### JSON Schema
@@ -169,8 +158,8 @@ get_last_scan_time(workspace_dir) -> timestamp
 # Update scan timestamp
 update_scan_timestamp(workspace_dir, file_hash, timestamp)
 
-# Quarantine corrupted file
-quarantine_corrupted(workspace_dir, file_hash, json_file)
+# Remove corrupted file and mark unscanned
+remove_corrupted_workspace_file(workspace_dir, file_hash, json_file)
 
 # Validate workspace schema
 validate_workspace_schema(workspace_dir) -> valid/invalid
@@ -235,7 +224,7 @@ save_workspace() {
 - Set restrictive permissions on workspace (0700 for directories, 0600 for files)
 - Prevent path traversal in workspace operations
 - Handle concurrent access safely with locking
-- Quarantine corrupted data instead of attempting to repair
+- Remove corrupted data and rescan
 
 ## Dependencies
 - Requires: Basic script structure (feature_0001) ✅
@@ -247,7 +236,7 @@ save_workspace() {
 - Unit tests: Workspace initialization
 - Unit tests: JSON read/write operations
 - Unit tests: Atomic write with locking
-- Unit tests: Corruption detection and quarantine
+- Unit tests: Corruption detection and removal with rescan behavior
 - Unit tests: Timestamp tracking
 - Integration tests: Concurrent access handling
 - Integration tests: Filesystem error handling (disk full, permissions)

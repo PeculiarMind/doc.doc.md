@@ -105,7 +105,6 @@ $ DOC_DOC_INTERACTIVE=true ./doc.doc.sh -d ./docs -t ./reports
 |----------|------------------|----------------------|
 | **User Prompts** | Display yes/no confirmations for optional operations | Never prompt - use default or fail with clear error |
 | **Tool Installation** | Prompt user "Install missing tool X? [y/N]" | Log warning, skip plugin, continue analysis |
-| **Migration Decisions** | Prompt user "Migrate workspace? [Y/n]" | Auto-migrate if safe, fail if breaking change |
 | **Error Recovery** | Prompt user for action or retry | Apply default recovery strategy or fail |
 
 **Example**: Missing optional tool (ocrmypdf)
@@ -283,7 +282,6 @@ export DOC_DOC_INTERACTIVE=false
 - [req_0006](../../02_requirements/03_accepted/req_0006_verbose_logging_mode.md) - Verbose Logging Mode
 - [req_0008](../../02_requirements/03_accepted/req_0008_installation_prompts.md) - Installation Prompts
 - [req_0020](../../02_requirements/03_accepted/req_0020_error_handling.md) - Error Handling
-- [req_0044](../../02_requirements/03_accepted/req_0044_workspace_format_migration.md) - Workspace Format Migration
 
 **Features Implementing This Concept**:
 - [feature_0016](../../../02_agile_board/01_funnel/feature_0016_mode_detection.md) - Mode Detection

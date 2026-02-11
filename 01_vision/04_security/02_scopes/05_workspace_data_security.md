@@ -147,7 +147,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Set restrictive file permissions (0600) on workspace files
 - Handle loading errors gracefully (corrupt workspace recoverable)
 
-**Related Requirements**: req_0032 (Workspace Management), req_0044 (Incremental Updates), req_0050 (Atomic Operations), req_0051 (Validation)
+**Related Requirements**: req_0059 (Workspace Recovery and Rescan), req_0050 (Atomic Operations), req_0051 (Validation)
 
 ### Interface 2: Script → Workspace Files (Write)
 **Description**: Main script writes updated workspace JSON files after analysis.
@@ -184,7 +184,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Use mktemp for secure temporary file creation
 - Clean up temp files on error
 
-**Related Requirements**: req_0032 (Workspace Management), req_0044 (Incremental Updates), req_0050 (Atomic Operations), req_0051 (Validation)
+**Related Requirements**: req_0059 (Workspace Recovery and Rescan), req_0050 (Atomic Operations), req_0051 (Validation)
 
 ### Interface 3: Plugin → Workspace Files (Plugin Outputs)
 **Description**: Plugins write analysis outputs to workspace subdirectory.
@@ -220,7 +220,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Check disk space before accepting plugin outputs
 - Log plugin output integration for auditing
 
-**Related Requirements**: req_0023 (Plugin Outputs), req_0032 (Workspace Management), req_0053 (Plugin Validation)
+**Related Requirements**: req_0023 (Plugin Outputs), req_0059 (Workspace Recovery and Rescan), req_0053 (Plugin Validation)
 
 ### Interface 4: Template Engine → Workspace Data (Read)
 **Description**: Template engine reads workspace data to resolve variables.
@@ -287,7 +287,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Log integrity check failures for forensics
 - Provide recovery mechanism (re-analyze or revert)
 
-**Related Requirements**: req_0032 (Workspace Management), req_0051 (Validation)
+**Related Requirements**: req_0059 (Workspace Recovery and Rescan), req_0051 (Validation)
 
 ## Data Formats
 
@@ -398,7 +398,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Lock timeout prevents indefinite waits (stale lock detection)
 - Lock released on error or signal (cleanup)
 
-**Related Requirements**: req_0032 (Workspace Management), req_0050 (Atomic Operations)
+**Related Requirements**: req_0059 (Workspace Recovery and Rescan), req_0050 (Atomic Operations)
 
 ### Incremental Update Protocol
 **Steps**:
@@ -414,7 +414,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Merge logic handles conflicts (new vs existing plugin outputs)
 - Validation before every save (ensure integrity)
 
-**Related Requirements**: req_0025 (Incremental Analysis), req_0044 (Incremental Updates)
+**Related Requirements**: req_0025 (Incremental Analysis)
 
 ## CIA Classification and Risk Assessment
 
@@ -454,10 +454,10 @@ This security scope defines the security boundaries, components, interfaces, thr
 | Threat Category | Key Threats | Risk Level | Related Requirements |
 |----------------|-------------|------------|---------------------|
 | **Spoofing** | Malicious plugin outputs masquerade as legitimate | MEDIUM | req_0053 |
-| **Tampering** | External modification of workspace files, concurrent write corruption | HIGH | req_0032, req_0050 |
+| **Tampering** | External modification of workspace files, concurrent write corruption | HIGH | req_0059, req_0050 |
 | **Repudiation** | Workspace changes not logged or attributed | MEDIUM | req_0052 |
 | **Information Disclosure** | World-readable workspace files expose confidential metadata | HIGH | req_0051 |
-| **Denial of Service** | Malformed or oversized JSON crashes application, disk exhaustion | MEDIUM | req_0032, req_0051 |
+| **Denial of Service** | Malformed or oversized JSON crashes application, disk exhaustion | MEDIUM | req_0059, req_0051 |
 | **Elevation of Privilege** | N/A (operates at user privilege level) | N/A | N/A |
 
 ### Risk Scores (DREAD)
@@ -475,7 +475,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 
 ### Preventive Controls
 
-#### Workspace Management (req_0032)
+#### Workspace Management (req_0059)
 - **Control**: Structured workspace directory with validated paths
 - **Implementation**: Directory structure enforcement, path validation, permission management
 - **Verification**: Test workspace initialization, directory creation, permission setting
@@ -647,9 +647,8 @@ This security scope defines the security boundaries, components, interfaces, thr
 ## References
 
 ### Related Requirements
-- req_0032: Workspace Directory Management (HIGH)
+- req_0059: Workspace Recovery and Rescan (HIGH)
 - req_0025: Incremental Analysis (MEDIUM)
-- req_0044: Incremental Workspace Updates (MEDIUM)
 - req_0050: Atomic File Operations (HIGH)
 - req_0051: Input Validation and Sanitization (HIGH)
 - req_0053: Plugin Output Validation (CRITICAL)
