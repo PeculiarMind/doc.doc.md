@@ -32,9 +32,9 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 ## Current Status
 
-**v0.1.0 - Modular Architecture with Mode-Aware Capabilities** 🚧
+**v0.1.0 - Modular Architecture with Plugin Execution System** 🚧
 
-Eight core features implemented:
+Eight core features implemented, four in active implementation:
 
 - ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
 - ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
@@ -42,20 +42,25 @@ Eight core features implemented:
 - ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
 - ✅ **Feature 0006**: Directory scanner component with recursive traversal
 - ✅ **Feature 0007**: Workspace management system (JSON state storage, atomic writes, locking, integrity verification)
-- ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 16 components)
+- ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 19 components)
 - ✅ **Feature 0016**: Interactive/Non-interactive mode detection (terminal detection, DOC_DOC_INTERACTIVE override)
+- 🔄 **Feature 0009**: Plugin execution engine (dependency graph, sandboxed execution, variable substitution)
+- 🔄 **Feature 0011**: Tool availability verification (check commands, install guidance, interactive prompts)
+- 🔄 **Feature 0012**: Plugin security and validation (descriptor validation, injection prevention, sandbox checks)
+- 🔄 **Feature 0020**: Stat plugin (file metadata extraction: modified time, size, owner)
 
-**Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration). New mode-aware behavior concept (08_0010) and ADR_0008 define intelligent terminal detection for optimal interactive and automated execution.
+**Architecture**: Entry script loads 19 components across 4 domains (core, ui, plugin, orchestration). Plugin execution system implements ADR-0009 (Bubblewrap sandboxing) and ADR-0010 (plugin-toolkit interface architecture). IDR-0016 documents implementation decisions.
 
-**Testing**: 18 of 18 test suites passing (including 60 new workspace tests).
+**Testing**: 21 of 21 test suites passing (34 new plugin execution, validation, and tool verification tests).
 
-**Requirements**: 50 accepted requirements (including new req_0057 interactive mode, req_0058 non-interactive mode behavior), 10 documented cross-cutting concepts, complete security threat modeling
+**Requirements**: 50 accepted requirements, 10 documented cross-cutting concepts, complete security threat modeling
 
 **Features in Progress**: 21 total features across development lifecycle:
 - **Done** (8): Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, modular architecture, mode detection
+- **Implementing** (4): Plugin execution engine (0009), tool verification (0011), plugin security (0012), stat plugin (0020)
 - **Ready** (1): OCR PDF plugin (Feature 0002)
-- **Backlog** (6): Interactive progress (0017), user prompts (0018), structured logging (0019), stat plugin (0020), workspace security (0013), advanced help (0014)
-- **Analyze** (6): Template engine (0008), plugin execution (0009), report generator (0010), tool verification (0011), plugin security (0012)
+- **Backlog** (5): Interactive progress (0017), user prompts (0018), structured logging (0019), workspace security (0013), advanced help (0014)
+- **Analyze** (3): Template engine (0008), report generator (0010)
 
 ## Installation
 
@@ -235,10 +240,13 @@ bash --version  # Requires 4.0+
 tests/
 ├── run_all_tests.sh              # Execute all test suites
 ├── helpers/test_helpers.sh       # Shared utilities and assertions
-├── unit/                         # Component tests (8 suites)
+├── unit/                         # Component tests (16 suites)
 │   ├── test_script_structure.sh
 │   ├── test_help_system.sh
 │   ├── test_argument_parsing.sh
+│   ├── test_plugin_executor.sh
+│   ├── test_plugin_validation.sh
+│   ├── test_tool_verification.sh
 │   └── ...
 ├── integration/                  # Multi-component tests
 │   └── test_complete_workflow.sh
@@ -260,7 +268,7 @@ tests/
 VERBOSE=true ./tests/run_all_tests.sh
 ```
 
-**Current Status**: 18 of 18 test suites passing. See [tests/README.md](tests/README.md) for details.
+**Current Status**: 21 of 21 test suites passing. See [tests/README.md](tests/README.md) for details.
 
 ## Project Structure
 
@@ -285,7 +293,9 @@ doc.doc.md/
 │   │   │   ├── plugin_parser.sh    # JSON descriptor parsing
 │   │   │   ├── plugin_discovery.sh # Plugin discovery and validation
 │   │   │   ├── plugin_display.sh   # Plugin listing and formatting
-│   │   │   └── plugin_executor.sh  # Plugin execution orchestration
+│   │   │   ├── plugin_executor.sh  # Plugin execution orchestration
+│   │   │   ├── plugin_validator.sh # Plugin descriptor security validation
+│   │   │   └── plugin_tool_checker.sh # Tool availability verification
 │   │   └── orchestration/      # Workflow orchestration (domain layer)
 │   │       ├── scanner.sh          # Directory and file scanning
 │   │       ├── workspace.sh        # Workspace management
@@ -308,10 +318,10 @@ doc.doc.md/
 │   └── 04_security/            # Security architecture and threat models
 │
 ├── 02_agile_board/             # Kanban workflow (21 features total)
-│   ├── 02_analyze/             # Analysis phase (6 features)
+│   ├── 02_analyze/             # Analysis phase (3 features)
 │   ├── 03_ready/               # Ready for implementation (1: 0002)
-│   ├── 04_backlog/             # Prioritized backlog (6 features: 0009,0013-0014,0017-0020)
-│   ├── 05_implementing/        # In progress (0 features)
+│   ├── 04_backlog/             # Prioritized backlog (5 features: 0013-0014,0017-0019)
+│   ├── 05_implementing/        # In progress (4 features: 0009,0011-0012,0020)
 │   ├── 06_done/                # Completed (8: 0001,0003-0007,0015-0016)
 │   ├── 07_obsoleted/           # Obsoleted items
 │   └── 08_rejected/            # Rejected items
@@ -343,7 +353,7 @@ doc.doc.md/
 - ✅ Plugin listing functionality
 - ✅ Enhanced logging with timestamps and component identifiers
 - ✅ Development containers for 4 platforms
-- ✅ Test infrastructure (18 suites, 18 passing)
+- ✅ Test infrastructure (21 suites, 21 passing)
 - ✅ 50 accepted requirements with complete lifecycle traceability
 - ✅ Modular component architecture (Feature 0015) - 84% code reduction
 - ✅ Architecture compliance framework (ARCH_REVIEW_0015 approved)
@@ -351,29 +361,30 @@ doc.doc.md/
 - ✅ Mode-aware behavior architecture (Concept 08_0010, ADR_0008)
 - ✅ Interactive/non-interactive mode detection (Feature 0016)
 
-### Phase 2: Mode-Aware Execution (In Progress)
-- ✅ Mode detection - automatic terminal detection (Feature 0016) - COMPLETE
+### Phase 2: Plugin Execution System (In Progress)
+- 🔄 Plugin execution engine with dependency graph (Feature 0009)
+- 🔄 Plugin security and validation (Feature 0012)
+- 🔄 Tool availability verification (Feature 0011)
+- 🔄 Stat plugin - basic file metadata extraction (Feature 0020)
+- ✅ Workspace management - JSON state storage (Feature 0007)
+
+### Phase 3: Mode-Aware Execution (Planned)
 - 🔜 Structured logging enhancement (Feature 0019, High Priority)
 - 🔜 Interactive progress display with live feedback (Feature 0017)
 - 🔜 User prompt system for interactive control (Feature 0018)
-- ✅ Workspace management - JSON state storage (Feature 0007)
-- 🔄 Tool availability verification (Feature 0011)
 
-### Phase 3: Core Analysis (Ready to Start)
+### Phase 4: Core Analysis (Ready to Start)
 - 🔜 OCR PDF plugin (Feature 0002) - ready for implementation
-- 🔜 Stat plugin - basic file metadata extraction (Feature 0020, High Priority)
 - ✅ Directory traversal and file discovery (Feature 0006) - complete
 - Template-based report generation (Feature 0010)
-- Plugin execution engine (Feature 0009)
 
-### Phase 4: Plugin Extensibility (Planned)
-- Plugin descriptor validation and security (Feature 0012)
+### Phase 5: Plugin Extensibility (Planned)
 - Data-driven workflow orchestration
 - Plugin management commands (info, enable, disable)
 - Advanced help system with examples (Feature 0014)
-- Example plugins (OCR, PDF analysis, stat)
+- Example plugins (OCR, PDF analysis)
 
-### Phase 5: Advanced Features (Future)
+### Phase 6: Advanced Features (Future)
 - Aggregated summary reports
 - Advanced template engine (conditionals, loops) (Feature 0008)
 - Performance monitoring and metrics
