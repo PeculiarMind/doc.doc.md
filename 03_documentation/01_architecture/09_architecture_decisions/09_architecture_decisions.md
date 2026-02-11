@@ -10,7 +10,7 @@ This directory contains Implementation Decision Records (IDRs) documenting key i
 
 **Important**: IDRs are separate from ADRs (Architecture Decision Records). ADRs (0001-0007) define strategic architectural decisions in the vision directory, while IDRs document implementation-level decisions made during development.
 
-**Total IDRs**: 14 (IDR-0001 through IDR-0014)
+**Total IDRs**: 17 (IDR-0001 through IDR-0017)
 
 ## Table of Contents
 
@@ -78,6 +78,18 @@ This directory contains Implementation Decision Records (IDRs) documenting key i
 **File**: [IDR_0014_modular_component_architecture_implementation.md](./IDR_0014_modular_component_architecture_implementation.md)  
 **Decision**: Implement modular component architecture with 16 components across 4 domains (core, ui, plugin, orchestration), transforming the 509-line monolithic script into a maintainable, testable component-based system with an 83-line entry script.
 
+### IDR-0015: Workspace Management Implementation
+**File**: [IDR_0015_workspace_management_implementation.md](./IDR_0015_workspace_management_implementation.md)  
+**Decision**: Implement workspace management system with content-based SHA-256 hashing, JSON state persistence, and corruption recovery for the plugin execution pipeline.
+
+### IDR-0016: Plugin Execution Engine Implementation
+**File**: [IDR_0016_plugin_execution_engine_implementation.md](./IDR_0016_plugin_execution_engine_implementation.md)  
+**Decision**: Implement plugin execution engine with Kahn's algorithm for dependency ordering, Bubblewrap sandbox with graceful fallback, and layered validation architecture.
+
+### IDR-0017: Mode-Aware UI Components
+**File**: [IDR_0017_mode_aware_ui_components.md](./IDR_0017_mode_aware_ui_components.md)  
+**Decision**: Implement three mode-aware UI components (progress display, prompt system, structured logging) as separate components following the modular architecture pattern, enabling interactive directory scan with progress indication and non-interactive structured logging.
+
 ## ADR vs IDR Distinction
 
 **Architecture Decision Records (ADRs)**:
@@ -89,7 +101,7 @@ This directory contains Implementation Decision Records (IDRs) documenting key i
 **Implementation Decision Records (IDRs)**:
 - Located in `03_documentation/01_architecture/09_architecture_decisions/` (this directory)
 - Document implementation-level decisions made during development
-- IDR-0001 through IDR-0013
+- IDR-0001 through IDR-0017
 - Define the "how" and implementation details
 - Must document any deviations from vision ADRs
 - Must create risk records for deviations
