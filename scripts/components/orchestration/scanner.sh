@@ -64,30 +64,8 @@ detect_file_type() {
   return 0
 }
 
-# Get last scan timestamp from workspace
-# Arguments:
-#   $1 - Workspace directory
-# Returns:
-#   Unix timestamp or empty string if no previous scan
-get_last_scan_time() {
-  local workspace_dir="$1"
-  
-  # If workspace doesn't exist or is empty, return empty (no previous scan)
-  if [[ -z "$workspace_dir" ]] || [[ ! -d "$workspace_dir" ]]; then
-    echo ""
-    return 0
-  fi
-  
-  # Try to read timestamp file (future: integrate with workspace.sh)
-  local timestamp_file="${workspace_dir}/.last_scan_timestamp"
-  if [[ -f "$timestamp_file" ]]; then
-    cat "$timestamp_file" 2>/dev/null || echo ""
-  else
-    echo ""
-  fi
-  
-  return 0
-}
+# get_last_scan_time is provided by orchestration/workspace.sh
+# It reads from workspace.json for the last_full_scan timestamp
 
 # Scan directory recursively and discover files
 # Arguments:
