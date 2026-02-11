@@ -15,5 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with doc.doc.md. If not, see <https://www.gnu.org/licenses/>.
 
-apt-get update
-apt-get install stat
+# stat is part of GNU coreutils, typically pre-installed on all Linux systems
+# Installation only needed if missing
+
+if ! command -v stat &> /dev/null; then
+    apt-get update
+    apt-get install -y coreutils
+fi
