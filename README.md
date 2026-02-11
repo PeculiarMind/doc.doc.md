@@ -309,7 +309,9 @@ doc.doc.md/
 │   ├── 03_ready/               # Ready for implementation (1: 0002)
 │   ├── 04_backlog/             # Prioritized backlog (8 features: 0007,0013-0020)
 │   ├── 05_implementing/        # In progress (0 features)
-│   └── 06_done/                # Completed (6: 0001,0003-0006,0015)
+│   ├── 06_done/                # Completed (6: 0001,0003-0006,0015)
+│   ├── 07_obsoleted/           # Obsoleted items
+│   └── 08_rejected/            # Rejected items
 │
 ├── 03_documentation/           # Implementation docs
 │   ├── 01_architecture/        # Architecture Decision Records, compliance reviews

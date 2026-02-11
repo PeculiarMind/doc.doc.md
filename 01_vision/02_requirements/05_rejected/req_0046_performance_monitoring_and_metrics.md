@@ -84,7 +84,7 @@ Users cannot verify these quality goals are met without built-in metrics. Extern
 ## Related Requirements
 - req_0006 (Verbose Logging Mode) - metrics logged in verbose mode
 - req_0025 (Incremental Analysis) - metrics show incremental vs full analysis performance
-- req_0032 (Workspace Directory Management) - workspace size metrics tracked
+- req_0059 (Workspace Recovery and Rescan) - workspace size metrics tracked
 
 ## Technical Considerations
 

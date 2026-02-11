@@ -8,17 +8,16 @@
 **Priority**: Medium
 
 ## Overview
-Implement user prompt and confirmation system for interactive mode that allows users to make decisions about optional operations, tool installation, workspace migrations, and other potentially disruptive actions.
+Implement user prompt and confirmation system for interactive mode that allows users to make decisions about optional operations, tool installation, and other potentially disruptive actions.
 
 ## Description
 Create a prompt system that enables interactive users to control toolkit behavior through clear yes/no or option-based confirmations. Prompts only appear in interactive mode and include clear default options (e.g., [y/N] where N is default), handle invalid responses gracefully with re-prompting, and allow users to decline optional operations without failing the entire workflow.
 
-The system provides standardized prompt functions for common scenarios (tool installation, migration confirmation, directory creation) while remaining flexible for custom prompts. All prompts are automatically suppressed in non-interactive mode where automatic defaults apply instead.
+The system provides standardized prompt functions for common scenarios (tool installation, directory creation) while remaining flexible for custom prompts. All prompts are automatically suppressed in non-interactive mode where automatic defaults apply instead.
 
 ## Business Value
 - Gives users control over potentially disruptive operations
 - Prevents unwanted tool installations or system modifications
-- Enables safe workspace migrations with user awareness and consent
 - Improves trust by being transparent about actions requiring approval
 - Reduces risk of unintended consequences from automated decisions
 - Supports informed user decisions through clear prompt messages
@@ -26,7 +25,6 @@ The system provides standardized prompt functions for common scenarios (tool ins
 ## Related Requirements
 - [req_0057](../../01_vision/02_requirements/03_accepted/req_0057_interactive_mode_behavior.md) - Interactive Mode Behavior (PRIMARY)
 - [req_0008](../../01_vision/02_requirements/03_accepted/req_0008_installation_prompts.md) - Installation Prompts
-- [req_0044](../../01_vision/02_requirements/03_accepted/req_0044_workspace_format_migration.md) - Workspace Format Migration (migration prompts)
 
 ## Acceptance Criteria
 
@@ -47,7 +45,6 @@ The system provides standardized prompt functions for common scenarios (tool ins
 ### Prompt Types
 - [ ] **Yes/No prompt**: Binary choice with default option
 - [ ] **Tool installation prompt**: "Install missing tool X? [y/N]"
-- [ ] **Migration prompt**: "Migrate workspace to version X.X? [Y/n]"
 - [ ] **Directory creation prompt**: "Create target directory? [Y/n]"
 - [ ] Custom prompts supported through common prompt function
 
@@ -64,7 +61,6 @@ The system provides standardized prompt functions for common scenarios (tool ins
 
 ### Integration Points
 - [ ] Tool verification system uses prompts for missing tool installation
-- [ ] Workspace management uses prompts for format migrations
 - [ ] Directory scanner uses prompts for target directory creation
 - [ ] Plugin system uses prompts for installing plugin dependencies
 
@@ -133,13 +129,6 @@ else
   log "INFO" "TOOL" "User declined ocrmypdf installation, skipping plugin"
 fi
 
-if prompt_yes_no "Migrate workspace to format v2.1?" "y"; then
-  perform_migration
-  log "INFO" "WORKSPACE" "User approved workspace migration"
-else
-  log "ERROR" "WORKSPACE" "User declined migration, cannot proceed"
-  exit 1
-fi
 ```
 
 ### Specialized Prompt Functions
@@ -158,23 +147,6 @@ prompt_tool_installation() {
   fi
 }
 
-# Prompt for workspace migration
-prompt_workspace_migration() {
-  local current_version="$1"
-  local target_version="$2"
-  local is_breaking="${3:-false}"
-  
-  local default
-  [[ "${is_breaking}" == "true" ]] && default="n" || default="y"
-  
-  local message="Workspace format v${current_version} → v${target_version}. Migrate?"
-  
-  if prompt_yes_no "${message}" "${default}"; then
-    return 0
-  else
-    return 1
-  fi
-}
 ```
 
 ### Testing Support

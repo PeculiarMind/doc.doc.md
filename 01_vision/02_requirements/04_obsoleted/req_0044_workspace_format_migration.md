@@ -3,9 +3,11 @@
 **ID**: req_0044
 
 ## Status
-State: Accepted  
+State: Obsoleted  
 Created: 2026-02-09  
-Last Updated: 2026-02-09
+Last Updated: 2026-02-11
+
+**Obsoleted By**: req_0059 (Workspace Recovery and Rescan)
 
 ## Overview
 The system shall detect workspace format version mismatches and provide migration mechanisms to upgrade obsolete workspace formats to the current schema.
@@ -170,3 +172,5 @@ migrate_1_0_to_1_1() {
 - [2026-02-09] Created in funnel by Requirements Engineer Agent - extracted from Workspace Concept and req_0032 analysis
 - [2026-02-09] Moved to analyze for detailed analysis
 - [2026-02-09] Moved to accepted by user - ready for implementation
+- [2026-02-11] Moved to obsoleted by user  
+-- Comment: Migrations are not required; workspace can be rebuilt by rescan

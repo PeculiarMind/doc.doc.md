@@ -82,7 +82,7 @@ The worked example in the security overview specifically addresses "Command Inje
 - req_0011 (Local Only Processing) - input validation prevents network exfiltration via injected commands
 - req_0020 (Error Handling) - validation errors handled gracefully
 - req_0023 (Data-driven Execution Flow) - plugin data validated before orchestration
-- req_0032 (Workspace Management) - workspace paths must be validated
+- req_0059 (Workspace Recovery and Rescan) - workspace paths must be validated
 
 ## Technical Considerations
 

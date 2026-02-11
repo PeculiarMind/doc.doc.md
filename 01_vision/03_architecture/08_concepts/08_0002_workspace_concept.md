@@ -42,7 +42,6 @@ workspace/
 ├── <file_hash_1>.json.lock  # Lock file during write
 ├── <file_hash_2>.json       # Analysis data for file 2
 ├── metadata.json            # Optional: workspace-level metadata
-└── .workspace_version       # Workspace schema version
 ```
 
 **File Naming**:
@@ -283,10 +282,7 @@ EOF
     # Create subdirectories if needed
     mkdir -p "$workspace_dir/files" || true
     mkdir -p "$workspace_dir/plugins" || true
-    mkdir -p "$workspace_dir/corruption" || true
     
-    # Write version marker
-    echo "1.0" > "$workspace_dir/.workspace_version"
     
     log_info "Workspace initialized successfully: $workspace_dir"
     return 0
@@ -297,8 +293,7 @@ EOF
 - Atomic operation (completes fully or fails cleanly)
 - Creates workspace.json with version and timestamp
 - Sets permissions to user-only (700)
-- Creates standard subdirectories (files/, plugins/, corruption/)
-- Writes .workspace_version marker file
+- Creates standard subdirectories (files/, plugins/)
 
 #### Validation
 
@@ -323,23 +318,8 @@ validate_workspace() {
         return 1
     fi
     
-    # Check version file exists
-    local version_file="$workspace_dir/.workspace_version"
-    if [[ ! -f "$version_file" ]]; then
-        log_warning "Workspace version file missing, recreating..."
-        echo "1.0" > "$version_file"
-    fi
-    
-    # Validate version compatibility
-    local workspace_version=$(cat "$version_file")
-    if [[ "$workspace_version" != "1.0" ]]; then
-        log_error "Incompatible workspace version: $workspace_version (expected 1.0)"
-        log_error "Run migration tool or delete workspace to recreate"
-        return 1
-    fi
-    
     # Recreate missing subdirectories with warnings
-    for subdir in files plugins corruption; do
+    for subdir in files plugins; do
         if [[ ! -d "$workspace_dir/$subdir" ]]; then
             log_warning "Missing subdirectory $subdir, recreating..."
             mkdir -p "$workspace_dir/$subdir" || ((errors++))
@@ -354,9 +334,9 @@ validate_workspace() {
     else
         # Validate JSON syntax
         if ! jq empty "$metadata_file" 2>/dev/null; then
-            log_warning "Workspace metadata corrupted, recreating..."
-            mv "$metadata_file" "$workspace_dir/corruption/workspace.json.$(date +%s)"
-            initialize_workspace "$workspace_dir"
+          log_warning "Workspace metadata corrupted, recreating..."
+          rm -f "$metadata_file"
+          initialize_workspace "$workspace_dir"
         fi
     fi
     
@@ -372,7 +352,6 @@ validate_workspace() {
 
 **Validation Checks**:
 - Directory exists and has correct permissions
-- Version file exists and version is compatible
 - Required subdirectories exist (recreate if missing)
 - workspace.json exists and is valid JSON
 - Stale lock files cleaned up (optional)
@@ -391,15 +370,8 @@ check_workspace_file() {
     if ! jq empty "$json_file" 2>/dev/null; then
         log_warning "Corrupted workspace file detected: $json_file"
         
-        # Quarantine corrupted file
-        local filename=$(basename "$json_file")
-        local quarantine_dir="$workspace_dir/corruption"
-        local quarantine_file="${quarantine_dir}/${filename}.corrupted.$(date +%Y%m%d_%H%M%S)"
-        
-        mkdir -p "$quarantine_dir"
-        mv "$json_file" "$quarantine_file"
-        
-        log_info "Corrupted file quarantined: $quarantine_file"
+        rm -f "$json_file"
+        log_info "Corrupted file removed: $json_file"
         log_info "File will be re-analyzed in next scan"
         
         return 1  # Indicates corruption found
@@ -425,8 +397,8 @@ scan_workspace_corruption() {
     done
     
     if [[ $corrupted_count -gt 0 ]]; then
-        log_warning "Found $corrupted_count corrupted files (quarantined to corruption/)"
-        log_info "Affected files will be re-analyzed automatically"
+      log_warning "Found $corrupted_count corrupted files (removed)"
+      log_info "Affected files will be re-analyzed automatically"
     else
         log_verbose "No corrupted workspace files found"
     fi
@@ -437,16 +409,10 @@ scan_workspace_corruption() {
 
 **Corruption Recovery Process**:
 1. **Detection**: Attempt to parse JSON, catch syntax errors
-2. **Quarantine**: Move corrupted file to `corruption/` subdirectory with timestamp
+2. **Removal**: Delete corrupted file and mark it for re-scan
 3. **Continue**: Process remaining valid workspace files
 4. **Re-analyze**: Missing workspace files automatically re-analyzed in next scan
 5. **Logging**: Document corruption detection and recovery actions
-
-**Quarantine Naming**:
-- Pattern: `<original_name>.corrupted.<timestamp>`
-- Example: `abc123def456.json.corrupted.20260209_143022`
-- Preserves original file for forensic analysis
-- Never automatically deletes corrupted data
 
 #### Cleanup Operations
 
@@ -501,13 +467,11 @@ workspace_size_report() {
     
     local total_size=$(du -sh "$workspace_dir" 2>/dev/null | cut -f1)
     local file_count=$(find "$workspace_dir" -name "*.json" -type f | wc -l)
-    local corruption_count=$(find "$workspace_dir/corruption" -type f 2>/dev/null | wc -l)
     
     echo "Workspace Statistics:"
     echo "  Location: $workspace_dir"
     echo "  Total Size: $total_size"
     echo "  JSON Files: $file_count"
-    echo "  Quarantined: $corruption_count"
 }
 
 reset_workspace() {
@@ -525,9 +489,6 @@ reset_workspace() {
     # Remove all JSON files except metadata
     find "$workspace_dir" -name "*.json" -type f -not -name "workspace.json" -delete
     find "$workspace_dir" -name "*.lock" -type f -delete
-    
-    # Clear corruption directory
-    rm -rf "$workspace_dir/corruption/"*
     
     # Update metadata
     if [[ -f "$workspace_dir/workspace.json" ]]; then
@@ -588,19 +549,10 @@ for json in workspace/*.json; do
 done
 ```
 
-**Schema Migration**:
+**Schema Recovery**:
 ```bash
-# Workspace version file
-echo "1.0" > workspace/.workspace_version
-
-# Migration script when schema changes
-migrate_workspace() {
-  local version=$(cat workspace/.workspace_version)
-  case "${version}" in
-    "1.0") migrate_1_0_to_1_1 ;;
-    "1.1") migrate_1_1_to_2_0 ;;
-  esac
-}
+# No migrations. Rebuild workspace by re-scanning when schema changes.
+rm -f workspace/*.json
 ```
 
 ### Design Principles
@@ -668,4 +620,4 @@ migrate_workspace() {
 - [req_0018: Per-File Reports](../../02_requirements/03_accepted/req_0018_per_file_reports.md) - stores file metadata in workspace JSON files
 - [req_0023: Data-driven Execution Flow](../../02_requirements/03_accepted/req_0023_data_driven_execution_flow.md) - plugins read/write workspace data
 - [req_0025: Incremental Analysis](../../02_requirements/03_accepted/req_0025_incremental_analysis.md) - depends on workspace timestamp tracking
-- [req_0032: Workspace Directory Management](../../02_requirements/03_accepted/req_0032_workspace_directory_management.md) - defines workspace lifecycle operations
+- [req_0059: Workspace Recovery and Rescan](../../02_requirements/03_accepted/req_0059_workspace_recovery_and_rescan.md) - defines workspace lifecycle operations

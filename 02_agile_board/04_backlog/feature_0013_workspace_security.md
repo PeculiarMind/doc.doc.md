@@ -27,14 +27,13 @@ Workspace security is critical because workspace contains analysis results, cont
 - [req_0050](../../01_vision/02_requirements/03_accepted/req_0050_workspace_integrity_verification.md) - Workspace Integrity (PRIMARY - Risk 204)
 - [req_0052](../../01_vision/02_requirements/03_accepted/req_0052_secure_defaults_and_configuration_hardening.md) - Secure Defaults (Risk 91)
 - [req_0055](../../01_vision/02_requirements/03_accepted/req_0055_file_type_verification_and_validation.md) - File Type Verification (Risk 92)
-- [req_0032](../../01_vision/02_requirements/03_accepted/req_0032_workspace_directory_management.md) - Workspace Management
+- [req_0059](../../01_vision/02_requirements/03_accepted/req_0059_workspace_recovery_and_rescan.md) - Workspace Management
 
 ## Acceptance Criteria
 
 ### Workspace Structure Validation
 - [ ] System validates workspace directory structure matches expected schema
-- [ ] System validates required subdirectories exist: `files/`, `plugins/`, `corruption/`
-- [ ] System validates `.workspace_version` file exists and is readable
+- [ ] System validates required subdirectories exist: `files/`, `plugins/`
 - [ ] System detects unexpected files or directories (log warning)
 - [ ] System validates workspace root is within expected filesystem boundaries
 
@@ -42,8 +41,7 @@ Workspace security is critical because workspace contains analysis results, cont
 - [ ] System validates JSON syntax for all workspace files before reading
 - [ ] System validates required fields present: `file_path`, `file_type`, `last_scanned`
 - [ ] System validates field types match expected types
-- [ ] System validates JSON structure matches workspace schema version
-- [ ] System rejects malformed JSON (quarantine to corruption directory)
+- [ ] System removes malformed JSON and treats it as unscanned
 
 ### File Permission Hardening
 - [ ] System sets restrictive permissions on workspace directory: `0700` (owner only)
@@ -62,11 +60,10 @@ Workspace security is critical because workspace contains analysis results, cont
 
 ### Corruption Detection
 - [ ] System detects JSON parsing errors (corrupted workspace files)
-- [ ] System quarantines corrupted files to `corruption/` directory
-- [ ] System appends timestamp to quarantined files: `<hash>.json.corrupted.YYYYMMDD-HHMMSS`
+- [ ] System removes corrupted files and treats them as unscanned
 - [ ] System logs corruption events with file path and error details
 - [ ] System continues operation with remaining valid files
-- [ ] System provides recovery guidance (suggests `-f fullscan` to regenerate)
+- [ ] System provides recovery guidance (rescan behavior)
 
 ### Lock File Verification
 - [ ] System validates lock files are recent (not stale)
@@ -133,13 +130,13 @@ verify_workspace_integrity() {
   while IFS= read -r json_file; do
     if ! validate_workspace_json "$json_file"; then
       log "WARN" "SECURITY" "Corrupted JSON detected: $json_file"
-      quarantine_corrupted_file "$workspace_dir" "$json_file"
+      remove_corrupted_file "$workspace_dir" "$json_file"
       ((corrupted_count++))
     fi
   done < <(find "$workspace_dir/files" -name '*.json' -type f)
   
   if ((corrupted_count > 0)); then
-    log "WARN" "SECURITY" "Quarantined $corrupted_count corrupted files"
+    log "WARN" "SECURITY" "Removed $corrupted_count corrupted files"
   fi
   
   # Clean stale locks
@@ -153,18 +150,12 @@ validate_workspace_structure() {
   local workspace_dir="$1"
   
   # Check required directories
-  for subdir in files plugins corruption; do
+  for subdir in files plugins; do
     if [[ ! -d "$workspace_dir/$subdir" ]]; then
       log "ERROR" "SECURITY" "Missing required directory: $subdir"
       return 1
     fi
   done
-  
-  # Check version file
-  if [[ ! -f "$workspace_dir/.workspace_version" ]]; then
-    log "ERROR" "SECURITY" "Missing workspace version file"
-    return 1
-  fi
   
   # Validate path doesn't contain traversal
   if [[ "$workspace_dir" == *".."* ]]; then
@@ -212,7 +203,7 @@ harden_workspace_permissions() {
     return 1
   }
   
-  chmod 700 "$workspace_dir"/{files,plugins,corruption} 2>/dev/null
+  chmod 700 "$workspace_dir"/{files,plugins} 2>/dev/null
   
   # Set file permissions
   find "$workspace_dir" -type f -exec chmod 600 {} \; 2>/dev/null
@@ -241,21 +232,16 @@ validate_workspace_json() {
   return 0
 }
 
-quarantine_corrupted_file() {
+remove_corrupted_file() {
   local workspace_dir="$1"
   local corrupted_file="$2"
   
-  local timestamp
-  timestamp=$(date +"%Y%m%d-%H%M%S")
-  
-  local quarantine_file="$workspace_dir/corruption/$(basename "$corrupted_file").corrupted.$timestamp"
-  
-  mv "$corrupted_file" "$quarantine_file" 2>/dev/null || {
-    log "ERROR" "SECURITY" "Failed to quarantine corrupted file: $corrupted_file"
+  rm -f "$corrupted_file" 2>/dev/null || {
+    log "ERROR" "SECURITY" "Failed to remove corrupted file: $corrupted_file"
     return 1
   }
   
-  log "INFO" "SECURITY" "Quarantined corrupted file: $quarantine_file"
+  log "INFO" "SECURITY" "Removed corrupted file: $corrupted_file"
   return 0
 }
 
@@ -346,7 +332,7 @@ FILE_PERMISSIONS=600         # Owner read/write only
 - Defense-in-depth: Multiple validation layers
 - Fail-secure: Reject on validation failure
 - Audit logging: Record all security events
-- Isolation: Quarantine corrupted data
+- Isolation: Remove corrupted data and rescan
 - Least privilege: Restrictive permissions by default
 
 ## Dependencies
@@ -359,7 +345,7 @@ FILE_PERMISSIONS=600         # Owner read/write only
 - Unit tests: Permission validation and hardening
 - Unit tests: JSON validation
 - Unit tests: File type validation
-- Unit tests: Corruption detection and quarantine
+- Unit tests: Corruption detection and removal with rescan behavior
 - Security tests: Path traversal attempts
 - Security tests: Symlink exploitation attempts
 - Security tests: Special file type handling

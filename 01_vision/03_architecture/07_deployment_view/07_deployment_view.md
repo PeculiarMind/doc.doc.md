@@ -229,8 +229,7 @@ doc.doc/                          # Project root
 ├── reports/                      # Generated reports (user provides)
 └── workspace/                    # Analysis state (user provides)
     ├── abc123.json
-    ├── def456.json
-    └── .workspace_version
+  └── def456.json
 ```
 
 ## 7.4 Installation Methods

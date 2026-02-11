@@ -25,7 +25,7 @@ This is a foundational feature that enables all mode-aware behaviors: user promp
 ## Related Requirements
 - [req_0057](../../01_vision/02_requirements/03_accepted/req_0057_interactive_mode_behavior.md) - Interactive Mode Behavior
 - [req_0058](../../01_vision/02_requirements/03_accepted/req_0058_non_interactive_mode_behavior.md) - Non-Interactive Mode Behavior (PRIMARY)
-- [req_0045](../../01_vision/02_requirements/04_obsolete/req_0045_non_interactive_mode_handling.md) - Obsoleted parent requirement
+- [req_0045](../../01_vision/02_requirements/04_obsoleted/req_0045_non_interactive_mode_handling.md) - Obsoleted parent requirement
 
 ## Acceptance Criteria
 

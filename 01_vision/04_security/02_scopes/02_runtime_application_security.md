@@ -241,7 +241,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Implement disk space checks before writing
 - Use atomic write operations (write to temp, then rename)
 
-**Related Requirements**: req_0032 (Workspace Management), req_0047 (Path Validation), req_0050 (Atomic Operations), req_0051 (Permission Controls)
+**Related Requirements**: req_0059 (Workspace Recovery and Rescan), req_0047 (Path Validation), req_0050 (Atomic Operations), req_0051 (Permission Controls)
 
 ### Interface 5: Script → Plugins (Invocation)
 **Description**: Script executes plugin scripts to analyze files.
@@ -379,7 +379,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - Symbolic link resolution can escape directory restrictions
 - File permissions must be explicitly set (umask not relied upon)
 
-**Related Requirements**: req_0032 (Workspace Management), req_0054 (Symlink Handling)
+**Related Requirements**: req_0059 (Workspace Recovery and Rescan), req_0054 (Symlink Handling)
 
 ## CIA Classification and Risk Assessment
 
@@ -425,7 +425,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 | **Tampering** | Argument injection, file overwrites, command injection | HIGH | req_0038, req_0047, req_0048, req_0051 |
 | **Repudiation** | Actions not logged or logs manipulated | LOW | req_0052 |
 | **Information Disclosure** | Path leakage in logs, errors exposing internals, sensitive data in output | HIGH | req_0051, req_0052, req_0054 |
-| **Denial of Service** | Resource exhaustion (disk, memory, CPU), infinite loops, hangs | MEDIUM | req_0032, req_0048 |
+| **Denial of Service** | Resource exhaustion (disk, memory, CPU), infinite loops, hangs | MEDIUM | req_0059, req_0048 |
 | **Elevation of Privilege** | Writing to privileged locations, command injection as root | MEDIUM | req_0047, req_0048 |
 
 ### Risk Scores (DREAD)
@@ -474,7 +474,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - **Verification**: Log output inspection for sensitive data patterns
 - **Residual Risk**: New code paths may log unsanitized data
 
-#### Workspace Isolation (req_0032)
+#### Workspace Isolation (req_0059)
 - **Control**: Restrict all file writes to workspace directory
 - **Implementation**: Path validation before writes, directory structure enforcement
 - **Verification**: Write operation tests attempting escapes
@@ -620,7 +620,7 @@ This security scope defines the security boundaries, components, interfaces, thr
 - req_0052: Secure Logging Practices (HIGH)
 - req_0054: Symlink Handling (MEDIUM)
 - req_0020: Robust Error Handling (MEDIUM)
-- req_0032: Workspace Directory Management (MEDIUM)
+- req_0059: Workspace Recovery and Rescan (MEDIUM)
 
 ### Related Security Scopes
 - scope_plugin_execution_001: Plugin Execution Security

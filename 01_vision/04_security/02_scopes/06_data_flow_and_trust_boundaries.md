@@ -298,7 +298,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 - Information disclosure (permissions)
 - Malformed JSON
 
-**Mitigations**: req_0032 (Workspace Management), req_0050 (Atomic Operations), req_0051 (Validation)
+**Mitigations**: req_0059 (Workspace Recovery and Rescan), req_0050 (Atomic Operations), req_0051 (Validation)
 
 ---
 
@@ -428,7 +428,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 
 **Mitigations**:
 - **Workspace permissions**: Restrictive file permissions (0600) prevent external access (req_0051)
-- **Workspace integrity**: JSON validation detects tampering (req_0032)
+- **Workspace integrity**: JSON validation detects tampering (req_0059)
 - **Template escaping**: Escape all variables even from trusted workspace (req_0051)
 
 **Severity**: MEDIUM (requires workspace access, mitigated by escaping)
@@ -452,7 +452,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 **Mitigations**:
 - **Plugin execution**: Timeouts, resource limits (req_0053)
 - **Plugin outputs**: Size limits, validation (req_0053)
-- **Workspace**: Size limits, disk space checks (req_0032)
+- **Workspace**: Size limits, disk space checks (req_0059)
 - **Multiple layers**: Resource limits at every stage
 
 **Severity**: MEDIUM (DoS, requires large input)
@@ -490,7 +490,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 | Symlinks | Symlink handling | req_0054 | Application → Files |
 | Plugin Descriptors | JSON schema validation | req_0053 | Application → Plugins |
 | Plugin Outputs | JSON validation + sanitization | req_0053 | Plugins → Workspace |
-| Workspace Data | JSON schema validation | req_0032 | Workspace ↔ Application |
+| Workspace Data | JSON schema validation | req_0059 | Workspace ↔ Application |
 | Template Syntax | Syntax restrictions | req_0049 | User Template → Engine |
 
 ### Command Injection Prevention
@@ -512,7 +512,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 | Stage | Control | Requirement | Boundary |
 |-------|---------|-------------|----------|
 | Workspace Writes | Atomic operations | req_0050 | Application → Workspace |
-| Workspace Reads | JSON validation | req_0032 | Workspace → Application |
+| Workspace Reads | JSON validation | req_0059 | Workspace → Application |
 | File Locking | Prevent concurrent corruption | req_0050 | Workspace ↔ Application |
 | Output Writes | Atomic operations | req_0050 | Application → Output |
 
@@ -568,7 +568,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 - [ ] Workspace locked during write
 - [ ] Atomic write used
 
-**Requirements**: req_0032, req_0050, req_0053, req_0051
+**Requirements**: req_0059, req_0050, req_0053, req_0051
 
 ---
 
@@ -741,7 +741,7 @@ This security scope provides an end-to-end view of data flow through the doc.doc
 - req_0054: Symlink Handling
 - req_0021: Plugin Architecture
 - req_0023: Data-Driven Execution
-- req_0032: Workspace Management
+- req_0059: Workspace Management
 - req_0040: Template Engine
 - req_0049: Template Syntax Restrictions
 - req_0050: Atomic Operations
