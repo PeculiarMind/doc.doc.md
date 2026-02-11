@@ -39,8 +39,10 @@ _sanitize_log_value() {
   # Replace carriage returns and newlines with literal representations
   value="${value//$'\r'/\\r}"
   value="${value//$'\n'/\\n}"
-  # Remove remaining control characters (0x00-0x1F except tab, and 0x7F)
-  # Using tr to strip non-printable characters while preserving tabs
+  # Replace tabs with spaces to prevent log alignment issues
+  value="${value//$'\t'/  }"
+  # Remove control characters: 0x00-0x08 (NUL-BS), 0x0B-0x1F (VT-US), 0x7F (DEL)
+  # Tab (0x09) and LF (0x0A) are already handled above via substitution
   printf '%s' "$value" | LC_ALL=C tr -d '\000-\010\013-\037\177'
 }
 
