@@ -47,7 +47,7 @@ Eight core features implemented:
 
 **Architecture**: Architecture review ARCH_REVIEW_0015 approved with full compliance. Entry script reduced 84%, components organized across 4 domains (core, ui, plugin, orchestration). New mode-aware behavior concept (08_0010) and ADR_0008 define intelligent terminal detection for optimal interactive and automated execution.
 
-**Testing**: 18 of 18 test suites passing (60 new workspace tests added).
+**Testing**: 18 of 18 test suites passing (including 60 new workspace tests).
 
 **Requirements**: 50 accepted requirements (including new req_0057 interactive mode, req_0058 non-interactive mode behavior), 10 documented cross-cutting concepts, complete security threat modeling
 
