@@ -3,7 +3,7 @@
 # Purpose: Plugin execution orchestration with dependency graph and sandbox support
 # Dependencies: plugin/plugin_discovery.sh, plugin/plugin_validator.sh, plugin/plugin_tool_checker.sh, orchestration/workspace.sh
 # Exports: execute_plugin(), build_dependency_graph(), orchestrate_plugins(), execute_plugin_sandboxed(), substitute_variables_secure(), should_execute_plugin()
-# Side Effects: Executes external commands, modifies workspace
+# Side Effects: Executes external commands, mediates workspace modifications through orchestration layer
 
 # ==============================================================================
 # Configuration
@@ -274,8 +274,10 @@ substitute_variables_secure() {
         return 1
       fi
 
-      # Replace ${key} with quoted value using sed
-      result=$(echo "$result" | sed "s|\${${key}}|${value}|g")
+      # Replace ${key} with value using sed; escape sed-special chars in value
+      local escaped_value
+      escaped_value=$(printf '%s' "$value" | sed 's/[\/&]/\\&/g')
+      result=$(echo "$result" | sed "s|\${${key}}|${escaped_value}|g")
     done <<< "$keys"
   fi
 
