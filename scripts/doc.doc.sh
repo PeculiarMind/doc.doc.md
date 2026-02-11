@@ -35,6 +35,7 @@ source_component() {
 # Core components (no dependencies)
 source_component "core/constants.sh"
 source_component "core/logging.sh"
+source_component "core/mode_detection.sh"
 source_component "core/error_handling.sh"
 source_component "core/platform_detection.sh"
 
@@ -61,6 +62,9 @@ source_component "plugin/plugin_executor.sh"
 
 # Main entry point
 main() {
+  # Detect interactive mode early (before any prompts or user-facing output)
+  detect_interactive_mode
+  
   # Initialize platform detection
   detect_platform
   
