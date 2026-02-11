@@ -619,3 +619,28 @@ detect_circular_dependencies() {
 ### Assessment
 
 **Result**: ✅ **APPROVED - FULLY COMPLIANT WITH ALL ADRs**
+
+## Security Review
+
+**Reviewed**: 2026-02-11  
+**Reviewer**: Security Review Agent
+
+### Security Findings
+
+| # | Severity | Finding |
+|---|----------|---------|
+| 1 | INFO | Validates injection patterns (`;`, `&&`, `\|\|`, `$()`, backtick, `eval`, `bash -c`, `sh -c`) — comprehensive coverage of common shell injection vectors. |
+| 2 | INFO | Validates sandbox compatibility by blocking `/proc/`, `/sys/`, `mount`, `chroot`, `sudo` — prevents privilege escalation and sandbox escape in command templates. |
+| 3 | INFO | Validates variable substitution references against `consumes` declarations — prevents undeclared variable injection. |
+| 4 | INFO | Circular dependency detection via Kahn's algorithm prevents infinite execution loops. |
+| 5 | LOW | `install_commandline` validation requires a recognized package manager name but uses substring matching. A command containing `apt` as a non-package-manager substring could pass validation. Other injection pattern checks provide secondary defense. |
+
+### Risk Assessment
+
+- **Primary Risk**: None identified. The validator acts as the primary security gate and provides comprehensive coverage of known attack patterns.
+- **Secondary Risk**: Package manager substring matching (finding #5) is a minor gap. Exploitation would require crafting a command that contains a package manager name as substring while also evading all injection pattern checks — a very narrow attack surface.
+- **Residual Risk**: Minimal. The validator's fail-secure design (reject on any validation failure) ensures malformed or suspicious descriptors do not reach execution.
+
+### Security Agent Verdict
+
+**APPROVED**

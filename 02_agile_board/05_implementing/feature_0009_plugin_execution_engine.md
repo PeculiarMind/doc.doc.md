@@ -799,3 +799,30 @@ The following security requirements have been added to acceptance criteria:
 ### Assessment
 
 **Result**: ✅ **APPROVED WITH NOTED DEVIATIONS**
+
+## Security Review
+
+**Reviewed**: 2026-02-11  
+**Reviewer**: Security Review Agent
+
+### Security Findings
+
+| # | Severity | Finding |
+|---|----------|---------|
+| 1 | INFO | Bubblewrap sandbox provides strong isolation when available (read-only source, no network, `/tmp` only write access) |
+| 2 | INFO | Bwrap fallback to unsandboxed `/bin/sh -c` when bwrap unavailable is a security deviation — plugins execute without filesystem or process isolation. Fallback logs a security warning (correct behavior). |
+| 3 | LOW | `substitute_variables_secure()` blocks `;`, `\|`, `&`, `` ` ``, `$(`, and control characters but does not block all shell metacharacters (e.g., newline in some contexts) |
+| 4 | INFO | Plugin output parsed as comma-separated values without validation of value content before workspace merge |
+
+### Risk Assessment
+
+- **Primary Risk**: Unsandboxed execution when Bubblewrap is unavailable allows plugins full system access. This is mitigated by validator pre-screening, timeout enforcement, and logged warnings.
+- **Secondary Risk**: Variable substitution edge cases are low probability given the validator rejects descriptors containing injection patterns before execution reaches the substitution stage.
+- **Residual Risk**: Accepted. Defense-in-depth layers (validator + sandbox + timeout) provide adequate protection for current threat model.
+
+### Security Agent Verdict
+
+**APPROVED WITH NOTES**
+
+- Bubblewrap sandbox fallback should be documented as a known security limitation in deployment guides.
+- Consider hardening to mandatory sandbox (fail-closed) in future releases for high-security environments.

@@ -308,3 +308,25 @@ None identified. The use of `bash -c` for executing `check_commandline` is accep
 ### Assessment
 
 **Result**: ✅ **APPROVED - FULLY COMPLIANT**
+
+## Security Review
+
+**Reviewed**: 2026-02-11  
+**Reviewer**: Security Review Agent
+
+### Security Findings
+
+| # | Severity | Finding |
+|---|----------|---------|
+| 1 | LOW | `check_tool_availability()` uses `bash -c` to execute `check_commandline` which could run arbitrary code if a descriptor is malicious. Mitigated by validator screening descriptors before tool checker runs. |
+| 2 | LOW | `prompt_tool_install()` uses `bash -c` to execute `install_commandline`. Mitigated by validator restricting to recognized package managers and requiring user confirmation before execution. |
+| 3 | INFO | TTY check properly guards interactive prompts — installation prompts are suppressed in non-interactive and CI environments. |
+
+### Risk Assessment
+
+- **Primary Risk**: Command execution via `bash -c` is inherent to the tool checking design. Risk is acceptable because the validator (Feature 0012) screens all descriptors for injection patterns before tool checking occurs.
+- **Residual Risk**: Low. The attack path requires bypassing the validator's injection pattern detection, which covers `;`, `&&`, `||`, `$()`, backticks, `eval`, `bash -c`, and `sh -c`.
+
+### Security Agent Verdict
+
+**APPROVED**
