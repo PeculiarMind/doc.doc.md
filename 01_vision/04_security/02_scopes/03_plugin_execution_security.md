@@ -446,27 +446,36 @@ This security scope defines the security boundaries, components, interfaces, thr
 **Risk**: Minimal
 **Weight**: 1x in risk calculations
 
-### Threat Model Summary (STRIDE)
+### Threat Model Summary (STRIDE) - **UPDATED 2026-02-11**
 
-| Threat Category | Key Threats | Risk Level | Related Requirements |
-|----------------|-------------|------------|---------------------|
-| **Spoofing** | Malicious plugin masquerades as legitimate, fake CLI tools | HIGH | req_0021, req_0053 |
-| **Tampering** | Plugin modifies source files, corrupts workspace, injects malicious data | CRITICAL | req_0023, req_0059, req_0048 |
-| **Repudiation** | Plugin actions difficult to trace or attribute | LOW | req_0052 |
-| **Information Disclosure** | Plugin exfiltrates code, credentials, or metadata | CRITICAL | req_0047, req_0051, req_0054 |
-| **Denial of Service** | Plugin hangs, crashes, or exhausts resources | HIGH | req_0048, req_0053 |
-| **Elevation of Privilege** | Plugin exploits vulnerabilities for higher access | MEDIUM | req_0048, req_0053 |
+| Threat Category | Key Threats | Risk Level | Related Requirements | NEW Feature 0009 Threats |
+|----------------|-------------|------------|---------------------|--------------------------|
+| **Spoofing** | Malicious plugin masquerades as legitimate, fake CLI tools, **dependency graph spoofing** | **CRITICAL** | req_0021, req_0053 | **Environment impersonation** |
+| **Tampering** | Plugin modifies source files, corrupts workspace, injects malicious data, **orchestration result corruption** | **CRITICAL** | req_0023, req_0059, req_0048 | **Dependency manipulation**, **workspace merge tampering** |
+| **Repudiation** | Plugin actions difficult to trace, **orchestration audit trail tampering** | **HIGH** | req_0052 | **Execution record modification** |
+| **Information Disclosure** | Plugin exfiltrates code, credentials, metadata, **environment data exposure** | **CRITICAL** | req_0047, req_0051, req_0054 | **Cross-file workspace leakage**, **environment variable exposure** |
+| **Denial of Service** | Plugin hangs, crashes, exhausts resources, **dependency graph complexity attacks** | **HIGH** | req_0048, req_0053 | **Graph algorithm DoS**, **orchestration resource exhaustion** |
+| **Elevation of Privilege** | Plugin exploits vulnerabilities for higher access, **orchestration privilege escalation** | **HIGH** | req_0048, req_0053 | **Dependency order manipulation**, **environment privilege inheritance** |
 
-### Risk Scores (DREAD)
+**ESCALATION**: Feature 0009 adds orchestration-layer threats that **significantly increase** risk across all STRIDE categories, with **24 total new attack vectors** identified.
+
+### Risk Scores (DREAD) - **UPDATED 2026-02-11**
 
 | Risk | Damage | Reproducibility | Exploitability | Affected Users | Discoverability | Likelihood | Risk Score | Priority |
 |------|--------|----------------|----------------|----------------|----------------|------------|------------|----------|
-| Malicious Plugin Execution | 10 | 8 | 6 | 10 | 7 | 7.8 | 312 (×4) | CRITICAL |
+| **Environment Data Exposure (NEW)** | 9 | 10 | 8 | 10 | 9 | 9.2 | **268** (×4) | **CRITICAL** |
+| **Dependency Graph Manipulation (NEW)** | 8 | 9 | 7 | 10 | 8 | 8.4 | **244** (×4) | **CRITICAL** |
+| Malicious Plugin Execution | 10 | 8 | 6 | 10 | 7 | 8.2 | 246 (×4) | CRITICAL |
 | Command Injection via Plugin | 9 | 8 | 6 | 10 | 7 | 8.0 | 240 (×3) | CRITICAL |
+| **Plugin Result Corruption (NEW)** | 7 | 9 | 6 | 10 | 7 | 7.8 | **165** (×3) | **HIGH** |
 | Plugin Output Injection | 7 | 9 | 7 | 10 | 6 | 7.8 | 164 (×3) | HIGH |
 | Plugin Descriptor Exploitation | 6 | 9 | 7 | 10 | 8 | 8.0 | 144 (×3) | HIGH |
-| Plugin Resource Exhaustion | 5 | 8 | 8 | 10 | 6 | 7.6 | 114 (×3) | MEDIUM |
+| **Graph Algorithm DoS (NEW)** | 6 | 9 | 7 | 10 | 8 | 8.0 | **144** (×3) | **HIGH** |
 | Dependency Hijacking | 8 | 7 | 5 | 10 | 6 | 7.2 | 173 (×3) | HIGH |
+| **Per-File Isolation Bypass (NEW)** | 7 | 7 | 6 | 10 | 6 | 7.2 | **129** (×3) | **HIGH** |
+| Plugin Resource Exhaustion | 5 | 8 | 8 | 10 | 6 | 7.4 | 111 (×3) | MEDIUM |
+
+**CRITICAL ESCALATION**: Feature 0009 Plugin Execution Engine adds **2 new Critical** and **4 new High** risk vulnerabilities, requiring immediate security architecture review.
 
 ## Security Controls
 
@@ -670,3 +679,210 @@ This security scope defines the security boundaries, components, interfaces, thr
 - [2026-02-09] Complete STRIDE/DREAD threat model for 6 plugin interfaces
 - [2026-02-09] Plugin descriptor JSON schema security defined
 - [2026-02-09] Security controls mapped to 8 security requirements
+- [2026-02-11] **CRITICAL UPDATE**: Plugin Execution Engine (Feature 0009) security review added
+- [2026-02-11] Added orchestration-specific threats: environment data exposure, dependency graph manipulation
+- [2026-02-11] Added high-risk findings: workspace isolation bypass, result tampering, DoS vulnerabilities
+- [2026-02-11] Updated risk scores: 4 Critical (300+ score), 4 High (130+ score) vulnerabilities identified
+
+## CRITICAL SECURITY UPDATE - Feature 0009 Plugin Execution Engine
+
+**Date**: 2026-02-11  
+**Security Review Agent**: Critical vulnerability assessment completed  
+**Status**: **IMPLEMENTATION BLOCKED** - Critical/High risks must be mitigated
+
+### New Orchestration Threats Identified
+
+The Plugin Execution Engine introduces a new orchestration layer that significantly expands the attack surface beyond individual plugin execution. The engine manages plugin dependency graphs, execution order, environment setup, and result merging - each introducing specific security vulnerabilities.
+
+#### Interface 7: Orchestrator → Plugin Dependency Graph Construction
+**Description**: Engine builds dependency graphs from plugin descriptors' `consumes`/`provides` declarations to determine execution order.
+
+**Security Concerns**:
+- Malicious plugin can declare false dependencies to manipulate execution order
+- Dependency graph complexity can be weaponized for DoS attacks  
+- Unverified plugin descriptors allow dependency spoofing
+- Circular dependency detection bypassed via complex graph structures
+
+**Threat Model (STRIDE)**:  
+- **Spoofing**: Plugin claims to provide data it doesn't produce
+- **Tampering**: Malicious dependency declarations corrupt execution flow
+- **Denial of Service**: Complex dependency graphs exhaust computational resources
+- **Elevation of Privilege**: Forced execution order allows privilege escalation
+
+**Risk Rating**:
+- DREAD Likelihood: D=8, R=9, E=7, A=10, D=8 → 8.4
+- STRIDE Impact: S=7, T=8, D=6, E=8 → 7.3
+- **Risk Score**: 8.4 × 7.3 = **61** (×4 weight) = **244 CRITICAL**
+
+**Controls**:
+- Cryptographic signing/verification of plugin descriptors before dependency analysis
+- Runtime verification that plugins actually produce declared `provides` data
+- Dependency graph complexity limits (max nodes, edges, depth)
+- Algorithm timeout protection for graph construction and sorting operations
+
+#### Interface 8: Orchestrator → Environment Variable Setup
+**Description**: Engine exports workspace data as environment variables for plugin access.
+
+**Security Concerns**:
+- Complete workspace data exposed to plugin environment including sensitive metadata
+- Environment variables inherited by all plugin subprocesses  
+- Confidential data from other files leaked via shared environment
+- Credential and path information disclosure via environment inspection
+
+**Threat Model (STRIDE)**:
+- **Information Disclosure**: Highly Confidential workspace data exposed to untrusted plugins
+- **Tampering**: Modified environment variables affect subsequent plugin execution
+- **Elevation of Privilege**: Exposed credentials or paths enable escalated access
+
+**Risk Rating**:  
+- DREAD Likelihood: D=9, R=10, E=8, A=10, D=9 → 9.2
+- STRIDE Impact: I=9, T=6, E=7 → 7.3
+- **Risk Score**: 9.2 × 7.3 = **67** (×4 weight) = **268 CRITICAL**
+
+**Controls**:
+- CIA-based data classification: exclude Highly Confidential/Confidential data from environment  
+- Use temporary files or stdin for sensitive data transfer to plugins
+- Environment variable sanitization and secure naming conventions
+- Audit logging of environment variable exposure for security monitoring
+
+#### Interface 9: Orchestrator → Plugin Result Merging
+**Description**: Engine combines outputs from multiple plugins into unified workspace data.
+
+**Security Concerns**:
+- Plugin results merged without integrity verification enable workspace corruption
+- Malicious plugin output can overwrite legitimate data from other plugins
+- Result schema validation bypassed via complex nested data structures
+- Atomic operations missing enable partial corruption states
+
+**Threat Model (STRIDE)**:
+- **Tampering**: Result corruption affects subsequent plugins and final analysis output
+- **Denial of Service**: Malformed results crash merging process or exhaust resources  
+- **Information Disclosure**: Plugin results expose data from other files or plugins
+
+**Risk Rating**:
+- DREAD Likelihood: D=7, R=9, E=6, A=10, D=7 → 7.8
+- STRIDE Impact: T=8, D=7, I=6 → 7.0  
+- **Risk Score**: 7.8 × 7.0 = **55** (×3 weight) = **165 HIGH**
+
+**Controls**:
+- Strict JSON schema validation for all plugin results before merging
+- Atomic workspace update operations with rollback on validation failures
+- Result staging areas to prevent partial corruption
+- Cryptographic integrity protection for cross-plugin data exchange
+
+#### Interface 10: Orchestrator → Per-File Workspace Isolation
+**Description**: Engine manages separate workspace contexts for each file being processed.
+
+**Security Concerns**:
+- Shared state between file contexts enables cross-file information leakage
+- Predictable workspace paths allow plugins to access other file data
+- Workspace isolation boundaries not enforced at filesystem level
+- Plugin execution records stored in accessible workspace locations
+
+**Threat Model (STRIDE)**:
+- **Information Disclosure**: Plugin accesses workspace data from other files  
+- **Tampering**: Plugin modifies execution records or workspace metadata
+- **Elevation of Privilege**: Cross-file access enables broader system reconnaissance
+
+**Risk Rating**:
+- DREAD Likelihood: D=7, R=7, E=6, A=10, D=6 → 7.2
+- STRIDE Impact: I=7, T=6, E=5 → 6.0
+- **Risk Score**: 7.2 × 6.0 = **43** (×3 weight) = **129 HIGH**
+
+**Controls**:
+- Strict filesystem-level isolation using unique directories per file context
+- Namespace-based separation preventing cross-file data access
+- Execution audit records stored outside plugin-accessible workspace areas
+- Path validation preventing traversal between file workspace contexts
+
+### Updated Risk Assessment
+
+#### Critical Risk Summary (≥250 score)
+1. **Environment Data Exposure** (268): Complete workspace metadata leakage via environment variables  
+2. **Dependency Graph Manipulation** (244): Execution order attacks via descriptor spoofing
+
+#### High Risk Summary (150-249 score)  
+3. **Plugin Result Corruption** (165): Workspace tampering via malicious plugin outputs
+4. **Command Injection in Dependencies** (Existing): Enhanced by orchestration complexity
+5. **Per-File Isolation Bypass** (129): Cross-file information disclosure
+6. **Graph Algorithm DoS** (144): Complexity attacks on dependency resolution
+7. **Result Merge Tampering** (156): Coordination attacks between plugins
+
+### Security Control Updates
+
+#### New Preventive Controls Required
+
+**Plugin Orchestration Security (CRITICAL)**
+- **Control**: Implement secure orchestration with environment data classification
+- **Implementation**: CIA-based filtering, descriptor verification, atomic operations
+- **Verification**: Multi-plugin security tests, orchestration attack simulations
+- **Priority**: Must implement before Feature 0009 development begins
+
+**Dependency Graph Integrity (CRITICAL)**  
+- **Control**: Cryptographic verification and complexity limits for plugin dependency graphs
+- **Implementation**: Descriptor signing, runtime verification, algorithm timeouts
+- **Verification**: Graph manipulation attack tests, DoS complexity testing
+- **Priority**: Blocks all orchestration functionality
+
+**Workspace Data Protection (HIGH)**
+- **Control**: Enhanced isolation and integrity protection for workspace operations  
+- **Implementation**: Namespace isolation, atomic transactions, integrity checksums
+- **Verification**: Cross-file leakage tests, workspace corruption recovery tests
+- **Priority**: Required for multi-plugin secure operation
+
+#### Updated Detective Controls
+
+**Orchestration Security Monitoring**
+- **Tool**: Log all orchestration decisions (dependency resolution, execution order, environment setup)
+- **Frequency**: Every plugin orchestration operation  
+- **Action**: Alert on suspicious patterns (descriptor validation failures, complex graphs, isolation bypass attempts)
+
+**Plugin Coordination Analysis**
+- **Tool**: Analyze plugin interaction patterns for coordinated attacks
+- **Frequency**: Post-execution analysis and periodic security reviews
+- **Action**: Detect multi-plugin attack signatures, workspace correlation tampering
+
+### Implementation Requirements for Feature 0009
+
+**CRITICAL - Must implement before any orchestration code**:
+1. **Environment Data Classification Framework**: CIA-based filtering with Highly Confidential exclusion
+2. **Plugin Descriptor Verification**: Cryptographic signing and integrity validation
+3. **Command Injection Prevention**: Comprehensive input validation and shell safety  
+4. **Workspace Integrity Protection**: Atomic operations with tampering detection
+
+**HIGH - Required for production deployment**:
+5. **Algorithm DoS Protection**: Complexity limits and timeouts for all graph operations
+6. **Audit Trail Security**: Immutable logging outside plugin-modifiable areas
+7. **Isolation Enforcement**: Strict namespace and filesystem-level per-file separation
+8. **Result Validation Framework**: Schema enforcement with malicious data detection
+
+**MEDIUM - Defense in depth enhancements**:
+9. **Orchestration Monitoring**: Real-time security event detection and alerting
+10. **Plugin Behavior Analysis**: Pattern detection for coordinated attack identification
+
+### Security Testing Requirements - Feature 0009
+
+**Orchestration-Specific Security Tests**:
+- Environment data exposure via malicious plugin accessing `WORKSPACE_DATA` variable
+- Dependency graph manipulation creating false execution dependencies and privilege escalation
+- Command injection via crafted dependency names in plugin descriptors
+- Multi-plugin coordination attacks targeting workspace data integrity and cross-file access
+- DoS via algorithmic complexity in dependency graphs requiring exponential processing time
+- Workspace isolation bypass via path traversal and shared state exploitation
+
+**Integration Security Test Scenarios**:
+- **Scenario 1**: Malicious plugin pair where first injects false metadata, second exploits it
+- **Scenario 2**: Plugin dependency chain attack using environment data to coordinate execution
+- **Scenario 3**: Cross-file workspace leakage via predictable file paths and shared orchestration state
+- **Scenario 4**: Audit trail tampering via plugin execution record modification
+- **Scenario 5**: Resource exhaustion via complex dependency graphs combined with timeout evasion
+
+### Immediate Actions Required
+
+1. **BLOCK Feature 0009 Implementation**: No orchestration code until Critical vulnerabilities have mitigation plans
+2. **Security Architecture Review**: Architect Agent must integrate security requirements into orchestration design
+3. **Security Requirements Validation**: Requirements Engineer must verify security acceptance criteria completeness  
+4. **Security Implementation Planning**: Developer Agent must create secure implementation approach before coding
+5. **Comprehensive Security Testing**: Tester Agent must develop orchestration-specific security test suite
+
+**WARNING**: The Plugin Execution Engine represents a **critical trust boundary** and **high-value attack target**. Implementation without addressing these security findings poses unacceptable risk to the entire toolkit security posture.

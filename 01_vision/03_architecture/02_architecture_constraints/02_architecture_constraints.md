@@ -39,10 +39,12 @@ This section documents the **true architectural constraints**—external limitat
 | ID | Title | Type | Detail File |
 |----|-------|------|-------------|
 | TC-0007 | Single-User Operator Trust Model | Security | [TC_0007_single_user_operator_trust_model.md](TC_0007_single_user_operator_trust_model.md) |
+| TC-0008 | Mandatory Plugin Sandboxing | Security | [TC_0008_mandatory_plugin_sandboxing.md](TC_0008_mandatory_plugin_sandboxing.md) |
+| TC-0009 | Plugin-Toolkit Interface Separation | Security | [TC_0009_plugin_toolkit_interface_separation.md](TC_0009_plugin_toolkit_interface_separation.md) |
 
 ## Summary
 
-**Total Constraints**: 7 (5 Technical, 1 Organizational, 1 Security)
+**Total Constraints**: 9 (5 Technical, 1 Organizational, 3 Security)
 
 These constraints define immutable boundaries for architectural decisions. They represent:
 - **Platform limitations**: What runtime environments provide (or don't provide)

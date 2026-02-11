@@ -2,9 +2,9 @@
 
 **ID**: 0011  
 **Type**: Feature Implementation  
-**Status**: Analyze  
+**Status**: Backlog  
 **Created**: 2026-02-09  
-**Updated**: 2026-02-09 (Moved to analyze)  
+**Updated**: 2026-02-11 (Requirements gaps addressed, ready for backlog)  
 **Priority**: High
 
 ## Overview
@@ -32,17 +32,20 @@ The verification system integrates with plugin descriptors to understand tool de
 
 ### Tool Discovery
 - [ ] System analyzes all active plugin descriptors to extract required tools
-- [ ] System reads `check_commandline` field from each plugin descriptor
-- [ ] System executes check commands to determine tool availability
+- [ ] System reads `check_commandline` field from each plugin descriptor per unified schema (ADR-0010)
+- [ ] System executes check commands in safe environment (no variable substitution)
 - [ ] System categorizes tools as: available, missing_optional, missing_required
 - [ ] System logs tool discovery process in verbose mode
+- [ ] System validates check commands follow security patterns (no injection vulnerabilities)
 
 ### Tool Availability Check
 - [ ] System checks each tool using descriptor's `check_commandline` (e.g., `command -v jq`)
-- [ ] System caches availability results to avoid repeated checks
+- [ ] System caches availability results with 5-minute TTL to avoid repeated checks
+- [ ] System invalidates cache on plugin descriptor changes or installation events
 - [ ] System handles check command failures gracefully (treat as not available)
 - [ ] System provides summary of available and missing tools
 - [ ] System checks core system tools (bash, find, stat, file, etc.)
+- [ ] System persists cache across tool verification runs for performance
 
 ### Missing Tool Reporting
 - [ ] System reports missing required tools with clear error messages
@@ -58,8 +61,12 @@ The verification system integrates with plugin descriptors to understand tool de
   - macOS: `brew install <package>`
   - Alpine: `apk add <package>`
   - Generic: Fallback guidance (build from source, manual install)
-- [ ] System reads installation commands from plugin descriptors (`install_commandline`)
+- [ ] System reads installation commands from plugin descriptors (`install_commandline` field per ADR-0010)
 - [ ] System handles multiple installation methods per tool (package manager, script, manual)
+- [ ] System validates install commands for security compliance (package manager only, no direct downloads)
+- [ ] System validates package manager commands use approved patterns (apt-get, yum, dnf, brew, apk)
+- [ ] System rejects installation commands with shell injection patterns (pipes, redirects, command substitution)
+- [ ] System validates installation commands don't attempt privilege escalation outside package managers
 
 ### Interactive Installation Prompts
 - [ ] System detects if running in interactive mode (stdin/stdout are TTY)
@@ -67,6 +74,7 @@ The verification system integrates with plugin descriptors to understand tool de
 - [ ] System executes installation command if user confirms (runs `install_commandline` from descriptor)
 - [ ] System validates installation succeeded after execution (re-run check command)
 - [ ] System handles installation failures gracefully (log error, continue)
+- [ ] System validates install commands are safe before execution (ADR-0009 security compliance)
 - [ ] System requires root/sudo for system-wide installations (provides guidance)
 
 ### Non-Interactive Behavior
@@ -87,6 +95,9 @@ The verification system integrates with plugin descriptors to understand tool de
 - [ ] System handles installation command failures (log error, continue)
 - [ ] System handles permission errors during installation (guidance to use sudo)
 - [ ] System provides actionable error messages for all failures
+- [ ] System validates installation command integrity before execution (prevent descriptor tampering)
+- [ ] System handles corrupted or malicious installation commands gracefully (quarantine plugin)
+- [ ] System logs all installation attempts for security audit trail
 
 ## Technical Considerations
 

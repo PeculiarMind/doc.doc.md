@@ -48,13 +48,13 @@ The plugin will serve as both a functional tool for PDF analysis and a reference
 - [ ] Descriptor specifies data inputs (consumes) with type and description:
   - `file_path_absolute` (string): Absolute path to the PDF file
 - [ ] Descriptor specifies data outputs (provides) with type and description:
-  - `ocr_text_content` (string): Extracted text content (maps to workspace `content.text`)
+  - `ocr_text_content` (string): Extracted text content
   - `ocr_status` (string): Processing status (success, failed, skipped)
   - `ocr_confidence` (number): OCR confidence score if available
-- [ ] Descriptor includes `execute_commandline` field using proper `read -r` pattern for all outputs
+- [ ] Descriptor includes `commandline` field using proper `read -r` pattern for all outputs  
 - [ ] Descriptor includes `check_commandline` field to verify tool availability
 - [ ] Descriptor includes `install_commandline` field to run installation script
-- [ ] Descriptor follows JSON schema used by other plugins and architecture specifications
+- [ ] Descriptor follows unified plugin schema per ADR-0010
 
 ### Functionality
 - [ ] Plugin detects PDF files based on file type/extension
@@ -65,13 +65,14 @@ The plugin will serve as both a functional tool for PDF analysis and a reference
 - [ ] Plugin handles errors gracefully (missing tool, corrupt PDF, unsupported format)
 
 ### Integration
-- [ ] Plugin works with existing file scanning and metadata extraction
-- [ ] Plugin output integrates with workspace JSON structure (ocr_text_content → content.text)
+- [ ] Plugin works with existing file scanning and metadata extraction  
+- [ ] Plugin output integrates with workspace JSON structure per orchestrator
 - [ ] Plugin output can be consumed by reporting/template plugins
 - [ ] Plugin respects verbose logging mode (req_0006)
 - [ ] Plugin works with tool verification system (req_0007)
 - [ ] Plugin integrates with installation prompt system (req_0008)
-- [ ] Plugin file filtering uses `processes` field (orchestrator filters before execution)
+- [ ] Plugin executes in Bubblewrap sandbox per ADR-0009 (mandatory sandboxing)
+- [ ] Plugin uses command template execution per ADR-0010 (interface architecture)
 
 ### Testing
 - [ ] Plugin tested with standard PDF files
@@ -131,13 +132,12 @@ Workspace JSON updated:
 Output available for downstream plugins and reporting
 ```
 
-### Descriptor Schema (Corrected)
+### Descriptor Schema (Updated for Architecture Alignment)
 ```json
 {
     "name": "ocrmypdf",
     "description": "Performs OCR on PDF files using ocrmypdf to extract text content.",
     "active": true,
-    "version": "1.0.0",
     "processes": {
         "mime_types": ["application/pdf"],
         "file_extensions": [".pdf"]
@@ -151,8 +151,7 @@ Output available for downstream plugins and reporting
     "provides": {
         "ocr_text_content": {
             "type": "string",
-            "description": "Extracted text content from the PDF file (maps to workspace content.text).",
-            "workspace_mapping": "content.text"
+            "description": "Extracted text content from the PDF file."
         },
         "ocr_status": {
             "type": "string",
@@ -163,10 +162,48 @@ Output available for downstream plugins and reporting
             "description": "Average OCR confidence score (0-100) if available."
         }
     },
-    "execute_commandline": "read -r ocr_text_content ocr_status ocr_confidence < <(./ocrmypdf_wrapper.sh \"${file_path_absolute}\")",
+    "commandline": "read -r ocr_text_content ocr_status ocr_confidence < <(./ocr_wrapper.sh '${file_path_absolute}')",
     "check_commandline": "read -r plugin_works < <(which ocrmypdf > /dev/null 2>&1 && echo 'true' || echo 'false')",
     "install_commandline": "read -r plugin_successfully_installed < <(./install.sh 2>&1 >/dev/null && echo 'true' || echo 'false')"
 }
+```
+
+### Plugin Implementation Approach (Updated)
+
+**Execution Model**: Command template with sandboxed execution per ADR-0010
+- Plugin uses command template with variable substitution (`${file_path_absolute}`)
+- Toolkit executes command in Bubblewrap sandbox with plugin directory as working dir
+- Command references local script (`./ocr_wrapper.sh`) for complex OCR processing
+- Structured output captured with `read -r` parsing inside sandbox
+- Automatic temp directory and cleanup managed by toolkit
+
+**ocr_wrapper.sh Script**:
+```bash
+#!/bin/bash
+# OCR wrapper script executed by commandline template
+input_file="$1" 
+
+# Perform OCR processing
+if temp_file=$(mktemp -p "$TEMP_DIR" ocr_XXXX.pdf); then
+    if ocrmypdf --output-type pdf "$input_file" "$temp_file" 2>/dev/null; then
+        # Extract text content
+        text=$(pdftotext "$temp_file" - 2>/dev/null | head -c 10000)
+        confidence="95"
+        status="success"
+    else
+        text=""
+        confidence="0"
+        status="failed"
+    fi
+    rm -f "$temp_file"
+else
+    text=""
+    confidence="0" 
+    status="failed"
+fi
+
+# Output in format expected by read -r pattern
+echo "$text,$status,$confidence"
 ```
 
 ## Dependencies

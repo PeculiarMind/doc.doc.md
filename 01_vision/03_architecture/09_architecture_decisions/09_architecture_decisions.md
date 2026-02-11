@@ -32,6 +32,8 @@ This document provides an index of all Architecture Decision Records (ADRs) for 
 | ADR-0006 | No Agent System in Product Architecture | Accepted | 2026-02-06 | [View](ADR_0006_no_agent_system_in_product_architecture.md) |
 | ADR-0007 | Modular Component-Based Script Architecture | Accepted | 2026-02-08 | [View](ADR_0007_modular_component_based_script_architecture.md) |
 | ADR-0008 | POSIX Terminal Test for Mode Detection | Accepted | 2026-02-10 | [View](ADR_0008_posix_terminal_test_for_mode_detection.md) |
+| ADR-0009 | Plugin Security Sandboxing with Bubblewrap | Accepted | 2026-02-11 | [View](ADR_0009_plugin_security_sandboxing_bubblewrap.md) |
+| ADR-0010 | Plugin-Toolkit Interface Architecture | Accepted | 2026-02-11 | [View](ADR_0010_plugin_toolkit_interface_architecture.md) |
 
 ## Decision Status Legend
 

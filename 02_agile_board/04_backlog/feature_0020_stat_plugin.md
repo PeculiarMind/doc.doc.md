@@ -41,38 +41,43 @@ The stat plugin is a critical baseline plugin that should execute for all files 
 - [ ] Descriptor declares plugin name: "stat"
 - [ ] Descriptor includes description of plugin functionality
 - [ ] Descriptor sets `active: true` for automatic execution
-- [ ] Descriptor specifies data inputs (consumes):
+- [ ] Descriptor includes `processes` field (empty for universal plugin - applies to all files)
+- [ ] Descriptor specifies data inputs (consumes) with type and description:
   - `file_path_absolute` (string): Absolute path to the file to analyze
-- [ ] Descriptor specifies data outputs (provides):
+- [ ] Descriptor specifies data outputs (provides) with type and description:
   - `file_last_modified` (integer): Last modified time as Unix timestamp
   - `file_size` (integer): File size in bytes
   - `file_owner` (string): Owner username
-- [ ] Descriptor includes `commandline` field using `stat -c` format specifiers
+- [ ] Descriptor includes `commandline` field using `stat -c` format with variable substitution
 - [ ] Descriptor includes `check_commandline` to verify `stat` command availability
-- [ ] Descriptor includes `install_commandline` for installation (usually no-op on Linux)
+- [ ] Descriptor includes `install_commandline` for installation (no-op on most systems)
+- [ ] Descriptor follows unified plugin schema per ADR-0010
 
 ### File Type Filtering
-- [ ] Plugin applies to ALL file types (no `processes` filter, universal plugin)
+- [ ] Plugin applies to ALL file types (`processes` object with no restrictions)
 - [ ] Plugin executes for every file discovered by directory scanner
-- [ ] Plugin does not fail on special files (if encountered, handle gracefully)
+- [ ] Plugin processes field allows universal execution (no MIME type or extension filters)
 
 ### Functionality
-- [ ] Plugin extracts last modified timestamp using `stat -c %Y`
+- [ ] Plugin extracts last modified timestamp using `stat -c %Y` 
 - [ ] Plugin extracts file size in bytes using `stat -c %s`
-- [ ] Plugin extracts file owner username using `stat -c %U`
-- [ ] Plugin outputs data in format compatible with `read -r` variable assignment
-- [ ] Plugin handles files with spaces, special characters in paths correctly
-- [ ] Plugin provides proper exit codes (0 for success, non-zero for failure)
+- [ ] Plugin extracts file owner username using `stat -c %U`  
+- [ ] Plugin uses command template with `${file_path_absolute}` variable substitution
+- [ ] Plugin outputs data in comma-separated format compatible with `read -r` parsing
+- [ ] Plugin handles files with spaces, special characters in paths via proper quoting
+- [ ] Plugin executes in Bubblewrap sandbox per ADR-0009 (mandatory sandboxing)
+- [ ] Plugin follows command template execution model per ADR-0010
 
 ### Integration
-- [ ] Plugin outputs map to workspace JSON structure:
-  - `file_last_modified` → workspace.files[].metadata.last_modified
-  - `file_size` → workspace.files[].metadata.size
-  - `file_owner` → workspace.files[].metadata.owner
+- [ ] Plugin outputs map to workspace JSON structure per orchestrator design:
+  - `file_last_modified` → workspace metadata
+  - `file_size` → workspace metadata  
+  - `file_owner` → workspace metadata
 - [ ] Plugin metadata available for incremental analysis timestamp comparison
 - [ ] Plugin metadata available for reporting and aggregation
-- [ ] Plugin works with verbose logging mode
-- [ ] Plugin respects data-driven execution flow
+- [ ] Plugin works with verbose logging mode (req_0006)
+- [ ] Plugin respects data-driven execution flow (req_0023)
+- [ ] Plugin executes in sandboxed environment with command template approach
 
 ### Error Handling
 - [ ] Plugin handles files that don't exist (deleted between scan and execution)
