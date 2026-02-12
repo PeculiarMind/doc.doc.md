@@ -42,6 +42,7 @@ graph TB
             Scanner[File Scanner]
             Orchestrator[Execution Orchestrator]
             Reporter[Report Generator]
+            TemplateEngine[Template Engine]
         end
     end
     
@@ -65,6 +66,8 @@ graph TB
     Orchestrator -->|Progress| Progress
     Tools -->|Results| Orchestrator
     Orchestrator -->|Data| Reporter
+    Reporter -->|Template + Data| TemplateEngine
+    TemplateEngine -->|Rendered Markdown| Reporter
     Reporter -->|Reports| FS
     Log -->|Structured logs| FS
     
@@ -100,7 +103,8 @@ graph TB
 | **Plugin Manager** | Discover plugins, load descriptors, validate capabilities | `discover_plugins()`, `load_descriptor()`, `check_tool_availability()` |
 | **File Scanner** | Traverse directories, detect file types, filter files | `scan_directory()`, `detect_mime_type()`, `filter_by_type()` |
 | **Execution Orchestrator** | Build dependency graph, schedule plugins, manage workspace | `build_dependency_graph()`, `execute_plugin()`, `update_workspace()` |
-| **Report Generator** | Load templates, merge data, render Markdown | `load_template()`, `substitute_variables()`, `write_report()` |
+| **Template Engine** | Process templates with variables, conditionals, loops | `process_template()`, `validate_syntax()`, `sanitize_value()` |
+| **Report Generator** | Load templates, merge data, render Markdown, generate aggregated reports | `generate_report()`, `generate_aggregated_report()`, `write_report()` |
 
 ### Important Interfaces
 
@@ -447,14 +451,15 @@ eval "${plugin_execute_commandline}"
 ## 5.6 Level 1: Report Generator
 
 ### Purpose
-Transforms workspace data into human-readable Markdown reports using customizable templates.
+Transforms workspace data into human-readable Markdown reports using customizable templates with conditionals, loops, and variable substitution.
 
 ### Responsibilities
-- Load template files
-- Substitute variables with workspace data
-- Generate per-file reports
+- Load and validate template files (delegates to Template Engine)
+- Process templates with conditionals and loops (via Template Engine)
+- Generate per-file Markdown reports
+- Generate aggregated summary reports (opt-in with --summary flag)
 - Apply consistent formatting
-- Handle missing data gracefully
+- Handle missing data gracefully via template conditionals
 
 ### Interface
 
@@ -471,38 +476,71 @@ REPORT_FILES        # Generated Markdown files
 ```
 
 **Functions**:
-- `load_template(template_file)` - Read template content
-- `substitute_variables(template, data)` - Replace placeholders
-- `generate_report(file, workspace, template, target)` - Main generation
-- `write_report(content, target_path)` - Write to file system
-- `format_date(timestamp)` - Format timestamps
-- `format_size(bytes)` - Human-readable sizes
+- `load_template(template_file)` - Read and cache template content
+- `generate_report(file, workspace, template, target)` - Main per-file generation
+- `generate_aggregated_report(target, stats, file_list)` - Aggregated summary (opt-in)
+- `write_report(content, target_path)` - Atomic write to file system
+- `collect_statistics(workspace_files)` - Gather corpus-level statistics
+- `process_template(template, data)` - Delegate to Template Engine component
 
-### Template Syntax
+### Sub-Component: Template Engine
+
+The Report Generator uses the **Template Engine** component (see [08_0011 Template Engine Concept](../08_concepts/08_0011_template_engine.md)) to process templates.
+
+**Template Engine Capabilities** (per [ADR-0011](../09_architecture_decisions/ADR_0011_bash_template_engine_with_control_structures.md)):
+- Variable substitution: `{{variable}}`, `{{nested.field}}`
+- Conditionals: `{{#if var}}...{{else}}...{{/if}}`
+- Loops: `{{#each array}}{{this}}{{@index}}{{/each}}`
+- Comments: `{{! documentation comment}}`
+- Security controls: No code execution, sanitization, iteration limits, timeout
+
+**Template Engine Interface**:
+```bash
+process_template(template_file, workspace_json) → markdown_output
+  Returns: Generated markdown (stdout)
+  Exit Codes: 0 (success), 1 (syntax error), 2 (timeout), 3 (security violation)
+```
+
+**Template Syntax Examples**:
 
 **Variable Substitution**:
 ```markdown
-# Analysis Report: {{file_path}}
-
-- **File Type**: {{file_type}}
-- **Size**: {{file_size}}
-- **Last Modified**: {{file_last_modified}}
-- **Owner**: {{file_owner}}
-
-## Content Summary
-{{content.summary}}
-
-## Tags
-{{content.tags}}
+# Analysis Report: {{filename}}
+**Path**: {{file_path_relative}}
+**Size**: {{file_size_human}}
 ```
 
-**Substitution Algorithm**:
-1. Parse template line by line
-2. Identify `{{variable_name}}` patterns
-3. Look up variable in workspace data (support dot notation)
-4. Replace with value or "(not available)" if missing
-5. Apply formatting functions if specified (date, size, etc.)
-6. Write result to target file
+**Conditionals**:
+```markdown
+{{#if content.summary}}
+## Summary
+{{content.summary}}
+{{else}}
+*No summary available*
+{{/if}}
+```
+
+**Loops**:
+```markdown
+{{#if content.tags}}
+## Tags
+{{#each content.tags}}
+- {{this}}
+{{/each}}
+{{else}}
+*No tags assigned*
+{{/if}}
+```
+
+**Processing Algorithm** (Template Engine):
+1. Validate template syntax (balanced tags, allowed constructs)
+2. Parse template with state machine (TEXT, IN_CONDITIONAL, IN_LOOP states)
+3. Resolve variables via jq queries to workspace JSON
+4. Evaluate conditionals (truthy/falsy checks)
+5. Process loops with iteration limits
+6. Sanitize all variable values
+7. Remove comments
+8. Generate final output with timeout enforcement
 
 ### Report Generation Flow
 
@@ -510,6 +548,7 @@ REPORT_FILES        # Generated Markdown files
 sequenceDiagram
     participant EO as Orchestrator
     participant RG as Report Generator
+    participant TE as Template Engine
     participant WS as Workspace
     participant FS as File System
     
@@ -518,22 +557,52 @@ sequenceDiagram
     FS-->>RG: template_content
     RG->>WS: load_workspace_data(file)
     WS-->>RG: workspace_json
-    RG->>RG: substitute_variables()
-    loop For each variable
-        RG->>RG: lookup_value(var_name)
-        RG->>RG: format_value(value)
-        RG->>RG: replace_placeholder()
+    RG->>TE: process_template(template_content, workspace_json)
+    TE->>TE: validate_syntax()
+    TE->>TE: parse_and_process()
+    loop For each template element
+        alt Variable
+            TE->>WS: jq query for variable
+            WS-->>TE: value
+            TE->>TE: sanitize_value()
+        else Conditional
+            TE->>TE: evaluate_condition()
+        else Loop
+            TE->>TE: process_loop_iterations()
+        end
     end
+    TE-->>RG: rendered_markdown
     RG->>FS: write_report(content, target)
     FS-->>RG: success
     RG-->>EO: report_path
 ```
 
 ### Error Handling
-- Template not found → use default template
-- Variable missing → substitute with "(not available)"
-- Invalid data format → log warning, use raw value
+- Template not found → use default template or error
+- Template syntax error → abort with clear error message and line number
+- Template security violation → abort processing, log security event
+- Template timeout → abort processing (30s default)
+- Variable missing → substitute with empty string (silent, handled in template conditionals)
+- Invalid workspace JSON → abort with parsing error
 - Write failure → log error, continue with other files
+- Aggregated report generation failure → log error, per-file reports still succeed
+
+### Security
+
+Template processing enforces strict security controls per [req_0049](../../../01_vision/02_requirements/03_accepted/req_0049_template_injection_prevention.md):
+
+- **No Code Execution**: Templates cannot execute shell commands (no eval, command substitution)
+- **Variable Sanitization**: All values escaped (shell metacharacters, Markdown formatting)
+- **Iteration Limits**: Maximum 10,000 iterations per template
+- **Nesting Limits**: Maximum 5 nesting levels for conditionals/loops
+- **Timeout Enforcement**: 30-second processing timeout
+- **Syntax Validation**: Templates validated before processing, reject malformed templates
+
+See [Security Scope: Template Processing](../../../01_vision/04_security/02_scopes/04_template_processing_security.md) for comprehensive threat model.
+
+### Architecture Decision
+
+The Report Generator's template processing capabilities are defined in [ADR-0011: Bash Template Engine with Control Structures](../09_architecture_decisions/ADR_0011_bash_template_engine_with_control_structures.md), which supersedes the original simple substitution approach from [ADR-0005](../09_architecture_decisions/ADR_0005_template_based_report_generation.md).
 
 ## 5.7 Level 1: Mode Detection
 

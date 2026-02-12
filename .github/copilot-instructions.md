@@ -24,7 +24,6 @@ Before executing any complex task (requiring 3+ steps or specialized domain know
 Determine if agent delegation is appropriate:
 
    **Use an agent when:**
-   - Task requires 5+ distinct steps
    - Specialized domain expertise needed (e.g., security, testing, documentation)
    - Multiple files/directories need coordinated changes
    - Research or exploration required before implementation

@@ -2,9 +2,9 @@
 
 **ID**: 0010  
 **Type**: Feature Implementation  
-**Status**: Analyze  
+**Status**: Backlog  
 **Created**: 2026-02-09  
-**Updated**: 2026-02-09 (Moved to analyze)  
+**Updated**: 2026-02-12 (Moved to backlog - architecture review approved)  
 **Priority**: Critical
 
 ## Overview
@@ -27,6 +27,40 @@ This feature completes the analysis workflow by delivering the final output that
 - [req_0018](../../01_vision/02_requirements/03_accepted/req_0018_per_file_reports.md) - Per-File Reports
 - [req_0039](../../01_vision/02_requirements/03_accepted/req_0039_aggregated_summary_reports.md) - Aggregated Reports (OPT-IN)
 - [req_0005](../../01_vision/02_requirements/03_accepted/req_0005_template_based_reporting.md) - Template-based Reporting
+
+## Architecture Review
+
+**Review Date**: 2026-02-12  
+**Reviewer**: Architect Agent  
+**Status**: ✅ **CONDITIONAL APPROVAL** - Architecture compliant, documentation updates required before "Ready"
+
+**Review Report**: [ARCH_REVIEW_FEATURE_0008_0010_TEMPLATE_AND_REPORT.md](../../ARCH_REVIEW_FEATURE_0008_0010_TEMPLATE_AND_REPORT.md)
+
+### Compliance Summary
+- ✅ Aligns with accepted requirements (req_0004, req_0018, req_0039, req_0005)
+- ✅ Correctly depends on feature_0008 (Template Engine)
+- ✅ Component location correct (orchestration/report_generator.sh)
+- ✅ Integration points well-defined (Template Engine, Workspace Manager)
+
+### Architecture Documentation Created
+- ✅ [ADR-0011: Bash Template Engine with Control Structures](../../01_vision/03_architecture/09_architecture_decisions/ADR_0011_bash_template_engine_with_control_structures.md)
+- ✅ [Concept 08_0011: Template Engine](../../01_vision/03_architecture/08_concepts/08_0011_template_engine.md)
+- ✅ Building Block View 5.6 updated with enhanced Report Generator and Template Engine
+- ✅ Mermaid diagram updated to show Template Engine integration
+
+### Feature Dependencies
+- **Depends On**: feature_0008 (Template Engine) - MUST be implemented first
+- **Integration**: Calls `process_template()` from template_engine component
+- **Shared Documentation**: Architecture updates apply to both features
+
+### Blocking Issues
+**NONE** - All architecture documentation complete. Feature ready to move to "Ready" state **AFTER** feature_0008 moves to "Ready".
+
+### Recommendations
+1. Wait for feature_0008 to move to "Ready" (template engine is prerequisite)
+2. Add acceptance criteria for mode-aware behavior (progress display in interactive mode)
+3. After both features implemented, verify end-to-end report generation workflow
+4. Consider batch optimization: load template once, apply to all files (cache template content)
 
 ## Acceptance Criteria
 

@@ -1,9 +1,9 @@
 # ADR-0005: Template-Based Report Generation
 
 **ID**: ADR-0005  
-**Status**: Accepted  
+**Status**: Superseded by [ADR-0011](ADR_0011_bash_template_engine_with_control_structures.md)  
 **Created**: 2026-02-06  
-**Last Updated**: 2026-02-08
+**Last Updated**: 2026-02-12 (Marked superseded)
 
 ## Context
 
@@ -128,3 +128,35 @@ substitute_variables() {
 - **Simplicity over Power**: Accept limited templating for ease of use
 - **String Replacement over Engine**: Avoid dependencies, keep it simple
 - **User Customization over Code Generation**: Empower users to define output
+
+---
+
+## Superseded Notice (2026-02-12)
+
+This ADR has been **superseded** by [ADR-0011: Bash Template Engine with Control Structures](ADR_0011_bash_template_engine_with_control_structures.md).
+
+**Reason for Supersession**:
+
+The simple variable substitution approach defined in this ADR proved insufficient for real-world reporting needs. Accepted requirement [req_0040](../../../02_requirements/03_accepted/req_0040_template_engine_implementation.md) (Template Engine Implementation) necessitates template capabilities explicitly listed as "Weaknesses" in this ADR:
+
+- ❌ Original ADR-0005: "Cannot conditionally include sections"
+- ✅ ADR-0011: Implements `{{#if}}...{{else}}...{{/if}}` conditionals
+
+- ❌ Original ADR-0005: "Cannot iterate over arrays" 
+- ✅ ADR-0011: Implements `{{#each array}}...{{/each}}` loops
+
+- ❌ Original ADR-0005: "Limited formatting options"
+- ✅ ADR-0011: Implements template comments, nested structures, helper functions
+
+**Architectural Evolution**:
+
+This represents a **positive evolution** of the architecture responding to validated requirements while maintaining core principles:
+
+- ✅ Still pure Bash implementation (ADR-0001 compliance maintained)
+- ✅ Still no external template library dependencies (principle retained)
+- ✅ Enhanced security controls added (ADR-0011 includes comprehensive req_0049 security requirements)
+- ✅ User customization still paramount (non-programmers can use templates)
+
+**Implementation**: feature_0008 (Template Engine Implementation) implements ADR-0011.
+
+**Historical Value**: This ADR remains in documentation as it shows the architectural decision-making process and the rationale for the initial simple approach. The evolution to ADR-0011 demonstrates how architecture responds to validated user needs.
