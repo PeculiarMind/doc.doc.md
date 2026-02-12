@@ -2,8 +2,193 @@
 # Component: report_generator.sh
 # Purpose: Report generation to target directory from workspace data
 # Dependencies: orchestration/workspace.sh, orchestration/template_engine.sh
-# Exports: generate_reports(), generate_aggregated_report(), init_target_directory()
+# Exports: generate_reports(), generate_aggregated_report(), init_target_directory(),
+#          load_template(), merge_workspace_data(), write_report(),
+#          human_readable_size(), format_date_iso8601()
 # Side Effects: Writes report files to target directory
+
+# ==============================================================================
+# Template Cache
+# ==============================================================================
+
+declare -g TEMPLATE_CACHE=""
+declare -g TEMPLATE_CACHE_PATH=""
+
+# ==============================================================================
+# Helper Functions
+# ==============================================================================
+
+# Convert bytes to human-readable format
+# Arguments:
+#   $1 - Size in bytes
+# Returns:
+#   Human-readable size string (e.g., "1.5KB", "2MB")
+human_readable_size() {
+  local bytes="$1"
+  
+  if [[ -z "$bytes" ]] || [[ ! "$bytes" =~ ^[0-9]+$ ]]; then
+    echo "0B"
+    return 0
+  fi
+  
+  local -a units=("B" "KB" "MB" "GB" "TB")
+  local unit_index=0
+  local size="$bytes"
+  
+  while (( size >= 1024 && unit_index < 4 )); do
+    size=$((size / 1024))
+    unit_index=$((unit_index + 1))
+  done
+  
+  echo "${size}${units[$unit_index]}"
+}
+
+# Format date in ISO8601 format
+# Arguments:
+#   $1 - Optional: Unix timestamp (uses current time if not provided)
+# Returns:
+#   ISO8601 formatted date string
+format_date_iso8601() {
+  local timestamp="${1:-}"
+  
+  if [[ -n "$timestamp" ]]; then
+    date -u -d "@$timestamp" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ"
+  else
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+  fi
+}
+
+# Load template from file with caching
+# Arguments:
+#   $1 - Template file path
+# Returns:
+#   Template content on stdout, 0 on success, 1 on failure
+load_template() {
+  local template_file="$1"
+  
+  if [[ -z "$template_file" ]]; then
+    log "ERROR" "REPORT" "Template file path is required"
+    return 1
+  fi
+  
+  if [[ ! -f "$template_file" ]]; then
+    log "ERROR" "REPORT" "Template file does not exist: $template_file"
+    return 1
+  fi
+  
+  if [[ ! -r "$template_file" ]]; then
+    log "ERROR" "REPORT" "Template file is not readable: $template_file"
+    return 1
+  fi
+  
+  # Check cache
+  if [[ "$TEMPLATE_CACHE_PATH" == "$template_file" ]] && [[ -n "$TEMPLATE_CACHE" ]]; then
+    echo "$TEMPLATE_CACHE"
+    return 0
+  fi
+  
+  # Load and cache template
+  local content
+  if ! content=$(<"$template_file"); then
+    log "ERROR" "REPORT" "Failed to read template file: $template_file"
+    return 1
+  fi
+  
+  TEMPLATE_CACHE="$content"
+  TEMPLATE_CACHE_PATH="$template_file"
+  
+  echo "$content"
+  return 0
+}
+
+# Merge workspace JSON data with helper variables
+# Arguments:
+#   $1 - JSON data from workspace
+# Returns:
+#   Enhanced JSON with helper fields on stdout
+merge_workspace_data() {
+  local json_data="$1"
+  
+  if [[ -z "$json_data" ]]; then
+    log "ERROR" "REPORT" "JSON data is required"
+    return 1
+  fi
+  
+  # Extract fields from JSON
+  local file_path file_size filename
+  file_path=$(echo "$json_data" | jq -r '.file_path // ""' 2>/dev/null)
+  file_size=$(echo "$json_data" | jq -r '.file_size // 0' 2>/dev/null)
+  
+  if [[ -n "$file_path" ]]; then
+    filename=$(basename "$file_path")
+  else
+    filename=""
+  fi
+  
+  # Generate helper values
+  local file_size_human generation_time
+  file_size_human=$(human_readable_size "$file_size")
+  generation_time=$(format_date_iso8601)
+  
+  # Merge with original data
+  echo "$json_data" | jq \
+    --arg filename "$filename" \
+    --arg file_size_human "$file_size_human" \
+    --arg generation_time "$generation_time" \
+    '. + {
+      filename: $filename,
+      file_size_human: $file_size_human,
+      generation_time: $generation_time
+    }'
+}
+
+# Write report content to file atomically
+# Arguments:
+#   $1 - Target file path
+#   $2 - Report content
+# Returns:
+#   0 on success, 1 on failure
+write_report() {
+  local target_file="$1"
+  local content="$2"
+  
+  if [[ -z "$target_file" ]]; then
+    log "ERROR" "REPORT" "Target file path is required"
+    return 1
+  fi
+  
+  # Create parent directory if needed
+  local target_dir
+  target_dir=$(dirname "$target_file")
+  if [[ ! -d "$target_dir" ]]; then
+    if ! mkdir -p "$target_dir" 2>/dev/null; then
+      log "ERROR" "REPORT" "Failed to create parent directory: $target_dir"
+      return 1
+    fi
+  fi
+  
+  # Validate directory is writable
+  if [[ ! -w "$target_dir" ]]; then
+    log "ERROR" "REPORT" "Target directory is not writable: $target_dir"
+    return 1
+  fi
+  
+  # Write atomically using temp file
+  local temp_file="${target_file}.tmp.$$"
+  if ! echo "$content" > "$temp_file" 2>/dev/null; then
+    log "ERROR" "REPORT" "Failed to write temporary file: $temp_file"
+    rm -f "$temp_file"
+    return 1
+  fi
+  
+  if ! mv "$temp_file" "$target_file" 2>/dev/null; then
+    log "ERROR" "REPORT" "Failed to move temporary file to target: $target_file"
+    rm -f "$temp_file"
+    return 1
+  fi
+  
+  return 0
+}
 
 # ==============================================================================
 # Target Directory Initialization
@@ -78,6 +263,11 @@ generate_reports() {
     return 1
   fi
 
+  if [[ ! -d "$workspace_dir" ]]; then
+    log "ERROR" "REPORT" "Workspace directory does not exist: $workspace_dir"
+    return 1
+  fi
+
   if [[ -z "$target_dir" ]]; then
     log "ERROR" "REPORT" "Target directory is required"
     return 1
@@ -94,10 +284,13 @@ generate_reports() {
     return 1
   fi
 
-  # Read template content
+  # Load template content with caching
   local template_content=""
   if [[ -n "$template_file" ]] && [[ -f "$template_file" ]]; then
-    template_content=$(cat "$template_file" 2>/dev/null)
+    if ! template_content=$(load_template "$template_file"); then
+      log "ERROR" "REPORT" "Failed to load template: $template_file"
+      return 1
+    fi
   fi
 
   # Find all workspace JSON files
@@ -108,41 +301,67 @@ generate_reports() {
   fi
 
   local report_count=0
+  local error_count=0
+  
   for json_file in "$workspace_files_dir"/*.json; do
     # Skip if no JSON files exist (glob didn't match)
     [[ -f "$json_file" ]] || continue
 
     # Load workspace data
     local json_data
-    json_data=$(cat "$json_file" 2>/dev/null)
-    if [[ -z "$json_data" ]] || ! echo "$json_data" | jq empty 2>/dev/null; then
-      log "WARN" "REPORT" "Skipping invalid workspace file: $json_file"
+    if ! json_data=$(cat "$json_file" 2>/dev/null); then
+      log "WARN" "REPORT" "Failed to read workspace file: $json_file"
+      error_count=$((error_count + 1))
+      continue
+    fi
+    
+    if ! echo "$json_data" | jq empty 2>/dev/null; then
+      log "WARN" "REPORT" "Skipping invalid JSON in workspace file: $json_file"
+      error_count=$((error_count + 1))
       continue
     fi
 
-    # Extract file path for naming the report
-    local file_path
-    file_path=$(echo "$json_data" | jq -r '.file_path // empty' 2>/dev/null)
+    # Merge workspace data with helper variables
+    local enhanced_data
+    if ! enhanced_data=$(merge_workspace_data "$json_data"); then
+      log "WARN" "REPORT" "Failed to merge workspace data: $json_file"
+      error_count=$((error_count + 1))
+      continue
+    fi
 
     # Generate a report filename from the hash
     local file_hash
     file_hash=$(basename "$json_file" .json)
     local report_filename="${file_hash}.md"
-
-    # Generate report content from template and data
-    local report_content
-    report_content=$(render_report "$template_content" "$json_data" 2>/dev/null)
-
-    # Write report file
     local report_path="$target_dir/$report_filename"
-    if echo "$report_content" > "$report_path" 2>/dev/null; then
+
+    # Generate report content from template and enhanced data
+    local report_content
+    if [[ -n "$template_content" ]]; then
+      if ! report_content=$(render_report "$template_content" "$enhanced_data"); then
+        log "WARN" "REPORT" "Failed to render report for: $json_file"
+        error_count=$((error_count + 1))
+        continue
+      fi
+    else
+      # No template - output formatted JSON
+      report_content=$(echo "$enhanced_data" | jq '.')
+    fi
+
+    # Write report file atomically
+    if write_report "$report_path" "$report_content"; then
       report_count=$((report_count + 1))
       log "DEBUG" "REPORT" "Generated report: $report_path"
     else
       log "WARN" "REPORT" "Failed to write report: $report_path"
+      error_count=$((error_count + 1))
     fi
   done
 
+  if [[ $error_count -gt 0 ]]; then
+    log "WARN" "REPORT" "Report generation completed with $error_count error(s)"
+  fi
+  
   log "INFO" "REPORT" "Report generation complete: $report_count report(s) written to $target_dir"
   return 0
 }
@@ -150,7 +369,7 @@ generate_reports() {
 # Render a single report by substituting workspace data into template
 # Arguments:
 #   $1 - Template content
-#   $2 - JSON data from workspace
+#   $2 - JSON data from workspace (enhanced with helpers)
 # Returns:
 #   Rendered report content on stdout
 render_report() {
@@ -163,25 +382,43 @@ render_report() {
     return 0
   fi
 
+  # Convert JSON to associative array for template engine
+  declare -A report_data
+  
+  # Extract all fields from JSON and populate associative array
+  while IFS='=' read -r key value; do
+    report_data["$key"]="$value"
+  done < <(echo "$json_data" | jq -r 'to_entries | .[] | "\(.key)=\(.value // "")"' 2>/dev/null)
+  
+  # Process template stages directly to avoid nameref issues
+  # Note: process_template has a nameref bug where data_ref creates circular references
+  # when called with report_data. Using direct function calls instead.
   local result="$template"
-
-  # Substitute known variables from JSON data
-  local file_path file_size file_type
-  file_path=$(echo "$json_data" | jq -r '.file_path // ""' 2>/dev/null)
-  file_size=$(echo "$json_data" | jq -r '.stat.file_size // .file_size // ""' 2>/dev/null)
-  file_type=$(echo "$json_data" | jq -r '.file_type // ""' 2>/dev/null)
-
-  local filename=""
-  if [[ -n "$file_path" ]]; then
-    filename=$(basename "$file_path")
+  
+  # Validate template syntax
+  if ! validate_template_syntax "$result"; then
+    log "ERROR" "REPORT" "Template syntax validation failed"
+    return 1
   fi
-
-  # Perform substitutions
-  result="${result//\$\{filename\}/$filename}"
-  result="${result//\$\{filepath_absolute\}/$file_path}"
-  result="${result//\$\{file_owner\}/${file_owner:-}}"
-  result="${result//\$\{doc_doc_version\}/${SCRIPT_VERSION:-1.0.0}}"
-
+  
+  # Apply template transformations
+  result=$(substitute_variables "$result" report_data) || {
+    log "ERROR" "REPORT" "Variable substitution failed"
+    return 1
+  }
+  
+  result=$(process_conditionals "$result" report_data) || {
+    log "ERROR" "REPORT" "Conditional processing failed"
+    return 1
+  }
+  
+  result=$(process_loops "$result" report_data) || {
+    log "ERROR" "REPORT" "Loop processing failed"
+    return 1
+  }
+  
+  result=$(remove_comments "$result")
+  
   echo "$result"
   return 0
 }
