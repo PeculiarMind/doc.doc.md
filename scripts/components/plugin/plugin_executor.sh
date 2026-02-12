@@ -391,7 +391,7 @@ execute_plugin() {
   local plugins_dir="$2"
   local variable_json="${3:-{\}}"
 
-  log "INFO" "PLUGIN" "Executing plugin: ${plugin_name}"
+  log "DEBUG" "PLUGIN" "Executing plugin: ${plugin_name}"
 
   # Validate plugin name
   if [[ ! "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
