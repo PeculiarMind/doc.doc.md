@@ -43,6 +43,7 @@ source_component "core/platform_detection.sh"
 source_component "ui/help_system.sh"
 source_component "ui/version_info.sh"
 source_component "ui/argument_parser.sh"
+source_component "ui/progress_display.sh"
 
 # Plugin components (depend on core)
 source_component "plugin/plugin_parser.sh"
