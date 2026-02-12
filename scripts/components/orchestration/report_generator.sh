@@ -391,8 +391,12 @@ render_report() {
   done < <(echo "$json_data" | jq -r 'to_entries | .[] | "\(.key)=\(.value // "")"' 2>/dev/null)
   
   # Process template stages directly to avoid nameref issues
-  # Note: process_template has a nameref bug where data_ref creates circular references
-  # when called with report_data. Using direct function calls instead.
+  # Note: process_template has a nameref bug where internal functions (substitute_variables,
+  # process_conditionals, process_loops) all declare 'local -n data_ref="$2"' which creates
+  # a circular reference when process_template itself has 'local -n data_ref="$2"'.
+  # Workaround: Call the functions directly instead of through process_template wrapper.
+  # This provides full template functionality while avoiding the nameref collision.
+  # Related: Template engine is feature_0008, nameref issue documented but not fixed yet.
   local result="$template"
   
   # Validate template syntax
