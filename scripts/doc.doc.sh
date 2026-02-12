@@ -158,6 +158,17 @@ run_analysis() {
   # Update full scan timestamp
   update_full_scan_timestamp "$WORKSPACE_DIR"
 
+  # Generate reports to target directory
+  if ! init_target_directory "$TARGET_DIR"; then
+    log "ERROR" "MAIN" "Failed to initialize target directory: $TARGET_DIR"
+    return 1
+  fi
+
+  if ! generate_reports "$WORKSPACE_DIR" "$TARGET_DIR" "$TEMPLATE_FILE"; then
+    log "ERROR" "MAIN" "Report generation failed"
+    return 1
+  fi
+
   # Log summary
   log "INFO" "MAIN" "Analysis complete: $processed_count files processed, $skipped_count skipped, $error_count errors"
 
