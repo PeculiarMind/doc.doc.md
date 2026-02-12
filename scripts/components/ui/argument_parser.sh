@@ -6,6 +6,15 @@
 # Side Effects: Sets global config variables, may exit on errors or help/version flags
 
 # ==============================================================================
+# Parsed Argument Variables
+# ==============================================================================
+SOURCE_DIR=""
+TEMPLATE_FILE=""
+TARGET_DIR=""
+WORKSPACE_DIR=""
+FORCE_FULLSCAN="false"
+
+# ==============================================================================
 # Argument Parsing Functions
 # ==============================================================================
 
@@ -13,7 +22,7 @@
 # Arguments:
 #   $@ - Command-line arguments
 # Side Effects:
-#   May set global variables (VERBOSE)
+#   May set global variables (VERBOSE, SOURCE_DIR, TEMPLATE_FILE, TARGET_DIR, WORKSPACE_DIR, FORCE_FULLSCAN)
 #   May call show_help/show_version and exit
 #   May exit on invalid arguments
 parse_arguments() {
@@ -39,43 +48,43 @@ parse_arguments() {
         exit "${EXIT_SUCCESS}"
         ;;
       -d)
-        # Future: directory analysis
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
           echo "Error: -d requires a directory argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "PARSER" "Directory argument: $2 (not yet implemented)"
+        SOURCE_DIR="$2"
+        log "INFO" "PARSER" "Source directory: $2"
         shift 2
         ;;
       -m)
-        # Future: output format
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
           echo "Error: -m requires a format argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "PARSER" "Format argument: $2 (not yet implemented)"
+        TEMPLATE_FILE="$2"
+        log "INFO" "PARSER" "Template file: $2"
         shift 2
         ;;
       -t)
-        # Future: type filtering
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
           echo "Error: -t requires a type argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "PARSER" "Type filter: $2 (not yet implemented)"
+        TARGET_DIR="$2"
+        log "INFO" "PARSER" "Target directory: $2"
         shift 2
         ;;
       -w)
-        # Future: workspace
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
           echo "Error: -w requires a workspace argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
-        log "INFO" "PARSER" "Workspace argument: $2 (not yet implemented)"
+        WORKSPACE_DIR="$2"
+        log "INFO" "PARSER" "Workspace directory: $2"
         shift 2
         ;;
       -p|--plugin)
@@ -106,8 +115,8 @@ parse_arguments() {
         esac
         ;;
       -f)
-        # Future: fullscan mode
-        log "INFO" "PARSER" "Fullscan mode (not yet implemented)"
+        FORCE_FULLSCAN="true"
+        log "INFO" "PARSER" "Full scan mode enabled"
         shift
         ;;
       -*)
