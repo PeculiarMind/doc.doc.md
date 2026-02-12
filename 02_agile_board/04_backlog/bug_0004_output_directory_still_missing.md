@@ -93,10 +93,23 @@ Need to investigate whether bug_0001 should be reopened or if this is a distinct
 - [req_0060](../../01_vision/02_requirements/03_accepted/req_0060_main_analysis_workflow_orchestration.md) - Main Workflow Orchestration
 
 ## Dependencies
-- **Blocked by**: feature_0008_template_engine (possibly not complete)
-- **Blocked by**: feature_0010_report_generator (status unclear)
-- **May reopen**: bug_0001 if this is same issue not actually fixed
-- **Critical for**: feature_0021_main_directory_analysis_orchestrator (end-to-end workflow)
+- **BLOCKED BY**: [feature_0008_template_engine](../02_analyze/feature_0008_template_engine.md) - Status: **Analyze** (NOT IMPLEMENTED)
+- **BLOCKED BY**: [feature_0010_report_generator](../02_analyze/feature_0010_report_generator.md) - Status: **Analyze** (NOT IMPLEMENTED)
+- **Related**: bug_0001 - marked as done but may have been premature
+- **Critical for**: [feature_0021_main_directory_analysis_orchestrator](feature_0021_main_directory_analysis_orchestrator.md) (end-to-end workflow)
+
+## Analysis Summary
+⚠️ **This may NOT be a bug** - this is likely **expected behavior** because the features required for report generation have not been implemented yet:
+
+- **feature_0008** (template engine) is in **Analyze** stage - specification exists but no implementation
+- **feature_0010** (report generator) is in **Analyze** stage - specification exists but no implementation
+
+Without a template engine and report generator, the system cannot create output files. The output directory issue is a **missing feature** rather than a bug. This issue should either:
+1. Be reclassified as "waiting on features 0008 and 0010" 
+2. Be closed as "working as designed - features not yet implemented"
+3. Be converted to a tracking item for implementing features 0008 and 0010
+
+bug_0001 being marked as "Done" may have been premature if it claimed to fix report generation.
 
 ## Definition of Done
 - [ ] `-t` option creates output directory if missing
