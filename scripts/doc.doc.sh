@@ -44,6 +44,7 @@ source_component "ui/help_system.sh"
 source_component "ui/version_info.sh"
 source_component "ui/argument_parser.sh"
 source_component "ui/progress_display.sh"
+source_component "ui/prompt_system.sh"
 
 # Plugin components (depend on core)
 source_component "plugin/plugin_parser.sh"
