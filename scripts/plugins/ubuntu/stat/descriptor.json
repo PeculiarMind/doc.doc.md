@@ -26,7 +26,7 @@
             "description": "Owner of the file."
         }
     },
-    "commandline": "stat -c '%Y,%s,%U' '${file_path_absolute}'",
+    "commandline": "stat -c '%Y,%U,%s' '${file_path_absolute}'",
     "check_commandline": "command -v stat >/dev/null 2>&1",
     "install_commandline": "apt install -y coreutils"
 }

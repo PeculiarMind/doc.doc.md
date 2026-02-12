@@ -55,124 +55,38 @@ source_component "plugin/plugin_display.sh"
 
 # Orchestration components (depend on core and plugin)
 source_component "orchestration/workspace.sh"
+source_component "orchestration/workspace_security.sh"
 source_component "orchestration/scanner.sh"
 source_component "orchestration/template_engine.sh"
 source_component "orchestration/report_generator.sh"
 source_component "plugin/plugin_executor.sh"
+source_component "orchestration/main_orchestrator.sh"
 
 # ==============================================================================
 # Main Workflow
 # ==============================================================================
 
 # Run directory analysis workflow
-# Validates parameters, initializes workspace, scans directory, processes files with plugins
+# Delegates to main orchestrator while preserving UI compatibility
 # Returns:
 #   0 on success, 1 on failure
 run_analysis() {
-  # Validate required parameters
-  if [[ ! -d "$SOURCE_DIR" ]] || [[ ! -r "$SOURCE_DIR" ]]; then
-    log "ERROR" "MAIN" "Source directory does not exist or is not readable: $SOURCE_DIR"
-    return 1
-  fi
-
-  if [[ -z "$WORKSPACE_DIR" ]]; then
-    log "ERROR" "MAIN" "Workspace directory is required (-w)"
-    return 1
-  fi
-
-  if [[ -z "$TARGET_DIR" ]]; then
-    log "ERROR" "MAIN" "Target directory is required (-t)"
-    return 1
-  fi
-
-  if [[ -z "$TEMPLATE_FILE" ]]; then
-    log "ERROR" "MAIN" "Template file is required (-m)"
-    return 1
-  fi
-
-  # Initialize workspace
-  if ! init_workspace "$WORKSPACE_DIR"; then
-    log "ERROR" "MAIN" "Failed to initialize workspace: $WORKSPACE_DIR"
-    return 1
-  fi
-
-  # Scan directory
-  local scan_output
-  scan_output=$(scan_directory "$SOURCE_DIR" "$WORKSPACE_DIR" "$FORCE_FULLSCAN")
-  if [[ $? -ne 0 ]]; then
-    log "ERROR" "MAIN" "Directory scan failed"
-    return 1
-  fi
-
-  # Determine plugins directory
+  # Determine plugins directory based on platform
   local plugins_dir="${SCRIPT_DIR}/plugins/${PLATFORM}"
   if [[ ! -d "$plugins_dir" ]]; then
     plugins_dir="${SCRIPT_DIR}/plugins/ubuntu"
   fi
-
-  # Collect scan results into array
-  local -a file_entries=()
-  while IFS= read -r line; do
-    [[ -z "$line" ]] && continue
-    file_entries+=("$line")
-  done <<< "$scan_output"
-
-  local total_files=${#file_entries[@]}
-  local processed_count=0
-  local skipped_count=0
-  local error_count=0
-
-  # Process each discovered file
-  for entry in "${file_entries[@]}"; do
-    local file_path
-    file_path=$(echo "$entry" | cut -d'|' -f1)
-
-    if [[ -z "$file_path" ]] || [[ ! -f "$file_path" ]]; then
-      skipped_count=$((skipped_count + 1))
-      continue
-    fi
-
-    # Show progress
-    processed_count=$((processed_count + 1))
-    local percent=0
-    if [[ $total_files -gt 0 ]]; then
-      percent=$(( processed_count * 100 / total_files ))
-    fi
-
-    if [[ "${IS_INTERACTIVE:-}" == "true" ]]; then
-      show_progress "$percent" "$processed_count" "$total_files" "$skipped_count" "$file_path" "stat"
-    else
-      log_progress_milestone "$processed_count" "$total_files" "MAIN"
-    fi
-
-    # Execute plugins for this file
-    if ! orchestrate_plugins "$file_path" "$WORKSPACE_DIR" "$plugins_dir" 2>/dev/null; then
-      log "WARN" "MAIN" "Plugin execution failed for: $file_path"
-      error_count=$((error_count + 1))
-    fi
-  done
-
-  # Clear progress display
-  clear_progress
-
-  # Update full scan timestamp
-  update_full_scan_timestamp "$WORKSPACE_DIR"
-
-  # Generate reports to target directory
-  if ! init_target_directory "$TARGET_DIR"; then
-    log "ERROR" "MAIN" "Failed to initialize target directory: $TARGET_DIR"
-    return 1
-  fi
-
-  if ! generate_reports "$WORKSPACE_DIR" "$TARGET_DIR" "$TEMPLATE_FILE"; then
-    log "ERROR" "MAIN" "Report generation failed"
-    return 1
-  fi
-
-  # Log summary
-  log "INFO" "MAIN" "Analysis complete: $processed_count files processed, $skipped_count skipped, $error_count errors"
-
-  return 0
+  
+  # Delegate to main orchestrator
+  orchestrate_directory_analysis \
+    "$SOURCE_DIR" \
+    "$WORKSPACE_DIR" \
+    "$TARGET_DIR" \
+    "$TEMPLATE_FILE" \
+    "$plugins_dir" \
+    "$FORCE_FULLSCAN"
+  
+  return $?
 }
 
 # Main entry point
