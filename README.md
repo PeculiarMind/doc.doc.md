@@ -60,7 +60,8 @@ Sixteen core features implemented, two in backlog:
 
 **Features in Progress**: 21 total features across development lifecycle:
 - **Done** (16): Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin
-- **Backlog** (2): Workspace security (0013), advanced help system (0014)
+- **Implementing** (1): Advanced help system (0014) — TDD Red Phase
+- **Backlog** (1): Workspace security (0013)
 - **Ready** (1): OCR PDF plugin (Feature 0002)
 - **Analyze** (2): Template engine (0008), report generator (0010)
 
