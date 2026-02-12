@@ -38,6 +38,18 @@ parse_arguments() {
         show_help
         exit "${EXIT_SUCCESS}"
         ;;
+      --help-plugins)
+        show_help_plugins
+        exit "${EXIT_SUCCESS}"
+        ;;
+      --help-template)
+        show_help_template
+        exit "${EXIT_SUCCESS}"
+        ;;
+      --help-examples)
+        show_help_examples
+        exit "${EXIT_SUCCESS}"
+        ;;
       -v|--verbose)
         set_log_level true
         log "INFO" "PARSER" "Verbose mode enabled"

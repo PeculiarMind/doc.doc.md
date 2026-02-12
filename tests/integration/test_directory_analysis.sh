@@ -214,12 +214,57 @@ test_workspace_initialization() {
   cleanup_test_env "$test_dir"
 }
 
+# Test 6: Reports are generated in target directory (bug_0001 regression test)
+test_target_directory_has_reports() {
+  local test_dir
+  test_dir=$(setup_test_env)
+
+  local output exit_code
+  run_command output exit_code "$SCRIPT_PATH" \
+    -d "$test_dir/source" \
+    -w "$test_dir/workspace" \
+    -t "$test_dir/target" \
+    -m "$test_dir/template.md"
+
+  assert_exit_code 0 $exit_code "Analysis should succeed for target directory report test"
+
+  # Check that report files exist in target directory
+  local report_count
+  report_count=$(find "$test_dir/target" -name "*.md" -type f 2>/dev/null | wc -l)
+
+  TESTS_RUN=$((TESTS_RUN + 1))
+  if [[ "$report_count" -ge 1 ]]; then
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+    echo -e "${GREEN}✓${NC} PASS: Target directory contains $report_count report file(s)"
+  else
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    echo -e "${RED}✗${NC} FAIL: Expected report files in target directory, found $report_count"
+  fi
+
+  # Verify report content is non-empty
+  local first_report
+  first_report=$(find "$test_dir/target" -name "*.md" -type f 2>/dev/null | head -1)
+  TESTS_RUN=$((TESTS_RUN + 1))
+  if [[ -n "$first_report" ]] && [[ -s "$first_report" ]]; then
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+    echo -e "${GREEN}✓${NC} PASS: Report file has content"
+  else
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    echo -e "${RED}✗${NC} FAIL: Report file should have content"
+  fi
+
+  assert_contains "$output" "Report generation complete" "Output should confirm report generation"
+
+  cleanup_test_env "$test_dir"
+}
+
 # Run all tests
 test_directory_scan_discovers_files
 test_stat_plugin_results
 test_progress_suppressed_noninteractive
 test_error_nonexistent_source
 test_workspace_initialization
+test_target_directory_has_reports
 
 finish_test_suite "Directory Analysis Integration"
 exit $?
