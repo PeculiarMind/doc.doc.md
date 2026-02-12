@@ -185,8 +185,8 @@ execute_analysis_workflow() {
   
   log "INFO" "ORCHESTRATOR" "File processing complete: $processed_count processed, $skipped_count skipped, $error_count errors"
   
-  # Log backwards-compatible summary for tests
-  log "INFO" "MAIN" "Analysis complete: $processed_count files processed, $skipped_count skipped, $error_count errors"
+  # Log analysis summary (compatible with logging expectations)
+  log "INFO" "ORCHESTRATOR" "Analysis complete: $processed_count files processed, $skipped_count skipped, $error_count errors"
   
   # Update full scan timestamp
   if type -t update_full_scan_timestamp &>/dev/null; then

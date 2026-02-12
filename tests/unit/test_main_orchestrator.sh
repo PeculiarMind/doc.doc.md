@@ -81,11 +81,12 @@ test_validate_analysis_parameters_requires_source_directory() {
   local exit_code=$?
   
   assert_exit_code 1 "$exit_code" "Should fail with empty source directory"
-  TESTS_RUN=$((TESTS_RUN + 1))
   if echo "$result" | grep -qi "source"; then
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${GREEN}✓${NC} PASS: Validates source directory is required"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${RED}✗${NC} FAIL: Should mention source directory in error"
     TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
@@ -97,11 +98,12 @@ test_validate_analysis_parameters_requires_workspace_directory() {
   local exit_code=$?
   
   assert_exit_code 1 "$exit_code" "Should fail with empty workspace directory"
-  TESTS_RUN=$((TESTS_RUN + 1))
   if echo "$result" | grep -qi "workspace"; then
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${GREEN}✓${NC} PASS: Validates workspace directory is required"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${RED}✗${NC} FAIL: Should mention workspace directory in error"
     TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
@@ -113,11 +115,12 @@ test_validate_analysis_parameters_requires_target_directory() {
   local exit_code=$?
   
   assert_exit_code 1 "$exit_code" "Should fail with empty target directory"
-  TESTS_RUN=$((TESTS_RUN + 1))
   if echo "$result" | grep -qi "target"; then
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${GREEN}✓${NC} PASS: Validates target directory is required"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${RED}✗${NC} FAIL: Should mention target directory in error"
     TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
@@ -129,11 +132,12 @@ test_validate_analysis_parameters_requires_template_file() {
   local exit_code=$?
   
   assert_exit_code 1 "$exit_code" "Should fail with empty template file"
-  TESTS_RUN=$((TESTS_RUN + 1))
   if echo "$result" | grep -qi "template"; then
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${GREEN}✓${NC} PASS: Validates template file is required"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${RED}✗${NC} FAIL: Should mention template file in error"
     TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
@@ -146,11 +150,12 @@ test_validate_analysis_parameters_checks_source_exists() {
   local exit_code=$?
   
   assert_exit_code 1 "$exit_code" "Should fail with nonexistent source directory"
-  TESTS_RUN=$((TESTS_RUN + 1))
   if echo "$result" | grep -qi "exist\|not found"; then
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${GREEN}✓${NC} PASS: Validates source directory exists"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${RED}✗${NC} FAIL: Should check if source directory exists"
     TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
@@ -163,11 +168,12 @@ test_validate_analysis_parameters_checks_template_exists() {
   local exit_code=$?
   
   assert_exit_code 1 "$exit_code" "Should fail with nonexistent template file"
-  TESTS_RUN=$((TESTS_RUN + 1))
   if echo "$result" | grep -qi "exist\|not found"; then
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${GREEN}✓${NC} PASS: Validates template file exists"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "${RED}✗${NC} FAIL: Should check if template file exists"
     TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
