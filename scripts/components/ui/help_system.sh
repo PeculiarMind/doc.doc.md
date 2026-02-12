@@ -26,13 +26,13 @@ Options:
   -h, --help              Display this help message and exit
   -v, --verbose           Enable verbose logging output
   --version               Display version information and exit
-  -d <directory>          Analyze specified directory (future)
-  -m <format>             Output format: markdown, json, html (future)
-  -t <types>              Filter by document types (future)
-  -w <workspace>          Specify workspace directory (future)
+  -d <directory>          Source directory to analyze
+  -m <template>           Template file for report generation
+  -t <directory>          Target directory for output reports
+  -w <workspace>          Workspace directory for state storage
   -p, --plugin <cmd>      Plugin operations: list, info, enable, disable
                           (only 'list' currently implemented)
-  -f                      Enable fullscan mode (future)
+  -f                      Force full rescan of all files
 
 Exit Codes:
   0  Success
@@ -47,7 +47,10 @@ Examples:
   ${SCRIPT_NAME} -h                Show this help message
   ${SCRIPT_NAME} --version         Show version information
   ${SCRIPT_NAME} -v                Run with verbose logging
-  ${SCRIPT_NAME} -d ./docs         Analyze docs directory (future)
+  ${SCRIPT_NAME} -d ./docs -m template.md -t ./output -w ./workspace
+                                   Analyze docs directory with template
+  ${SCRIPT_NAME} -d ./docs -m template.md -t ./output -w ./workspace -f
+                                   Force full rescan of all files
   ${SCRIPT_NAME} -p list           List available plugins
   ${SCRIPT_NAME} --plugin list     List available plugins (long form)
 

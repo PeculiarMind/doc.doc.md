@@ -34,7 +34,7 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 **v0.1.0 - Modular Architecture with Plugin Execution System** 🚧
 
-Eight core features implemented, four in active implementation:
+Sixteen core features implemented, two in backlog:
 
 - ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
 - ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
@@ -42,12 +42,15 @@ Eight core features implemented, four in active implementation:
 - ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
 - ✅ **Feature 0006**: Directory scanner component with recursive traversal
 - ✅ **Feature 0007**: Workspace management system (JSON state storage, atomic writes, locking, integrity verification)
+- ✅ **Feature 0009**: Plugin execution engine (dependency graph, sandboxed execution, variable substitution)
+- ✅ **Feature 0011**: Tool availability verification (check commands, install guidance, interactive prompts)
+- ✅ **Feature 0012**: Plugin security and validation (descriptor validation, injection prevention, sandbox checks)
 - ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 19 components)
 - ✅ **Feature 0016**: Interactive/Non-interactive mode detection (terminal detection, DOC_DOC_INTERACTIVE override)
-- 🔄 **Feature 0009**: Plugin execution engine (dependency graph, sandboxed execution, variable substitution)
-- 🔄 **Feature 0011**: Tool availability verification (check commands, install guidance, interactive prompts)
-- 🔄 **Feature 0012**: Plugin security and validation (descriptor validation, injection prevention, sandbox checks)
-- 🔄 **Feature 0020**: Stat plugin (file metadata extraction: modified time, size, owner)
+- ✅ **Feature 0017**: Interactive progress display (live progress bar, file counts, in-place updates)
+- ✅ **Feature 0018**: User prompt system (yes/no confirmations, tool installation prompts, mode-aware)
+- ✅ **Feature 0019**: Structured logging (dual-mode output, machine-parseable format, milestone tracking)
+- ✅ **Feature 0020**: Stat plugin (file metadata extraction: modified time, size, owner)
 
 **Architecture**: Entry script loads 19 components across 4 domains (core, ui, plugin, orchestration). Plugin execution system implements ADR-0009 (Bubblewrap sandboxing) and ADR-0010 (plugin-toolkit interface architecture). IDR-0016 documents implementation decisions.
 
@@ -56,11 +59,11 @@ Eight core features implemented, four in active implementation:
 **Requirements**: 50 accepted requirements, 10 documented cross-cutting concepts, complete security threat modeling
 
 **Features in Progress**: 21 total features across development lifecycle:
-- **Done** (8): Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, modular architecture, mode detection
-- **Implementing** (4): Plugin execution engine (0009), tool verification (0011), plugin security (0012), stat plugin (0020)
+- **Done** (16): Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin
+- **Implementing** (1): Advanced help system (0014) — TDD Red Phase
+- **Backlog** (1): Workspace security (0013)
 - **Ready** (1): OCR PDF plugin (Feature 0002)
-- **Backlog** (5): Interactive progress (0017), user prompts (0018), structured logging (0019), workspace security (0013), advanced help (0014)
-- **Analyze** (3): Template engine (0008), report generator (0010)
+- **Analyze** (2): Template engine (0008), report generator (0010)
 
 ## Installation
 
@@ -174,20 +177,21 @@ DOC_DOC_INTERACTIVE=false ./scripts/doc.doc.sh -d ./docs -t ./reports
 
 See [08_0010_mode_aware_behavior.md](01_vision/03_architecture/08_concepts/08_0010_mode_aware_behavior.md) for architecture details.
 
-### Planned Usage (Roadmap)
-
-When directory analysis is implemented:
+### Directory Analysis
 
 ```bash
 # Analyze directory with template
 ./scripts/doc.doc.sh -d /path/to/docs -m template.md -t ./output -w ./workspace
 
-# Options (not yet implemented):
-#   -d <directory>   Directory to analyze
-#   -m <template>    Markdown template file
-#   -t <target>      Output directory for reports
+# Force full rescan of all files
+./scripts/doc.doc.sh -d /path/to/docs -m template.md -t ./output -w ./workspace -f
+
+# Options:
+#   -d <directory>   Source directory to analyze
+#   -m <template>    Template file for report generation
+#   -t <directory>   Target directory for output reports
 #   -w <workspace>   Workspace directory for state storage
-#   -f               Enable fullscan mode
+#   -f               Force full rescan of all files
 ```
 
 ## Development Setup
@@ -240,7 +244,7 @@ bash --version  # Requires 4.0+
 tests/
 ├── run_all_tests.sh              # Execute all test suites
 ├── helpers/test_helpers.sh       # Shared utilities and assertions
-├── unit/                         # Component tests (16 suites)
+├── unit/                         # Component tests (22 suites)
 │   ├── test_script_structure.sh
 │   ├── test_help_system.sh
 │   ├── test_argument_parsing.sh
@@ -268,7 +272,7 @@ tests/
 VERBOSE=true ./tests/run_all_tests.sh
 ```
 
-**Current Status**: 21 of 21 test suites passing. See [tests/README.md](tests/README.md) for details.
+**Current Status**: 25 of 25 test suites passing. See [tests/README.md](tests/README.md) for details.
 
 ## Project Structure
 
@@ -307,9 +311,9 @@ doc.doc.md/
 │
 ├── tests/                      # Comprehensive test suite
 │   ├── run_all_tests.sh        # Master test runner
-│   ├── unit/                   # Component tests (11 suites)
-│   ├── integration/            # Multi-component tests (1 suite)
-│   └── system/                 # End-to-end tests (3 suites)
+│   ├── unit/                   # Component tests (22 suites)
+│   ├── integration/            # Multi-component tests (2 suites)
+│   └── system/                 # End-to-end tests (1 suite)
 │
 ├── 01_vision/                  # Project vision and requirements
 │   ├── 01_project_vision/      # Vision document
@@ -353,7 +357,7 @@ doc.doc.md/
 - ✅ Plugin listing functionality
 - ✅ Enhanced logging with timestamps and component identifiers
 - ✅ Development containers for 4 platforms
-- ✅ Test infrastructure (21 suites, 21 passing)
+- ✅ Test infrastructure (25 suites, 25 passing)
 - ✅ 50 accepted requirements with complete lifecycle traceability
 - ✅ Modular component architecture (Feature 0015) - 84% code reduction
 - ✅ Architecture compliance framework (ARCH_REVIEW_0015 approved)
@@ -361,17 +365,17 @@ doc.doc.md/
 - ✅ Mode-aware behavior architecture (Concept 08_0010, ADR_0008)
 - ✅ Interactive/non-interactive mode detection (Feature 0016)
 
-### Phase 2: Plugin Execution System (In Progress)
-- 🔄 Plugin execution engine with dependency graph (Feature 0009)
-- 🔄 Plugin security and validation (Feature 0012)
-- 🔄 Tool availability verification (Feature 0011)
-- 🔄 Stat plugin - basic file metadata extraction (Feature 0020)
+### Phase 2: Plugin Execution System (Complete)
+- ✅ Plugin execution engine with dependency graph (Feature 0009)
+- ✅ Plugin security and validation (Feature 0012)
+- ✅ Tool availability verification (Feature 0011)
+- ✅ Stat plugin - basic file metadata extraction (Feature 0020)
 - ✅ Workspace management - JSON state storage (Feature 0007)
 
-### Phase 3: Mode-Aware Execution (Planned)
-- 🔜 Structured logging enhancement (Feature 0019, High Priority)
-- 🔜 Interactive progress display with live feedback (Feature 0017)
-- 🔜 User prompt system for interactive control (Feature 0018)
+### Phase 3: Mode-Aware Execution (Complete)
+- ✅ Structured logging enhancement (Feature 0019)
+- ✅ Interactive progress display with live feedback (Feature 0017)
+- ✅ User prompt system for interactive control (Feature 0018)
 
 ### Phase 4: Core Analysis (Ready to Start)
 - 🔜 OCR PDF plugin (Feature 0002) - ready for implementation
@@ -383,13 +387,13 @@ doc.doc.md/
 - Plugin management commands (info, enable, disable)
 - Advanced help system with examples (Feature 0014)
 - Example plugins (OCR, PDF analysis)
+- Workspace security enhancements (Feature 0013)
 
 ### Phase 6: Advanced Features (Future)
 - Aggregated summary reports
 - Advanced template engine (conditionals, loops) (Feature 0008)
 - Performance monitoring and metrics
 - Security audit logging
-- Workspace security enhancements (Feature 0013)
 
 **See**: [Accepted Requirements](01_vision/02_requirements/03_accepted/) for detailed specifications
 

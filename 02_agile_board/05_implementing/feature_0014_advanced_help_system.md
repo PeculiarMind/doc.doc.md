@@ -2,9 +2,9 @@
 
 **ID**: 0014  
 **Type**: Feature Implementation  
-**Status**: Backlog  
+**Status**: Implementing  
 **Created**: 2026-02-09  
-**Updated**: 2026-02-09 (Moved to backlog)  
+**Updated**: 2026-02-12 (Moved to implementing - TDD Red Phase)  
 **Priority**: Medium
 
 ## Overview

@@ -36,8 +36,7 @@ PASSED_SUITES=0
 FAILED_SUITES=0
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║      doc.doc.sh Test Suite - TDD Red Phase             ║${NC}"
-echo -e "${BLUE}║  All tests expected to FAIL (no implementation yet)    ║${NC}"
+echo -e "${BLUE}║           doc.doc.sh Test Suite Runner                  ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -102,9 +101,8 @@ echo -e "Failed: ${RED}$FAILED_SUITES${NC}"
 echo ""
 
 if [[ $FAILED_SUITES -eq $TOTAL_SUITES ]]; then
-  echo -e "${YELLOW}⚠ TDD RED PHASE: All tests failed as expected (no implementation)${NC}"
-  echo -e "${YELLOW}✓ Tests are ready for implementation phase${NC}"
-  exit 0
+  echo -e "${RED}✗ All tests failed${NC}"
+  exit 1
 elif [[ $FAILED_SUITES -eq 0 ]]; then
   echo -e "${GREEN}✓ All tests passed! Implementation complete.${NC}"
   exit 0
