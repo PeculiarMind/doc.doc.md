@@ -23,7 +23,7 @@ The orchestrator must integrate seamlessly with existing infrastructure (directo
 - **Critical for MVP** - without this, the tool cannot fulfill its basic promise
 
 ## Related Requirements
-- [req_0060](../../01_vision/02_requirements/01_funnel/req_0060_main_analysis_workflow_orchestration.md) - Main Workflow Orchestration (PRIMARY)
+- [req_0060](../../01_vision/02_requirements/03_accepted/req_0060_main_analysis_workflow_orchestration.md) - Main Workflow Orchestration (PRIMARY)
 - [req_0001](../../01_vision/02_requirements/03_accepted/req_0001_single_command_directory_analysis.md) - Single Command Interface
 - [req_0064](../../01_vision/02_requirements/01_funnel/req_0064_comprehensive_error_handling_recovery.md) - Error Handling
 

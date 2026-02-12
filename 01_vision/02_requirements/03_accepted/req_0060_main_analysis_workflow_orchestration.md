@@ -2,8 +2,9 @@
 
 **ID**: req_0060
 **Title**: Main Analysis Workflow Orchestration
-**Status**: Funnel
+**Status**: Accepted
 **Created**: 2026-02-11
+**Updated**: 2026-02-12 (Moved from funnel to accepted - implementing feature in backlog)
 **Category**: Functional
 
 ## Overview
