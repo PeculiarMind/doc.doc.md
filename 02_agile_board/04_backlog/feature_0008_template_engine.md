@@ -2,9 +2,9 @@
 
 **ID**: 0008  
 **Type**: Feature Implementation  
-**Status**: Analyze  
+**Status**: Backlog  
 **Created**: 2026-02-09  
-**Updated**: 2026-02-09 (Moved to analyze)  
+**Updated**: 2026-02-12 (Moved to backlog - architecture review approved)  
 **Priority**: Critical
 
 ## Overview
@@ -28,6 +28,41 @@ The template engine bridges analysis data and human-readable reports, enabling u
 - [req_0005](../../01_vision/02_requirements/03_accepted/req_0005_template_based_reporting.md) - Template-based Reporting
 - [req_0049](../../01_vision/02_requirements/03_accepted/req_0049_template_injection_prevention.md) - Template Injection Prevention
 - [req_0034](../../01_vision/02_requirements/03_accepted/req_0034_template_variable_reference_documentation.md) - Template Variable Reference
+
+## Architecture Review
+
+**Review Date**: 2026-02-12  
+**Reviewer**: Architect Agent  
+**Status**: ✅ **CONDITIONAL APPROVAL** - Architecture compliant, documentation updates required before "Ready"
+
+**Review Report**: [ARCH_REVIEW_FEATURE_0008_0010_TEMPLATE_AND_REPORT.md](../../ARCH_REVIEW_FEATURE_0008_0010_TEMPLATE_AND_REPORT.md)
+
+### Compliance Summary
+- ✅ Aligns with accepted requirements (req_0040, req_0049)
+- ✅ Security concept comprehensive (scope_template_processing_001)
+- ✅ Component placement appropriate (orchestration layer)
+- ✅ Aligns with all architecture constraints (TC_*)
+
+### Architecture Documentation Created
+- ✅ [ADR-0011: Bash Template Engine with Control Structures](../../01_vision/03_architecture/09_architecture_decisions/ADR_0011_bash_template_engine_with_control_structures.md)
+- ✅ [Concept 08_0011: Template Engine](../../01_vision/03_architecture/08_concepts/08_0011_template_engine.md)
+- ✅ Building Block View 5.6 updated with Template Engine sub-component
+- ✅ ADR-0005 marked as superseded by ADR-0011
+
+### Security Assessment
+- **Risk Level**: HIGH (Template Injection, Risk Score: 174)
+- **Mitigation**: Comprehensive defense-in-depth controls present in feature specification
+- **Security Review**: REQUIRED after implementation (coordinate with Security Agent)
+- **Critical Controls**: No code execution, variable sanitization, iteration limits, timeout enforcement
+
+### Blocking Issues
+**NONE** - All architecture documentation complete, feature ready to move to "Ready" state.
+
+### Recommendations
+1. Move to "Ready" status - architecture compliant and documented
+2. Security Agent review REQUIRED after implementation
+3. Fuzz testing with malicious templates (req_0049 acceptance criteria)
+4. Consider adding explicit template file size limit (suggest 100KB max)
 
 ## Acceptance Criteria
 
