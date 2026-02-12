@@ -9,6 +9,7 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 ## Table of Contents
 
 - [Overview](#overview)
+- [Security Notice](#security-notice)
 - [Current Status](#current-status)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -29,6 +30,31 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 - **Privacy**: 100% local processing - no cloud services or data transmission
 - **Simplicity**: Pure Bash, minimal dependencies, runs anywhere Unix tools exist
 - **Adaptability**: Mode-aware behavior automatically adjusts UX for interactive users and reliable automation for scripts/cron jobs
+
+## Security Notice
+
+⚠️ **Important: Plugin Trust Model**
+
+**Current Security Posture (v0.1.0)**: The toolkit has strong input validation and local-only processing, but **plugins currently execute with full user permissions** (plugin sandboxing not yet implemented).
+
+**Security Recommendations**:
+- ✅ **Only use trusted plugins**: Review plugin code before installation
+- ✅ **Verify plugin sources**: Use official plugins or plugins from trusted developers
+- ⚠️ **Test new plugins**: Test on non-sensitive data first
+- ⚠️ **Sensitive data**: Use additional controls (container isolation, dedicated user account)
+
+**Plugin Sandboxing Roadmap**:
+- v0.1.0 (Current): No sandboxing - use trusted plugins only
+- v0.3.0 (Planned): Bubblewrap-based plugin sandboxing (filesystem restrictions, resource limits)
+- v1.0.0 (Production): Full sandbox implementation required
+
+For detailed security information, see [SECURITY_POSTURE.md](SECURITY_POSTURE.md).
+
+**What This Means**:
+- Safe for personal documents with official plugins
+- Safe for internal use with vetted plugins
+- Not recommended for untrusted third-party plugins without code review
+- Consider container isolation for sensitive data analysis
 
 ## Current Status
 
