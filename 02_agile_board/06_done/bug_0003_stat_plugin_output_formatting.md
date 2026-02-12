@@ -2,7 +2,7 @@
 
 **ID**: 0003  
 **Type**: Bug Fix  
-**Status**: Backlog  
+**Status**: Done  
 **Created**: 2026-02-12  
 **Priority**: High  
 **Severity**: Medium
