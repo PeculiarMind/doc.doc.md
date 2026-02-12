@@ -59,7 +59,7 @@ parse_arguments() {
         ;;
       -m)
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
-          echo "Error: -m requires a format argument" >&2
+          echo "Error: -m requires a template file argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
@@ -69,7 +69,7 @@ parse_arguments() {
         ;;
       -t)
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
-          echo "Error: -t requires a type argument" >&2
+          echo "Error: -t requires a target directory argument" >&2
           echo "Try '$SCRIPT_NAME --help' for more information." >&2
           exit "${EXIT_INVALID_ARGS}"
         fi
