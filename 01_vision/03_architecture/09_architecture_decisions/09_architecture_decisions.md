@@ -34,6 +34,8 @@ This document provides an index of all Architecture Decision Records (ADRs) for 
 | ADR-0008 | POSIX Terminal Test for Mode Detection | Accepted | 2026-02-10 | [View](ADR_0008_posix_terminal_test_for_mode_detection.md) |
 | ADR-0009 | Plugin Security Sandboxing with Bubblewrap | Accepted | 2026-02-11 | [View](ADR_0009_plugin_security_sandboxing_bubblewrap.md) |
 | ADR-0010 | Plugin-Toolkit Interface Architecture | Accepted | 2026-02-11 | [View](ADR_0010_plugin_toolkit_interface_architecture.md) |
+| ADR-0011 | Bash Template Engine with Control Structures | Accepted | 2026-02-12 | [View](ADR_0011_bash_template_engine_with_control_structures.md) |
+| ADR-0012 | Semantic Timestamp Versioning Pattern | Accepted | 2026-02-13 | [View](ADR_0012_semantic_timestamp_versioning_pattern.md) |
 
 ## Decision Status Legend
 

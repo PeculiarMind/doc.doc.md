@@ -2,8 +2,9 @@
 
 **ID**: req_0062
 **Title**: Plugin Results Aggregation and Workspace Integration
-**Status**: Funnel
+**Status**: Accepted
 **Created**: 2026-02-11
+**Last Updated**: 2026-02-13
 **Category**: Functional
 
 ## Overview

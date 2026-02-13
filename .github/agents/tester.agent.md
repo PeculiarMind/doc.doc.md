@@ -15,6 +15,18 @@ Creates and executes tests for features under implementation, supporting TDD and
 3. **Test implementation**: Add tests in the feature branch, keep them deterministic, and commit. Ensure red phase if implementation is not done.
 4. **Post-implementation execution**: Run the suite, create `testreport_<item>_<YYYYMMDD>.<N>.md`, update the test plan history, and hand back to Developer.
 
+## Test Report Naming Convention
+All test reports must be named using the following pattern:
+
+	testreport_<YYYY-MM-DD>.<SEQUENCE>_<TITLE>
+
+Where:
+- `<YYYY-MM-DD>` is the date of the report
+- `<SEQUENCE>` is a zero-padded 3-digit sequence number for that day (e.g., 001, 002)
+- `<TITLE>` is a short, descriptive title for the report
+
+Example: `testreport_2026-02-13.001_template_engine_coverage.md`
+
 ## Input Requirements
 - Feature branch name
 - Work item path in `02_agile_board/05_implementing`

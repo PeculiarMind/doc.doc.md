@@ -1,5 +1,10 @@
 # doc.doc.md
 
+> **Disclaimer:**
+> This project is developed using a software engineering process heavily supported by AI (GitHub Copilot and specialized agents). All code, documentation, and architectural artifacts are written and maintained by autonomous agents, with minimal direct human authorship. Review and validation are performed by agent personas for quality, security, and compliance.
+> 
+> **Purpose:** The reason for conducting the project in this way is to learn what AI is already capable of accomplishing in software engineering and to assess the results with respect to current limitations and challenges of agent-driven development.
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Shell Script](https://img.shields.io/badge/Shell-Bash-green.svg)](https://www.gnu.org/software/bash/)
 [![Version](https://img.shields.io/badge/Version-0.1.0-orange.svg)](scripts/doc.doc.sh)
@@ -71,105 +76,34 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 ## Current Status
 
-**v0.1.0 - Foundation Complete with Comprehensive Security & Architecture Review** ✅
 
-**21 core features implemented** with comprehensive quality validation:
+**Versioning:**
+This project uses the **Semantic Timestamp Versioning Pattern** as defined in [ADR-0012](01_vision/03_architecture/09_architecture_decisions/ADR_0012_semantic_timestamp_versioning_pattern.md):
 
-- ✅ **Feature 0001**: Basic script structure (CLI parsing, help, version, error handling, platform detection)
-- ✅ **Feature 0003**: Plugin listing functionality (`-p list` command)
-- ✅ **Feature 0004**: Enhanced logging format with timestamps (ISO 8601, component identifiers)
-- ✅ **Feature 0005**: Development containers (Ubuntu, Debian, Arch, Alpine)
-- ✅ **Feature 0006**: Directory scanner component with recursive traversal
-- ✅ **Feature 0007**: Workspace management system (JSON state storage, atomic writes, locking, integrity verification)
-- ✅ **Feature 0008**: Template engine (variable substitution, conditionals, loops, security controls)
-- ✅ **Feature 0009**: Plugin execution engine (dependency graph, variable substitution, error handling)
-- ✅ **Feature 0010**: Report generator (template orchestration, output management)
-- ✅ **Feature 0011**: Tool availability verification (check commands, install guidance, interactive prompts)
-- ✅ **Feature 0012**: Plugin security and validation (descriptor validation, injection prevention)
-- ✅ **Feature 0013**: Workspace security (integrity verification, corruption detection)
-- ✅ **Feature 0014**: Advanced help system (detailed usage, examples, component information)
-- ✅ **Feature 0015**: Modular component architecture (510-line monolith → 83-line entry + 19 components)
-- ✅ **Feature 0016**: Interactive/Non-interactive mode detection (terminal detection, DOC_DOC_INTERACTIVE override)
-- ✅ **Feature 0017**: Interactive progress display (live progress bar, file counts, in-place updates)
-- ✅ **Feature 0018**: User prompt system (yes/no confirmations, tool installation prompts, mode-aware)
-- ✅ **Feature 0019**: Structured logging (dual-mode output, machine-parseable format, milestone tracking)
-- ✅ **Feature 0020**: Stat plugin (file metadata extraction: modified time, size, owner)
-- ✅ **Feature 0021**: Main directory analysis orchestrator (complete workflow coordination)
+   <YEAR>_<CREATIVE_NAME>_<MMDD>.<SECONDS_OF_DAY>
 
-**Architecture**: Entry script loads 19 components across 4 domains (core, ui, plugin, orchestration). Complete implementation of modular architecture pattern with strong separation of concerns.
+- **CREATIVE_NAME** is maintained by the author in [scripts/components/version_name.txt](scripts/components/version_name.txt) and is the single source of truth for the current release codename.
+- **YEAR**, **MMDD**, and **SECONDS_OF_DAY** are determined automatically at change time using the current system time, before a pull request is created.
 
-**Testing**: 21 of 21 test suites passing with comprehensive coverage of all components.
+Example: `2026_Spark_0213.54321`
 
-**Requirements**: 50 accepted requirements fully implemented, 20 in funnel (10 security + 9 new enhancements + 1 sandboxing feature)
+See ADR-0012 for rationale, migration, and usage details.
 
-**Documentation**: 
-- 📋 95 architecture documents (43 vision + 52 implementation) covering all arc42 sections
-- 🔒 Comprehensive security posture assessment (8.75/10 architecture score, MODERATE security rating)
-- 📊 Complete requirements traceability with 93% vision coverage
-- 🏗️ Full architecture compliance verification (94% constraint compliance)
+**Current Status:**
 
-**Quality Reviews Complete**:
-- ✅ **Architecture Review**: 8.75/10 score - Excellent modularity, documentation, extensibility
-- ✅ **Security Review**: MODERATE rating - Strong input validation, local-only processing, plugin sandboxing planned
-- ✅ **Requirements Assessment**: 92% health score - 50 accepted + 9 new requirements addressing gaps
+**v0.1.0 - Modular Architecture with Plugin Execution System** 🚧
 
-**Next Phase**: Ready for v0.2.0 with plugin sandboxing feature (Feature 0026) and enhanced security controls
+**Features:**
+- **Done (21):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, mode detection, interactive progress display, user prompt system
+- **Backlog (13):** OCR PDF plugin, templates directory structure, default template fallback, list templates command, precise plugin listing, close template engine test coverage gaps, dependency security verification, plugin sandboxing mechanism, security audit logging, security testing framework, plugin assignment engine, plugin results aggregation system, report generation coordination, comprehensive workflow error handling
 
-## Quality Reviews
+**Architecture:** Entry script loads modular components across core, UI, plugin, and orchestration domains. Plugin execution system implements sandboxing and plugin-toolkit interface architecture. Architecture decisions and concepts are documented and traceable.
 
-**v0.1.0 Foundation Validation Complete** ✅
+**Testing:** 25 of 25 test suites passing (unit, integration, system, plugin execution, validation, tool verification).
 
-The project has undergone comprehensive independent reviews validating architecture, security, and requirements:
+**Requirements:** 64 accepted requirements, 15+ documented cross-cutting concepts, complete security threat modeling
 
-### 🏗️ Architecture Review
-**Score**: 8.75/10 - **EXCELLENT**  
-**Status**: [ARCHITECTURE_REVIEW_REPORT.md](ARCHITECTURE_REVIEW_REPORT.md)
 
-- ✅ **Modularity**: 9/10 - Clean separation of concerns across 19 components
-- ✅ **Documentation**: 9.5/10 - 95 architecture documents with complete arc42 coverage
-- ✅ **Extensibility**: 9/10 - Plugin architecture enables unlimited expansion
-- ⚠️ **Security**: 7/10 - Strong foundation, plugin sandboxing planned
-- ✅ **Testability**: 9/10 - Component isolation enables comprehensive testing
-- ✅ **Compliance**: 94% - 16/17 architectural constraints fully compliant
-
-**Key Findings**:
-- Excellent component architecture with strong separation of concerns
-- Comprehensive documentation following arc42 framework
-- Plugin sandboxing identified as critical gap for v0.2.0
-
-### 🔒 Security Review
-**Rating**: ⚠️ **MODERATE**  
-**Status**: [SECURITY_POSTURE.md](SECURITY_POSTURE.md)
-
-- ✅ **Input Validation**: HIGH - Prevents injection attacks
-- ✅ **Workspace Integrity**: HIGH - Protects state data
-- ✅ **Network Isolation**: HIGH - No network access by design
-- ⚠️ **Plugin Sandboxing**: NOT IMPLEMENTED - Critical gap identified
-- ⚠️ **Audit Trail**: PARTIAL - Logging exists, security-specific enhancement needed
-
-**Security Architecture**: 
-- 8 security findings documented with mitigation strategies
-- STRIDE+DREAD threat modeling complete (7 categories analyzed)
-- Defense-in-depth architecture with 6 security layers
-- Recommended for personal/internal use with trusted plugins
-- Additional controls needed for sensitive data processing
-
-### 📊 Requirements Assessment
-**Health Score**: 92% - **EXCELLENT**  
-**Status**: [REQUIREMENTS_ASSESSMENT_REPORT.md](REQUIREMENTS_ASSESSMENT_REPORT.md)
-
-- ✅ **Vision Coverage**: 90% - Strong foundation with targeted gaps
-- ✅ **Traceability**: 100% - Complete vision-to-implementation mapping
-- ✅ **Implementation**: 96% - 48/50 accepted requirements implemented
-- ✅ **Quality Standards**: 95% - All requirements meet SMART criteria
-
-**Requirements Portfolio**:
-- 50 accepted requirements (96% implemented)
-- 20 requirements in funnel (10 security + 9 enhancements + 1 sandboxing)
-- 9 new requirements created to address identified gaps
-- Complete traceability from vision to implementation
-
-**Conclusion**: The v0.1.0 foundation is **production-quality** in architecture and requirements, with security hardening required for sensitive data use cases.
 
 ## Installation
 
@@ -439,13 +373,13 @@ doc.doc.md/
 │       ├── DREAD risk assessment
 │       └── Defense-in-depth layers
 │
-├── 02_agile_board/             # Kanban workflow (25+ features tracked)
-│   ├── 01_funnel/              # New feature proposals (4 features)
-│   ├── 02_analyze/             # Analysis phase
-│   ├── 03_ready/               # Ready for implementation (1: Feature 0002)
-│   ├── 04_backlog/             # Prioritized backlog (2: Bug 0004, Feature 0026)
-│   ├── 05_implementing/        # In progress
-│   ├── 06_done/                # Completed (21 features)
+├── 02_agile_board/             # Kanban workflow
+│   ├── 01_funnel/              # Initial feature intake (empty)
+│   ├── 02_analyze/             # Analysis phase (empty)
+│   ├── 03_ready/               # Ready for implementation (empty)
+│   ├── 04_backlog/             # Prioritized backlog (13+ features)
+│   ├── 05_implementing/        # In progress (empty)
+│   ├── 06_done/                # Completed (21+ features)
 │   ├── 07_obsoleted/           # Obsoleted items
 │   └── 08_rejected/            # Rejected items
 │

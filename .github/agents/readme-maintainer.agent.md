@@ -12,7 +12,10 @@ Keeps README.md accurate and concise for users and contributors.
 1. Review current README and repo structure.
 2. Update sections affected by recent changes.
 3. Ensure setup, usage, and contribution info is current.
-4. Document README updates in the work item when invoked from workflow.
+4. Ensure all versioning documentation and examples comply with ADR-0012 (Semantic Timestamp Versioning Pattern):
+	- Reference the creative name from `scripts/components/version_name.txt` as the single source of truth.
+	- Document that YEAR, MMDD, and SECONDS_OF_DAY are determined at change time before PR creation.
+5. Document README updates in the work item when invoked from workflow.
 
 ## Input Requirements
 - Current README.md content

@@ -93,10 +93,10 @@ Need to investigate whether bug_0001 should be reopened or if this is a distinct
 - [req_0060](../../01_vision/02_requirements/03_accepted/req_0060_main_analysis_workflow_orchestration.md) - Main Workflow Orchestration
 
 ## Dependencies
-- **BLOCKED BY**: [feature_0008_template_engine](../02_analyze/feature_0008_template_engine.md) - Status: **Analyze** (NOT IMPLEMENTED)
-- **BLOCKED BY**: [feature_0010_report_generator](../02_analyze/feature_0010_report_generator.md) - Status: **Analyze** (NOT IMPLEMENTED)
+- **BLOCKED BY**: [feature_0008_template_engine](../../06_done/feature_0008_template_engine.md) - Status: **Done**
+- **BLOCKED BY**: [feature_0010_report_generator](../../06_done/feature_0010_report_generator.md) - Status: **Done**
 - **Related**: bug_0001 - marked as done but may have been premature
-- **Critical for**: [feature_0021_main_directory_analysis_orchestrator](feature_0021_main_directory_analysis_orchestrator.md) (end-to-end workflow)
+- **Critical for**: [feature_0021_main_directory_analysis_orchestrator](../../06_done/feature_0021_main_directory_analysis_orchestrator.md) (end-to-end workflow)
 
 ## Analysis Summary
 ⚠️ **This may NOT be a bug** - this is likely **expected behavior** because the features required for report generation have not been implemented yet:

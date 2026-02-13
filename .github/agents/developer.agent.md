@@ -18,8 +18,12 @@ Implements backlog items end-to-end, coordinating tests and required quality gat
 4. **TDD handoff**: Assign to Tester with requirements and acceptance criteria; wait for tests and test plan.
 5. **Implement**: Code to pass tests, update docs as needed, and record progress in the work item.
 6. **Validate**: Re-run tests; fix failures. Hand off to Tester for formal test execution and report.
-7. **Quality gates (in order)**: Architect compliance + docs, License Governance, Security Review, README Maintainer. Fix issues and re-submit as needed.
-8. **Close-out**: Move item to `06_done` and open a PR with all gate confirmations.
+7. **Versioning Compliance**: Before creating a pull request, ensure the project version string is generated according to ADR-0012 (Semantic Timestamp Versioning Pattern):
+	- Read the creative name from `scripts/components/version_name.txt` (single source of truth).
+	- Determine YEAR, MMDD, and SECONDS_OF_DAY using the current system time at change time.
+	- Update all version references as required.
+8. **Quality gates (in order)**: Architect compliance + docs, License Governance, Security Review, README Maintainer. Fix issues and re-submit as needed.
+9. **Close-out**: Move item to `06_done` and open a PR with all gate confirmations.
 
 ## Input Requirements
 - Backlog path (default `02_agile_board/04_backlog`)
