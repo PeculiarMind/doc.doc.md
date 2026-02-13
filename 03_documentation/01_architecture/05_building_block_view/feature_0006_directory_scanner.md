@@ -209,7 +209,7 @@ Fields:
 
 - Architecture Vision: `01_vision/03_architecture/05_building_block_view`
 - Modular Architecture: `01_vision/03_architecture/08_concepts/08_0004_modular_script_architecture.md`
-- Security Concept: `01_vision/03_architecture/08_concepts/08_0005_input_validation_and_security.md`
+- Security Concept: `01_vision/03_architecture/08_concepts/08_0010_input_validation_and_security.md`
 - Logging Concept: `01_vision/03_architecture/08_concepts/08_0008_audit_and_logging.md`
 - Feature Specification: `02_agile_board/04_backlog/feature_0006_directory_scanner.md`
 

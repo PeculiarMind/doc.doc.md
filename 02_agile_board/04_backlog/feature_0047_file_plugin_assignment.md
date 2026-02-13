@@ -1,0 +1,48 @@
+# Feature: File-Plugin Assignment Logic
+
+**ID**: feature_0047_file_plugin_assignment  
+**Status**: Backlog  
+**Created**: 2026-02-13  
+**Last Updated**: 2026-02-13
+
+## Overview
+Automatically determine which plugins should execute for each discovered file based on plugin capabilities, file types, dependency requirements, and user-specified rules.
+
+## Description
+The system must analyze discovered files and available plugins to create a file-plugin assignment matrix. Assignment logic considers plugin file type filters, data dependencies, user rules, and execution constraints. The assignment ensures dependency requirements are satisfiable and provides clear reporting of decisions.
+
+**Implementation Components**:
+- File property analysis (MIME type, extension, size)
+- Plugin capability matching based on `processes` filters
+- Data dependency analysis (consumes/provides)
+- User inclusion/exclusion rule processing
+- Assignment matrix generation (file → [plugins])
+- Dependency satisfiability checking
+- Assignment decision reporting
+- Performance optimization for large file sets
+
+## Traceability
+- **Primary**: [req_0061](../../01_vision/02_requirements/03_accepted/req_0061_file_plugin_assignment_logic.md) - File-Plugin Assignment Logic
+- **Related**: [req_0043](../../01_vision/02_requirements/03_accepted/req_0043_plugin_file_type_filtering.md) - Plugin File Type Filtering
+- **Related**: [req_0023](../../01_vision/02_requirements/03_accepted/req_0023_data_driven_execution_flow.md) - Data-Driven Execution
+- **Related**: [Concept 08_0001](../../01_vision/03_architecture/08_concepts/08_0001_plugin_concept.md) - Plugin Concept
+
+## Acceptance Criteria
+- [ ] System analyzes each discovered file's MIME type and properties
+- [ ] System matches files to plugins based on plugin file type filters
+- [ ] System respects plugin data dependencies when creating assignments
+- [ ] System excludes plugins that cannot satisfy their input dependencies
+- [ ] System supports user override rules for plugin inclusion/exclusion
+- [ ] System generates assignment matrix (file → [plugins])
+- [ ] System reports assignment decisions in verbose mode
+- [ ] Documentation explains assignment logic and override mechanisms
+
+## Dependencies
+- Plugin file type filtering (feature_0044)
+- Plugin descriptor parsing (req_0047)
+- Data dependency resolution (req_0023)
+
+## Notes
+- Created by Requirements Engineer Agent from accepted requirement req_0061
+- Priority: High
+- Type: Core Feature

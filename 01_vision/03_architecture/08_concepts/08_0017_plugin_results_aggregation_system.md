@@ -1,4 +1,4 @@
-# Concept: Plugin Results Aggregation System
+# Concept 0017: Plugin Results Aggregation System
 
 ## Overview
 Defines the aggregation layer that collects, validates, and merges plugin outputs into the workspace data model.

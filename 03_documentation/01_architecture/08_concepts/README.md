@@ -11,8 +11,6 @@ This directory documents the key cross-cutting concepts implemented in the doc.d
 ## Table of Contents
 
 - [Implemented Concepts](#implemented-concepts)
-  - [Concept 0001: Plugin Architecture](#concept-0001-plugin-architecture)
-  - [Concept 0002: Workspace Management](#concept-0002-workspace-management)
   - [Concept 0003: CLI Interface](#concept-0003-cli-interface)
 - [Concept Status Summary](#concept-status-summary)
 - [Cross-Cutting Concerns](#cross-cutting-concerns)
@@ -35,30 +33,6 @@ This directory documents the key cross-cutting concepts implemented in the doc.d
 
 ## Implemented Concepts
 
-### [Concept 0001: Plugin Architecture](./08_0001_plugin_concept.md) ✅ PARTIALLY IMPLEMENTED
-
-**Status**: Discovery and validation implemented, execution pending
-
-The plugin system allows extending functionality through JSON descriptors that define CLI tool integration.
-
-**Implemented**:
-- ✅ Plugin discovery (platform-aware scanning)
-- ✅ Descriptor parsing and validation
-- ✅ Tool availability checking
-- ✅ Platform-specific precedence
-- ✅ Plugin listing command
-
-**Pending**:
-- ⏳ Plugin execution orchestration
-- ⏳ Data dependency resolution
-- ⏳ Plugin output processing
-
-**Key Files**:
-- `scripts/plugins/all/*/descriptor.json` - Cross-platform plugins
-- `scripts/plugins/{platform}/*/descriptor.json` - Platform-specific plugins
-
-**Related ADRs**:
-- ADR-0010: Pipe-Delimited Plugin Data
 - ADR-0011: Dual JSON Parser Strategy
 - ADR-0012: Platform-Specific Plugin Precedence
 - ADR-0014: Continue on Malformed Descriptors

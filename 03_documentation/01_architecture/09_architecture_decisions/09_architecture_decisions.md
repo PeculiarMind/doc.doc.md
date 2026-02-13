@@ -20,7 +20,12 @@ This directory contains Implementation Decision Records (IDRs) documenting key i
 - [Status Indicators](#status-indicators)
 - [Summary](#summary)
 
+
 ## IDR Index
+### (Moved) Plugin Installation Verification Decision
+**File**: [ADR_0074_plugin_installation_verification.md](../../../01_vision/03_architecture/09_architecture_decisions/ADR_0074_plugin_installation_verification.md)  
+**Note**: This decision is now maintained as an ADR in the architecture vision.
+**Decision**: During initialization, doc.doc.sh verifies installation of all active plugins using their check_commandline, lists unavailable plugins for the user, and prevents execution of unavailable plugins (req_0074_plugin_installation_verification).
 
 ### IDR-0001: Modular Function Architecture
 **File**: [IDR_0001_modular_function_architecture.md](./IDR_0001_modular_function_architecture.md)  

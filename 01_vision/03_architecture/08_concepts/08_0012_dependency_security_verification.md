@@ -1,4 +1,4 @@
-# Concept: Dependency Security Verification
+# Concept 0012: Dependency Security Verification
 
 ## Overview
 Defines the process for verifying the security of external dependency tools, including secure path resolution, version checks, and safe invocation practices.

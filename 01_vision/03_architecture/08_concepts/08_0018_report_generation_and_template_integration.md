@@ -1,4 +1,4 @@
-# Concept: Report Generation and Template Integration
+# Concept 0018: Report Generation and Template Integration
 
 ## Overview
 Describes the pipeline for generating final reports using user-specified templates and aggregated workspace data.

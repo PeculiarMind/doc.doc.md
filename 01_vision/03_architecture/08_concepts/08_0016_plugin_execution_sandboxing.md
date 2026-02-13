@@ -1,4 +1,4 @@
-# Concept: Plugin Execution Sandboxing
+# Concept 0016: Plugin Execution Sandboxing
 
 ## Overview
 Defines the mechanisms and boundaries for executing plugins in isolated, sandboxed environments to prevent privilege escalation, unauthorized access, and resource abuse.

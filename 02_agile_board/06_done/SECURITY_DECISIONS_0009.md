@@ -68,7 +68,7 @@ The Architect Agent created the following ADRs and constraints:
 2. **[ADR-0010: Plugin-Toolkit Interface Architecture](../../01_vision/03_architecture/09_architecture_decisions/ADR_0010_plugin_toolkit_interface_architecture.md)**
 3. **[TC-0008: Mandatory Plugin Sandboxing](../../01_vision/03_architecture/02_architecture_constraints/TC_0008_mandatory_plugin_sandboxing.md)**
 4. **[TC-0009: Plugin-Toolkit Interface Separation](../../01_vision/03_architecture/02_architecture_constraints/TC_0009_plugin_toolkit_interface_separation.md)**
-5. **[Plugin Security Architecture Concept](../../03_documentation/01_architecture/08_concepts/08_0004_plugin_security_architecture.md)**
+5. **[Plugin Security Architecture Concept](../../01_vision/03_architecture/08_concepts/08_0008_plugin_security_architecture.md)**
 
 ## Security Risk Mitigation
 
