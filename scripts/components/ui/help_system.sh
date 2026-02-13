@@ -27,7 +27,8 @@ Options:
   -v, --verbose           Enable verbose logging output
   --version               Display version information and exit
   -d <directory>          Source directory to analyze
-  -m <template>           Template file for report generation
+  -m <template>           Template file for report generation (optional)
+                          Default: scripts/templates/default.md
   -t <directory>          Target directory for output reports
   -w <workspace>          Workspace directory for state storage
   -p, --plugin <cmd>      Plugin operations: list, info, enable, disable
@@ -47,8 +48,10 @@ Examples:
   ${SCRIPT_NAME} -h                Show this help message
   ${SCRIPT_NAME} --version         Show version information
   ${SCRIPT_NAME} -v                Run with verbose logging
+  ${SCRIPT_NAME} -d ./docs -t ./output -w ./workspace
+                                   Analyze docs directory with default template
   ${SCRIPT_NAME} -d ./docs -m template.md -t ./output -w ./workspace
-                                   Analyze docs directory with template
+                                   Analyze docs directory with custom template
   ${SCRIPT_NAME} -d ./docs -m template.md -t ./output -w ./workspace -f
                                    Force full rescan of all files
   ${SCRIPT_NAME} -p list           List available plugins

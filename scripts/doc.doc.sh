@@ -100,6 +100,9 @@ main() {
   # Parse command-line arguments
   parse_arguments "$@"
   
+  # Validate and apply defaults to arguments
+  validate_arguments
+  
   # Run analysis if source directory is provided
   if [[ -n "$SOURCE_DIR" ]]; then
     run_analysis
