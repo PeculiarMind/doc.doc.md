@@ -1,9 +1,9 @@
 # doc.doc.md
 
-> **Disclaimer:**
+> **⚠️ Disclaimer:**
 > This project is developed using a software engineering process heavily supported by AI (GitHub Copilot and specialized agents). All code, documentation, and architectural artifacts are written and maintained by autonomous agents, with minimal direct human authorship. Review and validation are performed by agent personas for quality, security, and compliance.
 > 
-> **Purpose:** The reason for conducting the project in this way is to learn what AI is already capable of accomplishing in software engineering and to assess the results with respect to current limitations and challenges of agent-driven development.
+> **💡Purpose:** The reason for conducting the project in this way is to learn what AI is already capable of accomplishing in software engineering and to assess the results with respect to current limitations and challenges of agent-driven development.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Shell Script](https://img.shields.io/badge/Shell-Bash-green.svg)](https://www.gnu.org/software/bash/)
