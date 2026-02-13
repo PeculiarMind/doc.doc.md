@@ -50,6 +50,10 @@ parse_arguments() {
         show_help_examples
         exit "${EXIT_SUCCESS}"
         ;;
+      --list-templates)
+        list_templates
+        exit "${EXIT_SUCCESS}"
+        ;;
       -v|--verbose)
         set_log_level true
         log "INFO" "PARSER" "Verbose mode enabled"

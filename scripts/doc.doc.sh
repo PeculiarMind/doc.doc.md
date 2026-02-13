@@ -42,6 +42,7 @@ source_component "core/platform_detection.sh"
 # UI components (depend on core)
 source_component "ui/help_system.sh"
 source_component "ui/version_info.sh"
+source_component "ui/template_display.sh"
 source_component "ui/argument_parser.sh"
 source_component "ui/progress_display.sh"
 source_component "ui/prompt_system.sh"
