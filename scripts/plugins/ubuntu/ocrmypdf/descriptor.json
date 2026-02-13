@@ -1,0 +1,32 @@
+{
+    "name": "ocrmypdf",
+    "description": "Performs Optical Character Recognition on PDF files using ocrmypdf, extracting text content and making PDFs searchable.",
+    "active": true,
+    "processes": {
+        "mime_types": ["application/pdf"],
+        "file_extensions": [".pdf"]
+    },
+    "consumes": {
+        "file_path_absolute": {
+            "type": "string",
+            "description": "Absolute path to the PDF file to be processed."
+        }
+    },
+    "provides": {
+        "ocr_confidence": {
+            "type": "integer",
+            "description": "OCR confidence score (0-100), or 0 if unavailable."
+        },
+        "ocr_status": {
+            "type": "string",
+            "description": "Processing status: success, failed, or skipped."
+        },
+        "ocr_text_content": {
+            "type": "string",
+            "description": "Extracted text content from the PDF."
+        }
+    },
+    "commandline": "/plugin/ocrmypdf_wrapper.sh '${file_path_absolute}'",
+    "check_commandline": "command -v ocrmypdf",
+    "install_commandline": "apt-get install -y ocrmypdf tesseract-ocr tesseract-ocr-eng ghostscript unpaper"
+}
