@@ -37,7 +37,7 @@ Implements backlog items end-to-end, coordinating tests and required quality gat
 - Test scope (default: all)
 
 ## Output Format
-- Item selection and current branch status
+- Item selection and branch name
 - Test results (preflight, post-impl, formal report)
 - Architecture compliance result and doc updates
 - License and security review outcomes

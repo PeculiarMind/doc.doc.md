@@ -16,7 +16,7 @@ Audits changes for license compatibility and attribution requirements (project l
 
 ## Input Requirements
 - Work item path and assignment confirmation
-- Current branch status
+- Branch name
 - List of new dependencies/assets
 - Summary of code changes
 

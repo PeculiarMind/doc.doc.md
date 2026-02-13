@@ -28,7 +28,7 @@ Where:
 Example: `testreport_2026-02-13.001_template_engine_coverage.md`
 
 ## Input Requirements
-- Current branch status
+- Branch name
 - Work item path in `02_agile_board/05_implementing`
 - Requirements and acceptance criteria
 - Architecture constraints (if any)
