@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document describes the building block view of the modular component architecture that replaced the monolithic script structure. The system is now organized into 16 discrete components across 4 domains, orchestrated by a lightweight entry script.
+This document describes the building block view of the modular component architecture that replaced the monolithic script structure. The system is now organized into 17 discrete components across 4 domains, orchestrated by a lightweight entry script.
 
 ## Level 1: System Context
 
@@ -16,7 +16,7 @@ This document describes the building block view of the modular component archite
 │                                                     │
 │  ┌─────────────┐     ┌──────────────────────────┐  │
 │  │ Entry Script│────▶│  Component Architecture  │  │
-│  │  (83 lines) │     │     (16 components)      │  │
+│  │  (83 lines) │     │     (17 components)      │  │
 │  └─────────────┘     └──────────────────────────┘  │
 │                                                     │
 └─────────────────────────────────────────────────────┘
@@ -43,7 +43,7 @@ The system is organized into 4 architectural domains:
         │                                         │
         │  ┌──────────┐  ┌──────────┐           │
         │  │   Core   │  │    UI    │           │
-        │  │ (4 comp) │  │ (3 comp) │           │
+        │  │ (4 comp) │  │ (4 comp) │           │
         │  └──────────┘  └──────────┘           │
         │                                         │
         │  ┌──────────┐  ┌──────────────────┐   │
@@ -119,11 +119,18 @@ UI components handle all user-facing interface functionality.
 │  ├─ show_version() - Display version info              │
 │  └─ Dependencies: constants.sh                         │
 │                                                         │
+│  template_display.sh (149 lines)                       │
+│  ├─ list_templates() - Discover and list templates     │
+│  ├─ display_template_list() - Format template info     │
+│  ├─ extract_template_description() - Extract metadata  │
+│  └─ Dependencies: logging.sh                           │
+│                                                         │
 │  argument_parser.sh (131 lines)                        │
 │  ├─ parse_arguments(args...) - Parse CLI arguments     │
 │  ├─ validate_arguments() - Validation logic            │
 │  ├─ Delegates to: show_help, show_version              │
 │  ├─ Delegates to: list_plugins (plugin domain)         │
+│  ├─ Delegates to: list_templates (ui/template_display) │
 │  └─ Dependencies: core/*, help_system, version_info    │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
@@ -132,6 +139,7 @@ UI components handle all user-facing interface functionality.
 **Design Notes**:
 - No dependencies between UI components at same level
 - `argument_parser.sh` acts as coordinator, depends on other UI components
+- `template_display.sh` provides template discovery and formatting
 - Pure display functions (no side effects except stdout)
 - Separation of display from business logic
 
@@ -247,6 +255,10 @@ constants.sh (no deps)
     │       │       │
     │       │       └──▶ plugin_discovery.sh
     │       │
+    │       ├──▶ template_display.sh
+    │       │       │
+    │       │       └──▶ argument_parser.sh (also needs help, version)
+    │       │
     │       ├──▶ scanner.sh (also needs workspace)
     │       │
     │       └──▶ template_engine.sh
@@ -255,7 +267,7 @@ constants.sh (no deps)
     │
     ├──▶ help_system.sh
     │       │
-    │       └──▶ argument_parser.sh (also needs version_info)
+    │       └──▶ argument_parser.sh (also needs version_info, template_display)
     │
     └──▶ version_info.sh
             │
@@ -284,6 +296,7 @@ source_component "core/platform_detection.sh"
 # Phase 2: UI and Plugin Base (depend on core)
 source_component "ui/help_system.sh"
 source_component "ui/version_info.sh"
+source_component "ui/template_display.sh"
 source_component "ui/argument_parser.sh"
 source_component "plugin/plugin_parser.sh"
 source_component "plugin/plugin_discovery.sh"
@@ -349,19 +362,19 @@ Components clearly document side effects:
 | Metric | Value | Status |
 |--------|-------|--------|
 | Entry script | 83 lines | ✅ Target: <150 |
-| Average component | 60 lines | ✅ Target: <200 |
-| Largest component | 131 lines (argument_parser) | ✅ Target: <200 |
+| Average component | 65 lines | ✅ Target: <200 |
+| Largest component | 149 lines (template_display) | ✅ Target: <200 |
 | Smallest component | 22 lines (version_info) | ✅ |
-| Total component count | 16 | ✅ |
-| Total lines (components) | 946 lines | ℹ️ Was: 509 |
+| Total component count | 17 | ✅ |
+| Total lines (components) | 1095 lines | ℹ️ Was: 946 |
 
 ### Complexity Metrics
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| Maximum dependency depth | 3 levels | constants → logging → error_handling → workspace |
+| Maximum dependency depth | 3 levels | constants → logging → template_display → argument_parser |
 | Components with 0 deps | 1 | constants.sh |
-| Components with 1 dep | 5 | logging, help, version, plugin_parser, template |
+| Components with 1 dep | 6 | logging, help, version, plugin_parser, template, template_display |
 | Components with 2+ deps | 10 | Most components |
 | Circular dependencies | 0 | ✅ None detected |
 
@@ -369,9 +382,9 @@ Components clearly document side effects:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Components testable independently | 16/16 | ✅ 100% |
-| Components with unit tests | 2/16 | ⚠️ Core only |
-| Components with headers | 16/16 | ✅ 100% |
+| Components testable independently | 17/17 | ✅ 100% |
+| Components with unit tests | 2/17 | ⚠️ Core only |
+| Components with headers | 17/17 | ✅ 100% |
 | Functional tests passing | 10/15 | ✅ (5 obsolete) |
 | Documentation coverage | 100% | ✅ Complete |
 
