@@ -102,6 +102,115 @@ extract_plugin_field() {
   local descriptor_path="$1"
   local field_name="$2"
   
+  if [[ ! -f "${descriptor_path}" ]]; then
+    return 1
+  fi
+  
+  # Use jq if available
+  if command -v jq >/dev/null 2>&1; then
+    jq -r ".${field_name} // empty" "${descriptor_path}" 2>/dev/null
+    return $?
+  fi
+  
+  # Fallback to python
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c "
+import json
+import sys
+try:
+    with open('${descriptor_path}', 'r') as f:
+        data = json.load(f)
+    value = data.get('${field_name}', '')
+    if value:
+        print(value)
+except:
+    pass
+" 2>/dev/null
+    return $?
+  fi
+  
+  return 1
+}
+
+# Get list of fields a plugin consumes (inputs)
+# Arguments:
+#   $1 - Path to descriptor.json file
+# Returns:
+#   Comma-separated list of input field names
+get_plugin_consumes() {
+  local descriptor_path="$1"
+  
+  if [[ ! -f "${descriptor_path}" ]]; then
+    return 1
+  fi
+  
+  # Use jq if available
+  if command -v jq >/dev/null 2>&1; then
+    jq -r '.consumes | keys | join(", ")' "${descriptor_path}" 2>/dev/null
+    return $?
+  fi
+  
+  # Fallback to python
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c "
+import json
+import sys
+try:
+    with open('${descriptor_path}', 'r') as f:
+        data = json.load(f)
+    consumes = data.get('consumes', {})
+    if consumes:
+        print(', '.join(consumes.keys()))
+except:
+    pass
+" 2>/dev/null
+    return $?
+  fi
+  
+  return 1
+}
+
+# Get list of fields a plugin provides (outputs)
+# Arguments:
+#   $1 - Path to descriptor.json file
+# Returns:
+#   Comma-separated list of output field names
+get_plugin_provides() {
+  local descriptor_path="$1"
+  
+  if [[ ! -f "${descriptor_path}" ]]; then
+    return 1
+  fi
+  
+  # Use jq if available
+  if command -v jq >/dev/null 2>&1; then
+    jq -r '.provides | keys | join(", ")' "${descriptor_path}" 2>/dev/null
+    return $?
+  fi
+  
+  # Fallback to python
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c "
+import json
+import sys
+try:
+    with open('${descriptor_path}', 'r') as f:
+        data = json.load(f)
+    provides = data.get('provides', {})
+    if provides:
+        print(', '.join(provides.keys()))
+except:
+    pass
+" 2>/dev/null
+    return $?
+  fi
+  
+  return 1
+}
+extract_plugin_field() {
+  local descriptor_path="$1"
+  local field_name="$2"
+  
   if command -v jq >/dev/null 2>&1; then
     jq -r ".${field_name} // empty" "${descriptor_path}" 2>/dev/null
   else

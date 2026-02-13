@@ -11,7 +11,7 @@
 
 # Display formatted plugin list
 # Arguments:
-#   $@ - Array of plugin data strings (name|description|active)
+#   $@ - Array of plugin data strings (name|description|active|descriptor_path)
 display_plugin_list() {
   local -a plugins=("$@")
   
@@ -35,7 +35,9 @@ display_plugin_list() {
     local name="${plugin_data%%|*}"
     local rest="${plugin_data#*|}"
     local description="${rest%%|*}"
-    local active="${rest##*|}"
+    rest="${rest#*|}"
+    local active="${rest%%|*}"
+    local descriptor_path="${rest#*|}"
     
     # Truncate description if too long
     if [[ ${#description} -gt 80 ]]; then
@@ -48,7 +50,25 @@ display_plugin_list() {
     else
       printf "[INACTIVE] %s\n" "${name}"
     fi
-    printf "           %s\n\n" "${description}"
+    printf "           %s\n" "${description}"
+    
+    # Get and display consumes (inputs)
+    if [[ -n "${descriptor_path}" ]] && [[ -f "${descriptor_path}" ]]; then
+      local consumes
+      consumes=$(get_plugin_consumes "${descriptor_path}")
+      if [[ -n "${consumes}" ]]; then
+        printf "           Consumes: %s\n" "${consumes}"
+      fi
+      
+      # Get and display provides (outputs)
+      local provides
+      provides=$(get_plugin_provides "${descriptor_path}")
+      if [[ -n "${provides}" ]]; then
+        printf "           Provides: %s\n" "${provides}"
+      fi
+    fi
+    
+    printf "\n"
   done
 }
 
