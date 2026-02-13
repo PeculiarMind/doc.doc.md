@@ -50,6 +50,10 @@ parse_arguments() {
         show_help_examples
         exit "${EXIT_SUCCESS}"
         ;;
+      --list-templates)
+        list_templates
+        exit "${EXIT_SUCCESS}"
+        ;;
       -v|--verbose)
         set_log_level true
         log "INFO" "PARSER" "Verbose mode enabled"
@@ -147,6 +151,24 @@ parse_arguments() {
 
 # Validate parsed arguments (future use)
 validate_arguments() {
-  # Placeholder for argument validation
+  # Set default template if not specified
+  if [[ -z "${TEMPLATE_FILE}" ]]; then
+    local default_template="${SCRIPT_DIR}/templates/default.md"
+    
+    if [[ -f "${default_template}" ]]; then
+      TEMPLATE_FILE="${default_template}"
+      log "INFO" "PARSER" "Using default template: ${default_template}"
+    else
+      # Only error if we're actually doing an analysis (have source dir)
+      if [[ -n "${SOURCE_DIR}" ]]; then
+        echo "Error: Default template not found at ${default_template}" >&2
+        echo "Please specify a template with -m flag or restore the default template." >&2
+        exit "${EXIT_FILE_ERROR}"
+      fi
+    fi
+  else
+    log "INFO" "PARSER" "Using custom template: ${TEMPLATE_FILE}"
+  fi
+  
   return 0
 }

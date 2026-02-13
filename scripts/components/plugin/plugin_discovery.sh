@@ -11,7 +11,7 @@
 
 # Discover all plugins in the plugins directory
 # Returns:
-#   Echoes newline-separated list of pipe-delimited plugin data: "name|description|active"
+#   Echoes newline-separated list of pipe-delimited plugin data: "name|description|active|descriptor_path"
 discover_plugins() {
   local plugins_dir="${SCRIPT_DIR}/plugins"
   
@@ -46,7 +46,8 @@ discover_plugins() {
         local plugin_name="${plugin_data%%|*}"
         
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
-          plugin_list+=("${plugin_data}")
+          # Append descriptor path to plugin data
+          plugin_list+=("${plugin_data}|${descriptor_file}")
           seen_plugins[${plugin_name}]=1
           log "DEBUG" "PLUGIN" "Added platform plugin: ${plugin_name}"
         fi
@@ -67,7 +68,8 @@ discover_plugins() {
         
         # Only add if not already seen (platform-specific takes precedence)
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
-          plugin_list+=("${plugin_data}")
+          # Append descriptor path to plugin data
+          plugin_list+=("${plugin_data}|${descriptor_file}")
           seen_plugins[${plugin_name}]=1
           log "DEBUG" "PLUGIN" "Added cross-platform plugin: ${plugin_name}"
         else
