@@ -143,6 +143,13 @@ chmod +x scripts/doc.doc.sh
 **List available plugins:**
 ```bash
 ./scripts/doc.doc.sh -p list
+# Shows plugins with their inputs (consumes) and outputs (provides)
+```
+
+**List available templates:**
+```bash
+./scripts/doc.doc.sh --list-templates
+# Shows all templates in scripts/templates/ directory
 ```
 
 **Enable verbose logging:**
@@ -220,15 +227,18 @@ See [08_0010_mode_aware_behavior.md](01_vision/03_architecture/08_concepts/08_00
 ### Directory Analysis
 
 ```bash
-# Analyze directory with template
+# Analyze directory with custom template
 ./scripts/doc.doc.sh -d /path/to/docs -m template.md -t ./output -w ./workspace
+
+# Analyze directory with default template (automatic)
+./scripts/doc.doc.sh -d /path/to/docs -t ./output -w ./workspace
 
 # Force full rescan of all files
 ./scripts/doc.doc.sh -d /path/to/docs -m template.md -t ./output -w ./workspace -f
 
 # Options:
 #   -d <directory>   Source directory to analyze
-#   -m <template>    Template file for report generation
+#   -m <template>    Template file for report generation (optional, uses scripts/templates/default.md if omitted)
 #   -t <directory>   Target directory for output reports
 #   -w <workspace>   Workspace directory for state storage
 #   -f               Force full rescan of all files
@@ -341,6 +351,7 @@ doc.doc.md/
 │   │   │   ├── plugin_display.sh   # Plugin listing and formatting
 │   │   │   ├── plugin_executor.sh  # Plugin execution orchestration
 │   │   │   ├── plugin_validator.sh # Security validation
+│   │   │   ├── plugin_display.sh   # Plugin listing and formatting
 │   │   │   └── plugin_tool_checker.sh # Tool availability verification
 │   │   └── orchestration/      # Workflow orchestration (domain layer)
 │   │       ├── workspace.sh        # Workspace state management
@@ -349,6 +360,9 @@ doc.doc.md/
 │   │       ├── template_engine.sh  # Template processing
 │   │       ├── report_generator.sh # Report generation
 │   │       └── main_orchestrator.sh # Complete workflow coordination
+│   ├── templates/              # Report templates
+│   │   ├── default.md          # Default template (auto-loaded when -m omitted)
+│   │   └── README.md           # Templates documentation
 │   └── plugins/                # Plugin directory structure
 │       ├── all/                # Cross-platform plugins
 │       │   └── stat/           # File metadata plugin
@@ -443,6 +457,13 @@ doc.doc.md/
 - ✅ Report generator with template orchestration (Feature 0010)
 - ✅ Main directory analysis orchestrator (Feature 0021)
 - ✅ Complete workflow coordination
+- ✅ **Templates Directory Structure** - Organized `scripts/templates/` with default template
+- ✅ **Default Template Fallback** - Optional `-m` flag with automatic default
+- ✅ **List Templates Command** - `--list-templates` for template discovery
+- ✅ **Precise Plugin Listing** - Enhanced plugin display with inputs/outputs
+- ✅ **Template Engine Test Coverage** - Comprehensive testing (55 tests passing)
+
+### Phase 5: Advanced Features (In Progress)
 
 ### Phase 5: Security Enhancement (🔜 NEXT - v0.2.0)
 - 🔜 **Plugin sandboxing with Bubblewrap** (Feature 0026) - HIGH PRIORITY
