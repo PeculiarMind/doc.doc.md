@@ -98,6 +98,7 @@ if ocrmypdf --force-ocr --sidecar "$TEXT_FILE" "$FILE_PATH" "$OUTPUT_PDF" >/dev/
     # Extract text content from sidecar file
     if [[ -f "$TEXT_FILE" ]]; then
         # Comprehensive sanitization of OCR output
+        # Remove control characters, shell metacharacters, and CSV injection vectors
         OCR_TEXT=$(cat "$TEXT_FILE" | \
             tr '\n' ' ' | \
             tr -d '\000-\037' | \
