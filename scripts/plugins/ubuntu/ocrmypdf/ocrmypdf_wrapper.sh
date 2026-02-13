@@ -108,11 +108,6 @@ if ocrmypdf --force-ocr --sidecar "$TEXT_FILE" "$FILE_PATH" "$OUTPUT_PDF" >/dev/
             xargs | \
             head -c 10000)
         
-        # Additional validation - ensure only printable characters
-        if [[ ! "$OCR_TEXT" =~ ^[[:print:][:space:]]*$ ]]; then
-            OCR_TEXT="[OCR output contains invalid characters]"
-        fi
-        
         # OCRmyPDF doesn't provide confidence scores, so we use a default
         OCR_CONFIDENCE="85"
     else

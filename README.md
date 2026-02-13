@@ -94,8 +94,8 @@ See ADR-0012 for rationale, migration, and usage details.
 **2026_Phoenix_0213 - Modular Architecture with Plugin Execution System** 🚧
 
 **Features:**
-- **Done (19):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin
-- **Backlog (12):** Templates directory structure, default template fallback, list templates command, precise plugin listing, close template engine test coverage gaps, dependency security verification, plugin sandboxing mechanism, security audit logging, security testing framework, plugin assignment engine, plugin results aggregation system, report generation coordination, comprehensive workflow error handling
+- **Done (32):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, and more
+- **Backlog (15):** Templates directory structure, default template fallback, list templates command, precise plugin listing, close template engine test coverage gaps, dependency security verification, plugin sandboxing mechanism, security audit logging, security testing framework, plugin assignment engine, plugin results aggregation system, report generation coordination, comprehensive workflow error handling, interactive mode bug fixes, and more
 
 **Architecture:** Entry script loads modular components across core, UI, plugin, and orchestration domains. Plugin execution system implements sandboxing and plugin-toolkit interface architecture. Architecture decisions and concepts are documented and traceable.
 
