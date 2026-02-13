@@ -207,14 +207,3 @@ except:
   
   return 1
 }
-extract_plugin_field() {
-  local descriptor_path="$1"
-  local field_name="$2"
-  
-  if command -v jq >/dev/null 2>&1; then
-    jq -r ".${field_name} // empty" "${descriptor_path}" 2>/dev/null
-  else
-    log "ERROR" "PLUGIN" "extract_plugin_field requires jq"
-    return 1
-  fi
-}
