@@ -7,7 +7,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Shell Script](https://img.shields.io/badge/Shell-Bash-green.svg)](https://www.gnu.org/software/bash/)
-[![Version](https://img.shields.io/badge/Version-2026__Phoenix__0213.75800-orange.svg)](scripts/doc.doc.sh)
+[![Version](https://img.shields.io/badge/Version-2026__Phoenix__0213.77073-orange.svg)](scripts/doc.doc.sh)
 [![Architecture](https://img.shields.io/badge/Architecture-8.75%2F10-brightgreen.svg)](ARCHITECTURE_REVIEW_REPORT.md)
 [![Security](https://img.shields.io/badge/Security-MODERATE-yellow.svg)](SECURITY_POSTURE.md)
 [![Requirements](https://img.shields.io/badge/Requirements-92%25-green.svg)](REQUIREMENTS_ASSESSMENT_REPORT.md)

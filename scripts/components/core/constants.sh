@@ -29,7 +29,7 @@ readonly SCRIPT_NAME="doc.doc.sh"
 # Format: <YEAR>_<CREATIVE_NAME>_<MMDD>.<SECONDS_OF_DAY>
 # To set version, source version_generator.sh and call generate_version_string()
 # For static contexts, version is generated at build/release time
-readonly SCRIPT_VERSION="2026_Phoenix_0213.75800"
+readonly SCRIPT_VERSION="2026_Phoenix_0213.77073"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly SCRIPT_COPYRIGHT="Copyright (c) 2026 doc.doc.md Project"
 readonly SCRIPT_LICENSE="GPL-3.0"
