@@ -7,7 +7,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Shell Script](https://img.shields.io/badge/Shell-Bash-green.svg)](https://www.gnu.org/software/bash/)
-[![Version](https://img.shields.io/badge/Version-0.1.0-orange.svg)](scripts/doc.doc.sh)
+[![Version](https://img.shields.io/badge/Version-2026__Phoenix__0213.75800-orange.svg)](scripts/doc.doc.sh)
 [![Architecture](https://img.shields.io/badge/Architecture-8.75%2F10-brightgreen.svg)](ARCHITECTURE_REVIEW_REPORT.md)
 [![Security](https://img.shields.io/badge/Security-MODERATE-yellow.svg)](SECURITY_POSTURE.md)
 [![Requirements](https://img.shields.io/badge/Requirements-92%25-green.svg)](REQUIREMENTS_ASSESSMENT_REPORT.md)
@@ -44,7 +44,7 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 ⚠️ **Important: Plugin Trust Model**
 
-**Current Security Posture (v0.1.0)**: The toolkit has **strong input validation** and **local-only processing**, but **plugins execute with full user permissions** (plugin sandboxing planned for v0.2.0).
+**Current Security Posture (2026_Phoenix release series)**: The toolkit has **strong input validation** and **local-only processing**, but **plugins execute with full user permissions** (plugin sandboxing planned for next release).
 
 **Security Architecture Rating**: ⚠️ **MODERATE** (Architecture Score: 8.75/10)
 - ✅ **Strong**: Input validation, workspace integrity, local processing, structured audit logging
@@ -58,9 +58,9 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 - ⚠️ **Sensitive data**: Use additional controls (container isolation, dedicated user account)
 
 **Plugin Sandboxing Roadmap**:
-- v0.1.0 (Current): No sandboxing - comprehensive security controls except plugin isolation
-- v0.2.0 (Next): Bubblewrap-based plugin sandboxing (Feature 0026) + resource limits
-- v1.0.0 (Production): Full security validation required before production release
+- Current (2026_Phoenix): No sandboxing - comprehensive security controls except plugin isolation
+- Next Release: Bubblewrap-based plugin sandboxing (Feature 0026) + resource limits
+- Production Release: Full security validation required before production release
 
 **Comprehensive Security Documentation**: See [SECURITY_POSTURE.md](SECURITY_POSTURE.md) for:
 - Complete threat model with 8 security findings
@@ -91,7 +91,7 @@ See ADR-0012 for rationale, migration, and usage details.
 
 **Current Status:**
 
-**v0.1.0 - Modular Architecture with Plugin Execution System** 🚧
+**2026_Phoenix_0213 - Modular Architecture with Plugin Execution System** 🚧
 
 **Features:**
 - **Done (21):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, mode detection, interactive progress display, user prompt system
@@ -465,21 +465,21 @@ doc.doc.md/
 
 ### Phase 5: Advanced Features (In Progress)
 
-### Phase 5: Security Enhancement (🔜 NEXT - v0.2.0)
+### Phase 5: Security Enhancement (🔜 NEXT - 2026_Aurora)
 - 🔜 **Plugin sandboxing with Bubblewrap** (Feature 0026) - HIGH PRIORITY
 - 🔜 Plugin resource limits (req_0067) - Prevent resource exhaustion
 - 🔜 Enhanced security audit trail (req_0051)
 - 🔜 Security testing automation (req_0056)
 - 📋 Template injection prevention validation (req_0049)
 
-### Phase 6: CI/CD & Quality (Planned - v0.3.0)
+### Phase 6: CI/CD & Quality (Planned - 2026_Velocity)
 - 📋 CI/CD pipeline integration (req_0065)
 - 📋 Performance benchmarking standards (req_0066)
 - 📋 Plugin dependency versioning (req_0068)
 - 📋 Template variable documentation (req_0069)
 - 📋 OCR PDF plugin (Feature 0002)
 
-### Phase 7: Advanced Features (Future - v0.4.0+)
+### Phase 7: Advanced Features (Future - Future releases)
 - 📋 Workspace migration strategy (req_0070)
 - 📋 Parallel plugin execution (req_0071)
 - 📋 Plugin disabled state (req_0072)
@@ -489,10 +489,10 @@ doc.doc.md/
 - 📋 Performance monitoring and metrics
 
 **Quality Milestones**:
-- ✅ v0.1.0: Foundation complete with comprehensive architecture & security review
-- 🔜 v0.2.0: Security hardening (sandboxing, resource limits)
-- 📋 v0.3.0: CI/CD integration and performance validation
-- 📋 v1.0.0: Production-ready with full security validation
+- ✅ 2026_Phoenix: Foundation complete with comprehensive architecture & security review
+- 🔜 2026_Aurora: Security hardening (sandboxing, resource limits)
+- 📋 2026_Velocity: CI/CD integration and performance validation
+- 📋 Production release: Production-ready with full security validation
 
 **See**: [Accepted Requirements](01_vision/02_requirements/03_accepted/) for detailed specifications
 

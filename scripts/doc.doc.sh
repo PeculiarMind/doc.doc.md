@@ -34,6 +34,7 @@ source_component() {
 # Load components in dependency order
 # Core components (no dependencies)
 source_component "core/constants.sh"
+source_component "core/version_generator.sh"
 source_component "core/logging.sh"
 source_component "core/mode_detection.sh"
 source_component "core/error_handling.sh"
