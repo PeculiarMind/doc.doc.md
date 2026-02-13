@@ -70,9 +70,9 @@ Plugins are located in the `scripts/plugins/` directory, organized by operating 
             "description": "Owner of the file."
         }
     },
-    "execute_commandline": "read -r file_created file_last_modified file_owner file_size < <(stat -c %W,%Y,%U,%B ${file_path_absolute})",
-    "install_commandline": "read -r plugin_successfully_installed < <(./install.sh 2>&1 >/dev/null && echo 'true' || echo 'false')",
-    "check_commandline": "read -r plugin_works < <(which stat > /dev/null 2>&1 && echo 'true' || echo 'false')"
+    "commandline": "stat -c '%Y,%U,%s' '${file_path_absolute}'",
+    "check_commandline": "command -v stat >/dev/null 2>&1",
+    "install_commandline": "apt install -y coreutils"
 }
  ```
 
@@ -90,9 +90,9 @@ The plugin descriptor is a JSON file that defines the plugin's metadata, capabil
 | processes.file_extensions | array of strings | File extensions the plugin processes. Use empty array `[]` to handle all extensions. Examples: `[".pdf"]`, `[".md", ".txt"]`.                                                                                                                                          | no       |         |
 | consumes                  | object           | Describes which kind parameters are required to execute this plugin.                                                                                                                                                                                                   | yes      |         |
 | provides                  | object           | Describes which kind of parameters the plugin "returns".                                                                                                                                                                                                               | no       |         |
-| execute_commandline       | string           | A command line to execute the plugin. It is executed by the toolkit in the plugins directory.                                                                                                                                                                          | yes      |         |
-| install_commandline       | string           | A command line to install the plugin. It is executed by the toolkit in the plugins directory.                                                                                                                                                                          | yes      |         |
+| commandline               | string           | A command line to execute the plugin. It is executed by the toolkit in the plugins directory with variable substitution.                                                                                                                                               | yes      |         |
 | check_commandline         | string           | A command line to check if the plugin is installed. It is executed by the toolkit in the plugins directory.                                                                                                                                                            | yes      |         |
+| install_commandline       | string           | A command line to install the plugin. It is executed by the toolkit in the plugins directory.                                                                                                                                                                          | yes      |         |
 
 
 The toolkit uses `consumes` and `provides` to determine plugin execution order automatically. Plugins execute only when all their consumed data is available. The `processes` attribute filters which files are passed to each plugin based on type or extension.
