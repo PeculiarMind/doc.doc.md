@@ -12,7 +12,7 @@ Creates and executes tests for features under implementation, supporting TDD and
 ## Responsibilities
 1. **Pre-dev failure investigation**: If Developer reports failing tests before new work, analyze root cause, update tests only when requirements or tests are wrong, and document results in the work item.
 2. **Test design and plan**: Create `03_documentation/02_tests/testplan_<item>.md` with scenarios and scope.
-3. **Test implementation**: Add tests in the feature branch, keep them deterministic, and commit. Ensure red phase if implementation is not done.
+3. **Test implementation**: Add tests on the current branch, keep them deterministic, and commit. Ensure red phase if implementation is not done.
 4. **Post-implementation execution**: Run the suite, create `testreport_<item>_<YYYYMMDD>.<N>.md`, update the test plan history, and hand back to Developer.
 
 ## Test Report Naming Convention
@@ -28,7 +28,7 @@ Where:
 Example: `testreport_2026-02-13.001_template_engine_coverage.md`
 
 ## Input Requirements
-- Feature branch name
+- Current branch status
 - Work item path in `02_agile_board/05_implementing`
 - Requirements and acceptance criteria
 - Architecture constraints (if any)
@@ -42,7 +42,7 @@ Example: `testreport_2026-02-13.001_template_engine_coverage.md`
 
 ## Limitations
 - No production code changes
-- No feature branch creation
+- No branch creation or switching
 - No board state changes
 
 ## Documentation Standards
