@@ -37,20 +37,20 @@ test_version_flag() {
   assert_exit_code 0 $exit_code "--version should exit with code 0"
 }
 
-# Test 2: Version follows semantic versioning
-test_semantic_versioning() {
+# Test 2: Version follows Semantic Timestamp Versioning (ADR-0012)
+test_semantic_timestamp_versioning() {
   local output exit_code
   run_command output exit_code "$SCRIPT_PATH" --version
   
-  # Look for pattern like X.Y.Z
-  if echo "$output" | grep -qE '[0-9]+\.[0-9]+\.[0-9]+'; then
+  # Look for pattern like YYYY_NAME_MMDD.SECONDS
+  if echo "$output" | grep -qE '[0-9]{4}_[A-Z][A-Za-z]+_[0-9]{4}\.[0-9]+'; then
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_PASSED=$((TESTS_PASSED + 1))
-    echo -e "${GREEN}✓${NC} PASS: Version follows semantic versioning format"
+    echo -e "${GREEN}✓${NC} PASS: Version follows Semantic Timestamp Versioning format (ADR-0012)"
   else
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_FAILED=$((TESTS_FAILED + 1))
-    echo -e "${RED}✗${NC} FAIL: Version should follow semantic versioning (X.Y.Z)"
+    echo -e "${RED}✗${NC} FAIL: Version should follow Semantic Timestamp Versioning (YYYY_NAME_MMDD.SECONDS)"
     echo "  Output: $output"
   fi
 }
@@ -81,7 +81,7 @@ test_version_license() {
 
 # Run all tests
 test_version_flag
-test_semantic_versioning
+test_semantic_timestamp_versioning
 test_version_includes_name
 test_version_copyright
 test_version_license

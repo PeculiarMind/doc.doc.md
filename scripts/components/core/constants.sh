@@ -25,7 +25,11 @@
 # Script Metadata
 # ==============================================================================
 readonly SCRIPT_NAME="doc.doc.sh"
-readonly SCRIPT_VERSION="1.0.0"
+# Note: SCRIPT_VERSION is dynamically generated using Semantic Timestamp Versioning (ADR-0012)
+# Format: <YEAR>_<CREATIVE_NAME>_<MMDD>.<SECONDS_OF_DAY>
+# To set version, source version_generator.sh and call generate_version_string()
+# For static contexts, version is generated at build/release time
+readonly SCRIPT_VERSION="2026_Phoenix_0213.77073"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly SCRIPT_COPYRIGHT="Copyright (c) 2026 doc.doc.md Project"
 readonly SCRIPT_LICENSE="GPL-3.0"
