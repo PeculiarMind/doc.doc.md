@@ -74,6 +74,98 @@ validate_analysis_parameters() {
 # Initialization
 # ==============================================================================
 
+# Global array to track unavailable plugins
+declare -gA UNAVAILABLE_PLUGINS
+
+# Verify plugin installation and track unavailable plugins
+# Arguments:
+#   $1 - Plugins directory path
+# Returns:
+#   0 on success (continues even if some plugins are unavailable)
+#   Sets UNAVAILABLE_PLUGINS associative array with plugin names as keys
+verify_plugin_installation() {
+  local plugins_dir="$1"
+  
+  log "INFO" "ORCHESTRATOR" "Verifying plugin installation"
+  
+  # Clear the unavailable plugins array
+  UNAVAILABLE_PLUGINS=()
+  
+  # Check if plugins directory exists
+  if [[ ! -d "${plugins_dir}" ]]; then
+    log "WARN" "ORCHESTRATOR" "Plugins directory not found: ${plugins_dir}"
+    return 0
+  fi
+  
+  # Get list of active plugins and check each one
+  while IFS= read -r -d '' descriptor_file; do
+    local plugin_name check_command
+    
+    plugin_name=$(jq -r '.name // empty' "${descriptor_file}" 2>/dev/null)
+    if [[ -z "${plugin_name}" ]]; then
+      continue
+    fi
+    
+    # Determine if plugin is active (CLI > Config > Descriptor)
+    local plugin_active
+    if declare -p PLUGIN_ACTIVATION_OVERRIDES &>/dev/null && [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
+      plugin_active="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
+    else
+      plugin_active=$(jq -r 'if has("active") then .active else true end' "${descriptor_file}" 2>/dev/null)
+    fi
+    
+    # Skip verification for inactive plugins
+    if [[ "${plugin_active}" == "false" ]]; then
+      log "DEBUG" "ORCHESTRATOR" "Skipping verification for inactive plugin: ${plugin_name}"
+      continue
+    fi
+    
+    # Get check command from descriptor
+    check_command=$(jq -r '.check_commandline // empty' "${descriptor_file}" 2>/dev/null)
+    if [[ -z "${check_command}" ]]; then
+      log "WARN" "ORCHESTRATOR" "No check_commandline for plugin: ${plugin_name}"
+      UNAVAILABLE_PLUGINS["${plugin_name}"]="no_check_command"
+      continue
+    fi
+    
+    # Check if tool is available
+    log "DEBUG" "ORCHESTRATOR" "Checking tool for plugin: ${plugin_name}"
+    if bash -c "${check_command}" >/dev/null 2>&1; then
+      log "DEBUG" "ORCHESTRATOR" "Tool available for plugin: ${plugin_name}"
+    else
+      log "WARN" "ORCHESTRATOR" "Tool not available for plugin: ${plugin_name}"
+      UNAVAILABLE_PLUGINS["${plugin_name}"]="tool_missing"
+    fi
+  done < <(find "${plugins_dir}" -name "descriptor.json" -type f -print0 2>/dev/null)
+  
+  # Report unavailable plugins if any
+  if [[ ${#UNAVAILABLE_PLUGINS[@]} -gt 0 ]]; then
+    log "WARN" "ORCHESTRATOR" "Found ${#UNAVAILABLE_PLUGINS[@]} unavailable plugin(s)"
+    for plugin_name in "${!UNAVAILABLE_PLUGINS[@]}"; do
+      local descriptor_file
+      descriptor_file=$(find "${plugins_dir}" -name "descriptor.json" -type f -exec grep -l "\"name\": *\"${plugin_name}\"" {} \; 2>/dev/null | head -1)
+      
+      if [[ -n "${descriptor_file}" ]]; then
+        local install_command
+        install_command=$(jq -r '.install_commandline // empty' "${descriptor_file}" 2>/dev/null)
+        
+        if [[ -n "${install_command}" ]] && [[ "${install_command}" != "null" ]]; then
+          log "WARN" "ORCHESTRATOR" "  - ${plugin_name}: Tool not installed. Install with: ${install_command}"
+        else
+          log "WARN" "ORCHESTRATOR" "  - ${plugin_name}: Tool not installed. No install command available."
+        fi
+      else
+        log "WARN" "ORCHESTRATOR" "  - ${plugin_name}: Tool not installed."
+      fi
+    done
+    log "INFO" "ORCHESTRATOR" "Analysis will continue, skipping unavailable plugins"
+  else
+    log "INFO" "ORCHESTRATOR" "All active plugins are available"
+  fi
+  
+  return 0
+}
+
 # Initialize workspace and target directories
 # Arguments:
 #   $1 - Workspace directory path
@@ -296,7 +388,12 @@ orchestrate_directory_analysis() {
     return $(handle_analysis_errors "Initialization failed" "INITIALIZATION")
   fi
   
-  # Step 3: Execute Analysis Workflow
+  # Step 3: Verify Plugin Installation (before analysis starts)
+  if ! verify_plugin_installation "$plugins_dir"; then
+    return $(handle_analysis_errors "Plugin verification failed" "PLUGIN")
+  fi
+  
+  # Step 4: Execute Analysis Workflow
   if ! execute_analysis_workflow "$source_dir" "$workspace_dir" "$target_dir" "$template_file" "$plugins_dir" "$force_fullscan"; then
     # Error already logged by execute_analysis_workflow
     return 1
