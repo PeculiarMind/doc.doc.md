@@ -1,9 +1,11 @@
 # Feature: Single-File Analysis Mode
 
 **ID**: feature_0051_single_file_analysis  
-**Status**: Backlog  
+**Status**: Implementing  
 **Created**: 2026-02-14  
 **Last Updated**: 2026-02-14
+**Started**: 2026-02-14
+**Assigned**: Developer Agent
 
 ## Overview
 Support analyzing a single file instead of an entire directory, enabling targeted plugin execution on specific files.
