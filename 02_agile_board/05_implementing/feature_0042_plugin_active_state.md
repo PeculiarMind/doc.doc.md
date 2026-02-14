@@ -48,9 +48,12 @@ This feature enables users to activate or deactivate plugins through multiple me
 - Type: Feature Enhancement
 
 ## Implementation Notes (2025-02-14)
-**Status**: Core functionality complete, execution filtering pending
+**Status**: **BLOCKED** - Partial implementation, needs executor refactoring
 
-**Implemented**:
+**Blocking Issue**: Plugin executor (`plugin_executor.sh::build_dependency_graph()`) reads descriptors directly, bypassing the discovery layer's activation overrides. This architectural issue requires refactoring the executor to accept pre-filtered plugin lists or activation override parameters.
+
+**Completed**: 5/8 acceptance criteria
+**Test Coverage**: 20/30 tests passing (all listing and configuration tests)
 1. Plugin descriptor `active` field parsing (defaults to `true` if missing)
 2. `--activate-plugin <name>` CLI flag
 3. `--deactivate-plugin <name>` CLI flag
