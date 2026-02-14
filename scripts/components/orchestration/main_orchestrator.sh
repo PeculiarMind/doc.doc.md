@@ -594,13 +594,15 @@ orchestrate_single_file_analysis() {
     if execute_plugin "$plugin_name" "$plugins_dir" "$variables_json"; then
       log "INFO" "ORCHESTRATOR" "Plugin executed successfully: $plugin_name"
       plugin_results+=("$plugin_name:success")
-      ((success_count++))
+      success_count=$((success_count + 1))
     else
       log "WARN" "ORCHESTRATOR" "Plugin execution failed: $plugin_name"
       plugin_results+=("$plugin_name:failure")
-      ((failure_count++))
+      failure_count=$((failure_count + 1))
     fi
   done
+  
+  log "DEBUG" "ORCHESTRATOR" "Plugin execution loop completed. Success: $success_count, Failure: $failure_count"
   
   # Step 9: Update workspace with scan results
   local scan_timestamp
