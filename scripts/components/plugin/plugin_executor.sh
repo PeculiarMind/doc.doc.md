@@ -62,6 +62,13 @@ build_dependency_graph() {
 
     local active
     active=$(jq -r '.active // false' "$dfile" 2>/dev/null)
+
+    # Apply activation overrides (CLI > Config > Descriptor)
+    if declare -p PLUGIN_ACTIVATION_OVERRIDES &>/dev/null && [[ -v PLUGIN_ACTIVATION_OVERRIDES["$pname"] ]]; then
+      active="${PLUGIN_ACTIVATION_OVERRIDES[$pname]}"
+      log "DEBUG" "PLUGIN" "Applying activation override for ${pname}: active=${active}"
+    fi
+
     [[ "$active" != "true" ]] && continue
 
     all_plugins+=("$pname")

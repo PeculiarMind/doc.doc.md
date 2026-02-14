@@ -47,7 +47,16 @@ discover_plugins() {
         local plugin_name="${plugin_data%%|*}"
         
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
-          # Apply activation overrides from CLI flags
+          # Check for .disabled directory suffix (overrides descriptor active field)
+          local plugin_dir_name
+          plugin_dir_name=$(basename "$(dirname "${descriptor_file}")")
+          if [[ "${plugin_dir_name}" == *.disabled ]]; then
+            log "DEBUG" "PLUGIN" "Plugin directory has .disabled suffix: ${plugin_name}"
+            local name_desc="${plugin_data%|*}"
+            plugin_data="${name_desc}|false"
+          fi
+          
+          # Apply activation overrides from CLI flags (CLI > Config > Descriptor/.disabled)
           if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
             local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
             log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
@@ -78,7 +87,16 @@ discover_plugins() {
         
         # Only add if not already seen (platform-specific takes precedence)
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
-          # Apply activation overrides from CLI flags
+          # Check for .disabled directory suffix (overrides descriptor active field)
+          local plugin_dir_name
+          plugin_dir_name=$(basename "$(dirname "${descriptor_file}")")
+          if [[ "${plugin_dir_name}" == *.disabled ]]; then
+            log "DEBUG" "PLUGIN" "Plugin directory has .disabled suffix: ${plugin_name}"
+            local name_desc="${plugin_data%|*}"
+            plugin_data="${name_desc}|false"
+          fi
+          
+          # Apply activation overrides from CLI flags (CLI > Config > Descriptor/.disabled)
           if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
             local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
             log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
