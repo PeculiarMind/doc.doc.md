@@ -14,7 +14,7 @@
     },
     "provides": {
         "ocr_confidence": {
-            "type": "integer",
+            "type": "number",
             "description": "OCR confidence score (0-100), or 0 if unavailable."
         },
         "ocr_status": {
@@ -28,5 +28,5 @@
     },
     "commandline": "/plugin/ocrmypdf_wrapper.sh \"${file_path_absolute}\"",
     "check_commandline": "command -v ocrmypdf",
-    "install_commandline": "apt-get install -y ocrmypdf tesseract-ocr tesseract-ocr-eng ghostscript unpaper"
+    "install_commandline": "./install.sh"
 }

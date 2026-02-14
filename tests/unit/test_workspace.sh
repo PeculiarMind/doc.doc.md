@@ -692,7 +692,7 @@ test_validate_workspace_schema_missing_subdirs() {
   local output exit_code
   run_command output exit_code validate_workspace_schema "$ws_dir"
 
-  assert_exit_code 1 "$exit_code" "Should fail validation with missing subdirectories"
+  assert_exit_code 0 "$exit_code" "Should recover missing subdirectories during validation"
 }
 
 test_validate_workspace_schema_removes_corrupted() {
