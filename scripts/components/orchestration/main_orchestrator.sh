@@ -163,6 +163,11 @@ execute_analysis_workflow() {
   
   log "INFO" "ORCHESTRATOR" "Processing $total_files files"
   
+  # Initialize progress display for interactive mode
+  if [[ "${IS_INTERACTIVE:-}" == "true" ]]; then
+    show_progress 0 0 "$total_files" 0 "" ""
+  fi
+  
   # Process each discovered file
   for entry in "${file_entries[@]}"; do
     local file_path
@@ -174,6 +179,12 @@ execute_analysis_workflow() {
     fi
     
     processed_count=$((processed_count + 1))
+    local percent=$((processed_count * 100 / total_files))
+    
+    # Update progress display before processing file
+    if [[ "${IS_INTERACTIVE:-}" == "true" ]]; then
+      show_progress "$percent" "$processed_count" "$total_files" "$skipped_count" "$file_path" "plugin-execution"
+    fi
     
     # Execute plugins for this file
     if ! orchestrate_plugins "$file_path" "$workspace_dir" "$plugins_dir" 2>/dev/null; then
@@ -182,6 +193,11 @@ execute_analysis_workflow() {
       # Continue processing other files (partial success)
     fi
   done
+  
+  # Clear progress display and show final status
+  if [[ "${IS_INTERACTIVE:-}" == "true" ]]; then
+    clear_progress
+  fi
   
   log "INFO" "ORCHESTRATOR" "File processing complete: $processed_count processed, $skipped_count skipped, $error_count errors"
   
