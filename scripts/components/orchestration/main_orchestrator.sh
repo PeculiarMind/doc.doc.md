@@ -534,24 +534,21 @@ orchestrate_single_file_analysis() {
   log "DEBUG" "ORCHESTRATOR" "Discovered plugins: $discovered_plugins"
   
   # Filter active plugins
+  # discover_plugins returns: name|description|active|path
   local active_plugins=()
-  while IFS= read -r plugin_file; do
-    if [[ -n "$plugin_file" ]] && [[ -f "$plugin_file" ]]; then
-      local plugin_name
-      plugin_name=$(basename "$plugin_file" .json)
-      
+  while IFS='|' read -r plugin_name plugin_desc plugin_active plugin_file; do
+    if [[ -n "$plugin_name" ]] && [[ -n "$plugin_file" ]] && [[ -f "$plugin_file" ]]; then
       # Skip unavailable plugins
-      if [[ -n "${UNAVAILABLE_PLUGINS[$plugin_name]}" ]]; then
+      if [[ -v UNAVAILABLE_PLUGINS[$plugin_name] ]]; then
         log "DEBUG" "ORCHESTRATOR" "Skipping unavailable plugin: $plugin_name"
         continue
       fi
       
-      # Check if plugin is active using jq
-      local is_active
-      is_active=$(jq -r 'if has("active") then .active else true end' "$plugin_file" 2>/dev/null)
+      # Check plugin active status
+      local is_active="$plugin_active"
       
       # Check for plugin activation overrides
-      if [[ -n "${PLUGIN_ACTIVATION_OVERRIDES[$plugin_name]}" ]]; then
+      if [[ -v PLUGIN_ACTIVATION_OVERRIDES[$plugin_name] ]]; then
         is_active="${PLUGIN_ACTIVATION_OVERRIDES[$plugin_name]}"
         log "DEBUG" "ORCHESTRATOR" "Override active status for $plugin_name: $is_active"
       fi
@@ -577,15 +574,24 @@ orchestrate_single_file_analysis() {
   local success_count=0
   local failure_count=0
   
+  # Build variables JSON for plugin execution
+  local variables_json
+  variables_json=$(jq -n \
+    --arg file_path "$file_path" \
+    '{
+      file_path_absolute: $file_path
+    }')
+  
   for plugin_file in "${active_plugins[@]}"; do
     local plugin_name
-    plugin_name=$(basename "$plugin_file" .json)
+    # Get plugin name from parent directory (e.g., /path/to/stat/descriptor.json -> stat)
+    plugin_name=$(basename "$(dirname "$plugin_file")")
     
     log "INFO" "ORCHESTRATOR" "Executing plugin: $plugin_name"
     
     # Execute plugin with file path
     local result
-    if execute_plugin "$plugin_file" "$file_path" "$workspace_dir" "$target_dir"; then
+    if execute_plugin "$plugin_name" "$plugins_dir" "$variables_json"; then
       log "INFO" "ORCHESTRATOR" "Plugin executed successfully: $plugin_name"
       plugin_results+=("$plugin_name:success")
       ((success_count++))
