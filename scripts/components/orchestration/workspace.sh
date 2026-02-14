@@ -60,11 +60,42 @@ init_workspace() {
       ;;
   esac
 
-  # Check if workspace already exists and is valid
-  if [[ -d "$workspace_dir" ]] && [[ -d "$workspace_dir/files" ]] && [[ -d "$workspace_dir/plugins" ]]; then
+  # Check if workspace already exists
+  if [[ -d "$workspace_dir" ]]; then
+    # Workspace exists, check subdirectories
+    local missing_subdirs=0
+    
+    if [[ ! -d "$workspace_dir/files" ]]; then
+      log "WARN" "WORKSPACE" "Missing subdirectory: files/, recreating..."
+      if mkdir -p "$workspace_dir/files" 2>/dev/null; then
+        chmod 0700 "$workspace_dir/files" 2>/dev/null || true
+        log "INFO" "WORKSPACE" "Recreated subdirectory: files/"
+      else
+        log "ERROR" "WORKSPACE" "Failed to recreate files/ subdirectory"
+        return 1
+      fi
+      missing_subdirs=1
+    fi
+    
+    if [[ ! -d "$workspace_dir/plugins" ]]; then
+      log "WARN" "WORKSPACE" "Missing subdirectory: plugins/, recreating..."
+      if mkdir -p "$workspace_dir/plugins" 2>/dev/null; then
+        chmod 0700 "$workspace_dir/plugins" 2>/dev/null || true
+        log "INFO" "WORKSPACE" "Recreated subdirectory: plugins/"
+      else
+        log "ERROR" "WORKSPACE" "Failed to recreate plugins/ subdirectory"
+        return 1
+      fi
+      missing_subdirs=1
+    fi
+    
     # Validate writable
     if [[ -w "$workspace_dir" ]]; then
-      log "INFO" "WORKSPACE" "Workspace already initialized: $workspace_dir"
+      if [[ "$missing_subdirs" -eq 0 ]]; then
+        log "INFO" "WORKSPACE" "Workspace already initialized: $workspace_dir"
+      else
+        log "INFO" "WORKSPACE" "Workspace repaired: $workspace_dir"
+      fi
       return 0
     else
       log "ERROR" "WORKSPACE" "Workspace directory is not writable: $workspace_dir"

@@ -13,7 +13,8 @@
 # Returns:
 #   Echoes newline-separated list of pipe-delimited plugin data: "name|description|active|descriptor_path"
 discover_plugins() {
-  local plugins_dir="${SCRIPT_DIR}/plugins"
+  # Allow overriding plugins directory for testing
+  local plugins_dir="${PLUGINS_DIR:-${SCRIPT_DIR}/plugins}"
   
   log "DEBUG" "PLUGIN" "Searching for plugins in: ${plugins_dir}"
   
@@ -46,6 +47,15 @@ discover_plugins() {
         local plugin_name="${plugin_data%%|*}"
         
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
+          # Apply activation overrides from CLI flags
+          if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
+            local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
+            log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
+            # Replace the active field in plugin_data
+            local name_desc="${plugin_data%|*}"
+            plugin_data="${name_desc}|${override_value}"
+          fi
+          
           # Append descriptor path to plugin data
           plugin_list+=("${plugin_data}|${descriptor_file}")
           seen_plugins[${plugin_name}]=1
@@ -68,6 +78,15 @@ discover_plugins() {
         
         # Only add if not already seen (platform-specific takes precedence)
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
+          # Apply activation overrides from CLI flags
+          if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
+            local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
+            log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
+            # Replace the active field in plugin_data
+            local name_desc="${plugin_data%|*}"
+            plugin_data="${name_desc}|${override_value}"
+          fi
+          
           # Append descriptor path to plugin data
           plugin_list+=("${plugin_data}|${descriptor_file}")
           seen_plugins[${plugin_name}]=1
