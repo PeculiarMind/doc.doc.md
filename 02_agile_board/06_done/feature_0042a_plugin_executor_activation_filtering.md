@@ -1,9 +1,10 @@
 # Feature: Plugin Executor Activation Filtering
 
 **ID**: feature_0042a_plugin_executor_activation_filtering  
-**Status**: Backlog  
+**Status**: Done  
 **Created**: 2026-02-14  
 **Last Updated**: 2026-02-14  
+**Completed**: 2026-02-14  
 **Assigned**: Developer Agent
 
 ## Overview
@@ -23,17 +24,17 @@ This feature completes feature_0042 by refactoring the executor to respect activ
 
 ## Traceability
 - **Primary**: [req_0072](../../01_vision/02_requirements/03_accepted/req_0072_plugin_disabled_state.md) - Plugin Active State (User-Configurable)
-- **Continuation of**: [feature_0042](../05_implementing/feature_0042_plugin_active_state.md) - Plugin Active State Configuration
+- **Continuation of**: [feature_0042](../06_done/feature_0042_plugin_active_state.md) - Plugin Active State Configuration
 - **Related**: [req_0021](../../01_vision/02_requirements/03_accepted/req_0021_toolkit_extensibility_and_plugin_architecture.md) - Plugin Architecture
 
 ## Acceptance Criteria
-- [ ] Plugin executor respects CLI flags (`--activate-plugin`, `--deactivate-plugin`)
-- [ ] Plugin executor respects configuration file activation settings
-- [ ] Plugin executor respects plugin descriptor `active` field
-- [ ] Precedence correctly applied: CLI > Config > Descriptor
-- [ ] Inactive plugins are not executed (not just unlisted)
-- [ ] All 30 tests in `test_plugin_active_state.sh` pass
-- [ ] Documentation explains the integration between discovery and executor
+- [x] Plugin executor respects CLI flags (`--activate-plugin`, `--deactivate-plugin`)
+- [x] Plugin executor respects configuration file activation settings
+- [x] Plugin executor respects plugin descriptor `active` field
+- [x] Precedence correctly applied: CLI > Config > Descriptor
+- [x] Inactive plugins are not executed (not just unlisted)
+- [x] All 30 tests in `test_plugin_active_state.sh` pass
+- [x] Documentation explains the integration between discovery and executor
 
 ## Dependencies
 - feature_0042 (partial - listing/config components complete)

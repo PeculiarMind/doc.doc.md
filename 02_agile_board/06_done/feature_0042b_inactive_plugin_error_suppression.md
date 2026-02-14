@@ -1,9 +1,10 @@
 # Feature: Inactive Plugin Error Suppression
 
 **ID**: feature_0042b_inactive_plugin_error_suppression  
-**Status**: Backlog  
+**Status**: Done  
 **Created**: 2026-02-14  
 **Last Updated**: 2026-02-14  
+**Completed**: 2026-02-14  
 **Assigned**: Developer Agent
 
 ## Overview
@@ -27,18 +28,18 @@ Inactive plugins should be silently skipped without cluttering the output.
 
 ## Traceability
 - **Primary**: [req_0072](../../01_vision/02_requirements/03_accepted/req_0072_plugin_disabled_state.md) - Plugin Active State (User-Configurable)
-- **Continuation of**: [feature_0042](../05_implementing/feature_0042_plugin_active_state.md) - Plugin Active State Configuration
+- **Continuation of**: [feature_0042](../06_done/feature_0042_plugin_active_state.md) - Plugin Active State Configuration
 - **Related**: [req_0007](../../01_vision/02_requirements/03_accepted/req_0007_tool_availability_verification.md) - Tool Availability Verification
 - **Related**: [req_0047](../../01_vision/02_requirements/03_accepted/req_0047_plugin_descriptor_validation.md) - Plugin Descriptor Validation
 
 ## Acceptance Criteria
-- [ ] Inactive plugins do not generate tool availability warnings
-- [ ] Inactive plugins do not generate installation verification errors
-- [ ] Inactive plugins do not generate validation errors
-- [ ] Inactive plugins do not generate execution errors
-- [ ] Error suppression respects activation precedence (CLI > Config > Descriptor)
-- [ ] System still logs inactive plugins at DEBUG level for troubleshooting
-- [ ] Documentation explains error suppression behavior
+- [x] Inactive plugins do not generate tool availability warnings
+- [x] Inactive plugins do not generate installation verification errors
+- [x] Inactive plugins do not generate validation errors
+- [x] Inactive plugins do not generate execution errors
+- [x] Error suppression respects activation precedence (CLI > Config > Descriptor)
+- [x] System still logs inactive plugins at DEBUG level for troubleshooting
+- [x] Documentation explains error suppression behavior
 
 ## Dependencies
 - feature_0042 (listing/config components)

@@ -398,7 +398,7 @@ EOF
   
   # Plugin should appear but be marked inactive due to .disabled suffix
   if [[ "$output" == *"suffix-test"* ]]; then
-    assert_contains "$output" "INACTIVE\|disabled" "Plugin with .disabled suffix should be inactive"
+    assert_contains "$output" "INACTIVE" "Plugin with .disabled suffix should be inactive"
   fi
   
   teardown_test_environment
@@ -436,7 +436,7 @@ test_rename_to_disabled_deactivates() {
   
   # Plugin should now be inactive if directory naming convention is supported
   # This test allows for the feature to be optional
-  assert_contains "$output2" "rename-test\|No plugins" "Plugin should either be inactive or still listed"
+  assert_contains "$output2" "rename-test" "Plugin should either be inactive or still listed"
   
   teardown_test_environment
 }

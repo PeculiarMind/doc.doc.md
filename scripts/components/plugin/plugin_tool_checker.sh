@@ -143,6 +143,19 @@ get_plugin_tool_status() {
       continue
     fi
 
+    # Skip tool status check for inactive plugins
+    local plugin_active
+    if declare -p PLUGIN_ACTIVATION_OVERRIDES &>/dev/null && [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
+      plugin_active="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
+    else
+      plugin_active=$(jq -r 'if has("active") then .active else true end' "${descriptor_file}" 2>/dev/null)
+    fi
+    if [[ "${plugin_active}" == "false" ]]; then
+      log "DEBUG" "TOOLCHECK" "Skipping tool status for inactive plugin: ${plugin_name}"
+      echo "${plugin_name}|${plugin_name}|inactive"
+      continue
+    fi
+
     check_command=$(jq -r '.check_commandline // empty' "${descriptor_file}" 2>/dev/null)
     if [[ -z "${check_command}" ]]; then
       echo "${plugin_name}|${plugin_name}|missing"
@@ -183,6 +196,20 @@ verify_plugin_tools() {
     plugin_name=$(jq -r '.name // empty' "${descriptor_file}" 2>/dev/null)
     if [[ -z "${plugin_name}" ]]; then
       log "WARN" "TOOLCHECK" "Skipping descriptor with no name: ${descriptor_file}"
+      continue
+    fi
+
+    # Determine if plugin is active (CLI > Config > Descriptor)
+    local plugin_active
+    if declare -p PLUGIN_ACTIVATION_OVERRIDES &>/dev/null && [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
+      plugin_active="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
+    else
+      plugin_active=$(jq -r 'if has("active") then .active else true end' "${descriptor_file}" 2>/dev/null)
+    fi
+
+    # Skip tool verification for inactive plugins
+    if [[ "${plugin_active}" == "false" ]]; then
+      log "DEBUG" "TOOLCHECK" "Skipping tool check for inactive plugin: ${plugin_name}"
       continue
     fi
 
