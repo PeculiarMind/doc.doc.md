@@ -29,13 +29,14 @@ This feature enables users to activate or deactivate plugins through multiple me
 - **Related**: [req_0074](../../01_vision/02_requirements/03_accepted/req_0074_plugin_installation_verification.md) - Plugin Installation Verification
 
 ## Acceptance Criteria
-- [ ] User can set plugin `active` state via configuration file
-- [ ] User can set plugin `active` state via command-line flag
-- [ ] Plugin descriptor supports `active: true/false`
+- [x] User can set plugin `active` state via configuration file
+- [x] User can set plugin `active` state via command-line flag
+- [x] Plugin descriptor supports `active: true/false`
 - [ ] Plugins marked as inactive are not executed but remain discoverable
 - [ ] Directory naming convention (e.g., `.disabled`) disables plugin (optional)
-- [ ] Plugin listing shows active/inactive status
+- [x] Plugin listing shows active/inactive status
 - [ ] Inactive plugins do not generate execution errors or warnings
+- [x] Documentation covers all activation/deactivation mechanisms
 - [ ] Documentation covers all activation/deactivation mechanisms
 
 ## Dependencies
@@ -46,3 +47,34 @@ This feature enables users to activate or deactivate plugins through multiple me
 - Created by Requirements Engineer Agent from accepted requirement req_0072
 - Priority: Medium
 - Type: Feature Enhancement
+
+## Implementation Notes (2025-02-14)
+**Status**: Core functionality complete, execution filtering pending
+
+**Implemented**:
+1. Plugin descriptor `active` field parsing (defaults to `true` if missing)
+2. `--activate-plugin <name>` CLI flag
+3. `--deactivate-plugin <name>` CLI flag
+4. `--config <file>` flag with JSON config file support
+   - Format: `{"plugins": {"plugin-name": {"active": true/false}}}`
+5. ACTIVE/INACTIVE status display in plugin listing
+6. Precedence: CLI > Config > Descriptor
+7. PLUGINS_DIR environment variable for test isolation
+8. Test suite: 20/30 tests passing
+
+**Pending**:
+- Execution filtering: Skip inactive plugins during analysis
+- Error suppression for inactive plugins
+- Directory naming convention (.disabled suffix) - OPTIONAL
+
+**Files Modified**:
+- `scripts/components/plugin/plugin_parser.sh` - Active field parsing
+- `scripts/components/plugin/plugin_discovery.sh` - Apply overrides, PLUGINS_DIR support
+- `scripts/components/plugin/plugin_display.sh` - Already had ACTIVE/INACTIVE display
+- `scripts/components/ui/argument_parser.sh` - Added flags and config loading
+- `tests/unit/test_plugin_active_state.sh` - Comprehensive test suite (765 lines)
+
+**Next Steps**:
+1. Implement execution filtering in plugin_executor.sh
+2. Add error suppression for inactive plugins
+3. Complete remaining test coverage
