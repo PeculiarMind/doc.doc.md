@@ -78,11 +78,12 @@ parse_plugin_descriptor() {
     # Fallback to python if jq not available
     if command -v python3 >/dev/null 2>&1; then
       local result
-      result=$(python3 -c "
+      # Pass path as argument to avoid command injection
+      result=$(python3 - "${descriptor_path}" <<'EOF'
 import json
 import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
     name = data.get('name', '')
     description = data.get('description', '')
@@ -90,9 +91,10 @@ try:
     if not name or not description:
         sys.exit(1)
     print(f'{name}|{description}|{active}')
-except Exception as e:
+except Exception:
     sys.exit(1)
-" 2>&1)
+EOF
+)
       
       if [[ $? -eq 0 ]] && [[ -n "${result}" ]]; then
         echo "${result}"
@@ -130,18 +132,18 @@ extract_plugin_field() {
   
   # Fallback to python
   if command -v python3 >/dev/null 2>&1; then
-    python3 -c "
+    python3 - "${descriptor_path}" "${field_name}" <<'EOF' 2>/dev/null
 import json
 import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
-    value = data.get('${field_name}', '')
+    value = data.get(sys.argv[2], '')
     if value:
         print(value)
 except:
     pass
-" 2>/dev/null
+EOF
     return $?
   fi
   
@@ -168,18 +170,18 @@ get_plugin_consumes() {
   
   # Fallback to python
   if command -v python3 >/dev/null 2>&1; then
-    python3 -c "
+    python3 - "${descriptor_path}" <<'EOF' 2>/dev/null
 import json
 import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
     consumes = data.get('consumes', {})
     if consumes:
         print(', '.join(consumes.keys()))
 except:
     pass
-" 2>/dev/null
+EOF
     return $?
   fi
   
@@ -206,18 +208,18 @@ get_plugin_provides() {
   
   # Fallback to python
   if command -v python3 >/dev/null 2>&1; then
-    python3 -c "
+    python3 - "${descriptor_path}" <<'EOF' 2>/dev/null
 import json
 import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
     provides = data.get('provides', {})
     if provides:
         print(', '.join(provides.keys()))
 except:
     pass
-" 2>/dev/null
+EOF
     return $?
   fi
   
@@ -244,6 +246,13 @@ detect_mime_type() {
     return 1
   fi
   
+  # Validate file_path is not empty and doesn't contain dangerous characters
+  if [[ -z "${file_path}" ]] || [[ "${file_path}" =~ [\'\$\`\;\\] ]]; then
+    log "WARN" "PLUGIN" "Invalid file path for MIME detection"
+    echo "application/octet-stream"
+    return 1
+  fi
+  
   # Check if file command is available
   if ! command -v file >/dev/null 2>&1; then
     log "WARN" "PLUGIN" "file command not available, using fallback MIME type"
@@ -251,19 +260,22 @@ detect_mime_type() {
     return 0
   fi
   
-  # Detect MIME type using file command
+  # Detect MIME type using file command with -- to prevent option injection
   local mime_type
-  mime_type=$(file --brief --mime-type "${file_path}" 2>/dev/null)
+  mime_type=$(file --brief --mime-type -- "${file_path}" 2>/dev/null)
   
   if [[ $? -eq 0 ]] && [[ -n "${mime_type}" ]]; then
-    log "DEBUG" "PLUGIN" "Detected MIME type for ${file_path}: ${mime_type}"
-    echo "${mime_type}"
-    return 0
-  else
-    log "DEBUG" "PLUGIN" "Failed to detect MIME type for ${file_path}, using fallback"
-    echo "application/octet-stream"
-    return 0
+    # Validate MIME type format (type/subtype)
+    if [[ "${mime_type}" =~ ^[a-zA-Z0-9][a-zA-Z0-9._+-]*/[a-zA-Z0-9][a-zA-Z0-9._+-]*$ ]]; then
+      log "DEBUG" "PLUGIN" "Detected MIME type for ${file_path}: ${mime_type}"
+      echo "${mime_type}"
+      return 0
+    fi
   fi
+  
+  log "DEBUG" "PLUGIN" "Failed to detect MIME type for ${file_path}, using fallback"
+  echo "application/octet-stream"
+  return 0
 }
 
 # Extract MIME types array from plugin descriptor processes field
@@ -288,18 +300,18 @@ get_plugin_processes_mime_types() {
   
   # Fallback to python
   if command -v python3 >/dev/null 2>&1; then
-    python3 -c "
+    python3 - "${descriptor_path}" <<'EOF' 2>/dev/null
 import json
 import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
     mime_types = data.get('processes', {}).get('mime_types', [])
     for mime_type in mime_types:
         print(mime_type)
 except:
     pass
-" 2>/dev/null
+EOF
     return 0
   fi
   
@@ -328,18 +340,18 @@ get_plugin_processes_extensions() {
   
   # Fallback to python
   if command -v python3 >/dev/null 2>&1; then
-    python3 -c "
+    python3 - "${descriptor_path}" <<'EOF' 2>/dev/null
 import json
 import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
     extensions = data.get('processes', {}).get('file_extensions', [])
     for ext in extensions:
         print(ext)
 except:
     pass
-" 2>/dev/null
+EOF
     return 0
   fi
   
@@ -383,15 +395,17 @@ is_plugin_applicable_for_file() {
   if command -v jq >/dev/null 2>&1; then
     has_processes=$(jq -r 'has("processes")' "${descriptor_path}" 2>/dev/null)
   elif command -v python3 >/dev/null 2>&1; then
-    has_processes=$(python3 -c "
+    has_processes=$(python3 - "${descriptor_path}" <<'EOF'
 import json
+import sys
 try:
-    with open('${descriptor_path}', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         data = json.load(f)
     print('true' if 'processes' in data else 'false')
 except:
     print('false')
-" 2>/dev/null)
+EOF
+)
   fi
   
   # If no processes object, plugin handles all files
