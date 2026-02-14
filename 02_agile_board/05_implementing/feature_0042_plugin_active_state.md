@@ -62,9 +62,25 @@ This feature enables users to activate or deactivate plugins through multiple me
 8. Test suite: 20/30 tests passing
 
 **Pending**:
-- Execution filtering: Skip inactive plugins during analysis
+- **CRITICAL**: Execution filtering implementation issue
+  - Current: `plugin_executor.sh` reads descriptors directly, bypassing CLI/config overrides
+  - Impact: CLI flags and config file don't affect plugin execution, only listing
+  - Fix needed: Refactor `build_dependency_graph()` to accept plugin data with overrides
+  - Alternatively: Apply overrides during executor's descriptor reading
 - Error suppression for inactive plugins
 - Directory naming convention (.disabled suffix) - OPTIONAL
+
+**Known Issue**:
+The plugin executor (`build_dependency_graph()`) reads plugin descriptors directly rather than using the discovery layer that applies activation overrides. This means:
+- Plugin listing correctly shows ACTIVE/INACTIVE based on CLI/config
+- But plugin execution still uses descriptor's active field only
+- CLI flags and config file don't prevent execution
+
+**Recommended Fix**:
+Modify `build_dependency_graph()` in `plugin_executor.sh` to:
+1. Accept plugin activation overrides as parameter
+2. Apply overrides when reading active field: `active=$(jq -r 'if has("active") then .active else true end' "$dfile")` then check overrides
+3. Or: Pass filtered plugin list from discover_plugins() instead of plugins_dir
 
 **Files Modified**:
 - `scripts/components/plugin/plugin_parser.sh` - Active field parsing
