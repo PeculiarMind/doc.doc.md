@@ -91,7 +91,7 @@ See ADR-0012 for rationale, migration, and usage details.
 
 **Current Status:**
 
-**2026_Phoenix_0213 - Modular Architecture with Plugin Execution System** 🚧
+**2026_Spark_0213 - Modular Architecture with Plugin Execution System** 🚧
 
 **Features:**
 - **Done (32):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, and more
