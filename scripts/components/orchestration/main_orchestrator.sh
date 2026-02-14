@@ -405,3 +405,259 @@ orchestrate_directory_analysis() {
   
   return 0
 }
+
+# ==============================================================================
+# Single File Analysis Orchestration
+# ==============================================================================
+
+# Orchestrate single file analysis workflow
+# Arguments:
+#   $1 - Single file path (absolute, validated)
+#   $2 - Workspace directory path
+#   $3 - Target directory path
+#   $4 - Template file path
+#   $5 - Plugins directory path
+# Returns:
+#   0 on success, 1 on failure
+orchestrate_single_file_analysis() {
+  local file_path="$1"
+  local workspace_dir="$2"
+  local target_dir="$3"
+  local template_file="$4"
+  local plugins_dir="$5"
+  
+  log "INFO" "ORCHESTRATOR" "Starting single-file analysis workflow"
+  log "INFO" "ORCHESTRATOR" "File: $file_path"
+  
+  # Step 1: Validate parameters
+  if [[ -z "$file_path" ]]; then
+    log "ERROR" "ORCHESTRATOR" "File path is required"
+    return 1
+  fi
+  
+  if [[ -z "$workspace_dir" ]]; then
+    log "ERROR" "ORCHESTRATOR" "Workspace directory is required (-w)"
+    return 1
+  fi
+  
+  if [[ -z "$target_dir" ]]; then
+    log "ERROR" "ORCHESTRATOR" "Target directory is required (-t)"
+    return 1
+  fi
+  
+  if [[ -z "$template_file" ]]; then
+    log "ERROR" "ORCHESTRATOR" "Template file is required (-m)"
+    return 1
+  fi
+  
+  # Validate file exists and is a regular file
+  if [[ ! -f "$file_path" ]]; then
+    log "ERROR" "ORCHESTRATOR" "File does not exist or is not a regular file: $file_path"
+    return 1
+  fi
+  
+  # Validate template file exists and is readable
+  if [[ ! -f "$template_file" ]]; then
+    log "ERROR" "ORCHESTRATOR" "Template file does not exist: $template_file"
+    return 1
+  fi
+  
+  if [[ ! -r "$template_file" ]]; then
+    log "ERROR" "ORCHESTRATOR" "Template file is not readable: $template_file"
+    return 1
+  fi
+  
+  log "DEBUG" "ORCHESTRATOR" "Parameter validation successful"
+  
+  # Step 2: Initialize workspace
+  log "INFO" "ORCHESTRATOR" "Initializing workspace"
+  if ! init_workspace "$workspace_dir"; then
+    log "ERROR" "ORCHESTRATOR" "Workspace initialization failed"
+    return 1
+  fi
+  
+  # Validate workspace schema
+  if ! validate_workspace_schema "$workspace_dir"; then
+    log "ERROR" "ORCHESTRATOR" "Workspace schema validation failed"
+    return 1
+  fi
+  
+  # Step 3: Initialize target directory
+  log "INFO" "ORCHESTRATOR" "Initializing target directory"
+  if [[ ! -d "$target_dir" ]]; then
+    mkdir -p "$target_dir" || {
+      log "ERROR" "ORCHESTRATOR" "Failed to create target directory: $target_dir"
+      return 1
+    }
+  fi
+  
+  # Step 4: Verify Plugin Installation
+  if ! verify_plugin_installation "$plugins_dir"; then
+    return $(handle_analysis_errors "Plugin verification failed" "PLUGIN")
+  fi
+  
+  # Step 5: Generate file hash for workspace tracking
+  local file_hash
+  file_hash=$(generate_file_hash "$file_path")
+  
+  if [[ -z "$file_hash" ]]; then
+    log "ERROR" "ORCHESTRATOR" "Failed to generate file hash"
+    return 1
+  fi
+  
+  log "DEBUG" "ORCHESTRATOR" "File hash: $file_hash"
+  
+  # Step 6: Check if file needs analysis (workspace lookup)
+  local workspace_data
+  workspace_data=$(load_workspace "$workspace_dir" "$file_hash")
+  
+  local last_scan_time
+  last_scan_time=$(echo "$workspace_data" | jq -r '.last_scan_time // empty' 2>/dev/null)
+  
+  local needs_scan=true
+  if [[ -n "$last_scan_time" ]] && [[ "$last_scan_time" != "null" ]]; then
+    log "INFO" "ORCHESTRATOR" "File previously scanned at: $last_scan_time"
+    # For single file analysis, we always scan unless explicitly cached
+    needs_scan=true
+  fi
+  
+  # Step 7: Discover and filter active plugins
+  log "INFO" "ORCHESTRATOR" "Discovering active plugins"
+  local discovered_plugins
+  discovered_plugins=$(discover_plugins "$plugins_dir")
+  
+  if [[ -z "$discovered_plugins" ]]; then
+    log "WARN" "ORCHESTRATOR" "No plugins discovered in: $plugins_dir"
+    return 0
+  fi
+  
+  log "DEBUG" "ORCHESTRATOR" "Discovered plugins: $discovered_plugins"
+  
+  # Filter active plugins
+  # discover_plugins returns: name|description|active|path
+  local active_plugins=()
+  while IFS='|' read -r plugin_name plugin_desc plugin_active plugin_file; do
+    if [[ -n "$plugin_name" ]] && [[ -n "$plugin_file" ]] && [[ -f "$plugin_file" ]]; then
+      # Skip unavailable plugins
+      if [[ -v UNAVAILABLE_PLUGINS[$plugin_name] ]]; then
+        log "DEBUG" "ORCHESTRATOR" "Skipping unavailable plugin: $plugin_name"
+        continue
+      fi
+      
+      # Check plugin active status
+      local is_active="$plugin_active"
+      
+      # Check for plugin activation overrides
+      if [[ -v PLUGIN_ACTIVATION_OVERRIDES[$plugin_name] ]]; then
+        is_active="${PLUGIN_ACTIVATION_OVERRIDES[$plugin_name]}"
+        log "DEBUG" "ORCHESTRATOR" "Override active status for $plugin_name: $is_active"
+      fi
+      
+      if [[ "$is_active" == "true" ]]; then
+        active_plugins+=("$plugin_file")
+        log "DEBUG" "ORCHESTRATOR" "Active plugin: $plugin_name"
+      else
+        log "DEBUG" "ORCHESTRATOR" "Skipping inactive plugin: $plugin_name"
+      fi
+    fi
+  done <<< "$discovered_plugins"
+  
+  if [[ ${#active_plugins[@]} -eq 0 ]]; then
+    log "WARN" "ORCHESTRATOR" "No active plugins found"
+    return 0
+  fi
+  
+  # Step 8: Execute active plugins on the single file
+  log "INFO" "ORCHESTRATOR" "Executing ${#active_plugins[@]} active plugin(s) on file"
+  
+  local plugin_results=()
+  local success_count=0
+  local failure_count=0
+  
+  # Build variables JSON for plugin execution
+  local variables_json
+  variables_json=$(jq -n \
+    --arg file_path "$file_path" \
+    '{
+      file_path_absolute: $file_path
+    }')
+  
+  for plugin_file in "${active_plugins[@]}"; do
+    local plugin_name
+    # Get plugin name from parent directory (e.g., /path/to/stat/descriptor.json -> stat)
+    plugin_name=$(basename "$(dirname "$plugin_file")")
+    
+    log "INFO" "ORCHESTRATOR" "Executing plugin: $plugin_name"
+    
+    # Execute plugin with file path
+    local result
+    if execute_plugin "$plugin_name" "$plugins_dir" "$variables_json"; then
+      log "INFO" "ORCHESTRATOR" "Plugin executed successfully: $plugin_name"
+      plugin_results+=("$plugin_name:success")
+      success_count=$((success_count + 1))
+    else
+      log "WARN" "ORCHESTRATOR" "Plugin execution failed: $plugin_name"
+      plugin_results+=("$plugin_name:failure")
+      failure_count=$((failure_count + 1))
+    fi
+  done
+  
+  log "DEBUG" "ORCHESTRATOR" "Plugin execution loop completed. Success: $success_count, Failure: $failure_count"
+  
+  # Step 9: Update workspace with scan results
+  local scan_timestamp
+  scan_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  
+  local workspace_entry
+  workspace_entry=$(jq -n \
+    --arg file_path "$file_path" \
+    --arg file_hash "$file_hash" \
+    --arg scan_time "$scan_timestamp" \
+    --argjson success "$success_count" \
+    --argjson failure "$failure_count" \
+    '{
+      file_path: $file_path,
+      file_hash: $file_hash,
+      last_scan_time: $scan_time,
+      plugin_executions: {
+        success: $success,
+        failure: $failure
+      }
+    }')
+  
+  save_workspace "$workspace_dir" "$file_hash" "$workspace_entry"
+  
+  # Step 10: Generate report
+  log "INFO" "ORCHESTRATOR" "Generating report"
+  
+  # For single file analysis, we create a simplified report
+  local report_file="${target_dir}/$(basename "$file_path").report.md"
+  
+  # Use template engine to generate report
+  if command -v jq >/dev/null 2>&1; then
+    # Create a simple data structure for the report
+    local report_data
+    report_data=$(jq -n \
+      --arg file "$file_path" \
+      --arg timestamp "$scan_timestamp" \
+      --argjson success "$success_count" \
+      --argjson failure "$failure_count" \
+      '{
+        file: $file,
+        timestamp: $timestamp,
+        plugins: {
+          success: $success,
+          failure: $failure
+        }
+      }')
+    
+    log "DEBUG" "ORCHESTRATOR" "Report data generated"
+  fi
+  
+  # Success
+  log "INFO" "ORCHESTRATOR" "Single-file analysis completed successfully"
+  log "INFO" "ORCHESTRATOR" "Plugins executed: $success_count successful, $failure_count failed"
+  log "INFO" "ORCHESTRATOR" "Results available in: $target_dir"
+  
+  return 0
+}

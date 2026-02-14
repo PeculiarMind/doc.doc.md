@@ -107,6 +107,27 @@ run_analysis() {
   return $?
 }
 
+# Run single file analysis workflow
+# Returns:
+#   0 on success, 1 on failure
+run_single_file_analysis() {
+  # Determine plugins directory based on platform
+  local plugins_dir="${SCRIPT_DIR}/plugins/${PLATFORM}"
+  if [[ ! -d "$plugins_dir" ]]; then
+    plugins_dir="${SCRIPT_DIR}/plugins/ubuntu"
+  fi
+  
+  # Delegate to single file orchestrator
+  orchestrate_single_file_analysis \
+    "$SINGLE_FILE" \
+    "$WORKSPACE_DIR" \
+    "$TARGET_DIR" \
+    "$TEMPLATE_FILE" \
+    "$plugins_dir"
+  
+  return $?
+}
+
 # Main entry point
 main() {
   # Detect interactive mode early (before any prompts or user-facing output)
@@ -121,7 +142,13 @@ main() {
   # Validate and apply defaults to arguments
   validate_arguments
   
-  # Run analysis if source directory is provided
+  # Run single file analysis if single file is provided
+  if [[ -n "$SINGLE_FILE" ]]; then
+    run_single_file_analysis
+    exit $?
+  fi
+  
+  # Run directory analysis if source directory is provided
   if [[ -n "$SOURCE_DIR" ]]; then
     run_analysis
     exit $?
