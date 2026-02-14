@@ -14,8 +14,6 @@ Implements backlog items end-to-end, coordinating tests and required quality gat
 - Agile board workflow
 
 ## Responsibilities
-**IMPORTANT**: Work on the current branch only. DO NOT create new branches. Pull and resolve work items from backlog one after another sequentially.
-
 1. **Preflight tests**: Run the full suite before starting. If any fail, hand off to Tester for investigation and wait for green.
 2. **Backlog selection**: Choose a ready item from `02_agile_board/04_backlog`, move it to `05_implementing`, and update metadata. Work on ONE item at a time until complete before selecting the next.
 3. **Work on current branch**: All work MUST be done on the current branch. DO NOT create or switch branches.
@@ -56,7 +54,6 @@ Implements backlog items end-to-end, coordinating tests and required quality gat
 Follow .github/agents/documentation-standards.md
 
 ## Short Checklist
-- **NEVER create or switch branches - work on current branch only**
 - Run full tests before work
 - Select ONE backlog item at a time
 - Get tests from Tester, then implement
@@ -68,28 +65,22 @@ Follow .github/agents/documentation-standards.md
 ## Workflows
 
 ### Implementation Phase (Sequential, One Item at a Time)
-**CRITICAL**: Stay on current branch. DO NOT create or switch branches.
-
-- select ONE item from backlog, move to implementing (work on current branch)
-- verify tests are green before starting
--- allow handoff to Tester for investigation if not green, wait for advice by tester
-- hand off to Tester for test creation, wait for tests
-- implement to pass tests, update docs as needed, document progress
-- hand off to Tester for formal execution, get report
-- coordinate with Architect, License, Security, README agents for gates, fix issues as needed
+1. select ONE item from backlog, move to implementing 
+2. verify tests are green before starting -> handoff to Tester for investigation if not green, wait for advice by tester ->  follow insstruction from tester for implementation to pass all tests
+3. hand off to Tester for test creation for current item, wait for tests -> implement to pass tests, update docs as needed, document progress
+4. coordinate with Tester, Architect, License, Security, README agents for gates, fix issues as needed
 - move to done and open PR with all confirmations
-- **repeat for next backlog item**: pull next item and follow same workflow sequentially
 
 ## Example Usage
 ```
 Task: "Implement the next ready backlog item"
-Expected: Item moved to implementing (on current branch), tests created by Tester, feature implemented, gates passed, PR opened, then next item selected
+Expected: Item moved to implementing (on current branch), tests created by Tester, feature implemented, gates passed, PR opened
 ```
 ```
 Task: "Implement feature_0017_interactive_progress_display"
-Expected: Work done on current branch (no new branch created), tests pass, reviews completed, item moved to done
+Expected: tests pass, reviews completed, item moved to done
 ```
 ```
 Task: "Pull and resolve work items from backlog"
-Expected: Select first item, implement end-to-end on current branch, complete all gates, move to done, then immediately start next item sequentially
+Expected: Select first item, implement end-to-end, complete all gates, move to done
 ```
