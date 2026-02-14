@@ -89,14 +89,17 @@ Modify `build_dependency_graph()` in `plugin_executor.sh` to:
 2. Apply overrides when reading active field: `active=$(jq -r 'if has("active") then .active else true end' "$dfile")` then check overrides
 3. Or: Pass filtered plugin list from discover_plugins() instead of plugins_dir
 
-**Files Modified**:
+**Files Actually Modified in This Implementation**:
 - `scripts/components/plugin/plugin_parser.sh` - Active field parsing
 - `scripts/components/plugin/plugin_discovery.sh` - Apply overrides, PLUGINS_DIR support
-- `scripts/components/plugin/plugin_display.sh` - Already had ACTIVE/INACTIVE display
-- `scripts/components/ui/argument_parser.sh` - Added flags and config loading
+- `scripts/components/ui/argument_parser.sh` - Added CLI flags and config loading
 - `tests/unit/test_plugin_active_state.sh` - Comprehensive test suite (765 lines)
 
-**Next Steps**:
-1. Implement execution filtering in plugin_executor.sh
-2. Add error suppression for inactive plugins
-3. Complete remaining test coverage
+**Files NOT Modified** (already had required functionality or blocked):
+- `scripts/components/plugin/plugin_display.sh` - No changes needed (already had ACTIVE/INACTIVE display)
+- `scripts/components/plugin/plugin_executor.sh` - Not modified (blocked - see issue above)
+
+**Next Steps** (New backlog items created):
+1. [feature_0042a](../04_backlog/feature_0042a_plugin_executor_activation_filtering.md) - Implement execution filtering in plugin_executor.sh (Assigned: Developer Agent)
+2. [feature_0042b](../04_backlog/feature_0042b_inactive_plugin_error_suppression.md) - Add error suppression for inactive plugins (Assigned: Developer Agent)
+3. Complete remaining test coverage (part of feature_0042a)
