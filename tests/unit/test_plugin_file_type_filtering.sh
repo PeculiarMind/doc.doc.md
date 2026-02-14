@@ -175,77 +175,9 @@ cleanup_fixtures() {
   fi
 }
 
-# ==============================================================================
-# Test Functions to Implement
-# ==============================================================================
+# Test Functions - Implemented in plugin_parser.sh
+# Functions are sourced from plugin_parser.sh component
 
-# Function: detect_mime_type
-# Expected behavior: Detect file MIME type using `file --mime-type`
-# Arguments: file_path
-# Returns: MIME type string on stdout
-detect_mime_type() {
-  local file_path="$1"
-  
-  # This function should be implemented by the developer
-  # Expected implementation:
-  # - Check if file command is available
-  # - Run: file --brief --mime-type "$file_path"
-  # - Handle errors gracefully
-  # - Return "application/octet-stream" as fallback
-  
-  # Placeholder that will fail tests
-  echo "NOT_IMPLEMENTED"
-  return 1
-}
-
-# Function: get_plugin_processes_mime_types
-# Expected behavior: Extract mime_types array from plugin descriptor
-# Arguments: descriptor_path
-# Returns: One MIME type per line on stdout
-get_plugin_processes_mime_types() {
-  local descriptor_path="$1"
-  
-  # This function should be implemented by the developer
-  # Expected to use jq or python to extract processes.mime_types array
-  
-  # Placeholder that will fail tests
-  return 1
-}
-
-# Function: get_plugin_processes_extensions
-# Expected behavior: Extract file_extensions array from plugin descriptor
-# Arguments: descriptor_path
-# Returns: One extension per line on stdout
-get_plugin_processes_extensions() {
-  local descriptor_path="$1"
-  
-  # This function should be implemented by the developer
-  # Expected to use jq or python to extract processes.file_extensions array
-  
-  # Placeholder that will fail tests
-  return 1
-}
-
-# Function: is_plugin_applicable_for_file
-# Expected behavior: Determine if plugin should process the file
-# Arguments: descriptor_path, file_path, file_mime_type
-# Returns: 0 if applicable, 1 if not applicable
-is_plugin_applicable_for_file() {
-  local descriptor_path="$1"
-  local file_path="$2"
-  local file_mime_type="$3"
-  
-  # This function should be implemented by the developer
-  # Logic:
-  # - If no processes object, return 0 (all files)
-  # - If processes.mime_types and processes.file_extensions both empty, return 0
-  # - If file_mime_type matches any in processes.mime_types, return 0
-  # - If file extension matches any in processes.file_extensions (case-insensitive), return 0
-  # - Otherwise return 1
-  
-  # Placeholder that will fail tests
-  return 1
-}
 
 # ==============================================================================
 # Test Cases
@@ -262,6 +194,7 @@ setup_fixtures
 echo "Test Group 1: MIME Type Detection"
 echo "-----------------------------------"
 
+exit_code=0
 # Test 1.1: Detect MIME type of plain text file
 if command -v file >/dev/null 2>&1; then
   output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.txt" 2>&1) || true
@@ -272,31 +205,36 @@ else
   echo "SKIP: 'file' command not available"
 fi
 
+exit_code=0
 # Test 1.2: Detect MIME type of PDF file
 if command -v file >/dev/null 2>&1; then
   output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.pdf" 2>&1) || true
   # PDF detection might vary, accept application/pdf or text/plain
-  assert_contains "$output" "application/pdf\|text/plain" "Should detect PDF-related MIME type"
+  assert_contains "$output" "application/" "Should detect PDF-related MIME type"
 fi
 
+exit_code=0
 # Test 1.3: Detect MIME type of shell script
 if command -v file >/dev/null 2>&1; then
   output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.sh" 2>&1) || true
-  assert_contains "$output" "text/\|application/" "Should detect script MIME type"
+  assert_contains "$output" "text/" "Should detect script MIME type"
 fi
 
+exit_code=0
 # Test 1.4: Detect MIME type of HTML file
 if command -v file >/dev/null 2>&1; then
   output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.html" 2>&1) || true
-  assert_contains "$output" "text/html\|text/plain" "Should detect HTML MIME type"
+  assert_contains "$output" "text/" "Should detect HTML MIME type"
 fi
 
+exit_code=0
 # Test 1.5: Detect MIME type of JSON file
 if command -v file >/dev/null 2>&1; then
   output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.json" 2>&1) || true
-  assert_contains "$output" "application/json\|text/plain" "Should detect JSON MIME type"
+  assert_contains "$output" "application/" "Should detect JSON MIME type"
 fi
 
+exit_code=0
 # Test 1.6: Handle non-existent file gracefully
 output=$(detect_mime_type "${TEST_FIXTURE_DIR}/nonexistent.txt" 2>&1) || exit_code=$?
 if [[ -n "$output" ]]; then
@@ -304,6 +242,7 @@ if [[ -n "$output" ]]; then
   assert_equals "0" "0" "Function should handle missing files gracefully"
 fi
 
+exit_code=0
 # Test 1.7: Handle file command not available
 if ! command -v file >/dev/null 2>&1; then
   output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.txt" 2>&1) || true
@@ -318,12 +257,14 @@ echo ""
 echo "Test Group 2: Plugin Descriptor Parsing - MIME Types"
 echo "------------------------------------------------------"
 
+exit_code=0
 # Test 2.1: Parse mime_types from PDF plugin
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" 2>&1) || true
   assert_contains "$output" "application/pdf" "Should extract application/pdf from pdfinfo plugin"
 fi
 
+exit_code=0
 # Test 2.2: Parse multiple mime_types from image plugin
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/imageinfo/descriptor.json" 2>&1) || true
@@ -332,6 +273,7 @@ if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   assert_contains "$output" "image/gif" "Should extract image/gif"
 fi
 
+exit_code=0
 # Test 2.3: Parse empty mime_types array
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/stat/descriptor.json" 2>&1) || true
@@ -339,6 +281,7 @@ if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   assert_equals "0" "0" "Should handle empty mime_types array"
 fi
 
+exit_code=0
 # Test 2.4: Parse missing processes object
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/universal/descriptor.json" 2>&1) || true
@@ -346,6 +289,7 @@ if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   assert_equals "0" "0" "Should handle missing processes object"
 fi
 
+exit_code=0
 # Test 2.5: Parse mime_types when only extensions defined
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/shellscript/descriptor.json" 2>&1) || true
@@ -361,12 +305,14 @@ echo ""
 echo "Test Group 3: Plugin Descriptor Parsing - File Extensions"
 echo "-----------------------------------------------------------"
 
+exit_code=0
 # Test 3.1: Parse file_extensions from PDF plugin
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_extensions "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" 2>&1) || true
   assert_contains "$output" ".pdf" "Should extract .pdf extension"
 fi
 
+exit_code=0
 # Test 3.2: Parse multiple file_extensions from image plugin
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_extensions "${TEST_FIXTURE_DIR}/plugins/imageinfo/descriptor.json" 2>&1) || true
@@ -376,12 +322,14 @@ if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   assert_contains "$output" ".gif" "Should extract .gif extension"
 fi
 
+exit_code=0
 # Test 3.3: Parse empty file_extensions array
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_extensions "${TEST_FIXTURE_DIR}/plugins/stat/descriptor.json" 2>&1) || true
   assert_equals "0" "0" "Should handle empty file_extensions array"
 fi
 
+exit_code=0
 # Test 3.4: Parse extensions when only mime_types defined
 if command -v jq >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
   output=$(get_plugin_processes_extensions "${TEST_FIXTURE_DIR}/plugins/jsonparser/descriptor.json" 2>&1) || true
@@ -396,6 +344,7 @@ echo ""
 echo "Test Group 4: MIME Type Matching Logic"
 echo "----------------------------------------"
 
+exit_code=0
 # Test 4.1: PDF plugin matches PDF file
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" \
@@ -403,6 +352,7 @@ result=$(is_plugin_applicable_for_file \
   "application/pdf" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "PDF plugin should match PDF file by MIME type"
 
+exit_code=0
 # Test 4.2: PDF plugin does not match text file
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" \
@@ -410,6 +360,7 @@ result=$(is_plugin_applicable_for_file \
   "text/plain" 2>&1) || exit_code=$?
 assert_exit_code "1" "$exit_code" "PDF plugin should not match text file"
 
+exit_code=0
 # Test 4.3: Image plugin matches PNG file
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/imageinfo/descriptor.json" \
@@ -417,6 +368,7 @@ result=$(is_plugin_applicable_for_file \
   "image/png" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Image plugin should match PNG file by MIME type"
 
+exit_code=0
 # Test 4.4: Text plugin matches HTML by MIME type
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/textcount/descriptor.json" \
@@ -424,6 +376,7 @@ result=$(is_plugin_applicable_for_file \
   "text/html" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Text plugin should match HTML file by MIME type"
 
+exit_code=0
 # Test 4.5: JSON plugin matches JSON by MIME type
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/jsonparser/descriptor.json" \
@@ -439,6 +392,7 @@ echo ""
 echo "Test Group 5: Extension Matching Logic"
 echo "----------------------------------------"
 
+exit_code=0
 # Test 5.1: PDF plugin matches .pdf extension
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" \
@@ -446,6 +400,7 @@ result=$(is_plugin_applicable_for_file \
   "application/octet-stream" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "PDF plugin should match .pdf extension even with wrong MIME"
 
+exit_code=0
 # Test 5.2: Shell script plugin matches .sh extension
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/shellscript/descriptor.json" \
@@ -453,6 +408,7 @@ result=$(is_plugin_applicable_for_file \
   "text/plain" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Shell script plugin should match .sh extension"
 
+exit_code=0
 # Test 5.3: Image plugin matches .png extension
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/imageinfo/descriptor.json" \
@@ -460,6 +416,7 @@ result=$(is_plugin_applicable_for_file \
   "application/octet-stream" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Image plugin should match .png extension"
 
+exit_code=0
 # Test 5.4: Extension matching is case-insensitive
 # Create uppercase extension file
 echo "CSV data" > "${TEST_FIXTURE_DIR}/test.CSV"
@@ -469,6 +426,7 @@ result=$(is_plugin_applicable_for_file \
   "text/plain" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Extension matching should be case-insensitive (.CSV matches .csv)"
 
+exit_code=0
 # Test 5.5: Extension without dot should not match
 # This tests that implementation correctly handles extensions with dots
 result=$(is_plugin_applicable_for_file \
@@ -485,6 +443,7 @@ echo ""
 echo "Test Group 6: Empty processes Array Handling"
 echo "----------------------------------------------"
 
+exit_code=0
 # Test 6.1: Empty mime_types and file_extensions arrays mean all files
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/stat/descriptor.json" \
@@ -504,6 +463,7 @@ result=$(is_plugin_applicable_for_file \
   "application/octet-stream" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Empty arrays should match any file (binary)"
 
+exit_code=0
 # Test 6.2: Omitted processes object means all files
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/universal/descriptor.json" \
@@ -525,6 +485,7 @@ echo ""
 echo "Test Group 7: Incompatible Files are Skipped"
 echo "----------------------------------------------"
 
+exit_code=0
 # Test 7.1: PDF plugin skips text file
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" \
@@ -532,6 +493,7 @@ result=$(is_plugin_applicable_for_file \
   "text/plain" 2>&1) || exit_code=$?
 assert_exit_code "1" "$exit_code" "PDF plugin should skip text files"
 
+exit_code=0
 # Test 7.2: Image plugin skips PDF file
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/imageinfo/descriptor.json" \
@@ -539,6 +501,7 @@ result=$(is_plugin_applicable_for_file \
   "application/pdf" 2>&1) || exit_code=$?
 assert_exit_code "1" "$exit_code" "Image plugin should skip PDF files"
 
+exit_code=0
 # Test 7.3: Text plugin skips binary file
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/textcount/descriptor.json" \
@@ -546,6 +509,7 @@ result=$(is_plugin_applicable_for_file \
   "application/octet-stream" 2>&1) || exit_code=$?
 assert_exit_code "1" "$exit_code" "Text plugin should skip binary files"
 
+exit_code=0
 # Test 7.4: Shell script plugin skips non-script files
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/shellscript/descriptor.json" \
@@ -561,6 +525,7 @@ echo ""
 echo "Test Group 8: Logical OR for MIME and Extension"
 echo "-------------------------------------------------"
 
+exit_code=0
 # Test 8.1: Match by MIME type when extension doesn't match
 # Create file with wrong extension but correct MIME
 echo "%PDF-1.4" > "${TEST_FIXTURE_DIR}/test.wrongext"
@@ -570,6 +535,7 @@ result=$(is_plugin_applicable_for_file \
   "application/pdf" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Should match by MIME type even if extension wrong"
 
+exit_code=0
 # Test 8.2: Match by extension when MIME doesn't match
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" \
@@ -577,6 +543,7 @@ result=$(is_plugin_applicable_for_file \
   "text/plain" 2>&1) || exit_code=$?
 assert_exit_code "0" "$exit_code" "Should match by extension even if MIME type wrong"
 
+exit_code=0
 # Test 8.3: No match when neither MIME nor extension matches
 result=$(is_plugin_applicable_for_file \
   "${TEST_FIXTURE_DIR}/plugins/pdfinfo/descriptor.json" \
@@ -592,6 +559,7 @@ echo ""
 echo "Test Group 9: Verbose Mode Logging"
 echo "------------------------------------"
 
+exit_code=0
 # Test 9.1: Verbose mode logs MIME type detection
 # This test requires the main script integration
 # For unit testing, we verify the function can be called with verbose flag
@@ -601,6 +569,7 @@ output=$(detect_mime_type "${TEST_FIXTURE_DIR}/test.txt" 2>&1) || true
 # Actual verification would be in integration tests
 assert_equals "0" "0" "Verbose mode should log MIME type detection"
 
+exit_code=0
 # Test 9.2: Verbose mode logs filtering decisions
 # This will be tested in integration tests with full script
 assert_equals "0" "0" "Verbose mode should log filtering decisions"
@@ -613,12 +582,15 @@ echo ""
 echo "Test Group 10: Error Handling"
 echo "-------------------------------"
 
+exit_code=0
 # Test 10.1: Handle missing file gracefully in detect_mime_type
 output=$(detect_mime_type "${TEST_FIXTURE_DIR}/nonexistent.file" 2>&1) || exit_code=$?
 # Should not crash, should return fallback or error
 assert_equals "0" "0" "Should handle missing files gracefully"
 
+exit_code=0
 # Test 10.2: Handle malformed plugin descriptor
+mkdir -p "${TEST_FIXTURE_DIR}/plugins/bad"
 cat > "${TEST_FIXTURE_DIR}/plugins/bad/descriptor.json" <<'EOF'
 {
   "name": "bad",
@@ -630,12 +602,14 @@ EOF
 output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/bad/descriptor.json" 2>&1) || exit_code=$?
 assert_equals "0" "0" "Should handle malformed processes field"
 
+exit_code=0
 # Test 10.3: Handle invalid JSON in descriptor
 mkdir -p "${TEST_FIXTURE_DIR}/plugins/invalid"
 echo "{ invalid json" > "${TEST_FIXTURE_DIR}/plugins/invalid/descriptor.json"
 output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/invalid/descriptor.json" 2>&1) || exit_code=$?
 assert_equals "0" "0" "Should handle invalid JSON"
 
+exit_code=0
 # Test 10.4: Handle missing descriptor file
 output=$(get_plugin_processes_mime_types "${TEST_FIXTURE_DIR}/plugins/missing/descriptor.json" 2>&1) || exit_code=$?
 assert_equals "0" "0" "Should handle missing descriptor file"

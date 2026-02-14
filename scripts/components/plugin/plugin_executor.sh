@@ -183,66 +183,14 @@ should_execute_plugin() {
     return 1
   fi
 
-  # Check if processes field exists
-  local has_processes
-  has_processes=$(jq -r '.processes // empty' "$descriptor_file" 2>/dev/null)
-  if [[ -z "$has_processes" ]]; then
-    log "DEBUG" "PLUGIN" "Plugin ${plugin_name} has no processes filter, applies to all files"
+  # Use the new file type filtering logic (feature_0044)
+  if is_plugin_applicable_for_file "$descriptor_file" "$file_path"; then
+    log "DEBUG" "PLUGIN" "Plugin ${plugin_name} applicable for file: ${file_path}"
     return 0
-  fi
-
-  # Check for wildcard MIME type
-  local wildcard_mime
-  wildcard_mime=$(jq -r '.processes.mime_types[]? // empty' "$descriptor_file" 2>/dev/null | grep -c '^\*\/\*$' || true)
-  if [[ "$wildcard_mime" -gt 0 ]]; then
-    return 0
-  fi
-
-  # Check for wildcard extension
-  local wildcard_ext
-  wildcard_ext=$(jq -r '.processes.file_extensions[]? // empty' "$descriptor_file" 2>/dev/null | grep -c '^\*$' || true)
-  if [[ "$wildcard_ext" -gt 0 ]]; then
-    return 0
-  fi
-
-  # Check file extension
-  local file_ext
-  local file_basename
-  file_basename=$(basename "$file_path")
-  if [[ "$file_basename" == *.* ]]; then
-    file_ext=".${file_basename##*.}"
   else
-    file_ext=""
+    log "DEBUG" "PLUGIN" "Plugin ${plugin_name} not applicable for file: ${file_path}"
+    return 1
   fi
-  local extensions
-  extensions=$(jq -r '.processes.file_extensions[]? // empty' "$descriptor_file" 2>/dev/null || true)
-  if [[ -n "$extensions" ]] && [[ -n "$file_ext" ]]; then
-    while IFS= read -r ext; do
-      if [[ "$ext" == "$file_ext" ]]; then
-        return 0
-      fi
-    done <<< "$extensions"
-  fi
-
-  # Check MIME type
-  if [[ -f "$file_path" ]] && command -v file >/dev/null 2>&1; then
-    local file_mime
-    file_mime=$(file --mime-type -b "$file_path" 2>/dev/null || true)
-    if [[ -n "$file_mime" ]]; then
-      local mime_types
-      mime_types=$(jq -r '.processes.mime_types[]? // empty' "$descriptor_file" 2>/dev/null || true)
-      if [[ -n "$mime_types" ]]; then
-        while IFS= read -r mime; do
-          if [[ "$mime" == "$file_mime" ]]; then
-            return 0
-          fi
-        done <<< "$mime_types"
-      fi
-    fi
-  fi
-
-  log "DEBUG" "PLUGIN" "Plugin ${plugin_name} does not apply to file: ${file_path}"
-  return 1
 }
 
 # ==============================================================================
