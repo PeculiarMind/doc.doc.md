@@ -195,7 +195,7 @@ validate_command_template_safety() {
 
   # For install_commandline: must use recognized package manager
   if [[ "${field_name}" == "install_commandline" ]]; then
-    if [[ ! "${command}" =~ (apt|yum|dnf|pacman|brew|true|:) ]]; then
+    if [[ ! "${command}" =~ (apt|yum|dnf|pacman|brew|true|:|install\.sh) ]]; then
       log "ERROR" "VALIDATOR" "install_commandline must use a recognized package manager"
       return 1
     fi
@@ -281,8 +281,8 @@ validate_data_objects() {
     if [[ -z "${type_value}" ]]; then
       log "ERROR" "VALIDATOR" "Missing 'type' in ${field_type}.${field_name}"
       validation_failed=1
-    elif [[ "${type_value}" != "string" ]] && [[ "${type_value}" != "integer" ]] && [[ "${type_value}" != "boolean" ]]; then
-      log "ERROR" "VALIDATOR" "Invalid type '${type_value}' in ${field_type}.${field_name}: must be string, integer, or boolean"
+    elif [[ "${type_value}" != "string" ]] && [[ "${type_value}" != "integer" ]] && [[ "${type_value}" != "number" ]] && [[ "${type_value}" != "boolean" ]]; then
+      log "ERROR" "VALIDATOR" "Invalid type '${type_value}' in ${field_type}.${field_name}: must be string, integer, number, or boolean"
       validation_failed=1
     fi
 

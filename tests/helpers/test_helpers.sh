@@ -128,6 +128,24 @@ assert_file_exists() {
   fi
 }
 
+assert_directory_exists() {
+  local dir="$1"
+  local message="${2:-Directory should exist}"
+  
+  TESTS_RUN=$((TESTS_RUN + 1))
+  
+  if [[ -d "$dir" ]]; then
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+    echo -e "${GREEN}✓${NC} PASS: $message"
+    return 0
+  else
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    echo -e "${RED}✗${NC} FAIL: $message"
+    echo "  Directory not found: $dir"
+    return 1
+  fi
+}
+
 assert_file_executable() {
   local file="$1"
   local message="${2:-File should be executable}"

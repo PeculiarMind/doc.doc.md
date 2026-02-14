@@ -103,7 +103,7 @@ init_workspace() {
     fi
   fi
 
-  log "INFO" "WORKSPACE" "Initializing workspace: $workspace_dir"
+  log "WARN" "WORKSPACE" "Creating workspace directory: $workspace_dir"
 
   # Create workspace directory structure with restrictive permissions (0700)
   if ! mkdir -p "$workspace_dir" 2>/dev/null; then
@@ -605,15 +605,25 @@ validate_workspace_schema() {
     return 1
   fi
 
-  # Check required subdirectories
+  # Check required subdirectories (recreate if missing)
   if [[ ! -d "$workspace_dir/files" ]]; then
-    log "ERROR" "WORKSPACE" "Missing required subdirectory: files/"
-    is_valid=1
+    log "WARN" "WORKSPACE" "Missing required subdirectory: files/, recreating..."
+    if mkdir -p "$workspace_dir/files" 2>/dev/null; then
+      chmod 0700 "$workspace_dir/files" 2>/dev/null || true
+    else
+      log "ERROR" "WORKSPACE" "Failed to recreate files/ subdirectory"
+      is_valid=1
+    fi
   fi
 
   if [[ ! -d "$workspace_dir/plugins" ]]; then
-    log "ERROR" "WORKSPACE" "Missing required subdirectory: plugins/"
-    is_valid=1
+    log "WARN" "WORKSPACE" "Missing required subdirectory: plugins/, recreating..."
+    if mkdir -p "$workspace_dir/plugins" 2>/dev/null; then
+      chmod 0700 "$workspace_dir/plugins" 2>/dev/null || true
+    else
+      log "ERROR" "WORKSPACE" "Failed to recreate plugins/ subdirectory"
+      is_valid=1
+    fi
   fi
 
   # Check writability
