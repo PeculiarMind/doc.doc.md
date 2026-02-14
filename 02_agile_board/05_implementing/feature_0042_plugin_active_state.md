@@ -36,7 +36,6 @@ This feature enables users to activate or deactivate plugins through multiple me
 - [ ] Directory naming convention (e.g., `.disabled`) disables plugin (optional)
 - [x] Plugin listing shows active/inactive status
 - [ ] Inactive plugins do not generate execution errors or warnings
-- [x] Documentation covers all activation/deactivation mechanisms
 - [ ] Documentation covers all activation/deactivation mechanisms
 
 ## Dependencies
