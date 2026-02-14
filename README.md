@@ -94,8 +94,8 @@ See ADR-0012 for rationale, migration, and usage details.
 **2026_Spark_0214 - Modular Architecture with Plugin Execution System** 🚧
 
 **Features:**
-- **Done (44):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, templates system, default template fallback, precise plugin listing, plugin installation checks, active/inactive plugin states, new versioning scheme, and more
-- **Implementing (1):** Workspace recovery (Feature 0046)
+- **Done (45):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, templates system, default template fallback, precise plugin listing, plugin installation checks, active/inactive plugin states, new versioning scheme, workspace recovery and rescan, and more
+- **Implementing (0):** -
 - **Backlog (12):** Plugin sandboxing, file type filtering and validation, plugin-file assignment, plugin results aggregation, final report generation, comprehensive error handling, single file analysis, dependency security verification, security audit logging, security testing framework, and more
 
 **Architecture:** Entry script loads modular components across core, UI, plugin, and orchestration domains. Plugin execution system implements plugin-toolkit interface architecture with data-driven dependency resolution. Architecture decisions and concepts are documented and traceable.
@@ -277,6 +277,20 @@ See [08_0010_mode_aware_behavior.md](01_vision/03_architecture/08_concepts/08_00
 #   -w <workspace>   Workspace directory for state storage
 #   -f               Force full rescan of all files
 ```
+
+### Workspace Recovery
+
+The toolkit includes automatic workspace recovery to handle corrupted state files:
+
+**Automatic Recovery Behavior:**
+- **Missing directories**: Workspace directory and subdirectories are created automatically when needed
+- **Corrupted JSON**: Invalid workspace files are detected, removed, and logged
+- **Re-scanning**: Source files with corrupted workspace state are automatically re-scanned
+- **No migrations**: Validation doesn't require manual migrations - workspace is self-healing
+
+**Recovery Events**: All corruption detection and recovery actions are logged for audit purposes
+
+**User Impact**: Analysis continues seamlessly even if workspace state becomes corrupted - no manual intervention required
 
 ## Development Setup
 
@@ -481,6 +495,7 @@ doc.doc.md/
 - ✅ Stat plugin - basic file metadata extraction (Feature 0020)
 - ✅ Workspace management - JSON state storage (Feature 0007)
 - ✅ Workspace security and integrity checks (Feature 0013)
+- ✅ Workspace recovery and rescan (Feature 0046)
 
 ### Phase 3: Mode-Aware Execution (✅ COMPLETE)
 - ✅ Structured logging enhancement (Feature 0019)
