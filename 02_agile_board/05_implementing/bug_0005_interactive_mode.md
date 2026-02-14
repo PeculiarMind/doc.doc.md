@@ -2,9 +2,32 @@
 ID: bug_0005_interactive_mode
 
 ## Status
-State: Backlog
+State: Implementing
 Created: 2026-02-13
 Last Updated: 2026-02-13
+Started: 2026-02-13
+Developer: Developer Agent
+Tester: Tester Agent
+Tests Created: 2026-02-13
+Tests Location: tests/unit/test_bug_0005_interactive_progress.sh
+Branch: copilot/implement-next-backlog-item-again
+
+## Root Cause Analysis
+The progress display functions (`render_progress_bar()`, `show_progress()`, `clear_progress()`) are defined in `scripts/components/ui/progress_display.sh` and loaded by the main script, but they are **never called** during file processing.
+
+In `scripts/components/orchestration/main_orchestrator.sh` (lines 167-184), the file processing loop uses only `log()` calls for output:
+- Line 164: `log "INFO" "ORCHESTRATOR" "Processing $total_files files"`
+- Line 180: `log "WARN" "ORCHESTRATOR" "Plugin execution failed for: $file_path"`
+- Line 186: `log "INFO" "ORCHESTRATOR" "File processing complete..."`
+
+The progress display system is completely disconnected from the orchestrator's file processing logic.
+
+## Required Fix
+Integrate progress display into the file processing loop:
+1. Initialize progress before the loop (show initial state)
+2. Update progress for each file processed (show current file, percent)
+3. Clear/finalize progress after the loop completes
+4. Only show progress when `IS_INTERACTIVE=true`, otherwise use existing log() calls
 
 ## Overview
 Interactive mode in doc.doc.sh does not work as expected.
@@ -65,10 +88,27 @@ The expected output should look as described in feature_0017_interactive_progres
 - Type: Bug
 - Priority: Medium
 
+## Test Implementation (TDD)
+**Test File**: `tests/unit/test_bug_0005_interactive_progress.sh`
+**Status**: ✅ Tests created and committed
+**Test Results**: Currently failing (as expected - implementation pending)
+
+### Test Coverage
+1. ✓ Progress functions called in interactive mode
+2. ✓ Progress NOT called in non-interactive mode  
+3. ✓ Progress shows correct file counts and percentages
+4. ✓ Progress displays current file being processed
+5. ✓ Progress initialized before loop starts
+6. ✓ Source code contains progress integration calls
+7. ✓ IS_INTERACTIVE flag controls progress display
+
+**Next Step**: Developer Agent to implement feature to pass tests
+
 ## Acceptance Criteria
 - [ ] Interactive mode can be triggered and works as documented
 - [ ] User receives prompts or interactive features when expected
 - [ ] No regression in non-interactive mode
+- [ ] All tests in test_bug_0005_interactive_progress.sh pass
 
 ## Related Requirements
 - ...
