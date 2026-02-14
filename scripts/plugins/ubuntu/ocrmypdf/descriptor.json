@@ -26,7 +26,7 @@
             "description": "Extracted text content from the PDF."
         }
     },
-    "commandline": "/plugin/ocrmypdf_wrapper.sh '${file_path_absolute}'",
+    "commandline": "/plugin/ocrmypdf_wrapper.sh \"${file_path_absolute}\"",
     "check_commandline": "command -v ocrmypdf",
     "install_commandline": "apt-get install -y ocrmypdf tesseract-ocr tesseract-ocr-eng ghostscript unpaper"
 }

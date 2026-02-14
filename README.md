@@ -94,8 +94,8 @@ See ADR-0012 for rationale, migration, and usage details.
 **2026_Phoenix_0213 - Modular Architecture with Plugin Execution System** 🚧
 
 **Features:**
-- **Done (21):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, mode detection, interactive progress display, user prompt system
-- **Backlog (13):** OCR PDF plugin, templates directory structure, default template fallback, list templates command, precise plugin listing, close template engine test coverage gaps, dependency security verification, plugin sandboxing mechanism, security audit logging, security testing framework, plugin assignment engine, plugin results aggregation system, report generation coordination, comprehensive workflow error handling
+- **Done (32):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, and more
+- **Backlog (15):** Templates directory structure, default template fallback, list templates command, precise plugin listing, close template engine test coverage gaps, dependency security verification, plugin sandboxing mechanism, security audit logging, security testing framework, plugin assignment engine, plugin results aggregation system, report generation coordination, comprehensive workflow error handling, interactive mode bug fixes, and more
 
 **Architecture:** Entry script loads modular components across core, UI, plugin, and orchestration domains. Plugin execution system implements sandboxing and plugin-toolkit interface architecture. Architecture decisions and concepts are documented and traceable.
 
@@ -111,6 +111,12 @@ See ADR-0012 for rationale, migration, and usage details.
 
 - Bash 4.0+ (check: `bash --version`)
 - Standard Unix tools: `file`, `stat`, `grep`, `find`
+
+**Optional Plugin Dependencies** (Ubuntu):
+- **OCRmyPDF Plugin**: `ocrmypdf`, `tesseract-ocr`, `tesseract-ocr-eng`, `ghostscript`, `unpaper`
+  ```bash
+  sudo apt-get install -y ocrmypdf tesseract-ocr tesseract-ocr-eng ghostscript unpaper
+  ```
 
 ### Quick Start
 
@@ -156,6 +162,33 @@ chmod +x scripts/doc.doc.sh
 ```bash
 ./scripts/doc.doc.sh --verbose -p list
 ```
+
+### Plugin Capabilities
+
+**Available Plugins:**
+
+1. **stat** (Cross-platform)
+   - Extracts file metadata (size, timestamps, permissions)
+   - Works on all files
+   - Inputs: `file_path_absolute`
+   - Outputs: `file_size_bytes`, `file_modified_time`, `file_permissions`, etc.
+
+2. **ocrmypdf** (Ubuntu)
+   - Performs Optical Character Recognition on PDF files
+   - Extracts text content and makes PDFs searchable
+   - Inputs: `file_path_absolute`
+   - Outputs: `ocr_confidence`, `ocr_status`, `ocr_text_content`
+   - **Dependencies**: `ocrmypdf`, `tesseract-ocr`, `ghostscript`, `unpaper`
+   - **Installation** (Ubuntu):
+     ```bash
+     sudo apt-get install -y ocrmypdf tesseract-ocr tesseract-ocr-eng ghostscript unpaper
+     ```
+   - **Reference Implementation**: Located at `scripts/plugins/ubuntu/ocrmypdf/`, serves as example of plugin architecture
+
+**Plugin Installation:**
+- Plugins automatically check for required tools at runtime
+- Use provided `install.sh` scripts for Ubuntu-specific plugins
+- Refer to plugin `descriptor.json` for dependency details
 
 ### Logging Format
 
@@ -367,6 +400,7 @@ doc.doc.md/
 │       ├── all/                # Cross-platform plugins
 │       │   └── stat/           # File metadata plugin
 │       └── ubuntu/             # Ubuntu-specific plugins
+│           └── ocrmypdf/       # OCR PDF plugin (reference implementation)
 │
 ├── tests/                      # Comprehensive test suite (21 suites, 100% passing)
 │   ├── run_all_tests.sh        # Master test runner
@@ -462,8 +496,7 @@ doc.doc.md/
 - ✅ **List Templates Command** - `--list-templates` for template discovery
 - ✅ **Precise Plugin Listing** - Enhanced plugin display with inputs/outputs
 - ✅ **Template Engine Test Coverage** - Comprehensive testing (55 tests passing)
-
-### Phase 5: Advanced Features (In Progress)
+- ✅ **OCRmyPDF Plugin** - PDF OCR capability with reference implementation (Feature 0002)
 
 ### Phase 5: Security Enhancement (🔜 NEXT - 2026_Aurora)
 - 🔜 **Plugin sandboxing with Bubblewrap** (Feature 0026) - HIGH PRIORITY
@@ -477,7 +510,6 @@ doc.doc.md/
 - 📋 Performance benchmarking standards (req_0066)
 - 📋 Plugin dependency versioning (req_0068)
 - 📋 Template variable documentation (req_0069)
-- 📋 OCR PDF plugin (Feature 0002)
 
 ### Phase 7: Advanced Features (Future - Future releases)
 - 📋 Workspace migration strategy (req_0070)

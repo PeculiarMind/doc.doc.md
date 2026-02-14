@@ -29,9 +29,29 @@ fi
 
 FILE_PATH="$1"
 
+# Validate path length (PATH_MAX is typically 4096)
+if [[ ${#FILE_PATH} -gt 4096 ]]; then
+    echo "0,failed,Error: File path exceeds maximum length" >&2
+    exit 1
+fi
+
+# Validate path doesn't contain null bytes or control characters
+if [[ "$FILE_PATH" =~ [[:cntrl:]] ]]; then
+    echo "0,failed,Error: File path contains invalid characters" >&2
+    exit 1
+fi
+
+# Resolve to absolute path for security
+FILE_PATH=$(realpath "$FILE_PATH" 2>/dev/null)
+if [[ $? -ne 0 ]] || [[ -z "$FILE_PATH" ]]; then
+    echo "0,failed,Error: Could not resolve file path" >&2
+    exit 1
+fi
+
 # Validate file exists
 if [[ ! -f "$FILE_PATH" ]]; then
-    echo "0,failed,Error: File not found: $FILE_PATH" >&2
+    FILENAME=$(basename "$FILE_PATH" 2>/dev/null || echo "unknown")
+    echo "0,failed,Error: File not found: $FILENAME" >&2
     exit 1
 fi
 
@@ -47,9 +67,23 @@ if ! command -v ocrmypdf >/dev/null 2>&1; then
     exit 1
 fi
 
-# Create temporary directory for OCR output
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TEMP_DIR"' EXIT
+# Create temporary directory for OCR output with validation
+TEMP_DIR=$(mktemp -d) || {
+    echo "0,failed,Error: Failed to create temporary directory" >&2
+    exit 1
+}
+
+# Set restrictive permissions
+chmod 700 "$TEMP_DIR"
+
+# Ensure cleanup on multiple signal types
+trap 'rm -rf "$TEMP_DIR" 2>/dev/null' EXIT INT TERM HUP
+
+# Verify directory exists and is writable
+if [[ ! -d "$TEMP_DIR" ]] || [[ ! -w "$TEMP_DIR" ]]; then
+    echo "0,failed,Error: Temporary directory not usable" >&2
+    exit 1
+fi
 
 OUTPUT_PDF="$TEMP_DIR/output.pdf"
 TEXT_FILE="$TEMP_DIR/output.txt"
@@ -63,8 +97,17 @@ if ocrmypdf --force-ocr --sidecar "$TEXT_FILE" "$FILE_PATH" "$OUTPUT_PDF" >/dev/
     
     # Extract text content from sidecar file
     if [[ -f "$TEXT_FILE" ]]; then
-        # Read text content and sanitize (remove commas for CSV format)
-        OCR_TEXT=$(cat "$TEXT_FILE" | tr '\n' ' ' | tr -d ',' | sed 's/[[:space:]]\+/ /g' | xargs)
+        # Comprehensive sanitization of OCR output
+        # Remove control characters, shell metacharacters, and CSV injection vectors
+        OCR_TEXT=$(cat "$TEXT_FILE" | \
+            tr '\n' ' ' | \
+            tr -d '\000-\037' | \
+            tr -d '`$\\|;&<>(){}[]!*?' | \
+            tr -d ',' | \
+            sed 's/[[:space:]]\+/ /g' | \
+            sed 's/^[=+\-@]//' | \
+            xargs | \
+            head -c 10000)
         
         # OCRmyPDF doesn't provide confidence scores, so we use a default
         OCR_CONFIDENCE="85"
