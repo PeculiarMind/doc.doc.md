@@ -399,6 +399,12 @@ except:
   # Check MIME type match
   if [[ -n "${mime_types}" ]]; then
     while IFS= read -r plugin_mime_type; do
+      # Check for wildcard MIME type
+      if [[ "${plugin_mime_type}" == "*/*" ]]; then
+        log "DEBUG" "PLUGIN" "Wildcard MIME type match: ${plugin_mime_type}"
+        return 0
+      fi
+      
       if [[ "${file_mime_type}" == "${plugin_mime_type}" ]]; then
         log "DEBUG" "PLUGIN" "MIME type match: ${file_mime_type} matches ${plugin_mime_type}"
         return 0
@@ -409,6 +415,12 @@ except:
   # Check extension match (case-insensitive)
   if [[ -n "${extensions}" ]] && [[ -n "${file_extension}" ]]; then
     while IFS= read -r plugin_extension; do
+      # Check for wildcard extension
+      if [[ "${plugin_extension}" == "*" ]]; then
+        log "DEBUG" "PLUGIN" "Wildcard extension match: ${plugin_extension}"
+        return 0
+      fi
+      
       # Convert both to lowercase for case-insensitive comparison
       local plugin_ext_lower=$(echo "${plugin_extension}" | tr '[:upper:]' '[:lower:]')
       local file_ext_lower=$(echo "${file_extension}" | tr '[:upper:]' '[:lower:]')
