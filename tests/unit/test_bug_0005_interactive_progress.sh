@@ -330,7 +330,8 @@ test_progress_shows_correct_counts_and_percentages() {
     return
   fi
   
-  # Verify total is consistent (should be at least 3 files)
+  # Verify total is consistent (at least 3: scanner stderr log lines inflate count
+  # because scan_output captures both stdout file list and stderr log messages)
   if [[ -n "$last_total" ]] && [[ "$last_total" -ge 3 ]]; then
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_PASSED=$((TESTS_PASSED + 1))
