@@ -1,10 +1,11 @@
 # Feature: Plugin Active State Configuration
 
 **ID**: feature_0042_plugin_active_state  
-**Status**: Implementing  
+**Status**: Done  
 **Created**: 2026-02-13  
-**Last Updated**: 2025-02-14  
+**Last Updated**: 2026-02-14  
 **Started**: 2025-02-14  
+**Completed**: 2026-02-14  
 **Assigned**: Developer Agent
 
 ## Overview
@@ -32,11 +33,11 @@ This feature enables users to activate or deactivate plugins through multiple me
 - [x] User can set plugin `active` state via configuration file
 - [x] User can set plugin `active` state via command-line flag
 - [x] Plugin descriptor supports `active: true/false`
-- [ ] Plugins marked as inactive are not executed but remain discoverable
-- [ ] Directory naming convention (e.g., `.disabled`) disables plugin (optional)
+- [x] Plugins marked as inactive are not executed but remain discoverable
+- [x] Directory naming convention (e.g., `.disabled`) disables plugin (optional)
 - [x] Plugin listing shows active/inactive status
-- [ ] Inactive plugins do not generate execution errors or warnings
-- [ ] Documentation covers all activation/deactivation mechanisms
+- [x] Inactive plugins do not generate execution errors or warnings
+- [x] Documentation covers all activation/deactivation mechanisms
 
 ## Dependencies
 - Plugin discovery and loading mechanism
