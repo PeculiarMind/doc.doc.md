@@ -1,7 +1,7 @@
 {
-  "file_path": "/tmp/plugin_active_state_test_80262/test.txt",
+  "file_path": "/tmp/plugin_active_state_test_9503/test.txt",
   "file_hash": "a1fff0ffefb9eace7230c24e50731f0a91c62f9cefdfe77121c2f607125dffae",
-  "last_scan_time": "2026-02-14T18:52:57Z",
+  "last_scan_time": "2026-02-14T21:59:40Z",
   "plugin_executions": {
     "success": 0,
     "failure": 1
