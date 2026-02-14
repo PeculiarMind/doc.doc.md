@@ -9,6 +9,38 @@
 # Plugin Discovery Functions
 # ==============================================================================
 
+# Apply activation overrides to plugin data based on .disabled suffix and CLI/config overrides
+# Arguments:
+#   $1 - descriptor_file path
+#   $2 - plugin_name
+#   $3 - plugin_data (pipe-delimited: name|description|active)
+# Returns:
+#   Echoes modified plugin_data with overrides applied
+_apply_activation_overrides() {
+  local descriptor_file="$1"
+  local plugin_name="$2"
+  local plugin_data="$3"
+  
+  # Check for .disabled directory suffix (overrides descriptor active field)
+  local plugin_dir_name
+  plugin_dir_name=$(basename "$(dirname "${descriptor_file}")")
+  if [[ "${plugin_dir_name}" == *.disabled ]]; then
+    log "DEBUG" "PLUGIN" "Plugin directory has .disabled suffix: ${plugin_name}"
+    local name_desc="${plugin_data%|*}"
+    plugin_data="${name_desc}|false"
+  fi
+  
+  # Apply activation overrides from CLI flags (CLI > Config > Descriptor/.disabled)
+  if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
+    local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
+    log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
+    local name_desc="${plugin_data%|*}"
+    plugin_data="${name_desc}|${override_value}"
+  fi
+  
+  echo "${plugin_data}"
+}
+
 # Discover all plugins in the plugins directory
 # Returns:
 #   Echoes newline-separated list of pipe-delimited plugin data: "name|description|active|descriptor_path"
@@ -47,23 +79,7 @@ discover_plugins() {
         local plugin_name="${plugin_data%%|*}"
         
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
-          # Check for .disabled directory suffix (overrides descriptor active field)
-          local plugin_dir_name
-          plugin_dir_name=$(basename "$(dirname "${descriptor_file}")")
-          if [[ "${plugin_dir_name}" == *.disabled ]]; then
-            log "DEBUG" "PLUGIN" "Plugin directory has .disabled suffix: ${plugin_name}"
-            local name_desc="${plugin_data%|*}"
-            plugin_data="${name_desc}|false"
-          fi
-          
-          # Apply activation overrides from CLI flags (CLI > Config > Descriptor/.disabled)
-          if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
-            local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
-            log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
-            # Replace the active field in plugin_data
-            local name_desc="${plugin_data%|*}"
-            plugin_data="${name_desc}|${override_value}"
-          fi
+          plugin_data=$(_apply_activation_overrides "${descriptor_file}" "${plugin_name}" "${plugin_data}")
           
           # Append descriptor path to plugin data
           plugin_list+=("${plugin_data}|${descriptor_file}")
@@ -87,23 +103,7 @@ discover_plugins() {
         
         # Only add if not already seen (platform-specific takes precedence)
         if [[ -z "${seen_plugins[${plugin_name}]+x}" ]]; then
-          # Check for .disabled directory suffix (overrides descriptor active field)
-          local plugin_dir_name
-          plugin_dir_name=$(basename "$(dirname "${descriptor_file}")")
-          if [[ "${plugin_dir_name}" == *.disabled ]]; then
-            log "DEBUG" "PLUGIN" "Plugin directory has .disabled suffix: ${plugin_name}"
-            local name_desc="${plugin_data%|*}"
-            plugin_data="${name_desc}|false"
-          fi
-          
-          # Apply activation overrides from CLI flags (CLI > Config > Descriptor/.disabled)
-          if [[ -v PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"] ]]; then
-            local override_value="${PLUGIN_ACTIVATION_OVERRIDES[${plugin_name}]}"
-            log "DEBUG" "PLUGIN" "Applying CLI override for ${plugin_name}: active=${override_value}"
-            # Replace the active field in plugin_data
-            local name_desc="${plugin_data%|*}"
-            plugin_data="${name_desc}|${override_value}"
-          fi
+          plugin_data=$(_apply_activation_overrides "${descriptor_file}" "${plugin_name}" "${plugin_data}")
           
           # Append descriptor path to plugin data
           plugin_list+=("${plugin_data}|${descriptor_file}")
