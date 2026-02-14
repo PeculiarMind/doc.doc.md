@@ -1,9 +1,11 @@
 # Feature: Workspace Recovery and Rescan
 
 **ID**: feature_0046_workspace_recovery  
-**Status**: Backlog  
+**Status**: Implementing  
 **Created**: 2026-02-13  
-**Last Updated**: 2026-02-13
+**Last Updated**: 2025-02-14  
+**Started**: 2025-02-14  
+**Assigned**: Developer Agent
 
 ## Overview
 Keep workspace state recoverable without migrations by rebuilding or re-scanning when data is invalid, ensuring forward progress and avoiding blocking on corrupted state.
