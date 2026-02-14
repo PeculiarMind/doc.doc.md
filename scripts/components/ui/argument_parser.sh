@@ -9,6 +9,7 @@
 # Parsed Argument Variables
 # ==============================================================================
 SOURCE_DIR=""
+SINGLE_FILE=""
 TEMPLATE_FILE=""
 TARGET_DIR=""
 WORKSPACE_DIR=""
@@ -180,9 +181,18 @@ parse_arguments() {
         esac
         ;;
       -f)
-        FORCE_FULLSCAN="true"
-        log "INFO" "PARSER" "Full scan mode enabled"
-        shift
+        # Check if next argument exists and is not a flag
+        if [[ $# -ge 2 ]] && [[ "$2" != -* ]]; then
+          # Single file analysis mode
+          SINGLE_FILE="$2"
+          log "INFO" "PARSER" "Single file analysis: $2"
+          shift 2
+        else
+          # Force full scan mode (backward compatibility)
+          FORCE_FULLSCAN="true"
+          log "INFO" "PARSER" "Full scan mode enabled"
+          shift
+        fi
         ;;
       --config)
         if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
@@ -232,6 +242,53 @@ parse_arguments() {
 
 # Validate parsed arguments (future use)
 validate_arguments() {
+  # Check for conflicting arguments
+  if [[ -n "${SINGLE_FILE}" ]] && [[ -n "${SOURCE_DIR}" ]]; then
+    echo "Error: Cannot specify both -d (directory) and -f (single file)" >&2
+    echo "Try '$SCRIPT_NAME --help' for more information." >&2
+    exit "${EXIT_INVALID_ARGS}"
+  fi
+  
+  # Validate single file if specified
+  if [[ -n "${SINGLE_FILE}" ]]; then
+    # Security: Canonicalize path to prevent path traversal (CWE-22)
+    local canonical_path
+    canonical_path=$(realpath -e "${SINGLE_FILE}" 2>/dev/null)
+    
+    if [[ $? -ne 0 ]] || [[ -z "${canonical_path}" ]]; then
+      echo "Error: File does not exist: ${SINGLE_FILE}" >&2
+      exit "${EXIT_FILE_ERROR}"
+    fi
+    
+    # Security: Validate file type (reject devices, FIFOs, sockets, etc.)
+    # This also validates symlink targets
+    # Note: SOURCE_DIR is not set in single-file mode, so symlink validation is skipped
+    if [[ ! -f "${canonical_path}" ]]; then
+      echo "Error: Not a regular file: ${SINGLE_FILE}" >&2
+      exit "${EXIT_FILE_ERROR}"
+    fi
+    
+    if [[ -c "${canonical_path}" ]] || [[ -b "${canonical_path}" ]] || [[ -p "${canonical_path}" ]] || [[ -S "${canonical_path}" ]]; then
+      echo "Error: Special file type not supported: ${SINGLE_FILE}" >&2
+      exit "${EXIT_FILE_ERROR}"
+    fi
+    
+    # Update SINGLE_FILE to canonical path
+    SINGLE_FILE="${canonical_path}"
+    log "INFO" "PARSER" "Validated single file: ${canonical_path}"
+    
+    # Set default workspace and target directories for single-file mode if not specified
+    if [[ -z "${WORKSPACE_DIR}" ]]; then
+      WORKSPACE_DIR="./doc.doc.workspace"
+      log "INFO" "PARSER" "Using default workspace directory: ${WORKSPACE_DIR}"
+    fi
+    
+    if [[ -z "${TARGET_DIR}" ]]; then
+      TARGET_DIR="./doc.doc.output"
+      log "INFO" "PARSER" "Using default target directory: ${TARGET_DIR}"
+    fi
+  fi
+  
   # Set default template if not specified
   if [[ -z "${TEMPLATE_FILE}" ]]; then
     local default_template="${SCRIPT_DIR}/templates/default.md"
@@ -240,8 +297,8 @@ validate_arguments() {
       TEMPLATE_FILE="${default_template}"
       log "INFO" "PARSER" "Using default template: ${default_template}"
     else
-      # Only error if we're actually doing an analysis (have source dir)
-      if [[ -n "${SOURCE_DIR}" ]]; then
+      # Only error if we're actually doing an analysis (have source dir or single file)
+      if [[ -n "${SOURCE_DIR}" ]] || [[ -n "${SINGLE_FILE}" ]]; then
         echo "Error: Default template not found at ${default_template}" >&2
         echo "Please specify a template with -m flag or restore the default template." >&2
         exit "${EXIT_FILE_ERROR}"
