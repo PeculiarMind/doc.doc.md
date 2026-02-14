@@ -400,6 +400,12 @@ execute_plugin() {
 
   log "DEBUG" "PLUGIN" "Executing plugin: ${plugin_name}"
 
+  # Check if plugin is unavailable (tool not installed)
+  if declare -p UNAVAILABLE_PLUGINS &>/dev/null && [[ -v UNAVAILABLE_PLUGINS["${plugin_name}"] ]]; then
+    log "DEBUG" "PLUGIN" "Skipping unavailable plugin: ${plugin_name}"
+    return 1
+  fi
+
   # Validate plugin name
   if [[ ! "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     log "ERROR" "PLUGIN" "Invalid plugin name: ${plugin_name}"
