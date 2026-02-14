@@ -37,7 +37,7 @@ parse_plugin_descriptor() {
     # Extract fields using jq
     name=$(jq -r '.name // empty' "${descriptor_path}" 2>/dev/null)
     description=$(jq -r '.description // empty' "${descriptor_path}" 2>/dev/null)
-    active=$(jq -r '.active // false' "${descriptor_path}" 2>/dev/null)
+    active=$(jq -r 'if has("active") then .active else true end' "${descriptor_path}" 2>/dev/null)
     
     # Validate required fields
     if [[ -z "${name}" ]]; then
@@ -50,10 +50,10 @@ parse_plugin_descriptor() {
       return 1
     fi
     
-    # Ensure active is a boolean
+    # Ensure active is a boolean (default to true if missing/invalid)
     if [[ "${active}" != "true" ]] && [[ "${active}" != "false" ]]; then
-      log "DEBUG" "PLUGIN" "Invalid 'active' value, defaulting to false: ${descriptor_path}"
-      active="false"
+      log "DEBUG" "PLUGIN" "Invalid 'active' value, defaulting to true: ${descriptor_path}"
+      active="true"
     fi
     
     echo "${name}|${description}|${active}"
@@ -70,7 +70,7 @@ try:
         data = json.load(f)
     name = data.get('name', '')
     description = data.get('description', '')
-    active = str(data.get('active', False)).lower()
+    active = str(data.get('active', True)).lower()
     if not name or not description:
         sys.exit(1)
     print(f'{name}|{description}|{active}')

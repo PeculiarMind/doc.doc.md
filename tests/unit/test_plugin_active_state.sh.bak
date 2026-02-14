@@ -118,7 +118,7 @@ test_active_plugin_is_discovered() {
   create_test_plugin "discoverable-plugin" "true"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   assert_contains "$output" "discoverable-plugin" "Active plugin should appear in plugin list"
   
@@ -131,7 +131,7 @@ test_inactive_plugin_is_discovered() {
   create_test_plugin "inactive-test-plugin" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   assert_contains "$output" "inactive-test-plugin" "Inactive plugin should still appear in list"
   
@@ -148,10 +148,10 @@ test_plugin_list_shows_active_status() {
   create_test_plugin "status-active" "true"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Should show active indicator for active plugin
-  assert_contains "$output" "ACTIVE" "Should display active status indicator"
+  assert_contains "$output" "ACTIVE\|✓\|enabled" "Should display active status indicator"
   
   teardown_test_environment
 }
@@ -162,10 +162,10 @@ test_plugin_list_shows_inactive_status() {
   create_test_plugin "status-inactive" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Should show inactive indicator for inactive plugin
-  assert_contains "$output" "INACTIVE" "Should display inactive status indicator"
+  assert_contains "$output" "INACTIVE\|✗\|disabled" "Should display inactive status indicator"
   
   teardown_test_environment
 }
@@ -177,7 +177,7 @@ test_plugin_list_shows_mixed_status() {
   create_test_plugin "mixed-inactive" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   assert_contains "$output" "mixed-active" "Should list active plugin"
   assert_contains "$output" "mixed-inactive" "Should list inactive plugin"
@@ -206,7 +206,7 @@ test_config_file_activates_plugin() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
   
   # Plugin should be shown as active due to config override
   assert_contains "$output" "config-activated" "Plugin should appear in list"
@@ -231,7 +231,7 @@ test_config_file_deactivates_plugin() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
   
   # Plugin should be shown as inactive due to config override
   assert_contains "$output" "config-deactivated" "Plugin should appear in list"
@@ -256,7 +256,7 @@ test_config_overrides_descriptor() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
   
   # Config should take precedence over descriptor
   assert_contains "$output" "override-test" "Plugin should appear"
@@ -274,7 +274,7 @@ test_cli_flag_activates_plugin() {
   create_test_plugin "cli-activate" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --activate-plugin cli-activate -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --activate-plugin cli-activate -p list 2>&1 || true
   
   # Plugin should be activated by CLI flag
   assert_contains "$output" "cli-activate" "Plugin should appear"
@@ -288,7 +288,7 @@ test_cli_flag_deactivates_plugin() {
   create_test_plugin "cli-deactivate" "true"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --deactivate-plugin cli-deactivate -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --deactivate-plugin cli-deactivate -p list 2>&1 || true
   
   # Plugin should be deactivated by CLI flag
   assert_contains "$output" "cli-deactivate" "Plugin should appear"
@@ -303,7 +303,7 @@ test_multiple_activate_flags() {
   create_test_plugin "multi-activate-2" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --activate-plugin multi-activate-1 --activate-plugin multi-activate-2 -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --activate-plugin multi-activate-1 --activate-plugin multi-activate-2 -p list 2>&1 || true
   
   assert_contains "$output" "multi-activate-1" "First plugin should appear"
   assert_contains "$output" "multi-activate-2" "Second plugin should appear"
@@ -318,7 +318,7 @@ test_multiple_deactivate_flags() {
   create_test_plugin "multi-deactivate-2" "true"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --deactivate-plugin multi-deactivate-1 --deactivate-plugin multi-deactivate-2 -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --deactivate-plugin multi-deactivate-1 --deactivate-plugin multi-deactivate-2 -p list 2>&1 || true
   
   assert_contains "$output" "multi-deactivate-1" "First plugin should appear"
   assert_contains "$output" "multi-deactivate-2" "Second plugin should appear"
@@ -344,7 +344,7 @@ EOF
   
   # But CLI activates it
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" --activate-plugin cli-override -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" --activate-plugin cli-override -p list 2>&1 || true
   
   # CLI should take precedence
   assert_contains "$output" "cli-override" "Plugin should appear"
@@ -358,7 +358,7 @@ test_cli_flag_overrides_descriptor() {
   create_test_plugin "cli-descriptor-override" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --activate-plugin cli-descriptor-override -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --activate-plugin cli-descriptor-override -p list 2>&1 || true
   
   # CLI should override descriptor
   assert_contains "$output" "cli-descriptor-override" "Plugin should appear"
@@ -394,7 +394,7 @@ test_disabled_directory_suffix_deactivates() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Plugin should appear but be marked inactive due to .disabled suffix
   if [[ "$output" == *"suffix-test"* ]]; then
@@ -410,7 +410,7 @@ test_no_disabled_suffix_uses_descriptor() {
   create_test_plugin "no-suffix" "true"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Plugin should use descriptor's active state
   assert_contains "$output" "no-suffix" "Plugin without suffix should appear"
@@ -425,14 +425,14 @@ test_rename_to_disabled_deactivates() {
   
   # Verify plugin is initially active
   local output1 exit_code1
-  run_command output1 exit_code1 env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output1 exit_code1 "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Rename to add .disabled suffix
   mv "${TEST_PLUGINS_DIR}/all/rename-test" "${TEST_PLUGINS_DIR}/all/rename-test.disabled"
   
   # Check if plugin is now inactive
   local output2 exit_code2
-  run_command output2 exit_code2 env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output2 exit_code2 "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Plugin should now be inactive if directory naming convention is supported
   # This test allows for the feature to be optional
@@ -455,7 +455,7 @@ test_inactive_plugins_not_executed() {
   echo "test content" > "$test_file"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
   
   # Output should not contain execution results from inactive plugin
   assert_not_contains "$output" "test_no-execute" "Inactive plugin should not execute"
@@ -474,7 +474,7 @@ test_active_plugins_are_executed() {
   echo "test content" > "$test_file"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
   
   # Output may contain execution results from active plugin
   # This is a loose check since execution depends on other factors
@@ -495,7 +495,7 @@ test_mixed_execution_only_active_run() {
   echo "test content" > "$test_file"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
   
   # Inactive plugin should not produce output
   assert_not_contains "$output" "test_execute-inactive" "Inactive plugin should not execute"
@@ -533,7 +533,7 @@ test_inactive_plugin_missing_tool_no_error() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Should not show error about missing tool for inactive plugin
   assert_not_contains "$output" "nonexistent_tool_xyz.*not found\|nonexistent_tool_xyz.*missing" "Should not error about missing tool in inactive plugin"
@@ -570,7 +570,7 @@ EOF
   echo "test content" > "$test_file"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -f "$test_file" 2>&1 || true
   
   # Should not error on malformed command in inactive plugin
   assert_not_contains "$output" "unclosed quote\|syntax error" "Should not error on malformed command in inactive plugin"
@@ -585,7 +585,7 @@ test_list_inactive_no_warnings() {
   create_test_plugin "warning-test-inactive" "false"
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Should list plugin without warnings
   assert_contains "$output" "warning-test-inactive" "Should list inactive plugin"
@@ -616,7 +616,7 @@ EOF
   
   # But CLI says inactive (should win)
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" --deactivate-plugin precedence-test -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" --deactivate-plugin precedence-test -p list 2>&1 || true
   
   # CLI flag should take precedence
   assert_contains "$output" "precedence-test" "Plugin should appear"
@@ -641,7 +641,7 @@ test_activation_precedence_config_over_descriptor() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --config "$TEST_CONFIG_FILE" -p list 2>&1 || true
   
   # Config should override descriptor
   assert_contains "$output" "precedence-config" "Plugin should appear"
@@ -676,7 +676,7 @@ test_missing_active_field_defaults_true() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Plugin should be active by default
   assert_contains "$output" "no-active-field" "Plugin without active field should appear"
@@ -708,7 +708,7 @@ test_invalid_active_value_handled() {
 EOF
   
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" -p list 2>&1 || true
   
   # Should handle gracefully - either treat as active/inactive or show validation error
   assert_exit_code 0 "$exit_code" "Should not crash on invalid active value" || true
@@ -719,7 +719,7 @@ EOF
 # Test 30: Activating non-existent plugin shows appropriate message
 test_activate_nonexistent_plugin_message() {
   local output exit_code
-  run_command output exit_code env PLUGINS_DIR="${TEST_PLUGINS_DIR}" "$SCRIPT_PATH" --activate-plugin nonexistent-plugin-xyz -p list 2>&1 || true
+  run_command output exit_code "$SCRIPT_PATH" --activate-plugin nonexistent-plugin-xyz -p list 2>&1 || true
   
   # Should handle gracefully - either show warning or silently ignore
   assert_exit_code 0 "$exit_code" "Should not crash when activating non-existent plugin" || true

@@ -13,10 +13,59 @@ TEMPLATE_FILE=""
 TARGET_DIR=""
 WORKSPACE_DIR=""
 FORCE_FULLSCAN="false"
+CONFIG_FILE=""
+
+# Plugin activation overrides (associative arrays)
+declare -gA PLUGIN_ACTIVATION_OVERRIDES
 
 # ==============================================================================
 # Argument Parsing Functions
 # ==============================================================================
+
+# Load configuration file and apply plugin activation settings
+# Arguments:
+#   $1 - Path to configuration file (JSON format)
+load_config_file() {
+  local config_path="$1"
+  
+  if [[ ! -f "${config_path}" ]]; then
+    log "WARN" "PARSER" "Configuration file not found: ${config_path}"
+    return 1
+  fi
+  
+  log "DEBUG" "PARSER" "Loading configuration from: ${config_path}"
+  
+  # Parse plugin activation settings from config file using jq
+  if command -v jq >/dev/null 2>&1; then
+    # Extract plugin activation settings if they exist
+    # Format: { "plugins": { "plugin-name": { "active": true }, ... } }
+    local plugins_obj
+    plugins_obj=$(jq -r '.plugins // {}' "${config_path}" 2>/dev/null)
+    
+    if [[ "${plugins_obj}" != "{}" ]]; then
+      # Iterate over each plugin in the config
+      local plugin_names
+      plugin_names=$(echo "${plugins_obj}" | jq -r 'keys[]' 2>/dev/null)
+      
+      while IFS= read -r plugin_name; do
+        if [[ -n "${plugin_name}" ]]; then
+          local plugin_active
+          plugin_active=$(echo "${plugins_obj}" | jq -r ".\"${plugin_name}\".active // empty" 2>/dev/null)
+          
+          if [[ -n "${plugin_active}" ]]; then
+            PLUGIN_ACTIVATION_OVERRIDES["${plugin_name}"]="${plugin_active}"
+            log "DEBUG" "PARSER" "Config override for ${plugin_name}: active=${plugin_active}"
+          fi
+        fi
+      done <<< "${plugin_names}"
+    fi
+  else
+    log "WARN" "PARSER" "jq not available, cannot parse configuration file"
+    return 1
+  fi
+  
+  return 0
+}
 
 # Parse command-line arguments
 # Arguments:
@@ -134,6 +183,38 @@ parse_arguments() {
         FORCE_FULLSCAN="true"
         log "INFO" "PARSER" "Full scan mode enabled"
         shift
+        ;;
+      --config)
+        if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
+          echo "Error: --config requires a configuration file argument" >&2
+          echo "Try '$SCRIPT_NAME --help' for more information." >&2
+          exit "${EXIT_INVALID_ARGS}"
+        fi
+        CONFIG_FILE="$2"
+        log "INFO" "PARSER" "Configuration file: $2"
+        # Load config file and apply plugin activation settings
+        load_config_file "$2"
+        shift 2
+        ;;
+      --activate-plugin)
+        if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
+          echo "Error: --activate-plugin requires a plugin name argument" >&2
+          echo "Try '$SCRIPT_NAME --help' for more information." >&2
+          exit "${EXIT_INVALID_ARGS}"
+        fi
+        PLUGIN_ACTIVATION_OVERRIDES["$2"]="true"
+        log "INFO" "PARSER" "Plugin activation override: $2 = true"
+        shift 2
+        ;;
+      --deactivate-plugin)
+        if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
+          echo "Error: --deactivate-plugin requires a plugin name argument" >&2
+          echo "Try '$SCRIPT_NAME --help' for more information." >&2
+          exit "${EXIT_INVALID_ARGS}"
+        fi
+        PLUGIN_ACTIVATION_OVERRIDES["$2"]="false"
+        log "INFO" "PARSER" "Plugin activation override: $2 = false"
+        shift 2
         ;;
       -*)
         echo "Error: Unknown option: $1" >&2
