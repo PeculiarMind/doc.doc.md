@@ -52,7 +52,8 @@ discover_plugins() {
   
   # Check if plugins directory exists
   if [[ ! -d "${plugins_dir}" ]]; then
-    error_exit "Plugins directory not found: ${plugins_dir}" "${EXIT_FILE_ERROR}"
+    log "WARN" "PLUGIN" "Plugins directory not found: ${plugins_dir}"
+    return 0
   fi
   
   # Platform-specific directory (e.g., plugins/ubuntu/)
