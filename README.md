@@ -35,7 +35,7 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 **Core Principles:**
 - **Composability**: Leverages proven Unix tools instead of reimplementing functionality
-- **Extensibility**: Plugin architecture for custom analysis capabilities
+- **Extensibility**: Plugin architecture for custom analysis capabilities with file type filtering
 - **Privacy**: 100% local processing - no cloud services or data transmission
 - **Simplicity**: Pure Bash, minimal dependencies, runs anywhere Unix tools exist
 - **Adaptability**: Mode-aware behavior automatically adjusts UX for interactive users and reliable automation for scripts/cron jobs
@@ -95,9 +95,9 @@ See ADR-0012 for rationale, migration, and usage details.
 **2026_Spark_0214 - Modular Architecture with Plugin Execution System** 🚧
 
 **Features:**
-- **Done (46):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, templates system, default template fallback, precise plugin listing, plugin installation checks, active/inactive plugin states, new versioning scheme, workspace recovery and rescan, single-file analysis mode, and more
+- **Done (47):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, templates system, default template fallback, precise plugin listing, plugin installation checks, active/inactive plugin states, new versioning scheme, workspace recovery and rescan, single-file analysis mode, plugin file type filtering, and more
 - **Implementing (0):** -
-- **Backlog (11):** Plugin sandboxing, file type filtering and validation, plugin-file assignment, plugin results aggregation, final report generation, comprehensive error handling, dependency security verification, security audit logging, security testing framework, and more
+- **Backlog (10):** Plugin sandboxing, plugin-file assignment, plugin results aggregation, final report generation, comprehensive error handling, dependency security verification, security audit logging, security testing framework, and more
 
 **Architecture:** Entry script loads modular components across core, UI, plugin, and orchestration domains. Plugin execution system implements plugin-toolkit interface architecture with data-driven dependency resolution. Architecture decisions and concepts are documented and traceable.
 
@@ -172,12 +172,14 @@ chmod +x scripts/doc.doc.sh
 1. **stat** (Cross-platform)
    - Extracts file metadata (size, timestamps, permissions)
    - Works on all files
+   - Processes: All MIME types (`*/*`) and all extensions (`*`)
    - Inputs: `file_path_absolute`
    - Outputs: `file_size_bytes`, `file_modified_time`, `file_permissions`, etc.
 
 2. **ocrmypdf** (Ubuntu)
    - Performs Optical Character Recognition on PDF files
    - Extracts text content and makes PDFs searchable
+   - Processes: PDF files only (`application/pdf`, `.pdf`)
    - Inputs: `file_path_absolute`
    - Outputs: `ocr_confidence`, `ocr_status`, `ocr_text_content`
    - **Dependencies**: `ocrmypdf`, `tesseract-ocr`, `ghostscript`, `unpaper`
@@ -187,10 +189,54 @@ chmod +x scripts/doc.doc.sh
      ```
    - **Reference Implementation**: Located at `scripts/plugins/ubuntu/ocrmypdf/`, serves as example of plugin architecture
 
+**Plugin File Type Filtering:**
+- Plugins declare supported file types via `processes` field in `descriptor.json`
+- MIME type filtering: Plugins specify exact types (e.g., `application/pdf`) or wildcards (`*/*`)
+- Extension filtering: Plugins specify extensions (e.g., `.pdf`) or wildcards (`*`)
+- Case-insensitive extension matching for cross-platform compatibility
+- Plugins with empty/omitted `processes` fields handle all file types
+- Only compatible plugins execute for each file
+
 **Plugin Installation:**
 - Plugins automatically check for required tools at runtime
 - Use provided `install.sh` scripts for Ubuntu-specific plugins
 - Refer to plugin `descriptor.json` for dependency details
+
+### Plugin Descriptor Format
+
+Each plugin includes a `descriptor.json` file that defines its capabilities and file type compatibility:
+
+**Example descriptor.json:**
+```json
+{
+    "name": "ocrmypdf",
+    "description": "Performs OCR on PDF files",
+    "active": true,
+    "processes": {
+        "mime_types": ["application/pdf"],
+        "file_extensions": [".pdf"]
+    },
+    "consumes": {
+        "file_path_absolute": {
+            "type": "string",
+            "description": "Absolute path to the PDF file"
+        }
+    },
+    "provides": {
+        "ocr_text_content": {
+            "type": "string",
+            "description": "Extracted text content"
+        }
+    }
+}
+```
+
+**Key Fields:**
+- `processes.mime_types`: Array of MIME types the plugin handles (e.g., `["application/pdf"]` or `["*/*"]` for all)
+- `processes.file_extensions`: Array of file extensions (e.g., `[".pdf"]` or `["*"]` for all)
+- `consumes`: Input data required by the plugin
+- `provides`: Output data generated by the plugin
+- Empty/omitted `processes` arrays indicate the plugin handles all file types
 
 ### Logging Format
 
@@ -542,6 +588,7 @@ doc.doc.md/
 - ✅ **Template Engine Test Coverage** - Comprehensive testing (55 tests passing)
 - ✅ **OCRmyPDF Plugin** - PDF OCR capability with reference implementation (Feature 0002)
 - ✅ **Single-File Analysis Mode** - Analyze individual files with `-f` flag (Feature 0051)
+- ✅ **Plugin File Type Filtering** - MIME type and extension-based filtering (Feature 0044)
 
 ### Phase 5: Security Enhancement (🔜 NEXT - 2026_Aurora)
 - 🔜 **Plugin sandboxing with Bubblewrap** (Feature 0026) - HIGH PRIORITY
