@@ -279,7 +279,7 @@ execute_analysis_workflow() {
     fi
     
     # Execute plugins for this file
-    if ! orchestrate_plugins "$file_path" "$workspace_dir" "$plugins_dir" 2>/dev/null; then
+    if ! orchestrate_plugins "$file_path" "$workspace_dir" "$plugins_dir" "$source_dir" 2>/dev/null; then
       log "WARN" "ORCHESTRATOR" "Plugin execution failed for: $file_path"
       error_count=$((error_count + 1))
       # Continue processing other files (partial success)
