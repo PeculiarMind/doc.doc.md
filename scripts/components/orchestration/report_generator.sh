@@ -114,15 +114,31 @@ merge_workspace_data() {
     return 1
   fi
   
-  # Extract fields from JSON
-  local file_path file_size filename
-  file_path=$(echo "$json_data" | jq -r '.file_path // ""' 2>/dev/null)
-  file_size=$(echo "$json_data" | jq -r '.file_size // 0' 2>/dev/null)
+  # Flatten nested plugin data to root level for template substitution.
+  # Plugin data is stored namespaced: { "stat": { "file_size": "123", ... }, ... }
+  # Templates expect flat variables: {{file_size}} not {{stat.file_size}}
+  # This jq expression merges all plugin-namespaced objects to the root level,
+  # e.g., {"stat": {"file_size": "123"}} becomes {"file_size": "123", "stat": {...}}
+  local flattened_data
+  flattened_data=$(echo "$json_data" | jq '
+    # Start with the original data
+    . as $root |
+    # Get all plugin names (objects that are not arrays and not primitive)
+    [keys[] | select(. as $k | $root[$k] | type == "object" and (. | has("name") | not))] as $plugin_keys |
+    # Merge all plugin data objects to root level
+    reduce $plugin_keys[] as $pk (.; . * .[$pk])
+  ' 2>/dev/null) || flattened_data="$json_data"
   
-  if [[ -n "$file_path" ]]; then
+  # Extract fields from flattened JSON
+  local file_path file_size filename filepath_relative
+  file_path=$(echo "$flattened_data" | jq -r '.file_path // ""' 2>/dev/null)
+  file_size=$(echo "$flattened_data" | jq -r '.file_size // 0' 2>/dev/null)
+  filename=$(echo "$flattened_data" | jq -r '.filename // ""' 2>/dev/null)
+  filepath_relative=$(echo "$flattened_data" | jq -r '.filepath_relative // ""' 2>/dev/null)
+  
+  # Fallback for filename if not in JSON
+  if [[ -z "$filename" ]] && [[ -n "$file_path" ]]; then
     filename=$(basename "$file_path")
-  else
-    filename=""
   fi
   
   # Generate helper values
@@ -130,8 +146,8 @@ merge_workspace_data() {
   file_size_human=$(human_readable_size "$file_size")
   generation_time=$(format_date_iso8601)
   
-  # Merge with original data
-  echo "$json_data" | jq \
+  # Merge with flattened data, ensuring all template variables are at root level
+  echo "$flattened_data" | jq \
     --arg filename "$filename" \
     --arg file_size_human "$file_size_human" \
     --arg generation_time "$generation_time" \
@@ -329,11 +345,35 @@ generate_reports() {
       continue
     fi
 
-    # Generate a report filename from the hash
-    local file_hash
-    file_hash=$(basename "$json_file" .json)
-    local report_filename="${file_hash}.md"
-    local report_path="$target_dir/$report_filename"
+    # Get filepath_relative from workspace data for sidecar naming
+    local filepath_relative
+    filepath_relative=$(echo "$json_data" | jq -r '.filepath_relative // empty' 2>/dev/null)
+
+    local report_path
+    if [[ -n "$filepath_relative" ]]; then
+      # Create sidecar file path: source/subdir/doc.pdf -> output/subdir/doc.md
+      local relative_dir
+      relative_dir=$(dirname "$filepath_relative")
+      local basename_noext
+      basename_noext=$(basename "$filepath_relative" | sed 's/\.[^.]*$//')
+      
+      if [[ "$relative_dir" == "." ]]; then
+        report_path="$target_dir/${basename_noext}.md"
+      else
+        # Create subdirectory mirroring source structure
+        if ! mkdir -p "$target_dir/$relative_dir" 2>/dev/null; then
+          log "WARN" "REPORT" "Failed to create output directory: $target_dir/$relative_dir"
+        fi
+        report_path="$target_dir/$relative_dir/${basename_noext}.md"
+      fi
+      log "DEBUG" "REPORT" "Using sidecar path: $report_path (from $filepath_relative)"
+    else
+      # Fallback to hash-based naming if no filepath_relative
+      local file_hash
+      file_hash=$(basename "$json_file" .json)
+      report_path="$target_dir/${file_hash}.md"
+      log "DEBUG" "REPORT" "Fallback to hash-based naming: $report_path"
+    fi
 
     # Generate report content from template and enhanced data
     local report_content

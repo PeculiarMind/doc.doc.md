@@ -453,12 +453,14 @@ execute_plugin() {
 #   $1 - File path to process
 #   $2 - Workspace directory
 #   $3 - Plugins directory
+#   $4 - Source directory (optional, for relative path computation)
 # Returns:
 #   0 on success, 1 on error
 orchestrate_plugins() {
   local file_path="$1"
   local workspace_dir="$2"
   local plugins_dir="$3"
+  local source_directory="${4:-}"
 
   log "INFO" "ORCHESTRATOR" "Orchestrating plugin execution for: ${file_path}"
 
@@ -500,6 +502,28 @@ orchestrate_plugins() {
   # Prepare absolute file path
   local file_path_absolute
   file_path_absolute=$(cd "$(dirname "$file_path")" && echo "$(pwd)/$(basename "$file_path")")
+
+  # Compute filename
+  local filename
+  filename=$(basename "$file_path")
+
+  # Compute relative path if source_directory is provided
+  local filepath_relative=""
+  if [[ -n "$source_directory" ]]; then
+    # Make source_directory absolute for consistent comparison
+    local source_dir_absolute
+    source_dir_absolute=$(cd "$source_directory" 2>/dev/null && pwd)
+    if [[ -n "$source_dir_absolute" ]]; then
+      # Handle case where file is directly in source directory
+      if [[ "$file_path_absolute" == "$source_dir_absolute"/* ]]; then
+        filepath_relative="${file_path_absolute#$source_dir_absolute/}"
+      elif [[ "$file_path_absolute" == "$source_dir_absolute" ]]; then
+        # Edge case: file path equals source directory (unlikely but handle it)
+        filepath_relative="$filename"
+      fi
+      # If file is outside source directory, filepath_relative remains empty
+    fi
+  fi
 
   # Prepare base variable JSON
   local base_variables
@@ -574,6 +598,21 @@ orchestrate_plugins() {
     workspace_data=$(merge_plugin_data "$workspace_data" "$plugin_name" "$result_json" "success")
 
   done <<< "$plugin_order"
+
+  # Add file metadata to workspace data before saving
+  local file_metadata
+  file_metadata=$(jq -n \
+    --arg file_path "$file_path_absolute" \
+    --arg filepath_relative "$filepath_relative" \
+    --arg source_directory "${source_directory:-}" \
+    --arg filename "$filename" \
+    '{
+      file_path: $file_path,
+      filepath_relative: $filepath_relative,
+      source_directory: $source_directory,
+      filename: $filename
+    }')
+  workspace_data=$(echo "$workspace_data" "$file_metadata" | jq -s '.[0] * .[1]' 2>/dev/null)
 
   # Save workspace
   if ! save_workspace "$workspace_dir" "$file_hash" "$workspace_data"; then

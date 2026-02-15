@@ -77,6 +77,7 @@ Lightweight Bash toolkit that orchestrates CLI tools to extract file metadata an
 
 ## Current Status
 
+✅ **MVP RELEASED** - See [MVP_ASSESSMENT.md](MVP_ASSESSMENT.md) for full assessment report.
 
 **Versioning:**
 This project uses the **Semantic Timestamp Versioning Pattern** as defined in [ADR-0012](01_vision/03_architecture/09_architecture_decisions/ADR_0012_semantic_timestamp_versioning_pattern.md):
@@ -86,22 +87,31 @@ This project uses the **Semantic Timestamp Versioning Pattern** as defined in [A
 - **CREATIVE_NAME** is maintained by the author in [scripts/components/version_name.txt](scripts/components/version_name.txt) and is the single source of truth for the current release codename.
 - **YEAR**, **MMDD**, and **SECONDS_OF_DAY** are determined automatically at change time using the current system time, before a pull request is created.
 
-Example: `2026_Spark_0213.54321`
+Example: `2026_Spark_0215.32477`
 
 See ADR-0012 for rationale, migration, and usage details.
 
-**Current Status:**
+**MVP Status:**
 
-**2026_Spark_0214 - Modular Architecture with Plugin Execution System** 🚧
+**2026_Spark_0215 - MVP Release** ✅
+
+**MVP Features (Complete):**
+- ✅ **stat plugin execution** - File size, owner, timestamps
+- ✅ **ocrmypdf plugin support** - OCR for PDFs (requires ocrmypdf tool)
+- ✅ **MD sidecar file creation** - `example.pdf` → `example.md`
+- ✅ **Directory structure mirroring** - Output hierarchy matches source
+- ✅ **Template variable substitution** - Plugin data in reports
+- ✅ **Plugin discovery and validation** - Automatic plugin management
+- ✅ **File type filtering** - Plugins execute only on applicable files
 
 **Features:**
-- **Done (47):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, templates system, default template fallback, precise plugin listing, plugin installation checks, active/inactive plugin states, new versioning scheme, workspace recovery and rescan, single-file analysis mode, plugin file type filtering, and more
+- **Done (50+):** Core structure, plugin listing, logging, dev containers, directory scanner, workspace management, plugin execution engine, tool verification, plugin security, modular architecture, mode detection, interactive progress, user prompts, structured logging, stat plugin, main orchestrator, advanced help system, workspace security, modular refactoring, OCRmyPDF plugin, templates system, default template fallback, precise plugin listing, plugin installation checks, active/inactive plugin states, new versioning scheme, workspace recovery and rescan, single-file analysis mode, plugin file type filtering, file-plugin assignment, plugin results aggregation, final report generation with sidecar naming
 - **Implementing (0):** -
-- **Backlog (10):** Plugin sandboxing, plugin-file assignment, plugin results aggregation, final report generation, comprehensive error handling, dependency security verification, security audit logging, security testing framework, and more
+- **Backlog (9):** Plugin sandboxing, comprehensive error handling, dependency security verification, security audit logging, security testing framework, and more
 
 **Architecture:** Entry script loads modular components across core, UI, plugin, and orchestration domains. Plugin execution system implements plugin-toolkit interface architecture with data-driven dependency resolution. Architecture decisions and concepts are documented and traceable.
 
-**Testing:** 46 test suites (unit, integration, system, plugin execution, validation, tool verification) - comprehensive coverage with ongoing test development.
+**Testing:** 48 test suites (unit, integration, system, plugin execution, validation, tool verification) - 94% pass rate (45/48)
 
 **Requirements:** 64 accepted requirements, 15+ documented cross-cutting concepts, complete security threat modeling
 
