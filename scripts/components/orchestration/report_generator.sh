@@ -114,15 +114,29 @@ merge_workspace_data() {
     return 1
   fi
   
-  # Extract fields from JSON
-  local file_path file_size filename
-  file_path=$(echo "$json_data" | jq -r '.file_path // ""' 2>/dev/null)
-  file_size=$(echo "$json_data" | jq -r '.file_size // 0' 2>/dev/null)
+  # Flatten nested plugin data to root level for template substitution
+  # Plugin data is stored as { "stat": { "file_size": "123", ... }, ... }
+  # We need to merge these values to the root level for ${file_size} to work
+  local flattened_data
+  flattened_data=$(echo "$json_data" | jq '
+    # Start with the original data
+    . as $root |
+    # Get all plugin names (objects that are not arrays and not primitive)
+    [keys[] | select(. as $k | $root[$k] | type == "object" and (. | has("name") | not))] as $plugin_keys |
+    # Merge all plugin data objects to root level
+    reduce $plugin_keys[] as $pk (.; . * .[$pk])
+  ' 2>/dev/null) || flattened_data="$json_data"
   
-  if [[ -n "$file_path" ]]; then
+  # Extract fields from flattened JSON
+  local file_path file_size filename filepath_relative
+  file_path=$(echo "$flattened_data" | jq -r '.file_path // ""' 2>/dev/null)
+  file_size=$(echo "$flattened_data" | jq -r '.file_size // 0' 2>/dev/null)
+  filename=$(echo "$flattened_data" | jq -r '.filename // ""' 2>/dev/null)
+  filepath_relative=$(echo "$flattened_data" | jq -r '.filepath_relative // ""' 2>/dev/null)
+  
+  # Fallback for filename if not in JSON
+  if [[ -z "$filename" ]] && [[ -n "$file_path" ]]; then
     filename=$(basename "$file_path")
-  else
-    filename=""
   fi
   
   # Generate helper values
@@ -130,8 +144,8 @@ merge_workspace_data() {
   file_size_human=$(human_readable_size "$file_size")
   generation_time=$(format_date_iso8601)
   
-  # Merge with original data
-  echo "$json_data" | jq \
+  # Merge with flattened data, ensuring all template variables are at root level
+  echo "$flattened_data" | jq \
     --arg filename "$filename" \
     --arg file_size_human "$file_size_human" \
     --arg generation_time "$generation_time" \

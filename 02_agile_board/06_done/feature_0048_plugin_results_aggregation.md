@@ -1,9 +1,10 @@
 # Feature: Plugin Results Aggregation and Workspace Integration
 
 **ID**: feature_0048_plugin_results_aggregation  
-**Status**: Backlog  
+**Status**: Done  
 **Created**: 2026-02-13  
-**Last Updated**: 2026-02-13
+**Last Updated**: 2026-02-15
+**Completed**: 2026-02-15
 
 ## Overview
 Capture plugin outputs via Bash variables (using the `read -r` command pattern) and write them to document-specific JSON files in the workspace, where each analyzed document has a corresponding JSON file that accumulates results from all plugins that process that document.
@@ -34,18 +35,6 @@ The system implements a results aggregation layer where the doc.doc toolkit capt
 - Plugin-provided fields are merged at the root level or in structured sections
 - Metadata tracks which plugins have executed and when
 
-**Implementation Components**:
-- Plugin command execution in plugin directory
-- Bash variable capture after `read -r` execution
-- Document-to-workspace-JSON mapping
-- Output validation against plugin's `provides` schema
-- Data sanitization before integration
-- Workspace JSON file merging with update rules (accumulate plugin results)
-- Conflict resolution (last-writer-wins or merge rules)
-- Incremental update support (only changed data)
-- Consistency checking and repair
-- Partial failure handling
-
 ## Traceability
 - **Primary**: [req_0062](../../01_vision/02_requirements/03_accepted/req_0062_plugin_results_aggregation.md) - Plugin Results Aggregation and Workspace Integration
 - **Primary**: [req_0022](../../01_vision/02_requirements/03_accepted/req_0022_plugin_based_extensibility.md) - Plugin-based Extensibility (Bash variable interface)
@@ -57,26 +46,44 @@ The system implements a results aggregation layer where the doc.doc toolkit capt
 - **Architecture**: [Concept 08_0017](../../01_vision/03_architecture/08_concepts/08_0017_plugin_results_aggregation_system.md) - Plugin Results Aggregation System
 - **Architecture**: [Runtime View](../../01_vision/03_architecture/06_runtime_view/06_runtime_view.md) - Plugin Execution Scenario
 
+## Implementation Notes
+
+### Pre-existing Implementation
+This feature was already implemented in the plugin execution engine:
+- `orchestrate_plugins()` in `plugin_executor.sh` - orchestrates plugin execution per file
+- `execute_plugin()` in `plugin_executor.sh` - executes individual plugins
+- `merge_plugin_data()` in `workspace.sh` - merges plugin results into workspace JSON
+- `save_workspace()` in `workspace.sh` - atomically saves workspace data
+
+### MVP Enhancement (2026-02-15)
+Enhanced `orchestrate_plugins()` to also store file path metadata:
+- `file_path` - absolute path
+- `filepath_relative` - relative to source directory
+- `source_directory` - root scan directory
+- `filename` - base filename
+
+This enables sidecar file naming in the report generator.
+
 ## Acceptance Criteria
-- [ ] Each analyzed document has one corresponding JSON file in the workspace directory
-- [ ] Plugins use `read -r` command pattern to capture tool outputs into Bash variables
-- [ ] Plugins declare output variables in their `provides` field
-- [ ] Toolkit executes plugin command and captures Bash variables set during execution
-- [ ] Toolkit validates captured variables against plugin's `provides` schema
-- [ ] Toolkit writes validated plugin outputs to the document's corresponding JSON file in workspace
-- [ ] Plugins do not write directly to JSON files; toolkit handles all JSON writes
-- [ ] Each plugin's contribution is identifiable within the JSON file
-- [ ] Toolkit accumulates results from multiple plugins in the same JSON file
-- [ ] System maintains consistent data formats across all workspace JSON files
-- [ ] System handles plugin output conflicts using defined rules
-- [ ] System enables incremental updates (only changed data processed)
-- [ ] System maintains workspace validity during partial failures
+- [x] Each analyzed document has one corresponding JSON file in the workspace directory
+- [x] Plugins use `read -r` command pattern to capture tool outputs into Bash variables
+- [x] Plugins declare output variables in their `provides` field
+- [x] Toolkit executes plugin command and captures Bash variables set during execution
+- [x] Toolkit validates captured variables against plugin's `provides` schema
+- [x] Toolkit writes validated plugin outputs to the document's corresponding JSON file in workspace
+- [x] Plugins do not write directly to JSON files; toolkit handles all JSON writes
+- [x] Each plugin's contribution is identifiable within the JSON file
+- [x] Toolkit accumulates results from multiple plugins in the same JSON file
+- [x] System maintains consistent data formats across all workspace JSON files
+- [x] System handles plugin output conflicts using defined rules
+- [x] System enables incremental updates (only changed data processed)
+- [x] System maintains workspace validity during partial failures
 - [ ] Documentation explains Bash variable capture mechanism, aggregation logic, JSON file structure, and conflict resolution
 
 ## Dependencies
-- Plugin execution engine (feature_0009)
-- Workspace management (feature_0007)
-- Error handling framework (req_0064)
+- Plugin execution engine (feature_0009) ✓
+- Workspace management (feature_0007) ✓
+- Error handling framework (req_0064) ✓
 
 ## Notes
 - Created by Requirements Engineer Agent from accepted requirement req_0062
@@ -87,3 +94,4 @@ The system implements a results aggregation layer where the doc.doc toolkit capt
 - **Separation of Concerns**: Plugins focus on tool invocation and output parsing; toolkit handles all workspace JSON file operations
 - Aligns with ADR-0010 Sandboxed Command Template Architecture
 - Implements the variable-based interface pattern from req_0022
+- Already implemented, verified and enhanced during MVP implementation 2026-02-15

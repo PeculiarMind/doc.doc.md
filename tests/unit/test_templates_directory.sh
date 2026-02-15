@@ -97,7 +97,8 @@ test_default_template_has_placeholders() {
   content=$(cat "${default_template}")
   
   # Check for common placeholder patterns - using grep for more reliable matching
-  if echo "${content}" | grep -q '\${\w\+}'; then
+  # Support both ${variable} shell-style and {{variable}} mustache-style syntax
+  if echo "${content}" | grep -qE '\$\{\w+\}|\{\{\w+\}\}'; then
     TESTS_RUN=$((TESTS_RUN + 1))
     TESTS_PASSED=$((TESTS_PASSED + 1))
     echo -e "${GREEN}✓${NC} PASS: Default template contains placeholder variables"
