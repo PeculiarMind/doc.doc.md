@@ -114,9 +114,11 @@ merge_workspace_data() {
     return 1
   fi
   
-  # Flatten nested plugin data to root level for template substitution
-  # Plugin data is stored as { "stat": { "file_size": "123", ... }, ... }
-  # We need to merge these values to the root level for ${file_size} to work
+  # Flatten nested plugin data to root level for template substitution.
+  # Plugin data is stored namespaced: { "stat": { "file_size": "123", ... }, ... }
+  # Templates expect flat variables: {{file_size}} not {{stat.file_size}}
+  # This jq expression merges all plugin-namespaced objects to the root level,
+  # e.g., {"stat": {"file_size": "123"}} becomes {"file_size": "123", "stat": {...}}
   local flattened_data
   flattened_data=$(echo "$json_data" | jq '
     # Start with the original data
