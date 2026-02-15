@@ -22,7 +22,20 @@ setup_test() {
 
 test_script_metadata_constants() {
   assert_equals "doc.doc.sh" "${SCRIPT_NAME}" "SCRIPT_NAME constant"
-  assert_equals "1.0.0" "${SCRIPT_VERSION}" "SCRIPT_VERSION constant"
+  # Note: Version format changed from semver to Semantic Timestamp Versioning (ADR-0012)
+  # Format: <YEAR>_<CREATIVE_NAME>_<MMDD>.<SECONDS_OF_DAY>
+  # Example: 2026_Phoenix_0213.77073
+  if [[ "${SCRIPT_VERSION}" =~ ^20[0-9]{2}_[A-Za-z]+_[0-9]{4}\.[0-9]+$ ]]; then
+    echo -e "${GREEN}✓${NC} PASS: SCRIPT_VERSION constant matches Semantic Timestamp format"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+  else
+    echo -e "${RED}✗${NC} FAIL: SCRIPT_VERSION constant"
+    echo "  Expected format: '<YEAR>_<CREATIVE_NAME>_<MMDD>.<SECONDS>'"
+    echo "  Actual: '${SCRIPT_VERSION}'"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+  fi
   assert_equals "GPL-3.0" "${SCRIPT_LICENSE}" "SCRIPT_LICENSE constant"
   
   # Check non-empty constants
