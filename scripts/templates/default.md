@@ -1,21 +1,20 @@
-# ${doc_name}
+# ${filename}
 
-## MetaData
+## File Information
+- **Path:** ${filepath_relative}
+- **Size:** ${file_size} bytes (${file_size_human})
+- **Owner:** ${file_owner}
+- **Last Modified:** ${file_last_modified}
 
-* **Document categories:** ${doc_categories}
-* **Document type:** ${doc_type}
-* **File name:** ${filename}
-* **Relative file path:** ${filepath_relative}
-* **Absolute File path:** ${filepath_absolute}
-* **File owner:** ${file_owner}
-* **Created at:** ${file_created_at}
-* **Created by:** ${file_created_by}
-* **Last analyzed at:** ${file_last_analyzed_at}
-* **Last analyzed by doc.doc version:** ${doc_doc_version}
+## Analysis
+- **Last Analyzed:** ${generation_time}
 
-## Content Description
+{{#if ocr_status}}
+## OCR Results
+- **Status:** ${ocr_status}
+- **Confidence:** ${ocr_confidence}%
 
-${doc_content_summary}
-
-
+### Extracted Text
+${ocr_text_content}
+{{/if}}
 
