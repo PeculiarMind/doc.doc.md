@@ -1,0 +1,21 @@
+{
+	"name": "ProTemp Development Container",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"editor.formatOnSave": true,
+				"editor.tabSize": 2,
+				"files.eol": "\n"
+			}
+		}
+	},
+
+	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+
+	"remoteUser": "vscode"
+}
