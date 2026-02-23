@@ -1,27 +1,28 @@
 # License
 
-This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** license.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-## You are free to:
+## Summary
 
-- **Share** — copy and redistribute the material in any medium or format.
-- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially.
+The AGPL-3.0 is a strong copyleft license that requires:
 
-## Under the following terms:
+- **Source Code Availability**: If you run a modified version of this software on a server and let others interact with it there, you must also make the source code available to those users.
+- **Copyleft**: Any modified versions or derivative works must also be licensed under AGPL-3.0.
+- **Patent Grant**: Contributors grant patent rights to users.
+- **Notice Requirements**: You must retain copyright notices and provide a copy of the license.
 
-- **Attribution** — You must give appropriate credit by 
-  - linking to the original project repository: [https://github.com/PeculiarMind/ProTemp.AI](https://github.com/PeculiarMind/ProTemp.AI), 
-  - provide a link to the license, 
-  - and indicate if changes were made.
-- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
-- **No additional restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+## Key Terms
+
+- **Freedom to Use**: You can use this software for any purpose.
+- **Freedom to Study and Modify**: You have access to the source code and can modify it.
+- **Freedom to Distribute**: You can distribute copies of the original software.
+- **Freedom to Distribute Modified Versions**: You can distribute your modifications, but they must be under AGPL-3.0.
+- **Network Use is Distribution**: If you run this software on a server and provide access over a network, you must provide the source code to users.
 
 ## Full License Text
 
 The full license text is available at:  
-[https://creativecommons.org/licenses/by-sa/4.0/legalcode](https://creativecommons.org/licenses/by-sa/4.0/legalcode)
+[https://www.gnu.org/licenses/agpl-3.0.html](https://www.gnu.org/licenses/agpl-3.0.html)
 
-## Summary
-
-For a human-readable summary, see:  
-[https://creativecommons.org/licenses/by-sa/4.0/](https://creativecommons.org/licenses/by-sa/4.0/)
+Or see the complete license in the GNU documentation:  
+[https://www.gnu.org/licenses/agpl-3.0.txt](https://www.gnu.org/licenses/agpl-3.0.txt)
