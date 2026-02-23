@@ -9,3 +9,11 @@ arc42 provides a practical, proven template for documenting and communicating so
 - **Homepage**: [https://arc42.org](https://arc42.org)
 - **License**: arc42 is available under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license.
 - **Authors**: Dr. Gernot Starke and Dr. Peter Hruschka
+
+## PeculiarMind/ProTemp.AI
+
+The project structure and organization are inspired by the **PeculiarMind/ProTemp.AI** project.
+
+- **GitHub Repository**: [https://github.com/PeculiarMind/ProTemp.AI](https://github.com/PeculiarMind/ProTemp.AI)
+- **License**: ProTemp.AI is available under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license.
+- **Author**: PeculiarMind
