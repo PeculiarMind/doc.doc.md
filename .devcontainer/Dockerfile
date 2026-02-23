@@ -14,6 +14,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Install basic development tools
 RUN apt-get update && apt-get install -y \
+    file \
     git \
     curl \
     wget \
