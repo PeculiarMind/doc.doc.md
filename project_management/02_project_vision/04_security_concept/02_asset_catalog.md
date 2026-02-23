@@ -13,4 +13,5 @@ This section catalogs all assets of this project, categorizing them by type and 
 
 | Asset ID | Asset Name | Asset Category | Type | Description | C | I | A |
 |----------|------------|----------------|------------|-------------|:-:|:-:|:-:|
-| ASSET-0001 | [User Credentials] | PRIMARY | Data | Passwords, MFA secrets | 3 | 3 | 2 |
+| ASSET-0001 | documents | PRIMARY | Data | the documents that are processed by the system | 2 | 3 | 3 |
+

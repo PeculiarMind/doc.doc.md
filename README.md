@@ -1,143 +1,382 @@
-# ProTemp.AI — Project Template
+# doc.doc.md
 
-ProTemp is a ready-to-use **project template** that provides a standardised folder structure, document templates, and AI-agent personas for managing the full lifecycle of a software project — from vision and requirements through architecture, implementation, testing, and documentation.
+**Transform your document collections into organized, searchable markdown files.**
 
-Clone or fork this repository to bootstrap a new project with sensible defaults for project management, quality assurance, and architecture documentation.
+doc.doc.md is a command-line tool that processes document collections in directory structures and generates markdown files for each document. Perfect for managing personal documents, home labs, or any collection where you want markdown-based organization without a complex document management system.
 
-## Key Features
+---
 
-- **Structured project management** — predefined folders for vision, planning boards, roadmaps, and reporting.
-- **Arc42-based architecture docs** — both a vision layer (what should be) and an implementation layer (what is), following the proven 12-section arc42 template.
-- **Document templates** — ready-made templates for requirements, architecture decisions, constraints, work items, test reports, security reviews, security analysis scopes, technical debt records, and more.
-- **Documentation standards** — a central registry that defines document types, naming conventions, storage locations, and linked templates.
-- **Kanban-style planning board** — work items flow through `funnel → analyze → ready → backlog → implementing → done` (plus obsoleted/rejected).
-- **AI-agent personas** — seven specialised GitHub Copilot agent definitions (Architect, Developer, Tester, Requirements, Security, Documentation, License) with clear responsibilities, inputs, outputs, and limitations.
-- **Workflow definitions** — documented workflows for requirements engineering and implementation that agents can follow autonomously.
+## ⚠️ Development Status
 
-## Repository Structure
+**This project is in early development.** The core structure is in place, but the main `doc.doc.sh` script is not yet fully implemented. Contributions and feedback are welcome!
 
-```
-ProTemp/
-├── .github/
-│   ├── copilot-instructions.md          # Copilot agent orchestration rules
-│   └── agents/                          # Agent persona definitions
-│       ├── architect.agent.md
-│       ├── developer.agent.md
-│       ├── documentation.agent.md
-│       ├── license.agent.md
-│       ├── requirements.agent.md
-│       ├── security.agent.md
-│       └── tester.agent.md
-│
-├── project_management/
-│   ├── 01_guidelines/                   # Standards, templates, workflows
-│   │   ├── documentation_standards/
-│   │   │   ├── documentation-standards.md
-│   │   │   └── doc_templates/           # All document templates
-│   │   └── workflows/                   # Process workflow definitions
-│   ├── 02_project_vision/               # Vision & requirements
-│   │   ├── 01_project_goals/
-│   │   ├── 02_requirements/             # Funnel → Analyze → Accepted / Obsoleted / Rejected
-│   │   ├── 03_architecture_vision/      # Arc42 sections 1–12 (target state)
-│   │   └── 04_security_concept/         # Security methodology, asset catalog, threat models
-│   │       ├── 01_security_concept.md   # STRIDE/DREAD framework
-│   │       ├── 02_asset_catalog.md      # CIA-rated asset inventory
-│   │       └── SAS_XXXX_*.md            # Security analysis scopes (threat models)
-│   ├── 03_plan/
-│   │   ├── 01_roadmap/
-│   │   └── 02_planning_board/           # Kanban columns (funnel → done)
-│   └── 04_reporting/
-│       ├── 01_architecture_reviews/
-│       ├── 02_tests_reports/
-│       └── 03_security_reviews/
-│
-├── project_documentation/
-│   ├── 01_architecture/                 # Arc42 sections 1–12 (implemented state)
-│   ├── 02_ops_guide/
-│   ├── 03_user_guide/
-│   └── 04_dev_guide/
-│
-├── AGENTS.md                            # Central registry of all available agents
-├── CREDITS.md
-├── LICENSE.md
-└── README.md
-```
+---
 
-## Getting Started
+## Features
 
-1. **Clone or fork** this repository.
-2. Replace placeholder content in `project_management/02_project_vision/01_project_goals/` with your project's vision.
-3. Start deriving requirements — the Requirements agent or the workflow in `project_management/01_guidelines/workflows/requirements_engineering_workflow.md` will guide you.
-4. Use the document templates in `project_management/01_guidelines/documentation_standards/doc_templates/` whenever you create a new artifact.
-5. Consult `project_management/01_guidelines/documentation_standards/documentation-standards.md` for naming conventions and storage locations.
-6. Review [AGENTS.md](AGENTS.md) to understand available agents, workflows, and supporting standards.
+- **Directory Mirroring**: Automatically mirrors your input directory structure in the output location
+- **Markdown Generation**: Creates markdown files for each document based on customizable templates
+- **Advanced Filtering**: Powerful include/exclude logic with AND/OR operators for extensions, glob patterns, and MIME types
+- **Language-Agnostic Plugin System**: Extensible architecture supporting plugins in any language (Bash, Python, compiled binaries)
+- **Template-Based Output**: Full control over the structure of generated markdown files
+- **Unix Pipeline Architecture**: Efficient file processing using standard Unix pipes and streams
+- **Simple CLI**: Straightforward command-line interface with clear options
 
-## Tools
+## Installation
 
-ProTemp includes utility scripts in `project_management/00_tools/` to automate common project maintenance tasks:
+### Prerequisites
 
-### File/Directory Rename and Reference Updater
+- **Bash** shell environment (version 4.0+)
+- **Python 3.12+** for advanced filtering and processing
+- **Git** (for cloning the repository)
 
-Automatically rename or move files and directories while updating all references throughout the workspace. Essential for refactoring project structure without breaking links.
+The tool uses a mixed Bash+Python architecture:
+- Bash handles CLI orchestration, file discovery, and plugin execution
+- Python handles complex filtering logic (AND/OR operators across include/exclude parameters)
+
+### Quick Start
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PeculiarMind/doc.doc.md.git
+   cd doc.doc.md
+   ```
+
+2. Make the script executable:
+   ```bash
+   chmod +x doc.doc.sh
+   ```
+
+3. Run your first command:
+   ```bash
+   ./doc.doc.sh --help
+   ```
+
+### Development Container
+
+This project is configured for use with VS Code Dev Containers. If you're using VS Code with the Remote-Containers extension, simply open the repository and select "Reopen in Container" when prompted.
+
+## Usage
+
+### Basic Command
 
 ```bash
-# Rename a file and update all references
-python3 project_management/00_tools/rename_and_update_refs.py \
-  old_file.md new_file.md --dry-run
-
-# Move a directory and update all nested file references  
-python3 project_management/00_tools/rename_and_update_refs.py \
-  old_folder/ new_folder/
+./doc.doc.sh process \
+  --input-directory /path/to/documents \
+  --output-directory /path/to/output \
+  --template /path/to/template.md
 ```
 
-**Features:**
-- Updates references in markdown links, code, configs, and documentation
-- Handles both files and directories recursively
-- Supports various reference formats (plain text, quoted, backticks, etc.)
-- Dry-run mode to preview changes before applying
-- Automatic workspace detection
+### Advanced Filtering
 
-### Broken Reference Finder
-
-Scan the workspace for broken references - links and textual references pointing to files that don't exist.
+Filter files using powerful include/exclude logic:
 
 ```bash
-# Find all broken references
-python3 project_management/00_tools/find_broken_refs.py
-
-# Show detailed output
-python3 project_management/00_tools/find_broken_refs.py --verbose
+./doc.doc.sh process \
+  --input-directory /path/to/documents \
+  --output-directory /path/to/output \
+  --include ".pdf,.docx" \
+  --include "**/2024/**" \
+  --exclude ".log" \
+  --exclude "**/temp/**" \
+  --exclude "**/drafts/**"
 ```
 
-**Features:**
-- Detects broken markdown links, quoted paths, and backticked references
-- Scans documentation, code, and configuration files
-- Reports line numbers and reference types
-- Useful for pre-commit checks and CI/CD pipelines
-- Exit code 1 if broken references found (CI-friendly)
+**Filter Logic:**
+- Multiple `--include` parameters are ANDed (file must match at least one criterion from each)
+- Values within a single `--include` parameter are ORed (e.g., `.pdf,.docx` matches either)
+- Same logic applies to `--exclude` parameters
+- Auto-detects filter types: file extensions (`.pdf`), glob patterns (`**/2024/**`), or MIME types (`application/pdf`)
 
-See [project_management/00_tools/TOOLS.md](project_management/00_tools/TOOLS.md) for complete documentation and examples.
+### Example Workflow
 
-## AI Agent System
+**Input Directory:**
+```
+/documents
+├── 2025
+│   ├── somedoc.pdf
+│   ├── anotherdoc.docx
+│   └── justaphoto.jpg
+└── 2024
+    └── olderdoc.pdf
+```
 
-ProTemp ships with seven GitHub Copilot agent personas defined in `.github/agents/`. An orchestration layer in `.github/copilot-instructions.md` routes tasks to the most appropriate agent automatically.
+**Output Directory** (after processing):
+```
+/output
+├── 2025
+│   ├── somedoc.md
+│   ├── anotherdoc.md
+│   └── justaphoto.md
+└── 2024
+    └── olderdoc.md
+```
 
-See [AGENTS.md](AGENTS.md) for the complete agent registry, including supporting standards and workflow definitions.
+Each `.md` file contains metadata and content extracted from the original document, formatted according to your template.
 
-| Agent | Responsibility |
-|-------|---------------|
-| **Architect** | Architecture vision & implementation compliance |
-| **Developer** | Backlog selection, implementation, and close-out |
-| **Tester** | Test planning, execution, and reporting |
-| **Requirements** | Requirements elicitation and specification |
-| **Security** | Security reviews and security concept maintenance |
-| **Documentation** | User, ops, and dev guide maintenance |
-| **License** | License compliance and dependency auditing |
+### Command-Line Options
+
+#### Process Command
+
+| Option | Short | Description | Required | Default |
+|--------|-------|-------------|----------|----------|
+| `--input-directory` | `-d` | Path to the input directory containing documents | Yes | |
+| `--output-directory` | `-o` | Path where the markdown files will be created | Yes | |
+| `--template` | `-t` | Path to the markdown template file | No | Built-in default |
+| `--include` | `-i` | Comma-separated file extensions, glob patterns, or MIME types to include | No | All files |
+| `--exclude` | `-e` | Comma-separated file extensions, glob patterns, or MIME types to exclude | No | |
+
+#### Plugin Commands
+
+```bash
+./doc.doc.sh list plugins                    # List all available plugins
+./doc.doc.sh list plugins active             # List active plugins only
+./doc.doc.sh list plugins inactive           # List inactive plugins only
+./doc.doc.sh activate --plugin <name>        # Activate a plugin
+./doc.doc.sh deactivate --plugin <name>      # Deactivate a plugin
+./doc.doc.sh install --plugin <name>         # Install plugin dependencies
+./doc.doc.sh installed --plugin <name>       # Check if plugin is installed
+./doc.doc.sh tree                            # Display plugin dependency tree
+```
+
+## Project Structure
+
+```
+doc.doc.md/
+├── doc.doc.sh              # Main script
+├── doc.doc.md/             # Core directory
+│   ├── components/         # Reusable components (planned)
+│   ├── plugins/            # Plugin directory
+│   │   └── stat/           # File statistics plugin
+│   │       └── descriptor.json
+│   └── templates/          # Template directory
+│       └── default.md      # Default markdown template
+├── project_documentation/  # Project docs (arc42 structure)
+├── project_management/     # Guidelines, workflows, tools
+└── LICENSE.md             # AGPL-3.0 license
+```
+
+## Plugins
+
+Plugins extend doc.doc.md's functionality by extracting metadata and content from different file types. The project includes built-in plugins for file statistics and MIME type detection.
+
+### Built-in Plugins
+
+- **stat**: Extracts file system metadata (size, owner, timestamps)
+- **file**: Detects MIME types using the standard `file` command
+
+### Plugin Architecture
+
+Plugins are **language-agnostic** and invoked via shell commands:
+- Defined using `descriptor.json` files
+- Can be implemented in **any language** (Bash, Python, compiled binaries, etc.)
+- Invoked as shell commands, never imported directly
+- Simple interface: receive inputs, produce outputs
+
+### Plugin Structure
+
+Plugins are defined using JSON descriptors that specify:
+- **Name and description**: Plugin identification
+- **Commands**: Shell commands to execute (main, install, installed checks)
+- **Input parameters**: What the plugin needs to process a file
+- **Output fields**: What information the plugin extracts
+
+### Example: file Plugin (Bash)
+
+The `file` plugin detects MIME types using the standard `file` command:
+
+```json
+{
+  "name": "file",
+  "description": "Detects MIME types using the file command",
+  "commands": {
+    "main": {
+      "command": "main.sh {FILE_PATH}",
+      "input": { "FILE_PATH": { "required": true, "type": "string" } },
+      "output": {
+        "MIME_TYPE": { "type": "string", "description": "Detected MIME type" }
+      }
+    },
+    "install": {
+      "command": "install.sh"
+    },
+    "installed": {
+      "command": "installed.sh"
+    }
+  }
+}
+```
+
+### Example: stat Plugin (Bash)
+
+The `stat` plugin extracts file system information:
+
+```json
+{
+  "name": "stat",
+  "description": "Provides statistical information about a file",
+  "commands": {
+    "main": {
+      "command": "main.sh {FILE_PATH}",
+      "input": { "FILE_PATH": { "required": true, "type": "string" } },
+      "output": {
+        "FILE_SIZE": { "type": "number", "description": "File size in bytes" },
+        "FILE_OWNER": { "type": "string", "description": "File owner" }
+      }
+    },
+    "install": {
+      "command": "install.sh"
+    },
+    "installed": {
+      "command": "installed.sh"
+    }
+  }
+}
+```
+
+### Example: Python Plugin
+
+Plugins can be implemented in Python:
+
+```json
+{
+  "name": "pdf-extractor",
+  "commands": {
+    "main": {
+      "command": "python3 extract.py {FILE_PATH}",
+      "input": { "FILE_PATH": { "required": true, "type": "string" } },
+      "output": {
+        "PDF_TITLE": { "type": "string" },
+        "PDF_AUTHOR": { "type": "string" }
+      }
+    }
+  }
+}
+```
+
+### Creating Custom Plugins
+
+1. Create a new directory under `doc.doc.md/plugins/[plugin-name]/`
+2. Add a `descriptor.json` file defining commands, inputs, and outputs
+3. Implement the plugin in your preferred language:
+   - **Bash**: Create `main.sh` script
+   - **Python**: Create `process.py` script
+   - **Compiled**: Add your binary and update command path
+4. Specify the shell command in `descriptor.json`
+5. Optionally add `install.sh` and `installed.sh` for dependency management
+6. Reference the plugin output variables in your template
+
+## Templates
+
+Templates control the structure and content of generated markdown files.
+
+### Default Template
+
+Located at `doc.doc.md/templates/default.md`:
+
+```markdown
+# {{FILE_NAME}}
+
+Document processed on {{PROCESSING_DATE}}
+```
+
+### Template Variables
+
+Templates support variables populated by plugins. Variables use the `{{VARIABLE_NAME}}` syntax.
+
+Example template using the stat plugin:
+
+```markdown
+# {{FILE_NAME}}
+
+## File Information
+
+- **Size**: {{FILE_SIZE}} bytes
+- **Owner**: {{FILE_OWNER}}
+- **Created**: {{FILE_CREATED}}
+- **Modified**: {{FILE_MODIFIED}}
+
+
+```
+
+### Creating Custom Templates
+
+1. Create a new `.md` file with your desired structure
+2. Use `{{VARIABLE_NAME}}` placeholders for dynamic content
+3. Pass the template path via the `--template` option
+
+## Use Cases
+
+- **Personal Document Management**: Convert your file cabinets into searchable markdown
+- **Home Lab Documentation**: Generate documentation indices for your digital archives
+- **Content Migration**: Prepare documents for import into Obsidian, Logseq, or other markdown tools
+- **Document Cataloging**: Create metadata-rich catalogs of large document collections
+
+## Architecture
+
+doc.doc.md uses a **mixed Bash and Python architecture** for optimal performance and maintainability:
+
+- **Bash**: CLI orchestration, file discovery (`find`), plugin execution, Unix pipeline coordination
+- **Python 3.12+**: Complex filtering logic with AND/OR operators across include/exclude parameters
+
+**Why this approach?**
+- **Primary driver**: Complex filter evaluation (AND/OR logic across multiple parameters) is difficult to implement reliably in pure Bash
+- Leverages each language's strengths (shell operations vs. complex logic)
+- Maintains Unix CLI tool philosophy
+- Supports language-agnostic plugins via shell command invocation
+- Efficient pipeline processing via null-delimited streams
+
+See [ADR-001](project_management/02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_001_mixed_bash_python_implementation.md) for detailed rationale.
+
+## Contributing
+
+Contributions are welcome! This project is in active development and needs help with:
+
+- Core script implementation (Bash + Python components)
+- Plugin development (PDF, DOCX, image processing, etc.) in any language
+- Template creation
+- Documentation improvements
+- Testing and bug reports
+
+### Getting Started
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow the workflow guidelines in `project_management/01_guidelines/workflows/`
+- Review the communication standards in `project_management/01_guidelines/agent_behavior/`
+- Check the documentation standards in `project_management/01_guidelines/documentation_standards/`
 
 ## License
 
-This project is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/) license. See [LICENSE.md](LICENSE.md) for details.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+Key points:
+- **Open Source**: Source code must be made available
+- **Copyleft**: Derivative works must use the same license
+- **Network Use**: Running modified versions on a server requires sharing source code with users
+- **Patent Grant**: Contributors grant patent rights to users
+
+See [LICENSE.md](LICENSE.md) for full details.
 
 ## Credits
 
-Architecture documentation structure based on the [arc42](https://arc42.org) template by Dr. Gernot Starke and Dr. Peter Hruschka. See [CREDITS.md](CREDITS.md).
+- **arc42**: Architecture documentation structure based on the [arc42 template](https://arc42.org)
+- **ProTemp.AI**: Project structure inspired by [PeculiarMind/ProTemp.AI](https://github.com/PeculiarMind/ProTemp.AI)
+
+See [CREDITS.md](CREDITS.md) for complete attribution.
+
+## Support
+
+- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/PeculiarMind/doc.doc.md/issues)
+- **Discussions**: Join conversations about the project
+- **Documentation**: Comprehensive guides in `project_documentation/`
+
+---
+
+**Ready to organize your documents?** Start by exploring the examples and customizing your first template!
