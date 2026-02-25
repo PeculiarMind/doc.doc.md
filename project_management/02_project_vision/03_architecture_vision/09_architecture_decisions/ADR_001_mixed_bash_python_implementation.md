@@ -1,10 +1,18 @@
-# Mixed Bash and Python Implementation Strategy
+# Prgramming Languages of framework and core components
 
 - **ID:** ADR-001
-- **Status:** Draft
+- **Status:** DECIDED
 - **Created at:** 2026-02-23
 - **Created by:** Architect Agent
+- **Decided at:** 2026-02-23
+- **Decision by:** PeculiarMind
 - **Obsoleted by:** N/A
+
+# Change History
+| Date | Author | Description |
+|------|--------|-------------|
+| 2026-02-23 | Architect Agent | Initial decision document created |
+| 2026-02-23 | PeculiarMind    | Reviewed and approved mixed Bash/Python approach |
 
 # TOC
 
@@ -17,7 +25,7 @@
 
 # Context
 
-The doc.doc.md project is a command-line tool designed to process document collections in directory structures and generate markdown files. The system has several distinct functional requirements:
+The doc.doc.md project is a command-line tool that processes document collections within directory structures and generates markdown files. The system has several distinct functional requirements:
 
 ## Core Requirements
 
@@ -30,8 +38,8 @@ The doc.doc.md project is a command-line tool designed to process document colle
 2. **Complex Filtering Logic:**
    - Handle include/exclude filters with AND/OR operators
    - Support multiple filter types: file extensions (`.pdf`, `.txt`), glob patterns (`**/2024/**`), and MIME types (`application/pdf`)
-   - Multiple `--include` parameters are ANDed together (file must match at least one criterion from each parameter)
-   - Values within a single `--include` parameter are ORed together
+   - Values within a single `--include` parameter are ORed together (a file matches if it satisfies at least one criterion)
+   - Multiple `--include` parameters are ANDed together (a file must match at least one criterion from each `--include` parameter)
    - Same logic applies to `--exclude` parameters
 
 3. **File Processing:**
@@ -48,19 +56,19 @@ The doc.doc.md project is a command-line tool designed to process document colle
 
 ## Technical Challenges
 
-- **Filtering Complexity:** The AND/OR logic for combining multiple include/exclude criteria with different filter types (extensions, globs, MIME types) requires robust parsing and evaluation - this is the primary driver for Python usage
-- **Cross-Platform Compatibility:** The tool should work on Linux, macOS, and potentially Windows (via WSL/Git Bash)
-- **Plugin Orchestration:** Managing plugin discovery, dependency resolution, and execution order via shell command invocation
+- **Filtering Complexity:** The AND/OR logic for combining multiple include/exclude criteria with different filter types (extensions, globs, MIME types) requires robust parsing and evaluation—this is the primary driver for Python usage
+- **Cross-Platform Compatibility:** The tool must work on Linux, macOS, and potentially Windows (via WSL/Git Bash)
+- **Plugin Orchestration:** Managing plugin discovery, dependency resolution, and execution order through shell command invocation
 - **User Experience:** Fast startup time, responsive CLI, clear error messages, and progress feedback
-- **Language-Agnostic Plugin System:** Plugins invoked via shell commands (not direct imports), allowing any language while maintaining simple shell-based interface
+- **Language-Agnostic Plugin System:** Plugins invoked through shell commands (not direct imports), allowing any language while maintaining a simple shell-based interface
 
 ## Technical Non-Challenges
 
-- **MIME Type Detection:** Delegated to the dedicated `file` plugin which wraps the standard `file` command - not a factor in the Bash vs Python decision
+- **MIME Type Detection:** Delegated to the dedicated `file` plugin, which wraps the standard `file` command—not a factor in the Bash vs Python decision
 
 # Decision
 
-**We will implement doc.doc.md using a mixed Bash and Python approach**, with clear separation of responsibilities:
+**We will implement doc.doc.md using a mixed Bash and Python approach** with clear separation of responsibilities:
 
 ## Bash Components
 
@@ -68,14 +76,14 @@ The doc.doc.md project is a command-line tool designed to process document colle
 
 - **Main entry point** (`doc.doc.sh`): Command-line argument parsing, help display, top-level workflow coordination
 - **Component scripts** (`components/*.sh`):
-  - `help.sh` - Help system and documentation
-  - `logging.sh` - User-facing log messages and progress indication
-  - `plugins.sh` - Plugin discovery, activation/deactivation, and orchestration
-  - `templates.sh` - Template file management
-- **Plugin invocation**: Plugins are executed as shell commands (from `descriptor.json`); they may be Bash scripts, Python scripts, or any executable - invocation is always via shell command execution, never direct Python imports
+  - `help.sh` — Help system and documentation
+  - `logging.sh` — User-facing log messages and progress indication
+  - `plugins.sh` — Plugin discovery, activation/deactivation, and orchestration
+  - `templates.sh` — Template file management
+- **Plugin invocation**: Plugins are executed as shell commands (from `descriptor.json`); they may be Bash scripts, Python scripts, or any executable—invocation is always through shell command execution, never direct Python imports
 - **File system operations**: Directory traversal with `find`, file discovery, path operations
 - **Process coordination**: Invoking Python scripts at appropriate workflow stages
-- **Pipeline orchestration**: Connecting `find`, Python filters, and plugin execution via Unix pipes
+- **Pipeline orchestration**: Connecting `find`, Python filters, and plugin execution through Unix pipes
 
 ## Python Components
 
@@ -84,23 +92,23 @@ The doc.doc.md project is a command-line tool designed to process document colle
 - **Filter evaluation engine**: Parse and evaluate complex include/exclude logic with AND/OR operators across multiple `--include` and `--exclude` parameters
 - **Glob pattern matching**: Advanced path matching beyond basic shell globs (e.g., `**/2024/**/*.pdf`)
 - **Data transformation and formatting**: Prepare data structures for template rendering
-- **Plugin internal logic** (optional): Plugins may use Python for complex processing, called from their Bash entry point
-- **Future extensibility**: Foundation for additional complex features (metadata extraction, content analysis, etc.)
+- **Plugin internal logic** (optional): Plugins may use Python for complex processing when called from their Bash entry point
+- **Future extensibility**: Foundation for additional complex features (metadata extraction, content analysis)
 
 **Python will NOT handle:**
-- Plugin invocation (plugins executed as shell commands, not Python imports)
-- MIME type detection (handled by dedicated `file` plugin using the `file` command)
-- CLI argument parsing (handled by Bash entry point)
+- Plugin invocation (plugins are executed as shell commands, not Python imports)
+- MIME type detection (handled by the dedicated `file` plugin using the `file` command)
+- CLI argument parsing (handled by the Bash entry point)
 - Direct user interaction (always wrapped by Bash)
 
 ## Integration Points
 
 **Unix Pipeline Architecture:**
 
-- **Invocation pattern**: Bash uses `find` to discover files, pipes to Python for filtering, processes results
+- **Invocation pattern**: Bash uses `find` to discover files, pipes to Python for filtering, then processes results
 - **Data format**: Null-delimited file paths (`\0`) for safe handling of special characters
 - **IPC mechanism**: Standard Unix pipes with null-delimited streams
-- **Filtering stage**: Single upfront filter before files are handed to plugins (performance is not a constraint; batch processing is acceptable)
+- **Filtering stage**: Single upfront filter before files are passed to plugins (performance is not a constraint; batch processing is acceptable)
 
 **Example workflow:**
 ```bash
@@ -115,9 +123,9 @@ find "$INPUT_DIR" -type f -print0 | \
 ```
 
 **Plugin Architecture:**
-- **Invocation method**: Plugins are invoked via shell command execution (e.g., `bash main.sh` or `python3 process.py`)
-- **Language-agnostic**: Plugins define their command in `descriptor.json`; the command is executed via the shell
-- **No direct imports**: Core system never imports or calls plugins directly from Python - always via shell command
+- **Invocation method**: Plugins are invoked through shell command execution (e.g., `bash main.sh` or `python3 process.py`)
+- **Language-agnostic**: Plugins define their command in `descriptor.json`; the command is executed through the shell
+- **No direct imports**: The core system never imports or calls plugins directly from Python—always through shell commands
 - **Examples**:
   - Bash plugin: `"command": "main.sh {FILE_PATH}"`
   - Python plugin: `"command": "python3 process.py {FILE_PATH}"`
@@ -133,8 +141,8 @@ find "$INPUT_DIR" -type f -print0 | \
 ## Positive
 
 1. **Leverage Language Strengths:**
-   - Bash excels at CLI scripting, file operations, and process orchestration - natural fit for the entry point and system integration
-   - Python excels at complex logic, robust parsing, and cross-platform library support - ideal for filtering and processing
+   - Bash excels at CLI scripting, file operations, and process orchestration—a natural fit for the entry point and system integration
+   - Python excels at complex logic, robust parsing, and cross-platform library support—ideal for filtering and processing
 
 2. **Familiar User Experience:**
    - Bash entry point provides traditional CLI tool UX expected by Unix/Linux users
@@ -146,10 +154,10 @@ find "$INPUT_DIR" -type f -print0 | \
    - Easier to test individual components (unit tests in Python, integration tests in Bash)
 
 4. **Extensibility:**
-   - Plugins can be written in any language (Bash, Python, compiled binaries, etc.)
-   - Plugin interface is simple: shell command execution with defined inputs/outputs via `descriptor.json`
+   - Plugins can be written in any language (Bash, Python, compiled binaries)
+   - Plugin interface is simple: shell command execution with defined inputs/outputs through `descriptor.json`
    - Future enhancements can be added in the most appropriate language
-   - Python libraries available for complex file format parsing (PDF, DOCX, etc.)
+   - Python libraries are available for complex file format parsing (PDF, DOCX)
 
 5. **Performance:**
    - Bash handles file discovery and traversal efficiently
@@ -200,18 +208,18 @@ The following matrix compares all considered implementation approaches across ke
 
 | Criterion | Weight | **Mixed Bash+Python** (✓) | Pure Bash | Pure Python | Bash+Unix Tools | Bash+Compiled |
 |-----------|--------|---------------------------|-----------|-------------|-----------------|---------------|
-| **Filter Logic Complexity** | 1.0 | ✓ Excellent (Python) | ✗ Very difficult | ✓ Excellent | ✗ Nearly impossible | ✓ Excellent |
+| **Filter Logic Complexity** | 1.0 | ✓ Excellent (Python) | ✗ Very difficult | ✓ Excellent | ✗ Nearly impossible with awk/sed | ✓ Excellent |
 | **Unix CLI UX** | 1.0 | ✓ Native Bash feel | ✓ Perfect | ~ Less idiomatic | ✓ Perfect | ✓ Native Bash feel |
 | **Plugin Language Flexibility** | 1.0 | ✓ Any (shell-invoked) | ✓ Any (shell-invoked) | ~ Python or subprocess | ✓ Any (shell-invoked) | ✓ Any (shell-invoked) |
 | **Runtime Dependencies** | 0.1 | ~ Bash + Python 3.12+ | ✓ Bash only | ✓ Python only | ✓ Bash + standard tools | ✓ Bash only |
 | **Installation Complexity** | 0.1 | ~ Moderate | ✓ Minimal | ✓ Simple | ✓ Minimal | ~ Platform-specific binaries |
-| **Maintainability** | 0.5 | ✓ Good separation | ~ Hard filter logic | ✓ Excellent | ✗ Unreadable filters | ✓ Excellent |
-| **Development Speed** | 1.0 | ✓ Fast iteration | ~ Slow for filters | ✓ Very fast | ✗ Error-prone | ~ Build step slows |
+| **Maintainability** | 0.5 | ✓ Good separation | ~ Hard filter logic | ✓ Excellent | ✗ Unreadable nested conditionals | ✓ Excellent |
+| **Development Speed** | 1.0 | ✓ Fast iteration | ~ Slow for filters | ✓ Very fast | ✗ Error-prone debugging | ~ Build step slows |
 | **Performance** | 0.1 | ✓ Good (1x Python call) | ✓ Excellent | ~ Startup overhead | ✓ Excellent | ✓ Excellent |
 | **Cross-Platform** | 0.5 | ✓ Bash+Python ubiquitous | ✓ Bash everywhere | ✓ Python everywhere | ~ Tool availability varies | ~ Cross-compilation needed |
-| **Testing Complexity** | 0.5 | ~ Cross-language tests | ✓ Bash tests only | ✓ Python tests only | ✓ Bash tests only | ~ Cross-language tests |
-| **Future Extensibility** | 1.0 | ✓ Python libraries | ~ Limited | ✓ Rich ecosystem | ✗ Very limited | ✓ Good libraries |
-| **Contributor Barrier** | 0.5 | ~ Two languages | ✓ Shell scripting only | ✓ Python only | ✓ Shell scripting only | ✗ Compiled language + Bash |
+| **Testing Complexity** | 0.5 | ~ Cross-language tests | ✓ Bash tests only | ✓ Python tests only | ✗ Complex awk/sed edge cases | ~ Cross-language tests |
+| **Future Extensibility** | 1.0 | ✓ Python libraries | ~ Limited | ✓ Rich ecosystem | ✗ Very limited for complex tasks | ✓ Good libraries |
+| **Contributor Barrier** | 0.5 | ~ Two languages | ✓ Shell scripting only | ✓ Python only | ✗ Advanced awk/sed expertise | ✗ Compiled language + Bash |
 | **Distribution** | 1.0 | ✓ Simple (scripts) | ✓ Simple (scripts) | ✓ Simple (scripts) | ✓ Simple (scripts) | ✗ Architecture-specific |
 | **Weighted Score** | **/8.3** | **7.70** (93%) | **6.05** (73%) | **7.25** (87%) | **4.55** (55%) | **5.75** (69%) |
 
@@ -221,7 +229,7 @@ The following matrix compares all considered implementation approaches across ke
 - ✗ = Weakness / Poor fit (0.0 points)
 - **Weighted Score** = Sum of (rating × weight) across all criteria
 
-**Decision Rationale:** Mixed Bash+Python scores highest (7.70/8.3, 93%) by providing the best balance between Unix CLI UX (Bash orchestration), complex logic handling (Python filtering), and plugin flexibility (shell command invocation). Pure Python (7.25/8.3, 87%) is close but loses the natural shell integration expected from CLI tools. The dual dependency trade-off is justified by avoiding unmaintainable Bash filter logic while preserving the shell scripting philosophy.
+**Decision Rationale:** Mixed Bash+Python scores highest (7.70/8.3, 93%) by providing the best balance between Unix CLI UX (Bash orchestration), complex logic handling (Python filtering), and plugin flexibility (shell command invocation). Pure Python (7.25/8.3, 87%) is competitive but sacrifices the natural shell integration expected from CLI tools. The dual dependency trade-off is justified by avoiding unmaintainable Bash filter logic while preserving the shell scripting philosophy and enabling language-agnostic plugin development.
 
 # Alternatives Considered
 
@@ -241,7 +249,7 @@ The following matrix compares all considered implementation approaches across ke
 - Limited library ecosystem for future enhancements (data transformation, metadata extraction)
 - Error handling and data structures less robust than Python
 
-**Rejection Reason:** The complex filtering logic requirements (especially AND/OR combinations of include/exclude with multiple filter types) would be extremely difficult to implement reliably and maintainably in pure Bash. The evaluation logic alone would require extensive conditional chains that would be error-prone and difficult to test.
+**Rejection Reason:** The complex filtering logic requirements documented in the project goals (AND/OR combinations of include/exclude with multiple filter types: extensions, globs, and MIME types) would be extremely difficult to implement reliably and maintainably in pure Bash. The evaluation logic alone would require extensive nested conditional chains that would be error-prone, difficult to test, and nearly impossible to extend. String manipulation and data structure handling in Bash are insufficient for the robustness required.
 
 ## Alternative 2: Pure Python Implementation
 
@@ -261,26 +269,34 @@ The following matrix compares all considered implementation approaches across ke
 - Shell integration features (pipes, redirects) less idiomatic
 - Larger installation footprint
 
-**Rejection Reason:** While Python would handle complex logic excellently, using Bash for orchestration and shell command execution maintains the Unix CLI tool philosophy. A pure Python implementation would require either subprocess calls to invoke plugins (awkward) or a Python-based plugin API (limiting language choice). The shell-based plugin invocation model keeps the system simple and language-agnostic: **plugins are executed as shell commands**, allowing any language while maintaining a consistent, simple interface.
+**Rejection Reason:** While Python would handle complex logic excellently, using Bash for orchestration and shell command execution maintains the Unix CLI tool philosophy and keeps the system accessible. A pure Python implementation would require either subprocess calls to invoke plugins (awkward and less natural) or a Python-based plugin API (limiting language choice and increasing complexity). The shell-based plugin invocation model keeps the system simple and truly language-agnostic: **plugins are executed as shell commands**, allowing implementation in any language while maintaining a consistent, simple interface. This trade-off favors the mixed approach for better Unix integration and plugin flexibility.
 
 ## Alternative 3: Bash with External Unix Tools Only
 
-**Approach:** Use Bash with standard Unix tools (`find`, `file`, `grep`, `awk`, etc.) to avoid Python dependency.
+**Approach:** Use Bash with standard Unix tools (`find`, `file`, `grep`, `awk`) to avoid Python dependency.
 
 **Pros:**
 - No additional runtime dependencies beyond standard Unix tools
 - Very lightweight
-- Maximum compatibility
-- Fast execution
+- Maximum compatibility across Unix-like systems
+- Fast execution with minimal overhead
 
 **Cons:**
-- Complex filtering logic extremely difficult with `awk`/`sed` alone
-- AND/OR combinations of multiple filter types nearly impossible to express cleanly
-- Future extensibility severely limited
-- Code would be very difficult to read and maintain
-- Testing complex awk/sed pipelines is error-prone
+- Complex filtering logic extremely difficult to implement reliably with `awk`/`sed` alone
+- AND/OR combinations across multiple filter types (extensions, globs, MIME types) nearly impossible to express cleanly
+- Maintaining the required filter semantics would require deeply nested conditional chains
+- Future extensibility severely limited (no robust libraries for advanced processing)
+- Code readability and maintainability would be poor
+- Testing and debugging complex awk/sed pipelines is error-prone and time-consuming
+- Edge case handling (special characters in paths, complex glob patterns) becomes brittle
 
-**Rejection Reason:** While this approach minimizes dependencies, the complexity of the filtering requirements would result in unmaintainable shell code. The AND/OR logic alone would require extensive conditional chains that would be error-prone and difficult to test.
+**Rejection Reason:** While this approach minimizes dependencies, the specific filtering requirements documented in the project goals make it impractical. The requirement to support:
+- Values within a single `--include` parameter ORed together
+- Multiple `--include` parameters ANDed together
+- Same logic for `--exclude` parameters
+- Three different filter types (extensions, globs, MIME types) combined in the same expression
+
+would result in deeply nested, unmaintainable shell code with extensive conditional chains. For example, handling just two `--include` parameters with mixed filter types would require evaluating all combinations of OR conditions within each parameter, then ANDing the results—a task that quickly becomes unreadable in pure shell scripting. The resulting code would be fragile, difficult to test, and nearly impossible to extend for future enhancements.
 
 ## Alternative 4: Bash + Compiled Language (Go/Rust)
 
@@ -299,7 +315,7 @@ The following matrix compares all considered implementation approaches across ke
 - Build toolchain requirements
 - Slower development iteration
 
-**Rejection Reason:** While performance would be excellent, the added complexity of cross-compiling and distributing platform-specific binaries outweighs the benefits for a document processing tool where startup time is not critical. Python's ubiquity makes it a better choice for ease of installation and contribution.
+**Rejection Reason:** While performance would be excellent, the added complexity of cross-compiling and distributing platform-specific binaries outweighs the benefits for a document processing tool where startup time is not critical. Python's ubiquity and ease of installation make it a better choice for lowering the barrier to entry. The development overhead of maintaining build toolchains for multiple platforms (Linux, macOS, Windows/WSL) and the requirement for contributors to know a compiled language significantly increases project complexity without proportional benefit.
 
 # References
 
