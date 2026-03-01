@@ -13,6 +13,15 @@ PASS=0
 FAIL=0
 TOTAL=0
 
+# Cleanup trap to ensure temporary files are removed even on test failure
+cleanup() {
+  if [ -n "${TEST_DIR:-}" ] && [ -d "$TEST_DIR" ]; then
+    chmod -R u+rw "$TEST_DIR" 2>/dev/null || true
+    rm -rf "$TEST_DIR"
+  fi
+}
+trap cleanup EXIT
+
 # Test helper functions
 assert_eq() {
   local test_name="$1"
@@ -294,8 +303,7 @@ else
   FAIL=$((FAIL + 1))
 fi
 
-# Cleanup
-rm -rf "$TEST_DIR"
+# Cleanup is handled by trap
 
 # Summary
 echo ""
