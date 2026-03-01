@@ -111,3 +111,9 @@ Checks if a plugin is installed.
 **Command:** `doc.doc.sh tree`  
 Displays a tree view of the plugins, showing their dependencies and activation status. Active plugins are highlighted in green, while inactive plugins are highlighted in red. The tree view provides a clear visual representation of the plugin ecosystem, making it easy to understand plugin relationships and activation status.
 
+
+## Plugin Execution
+doc.doc.sh executes active plugins in a specific order based on their dependencies. The execution order is determined by performing a topological sort on the plugin dependency graph. This ensures that plugins are executed in the correct sequence, with dependencies being executed before the plugins that depend on them. Each plugin receives the input parameters as a json object. Consequently plugins create output in the form of a json object that is written to stdout. This output will be consumed and processed by the doc.doc.md framework. 
+
+
+
