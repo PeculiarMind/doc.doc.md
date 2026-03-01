@@ -88,7 +88,7 @@
 
 - **Operating System**: Linux or macOS (or Windows with WSL/Git Bash)
 - **Bash**: Version 4.0+
-- **Python**: Version 3.7+ (standard library only)
+- **Python**: Version 3.12+ (standard library only)
 - **Unix Utilities**: find, file, grep, sed, awk
 - **Plugin Dependencies**: As specified by individual plugins
 
@@ -97,5 +97,7 @@
 1. **Input Phase**: User provides command, input directory, filters, and options
 2. **Discovery Phase**: System identifies files matching filter criteria
 3. **Processing Phase**: Each matched file processed through active plugin chain
+   - Plugin parameters passed as JSON via stdin
+   - Plugin results returned as JSON via stdout
 4. **Output Phase**: Generated markdown written to output directory (mirrored structure)
 5. **Feedback Phase**: Status, progress, and completion messages to user

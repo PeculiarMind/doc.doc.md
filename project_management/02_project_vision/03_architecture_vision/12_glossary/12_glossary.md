@@ -32,6 +32,9 @@
 | **Plugin Dependency** | A requirement specified by a plugin; another plugin or system utility that must be present for the plugin to function. |
 | **Plugin Chain** | The ordered sequence of plugins executed for each file during processing. |
 | **Entry Point** | The script (typically `main.sh`) that serves as the executable for a plugin. |
+| **JSON stdin/stdout Communication** | Plugin invocation pattern where parameters are passed as JSON via standard input and results returned as JSON via standard output, providing type preservation and security benefits over environment variables. |
+| **Plugin Input Parameters** | Data passed to plugins via JSON stdin, following the input schema defined in descriptor.json with lowerCamelCase naming. |
+| **Plugin Output Variables** | Data returned by plugins via JSON stdout, following the output schema defined in descriptor.json with lowerCamelCase naming. |
 
 ## Filter Logic
 
@@ -68,7 +71,8 @@
 |------|------------|
 | **Markdown** | Lightweight markup language used for formatting text; the output format of this system. |
 | **Obsidian** | A popular markdown-based knowledge management application; target compatibility for generated markdown. |
-| **Template Variable** | A placeholder in a template file (e.g., `{{fileName}}`) that gets replaced with actual data using lowerCamelCase naming. |
+| **Template Variable** | A placeholder in a template file (e.g., `{{fileName}}`, `{{fileSize}}`, `{{mimeType}}`) that gets replaced with actual data. All template variables follow lowerCamelCase naming convention. |
+| **lowerCamelCase** | Naming convention where the first word is lowercase and subsequent words are capitalized without spaces (e.g., `filePath`, `mimeType`, `fileSizeHuman`). Used for all plugin parameters, output variables, and template placeholders. |
 
 ## Quality Attributes
 

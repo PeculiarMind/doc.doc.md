@@ -10,6 +10,7 @@
 | Date       | Author       | Description                |
 |------------|--------------|----------------------------|
 | 2026-03-01 | Architect Agent | Initial concept creation from legacy documentation |
+| 2026-03-01 | Architect Agent | Updated credential handling section to clarify environment variables are for system config, not plugin parameters; added JSON input validation section |
 
 **Table of Contents:**  
 - [Problem Statement](#problem-statement)
@@ -149,13 +150,19 @@ validate_plugin_name() {
 **Guidelines:**
 - Never log sensitive data (passwords, tokens, keys)
 - Avoid storing credentials in files
-- Use environment variables for sensitive configuration
+- Use environment variables for system configuration of sensitive data (not for plugin parameters)
 - Clear sensitive variables after use
 - Document secure credential practices for plugin developers
 
+**Note**: Plugin parameters are passed via JSON stdin/stdout (per ADR-003 and ARC_0003), which provides better security than environment variables by avoiding:
+- Environment variable injection attacks
+- Size limitations
+- Cross-process visibility
+- Accidental logging in process listings
+
 **Example:**
 ```bash
-# Good: Use environment variable
+# Good: Use environment variable for system configuration
 API_KEY="${DOC_API_KEY}"
 
 # Bad: Hardcoded credential
@@ -165,6 +172,17 @@ API_KEY="secret123"
 process_with_key "$API_KEY"
 unset API_KEY
 ```
+
+#### JSON Input Validation
+
+**Security Measures:**
+- Validate all JSON input to plugins against descriptor schema
+- Reject malformed or malicious JSON before plugin execution
+- Enforce type constraints (string, number, boolean, array, object)
+- Limit JSON payload size (prevent DoS attacks)
+- Prevent deeply nested JSON structures (depth limit)
+- Validate parameter names match lowerCamelCase convention
+- See REQ_SEC_009 for detailed validation requirements (when accepted)
 
 #### Output Security
 

@@ -260,10 +260,10 @@ plugins/stat/
 **Purpose**: Extract file metadata using `stat` command.
 
 **Outputs**:
-- file_size
-- file_size_human
-- modified_date
-- created_date
+- fileSize
+- fileSizeHuman
+- modifiedDate
+- createdDate
 - permissions
 - owner
 
@@ -272,8 +272,8 @@ plugins/stat/
 **Purpose**: Determine MIME type using `file` command.
 
 **Outputs**:
-- mime_type
-- mime_description
+- mimeType
+- mimeDescription
 
 ## Component Interactions
 

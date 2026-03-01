@@ -103,9 +103,12 @@ Quality scenarios concretize quality requirements and make them measurable.
 |----|----------|----------|----------|---------|
 | QS-S01 | **Path Traversal Attempt** | Input path contains `../../../` | Path validated and sanitized | No access outside intended directory |
 | QS-S02 | **Template Injection** | Template variable contains shell commands | Variables escaped before substitution | No command execution via templates |
-| QS-S03 | **Plugin Validation** | Malicious plugin descriptor loaded | Descriptor validated against schema | Invalid descriptors rejected with error |
+| QS-S03 | **Plugin Descriptor Validation** | Malicious plugin descriptor loaded | Descriptor validated against schema | Invalid descriptors rejected with error |
 | QS-S04 | **File Permissions** | Processing sensitive files | Output preserves appropriate permissions | Generated files inherit secure permissions |
 | QS-S05 | **Plugin Isolation** | Plugin attempts to modify core files | Plugins run with limited permissions | Core files protected from plugin writes |
+| QS-S06 | **JSON Input Validation** | Malformed JSON sent to plugin | JSON validated against descriptor schema before execution | Invalid JSON rejected with clear error |
+| QS-S07 | **JSON Type Confusion** | Plugin receives wrong parameter types | Type validation enforced per descriptor | Type mismatches rejected before plugin execution |
+| QS-S08 | **JSON Size Attack** | Oversized JSON payload sent to plugin | Size limits enforced (max 1MB) | Oversized payloads rejected to prevent DoS |
 
 ---
 

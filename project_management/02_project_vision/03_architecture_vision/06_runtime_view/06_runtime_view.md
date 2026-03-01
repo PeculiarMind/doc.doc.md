@@ -89,8 +89,8 @@ For file: /input/docs/2024/report.pdf
 │  └─ file plugin (provides MIME type)
 │
 ├─ Execute plugins in order:
-│  ├─ stat plugin → {size, dates, permissions}
-│  └─ file plugin → {mime_type, description}
+│  ├─ stat plugin → {fileSize, modifiedDate, permissions}
+│  └─ file plugin → {mimeType, mimeDescription}
 │
 ├─ Merge plugin outputs into data structure
 │
