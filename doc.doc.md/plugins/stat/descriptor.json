@@ -54,6 +54,10 @@
         "success": {
           "type": "boolean",
           "description": "Indicates whether the stat plugin was successfully installed."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message describing the installation result."
         }
       }
     }
