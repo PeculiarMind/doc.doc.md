@@ -275,26 +275,26 @@ Templates control the structure and content of generated markdown files.
 Located at `doc.doc.md/templates/default.md`:
 
 ```markdown
-# {{FILE_NAME}}
+# {{fileName}}
 
-Document processed on {{PROCESSING_DATE}}
+Document processed on {{processingDate}}
 ```
 
 ### Template Variables
 
-Templates support variables populated by plugins. Variables use the `{{VARIABLE_NAME}}` syntax.
+Templates support variables populated by plugins. Variables use the `{{variableName}}` syntax (lowerCamelCase).
 
 Example template using the stat plugin:
 
 ```markdown
-# {{FILE_NAME}}
+# {{fileName}}
 
 ## File Information
 
-- **Size**: {{FILE_SIZE}} bytes
-- **Owner**: {{FILE_OWNER}}
-- **Created**: {{FILE_CREATED}}
-- **Modified**: {{FILE_MODIFIED}}
+- **Size**: {{fileSize}} bytes
+- **Owner**: {{fileOwner}}
+- **Created**: {{fileCreated}}
+- **Modified**: {{fileModified}}
 
 
 ```
@@ -302,7 +302,7 @@ Example template using the stat plugin:
 ### Creating Custom Templates
 
 1. Create a new `.md` file with your desired structure
-2. Use `{{VARIABLE_NAME}}` placeholders for dynamic content
+2. Use `{{variableName}}` placeholders for dynamic content (lowerCamelCase matching plugin outputs)
 3. Pass the template path via the `--template` option
 
 ## Use Cases

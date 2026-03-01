@@ -56,17 +56,17 @@ Template processing must prevent injection attacks by using safe string substitu
 
 | Variable | Source | Sanitization | Example |
 |----------|--------|--------------|---------|
-| `{{file_name}}` | File system | Escape special chars | `report.pdf` |
-| `{{file_path}}` | File system | Escape special chars | `/input/docs/report.pdf` |
-| `{{file_size}}` | stat plugin | Integer only | `1048576` |
-| `{{file_size_human}}` | stat plugin | Alphanumeric + units | `1.0 MB` |
-| `{{mime_type}}` | file plugin | MIME format validation | `application/pdf` |
-| `{{mime_description}}` | file plugin | Escape special chars | `PDF document` |
-| `{{modified_date}}` | stat plugin | Date format validation | `2024-02-25 14:30:00` |
-| `{{created_date}}` | stat plugin | Date format validation | `2024-02-20 09:15:00` |
+| `{{fileName}}` | File system | Escape special chars | `report.pdf` |
+| `{{filePath}}` | File system | Escape special chars | `/input/docs/report.pdf` |
+| `{{fileSize}}` | stat plugin | Integer only | `1048576` |
+| `{{fileSizeHuman}}` | stat plugin | Alphanumeric + units | `1.0 MB` |
+| `{{mimeType}}` | file plugin | MIME format validation | `application/pdf` |
+| `{{mimeDescription}}` | file plugin | Escape special chars | `PDF document` |
+| `{{fileModified}}` | stat plugin | Date format validation | `2024-02-25 14:30:00` |
+| `{{fileCreated}}` | stat plugin | Date format validation | `2024-02-20 09:15:00` |
 | `{{permissions}}` | stat plugin | Permission format | `rw-r--r--` |
-| `{{owner}}` | stat plugin | Alphanumeric + colon | `user:group` |
-| `{{generation_timestamp}}` | System | Date format validation | `2024-02-25 15:00:00` |
+| `{{fileOwner}}` | stat plugin | Alphanumeric + colon | `user:group` |
+| `{{generationTimestamp}}` | System | Date format validation | `2024-02-25 15:00:00` |
 
 ### Template Processing Rules
 
@@ -116,7 +116,7 @@ process_template() {
     file_name=$(printf '%s\n' "$file_name" | sed 's/[&/\]/\\&/g; s/`/\\`/g; s/\$/\\$/g')
     
     # Safe substitution (no eval)
-    sed "s/{{file_name}}/$file_name/g" "$template"
+    sed "s/{{fileName}}/$file_name/g" "$template"
 }
 ```
 
@@ -126,7 +126,7 @@ process_template_awk() {
     local template="$1"
     local file_name="$2"
     
-    awk -v fname="$file_name" '{gsub(/{{file_name}}/, fname); print}' "$template"
+    awk -v fname="$file_name" '{gsub(/{{fileName}}/, fname); print}' "$template"
 }
 ```
 

@@ -68,7 +68,7 @@
 |------|------------|
 | **Markdown** | Lightweight markup language used for formatting text; the output format of this system. |
 | **Obsidian** | A popular markdown-based knowledge management application; target compatibility for generated markdown. |
-| **Template Variable** | A placeholder in a template file (e.g., `{{file_name}}`) that gets replaced with actual data. |
+| **Template Variable** | A placeholder in a template file (e.g., `{{fileName}}`) that gets replaced with actual data using lowerCamelCase naming. |
 
 ## Quality Attributes
 

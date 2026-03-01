@@ -95,7 +95,7 @@ For file: /input/docs/2024/report.pdf
 ├─ Merge plugin outputs into data structure
 │
 ├─ Apply template (default.md):
-│  Replace {{file_path}}, {{file_size}}, {{mime_type}}, etc.
+│  Replace {{filePath}}, {{fileSize}}, {{mimeType}}, etc.
 │
 └─ Write to: /output/docs/2024/report.md
 ```

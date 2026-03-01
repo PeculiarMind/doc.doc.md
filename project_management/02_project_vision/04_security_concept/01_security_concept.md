@@ -683,7 +683,7 @@ process_template() {
     file_name=$(printf '%s\n' "$file_name" | sed 's/[&/\]/\\&/g')
     
     # Safe substitution (no eval)
-    sed "s/{{file_name}}/$file_name/g" "$template"
+    sed "s/{{fileName}}/$file_name/g" "$template"
 }
 
 # BAD: Vulnerable to injection
