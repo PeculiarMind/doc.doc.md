@@ -229,19 +229,21 @@ plugins/stat/
 
 ### Plugin Interface Contract
 
-**Environment Variables (Input)**:
-```bash
-FILE_PATH=/input/docs/report.pdf    # File to process
-OUTPUT_DIR=/output/docs              # Output directory
-PLUGIN_DATA_DIR=/tmp/plugin_data     # Temp storage
-```
-
-**Standard Output (JSON)**:
+**Standard Input (JSON via stdin)**:
 ```json
 {
-  "file_size": 1048576,
-  "file_size_human": "1.0 MB",
-  "modified_date": "2024-02-25",
+  "filePath": "/input/docs/report.pdf",
+  "outputDir": "/output/docs",
+  "pluginDataDir": "/tmp/plugin_data"
+}
+```
+
+**Standard Output (JSON via stdout)**:
+```json
+{
+  "fileSize": 1048576,
+  "fileSizeHuman": "1.0 MB",
+  "modifiedDate": "2024-02-25",
   "permissions": "rw-r--r--"
 }
 ```

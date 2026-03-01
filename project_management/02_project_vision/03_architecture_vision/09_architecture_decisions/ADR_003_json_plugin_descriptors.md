@@ -18,6 +18,7 @@
 | 2026-03-01 | GitHub Copilot | Added naming convention: all input/output parameter names must follow lowerCamelCase (e.g., `filePath`, `mimeType`, `fileSize`) |
 | 2026-03-01 | GitHub Copilot | Removed `system_requirements` field - install and installed commands are responsible for managing and verifying dependencies |
 | 2026-03-01 | GitHub Copilot | Removed `dependencies` field - dependencies discovered automatically by analyzing input/output parameters between plugins |
+| 2026-03-01 | Architect Agent | Changed plugin parameter passing from environment variables to JSON stdin/stdout communication for improved type preservation, security, and consistency |
 
 # TOC
 
@@ -251,12 +252,15 @@ plugins/<plugin_name>/
 All plugins must implement three standard commands in the `commands` object:
 
 1. **process**: Main file processing command
-   - **Input** (via environment variables):
-     ```bash
-     export FILE_PATH="/input/docs/report.pdf"
-     export OUTPUT_DIR="/output/docs"
-     export PLUGIN_DATA_DIR="/tmp/plugin_data"
+   - **Input** (via stdin, JSON format):
+     ```json
+     {
+       "filePath": "/input/docs/report.pdf",
+       "outputDir": "/output/docs",
+       "pluginDataDir": "/tmp/plugin_data"
+     }
      ```
+     **Note**: Input parameter names match the lowerCamelCase names defined in the descriptor's input schema.
    - **Output** (via stdout, JSON format):
      ```json
      {
@@ -273,10 +277,12 @@ All plugins must implement three standard commands in the `commands` object:
      - 2: Fatal error (stop processing)
 
 2. **install**: Install plugin dependencies
+   - **Input** (via stdin): Empty JSON object `{}` or no input
    - Executes installation of required system tools or dependencies
    - **Exit codes**: 0 = success, non-zero = failure
 
 3. **installed**: Check if plugin is installed
+   - **Input** (via stdin): Empty JSON object `{}` or no input
    - Verifies all dependencies and requirements are met
    - **Exit codes**: 0 = installed and ready, non-zero = not installed or missing requirements
 
@@ -292,7 +298,8 @@ All plugins must implement three standard commands in the `commands` object:
 4. **Structured Metadata**: JSON descriptors easily parsed by Bash (via Python/jq) and other tools
 5. **Self-Contained**: Each plugin directory contains everything needed for that plugin
 6. **Command-Based Invocation**: All plugin functionality accessed through commands object, enabling standardization and extensibility
-6. **Optional Installation**: Plugins without dependencies work immediately; others provide install script
+8. **Optional Installation**: Plugins without dependencies work immediately; others provide install script
+9. **JSON stdin/stdout Communication**: Parameters passed as JSON via stdin, output returned as JSON via stdout for type preservation and consistency
 
 # Consequences
 
@@ -303,10 +310,14 @@ All plugins must implement three standard commands in the `commands` object:
 3. **Easy Parsing**: JSON parsable in Bash (via jq or Python), Python, and virtually all languages
 4. **Process Isolation**: Plugin crashes don't affect core system or other plugins
 5. **No Tight Coupling**: Core system never imports plugin code; clean separation
-6. **Testability**: Plugins easily tested independently; mock via environment variables
+6. **Testability**: Plugins easily tested independently; mock via JSON stdin input
 7. **Universal Tools**: JSON validators, schema tools widely available
 8. **Version Control Friendly**: Text files (JSON, shell scripts) work well in Git
 9. **Documentation**: descriptor.json serves as self-documentation
+10. **Type Preservation**: JSON stdin/stdout maintains type information (numbers, booleans, arrays, objects) vs. string-only environment variables
+11. **No Size Limits**: JSON stdin avoids environment variable size limitations for large parameter values
+12. **Security**: Eliminates environment variable injection attack vectors
+13. **Consistency**: Same communication format (JSON) for both input and output
 
 ## Negative
 

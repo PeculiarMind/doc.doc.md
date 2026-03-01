@@ -10,6 +10,7 @@
 | Date       | Author       | Description                |
 |------------|--------------|----------------------------|
 | 2026-03-01 | Architect Agent | Initial concept creation from legacy documentation |
+| 2026-03-01 | Architect Agent | Updated plugin interface to use JSON stdin/stdout instead of environment variables |
 
 **Table of Contents:**  
 - [Problem Statement](#problem-statement)
@@ -35,8 +36,8 @@ This concept defines the plugin architecture for doc.doc.md, including plugin st
 - Plugin discovery and validation mechanism
 - Plugin dependency resolution and execution order
 - Plugin lifecycle (installation, execution, error handling)
-- Environment variable-based plugin communication
-- JSON-based plugin output format
+- JSON-based plugin input/output communication via stdin/stdout
+- Consistent data format for plugin communication
 
 ### Out of Scope
 - Plugin distribution and marketplace
@@ -143,10 +144,14 @@ Each command defines its own input/output parameters with type declarations and 
 
 #### Plugin Interface
 
-**Input** (via environment variables):
-- `FILE_PATH`: Absolute path to the file being processed
-- `OUTPUT_DIR`: Directory for output generation
-- `PLUGIN_DATA_DIR`: Directory for plugin-specific temporary data
+**Input** (via stdin, JSON format):
+```json
+{
+  "filePath": "/absolute/path/to/file.pdf",
+  "someOtherParameter": "value",
+  ...
+}
+```
 
 **Output** (via stdout, JSON format):
 ```json
@@ -158,7 +163,11 @@ Each command defines its own input/output parameters with type declarations and 
 }
 ```
 
-**Note**: Output variable names must match the lowerCamelCase names defined in the descriptor's `output` object.
+**Note**: 
+- Input parameter names must match the lowerCamelCase names defined in the descriptor's `input` object
+- Output variable names must match the lowerCamelCase names defined in the descriptor's `output` object
+- Plugins read JSON from stdin and write JSON to stdout
+- Both input and output use the same JSON format for consistency
 
 #### Plugin Execution Flow
 
@@ -209,7 +218,10 @@ The system runs `installed.sh` before executing a plugin and automatically runs 
 - **Flexibility**: Plugins can use any tool or language internally
 - **Maintainability**: Core system remains simple, complexity is in plugins
 - **Reusability**: Plugins can be shared across different installations
-- **Simple interface**: Environment variables and JSON are universal
+- **Simple interface**: JSON is universal and language-agnostic
+- **Type preservation**: JSON maintains type information (numbers, booleans, objects)
+- **Security**: JSON stdin/stdout eliminates environment variable injection vectors
+- **No size limits**: Avoids environment variable size restrictions
 
 ### Challenges and Risks
 - **Plugin quality**: User-created plugins may be unreliable or insecure
@@ -233,7 +245,7 @@ The system runs `installed.sh` before executing a plugin and automatically runs 
 10. **Phase 10**: Create plugin template and examples
 
 ### Conclusion
-The plugin architecture provides a flexible and extensible foundation for doc.doc.md. By defining a simple interface based on environment variables and JSON output, plugins can be written in any language and use any tools. The dependency resolution system allows complex plugin interactions while maintaining simplicity for basic use cases. This architecture enables the system to grow and adapt to new file types and use cases without requiring changes to the core system.
+The plugin architecture provides a flexible and extensible foundation for doc.doc.md. By defining a simple interface based on JSON stdin/stdout communication, plugins can be written in any language and use any tools. The JSON-based communication format enables type preservation, avoids environment variable limitations, and provides better security. The dependency resolution system allows complex plugin interactions while maintaining simplicity for basic use cases. This architecture enables the system to grow and adapt to new file types and use cases without requiring changes to the core system.
 
 ### References
 - Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)

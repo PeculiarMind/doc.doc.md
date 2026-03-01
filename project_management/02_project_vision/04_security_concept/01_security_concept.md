@@ -279,7 +279,7 @@ Trust boundaries represent points where data crosses from one security context t
 | **B1: Input Validation** | Argument parsing, path validation, filter syntax validation | Command injection, path traversal, malicious input processing |
 | **B2: Component Invocation** | Validated parameters passed to trusted components | Incorrect processing, data corruption |
 | **B3: Python Invocation** | Controlled Python script execution with validated arguments | Filter bypass, arbitrary code execution |
-| **B4: Plugin Execution** | Plugin descriptor validation, environment variable sanitization | Malicious plugin execution, system compromise |
+| **B4: Plugin Execution** | Plugin descriptor validation, JSON input validation | Malicious plugin execution, system compromise |
 | **B5: System Calls** | Unix permissions, restricted file access patterns | Unauthorized file access, privilege escalation |
 
 ---
@@ -376,7 +376,7 @@ Trust boundaries represent points where data crosses from one security context t
 | **Spoofing** (3) | Malicious plugin impersonates trusted plugin | 3 | Plugin signing (future), descriptor validation, clear naming |
 | **Tampering** (4) | Plugin modifies core system files or other plugins | 4 | File permissions, plugin sandboxing (future), read-only core |
 | **Repudiation** (2) | Plugin performs malicious action without attribution | 2 | Plugin execution logging, tracking active plugins |
-| **Information Disclosure** (4) | Plugin accesses sensitive files outside intended scope | 4 | Limited file access, environment variable sanitization |
+| **Information Disclosure** (4) | Plugin accesses sensitive files outside intended scope | 4 | Limited file access, JSON input validation |
 | **Denial of Service** (4) | Plugin consumes excessive resources or crashes | 4 | Resource limits (future), error isolation, timeout |
 | **Elevation of Privilege** (5) | Plugin exploits system to gain elevated access | 5 | No root execution, Unix permissions, sandbox (future) |
 
@@ -395,7 +395,7 @@ Trust boundaries represent points where data crosses from one security context t
 
 **Required Controls**:
 - ✅ Validate plugin descriptor schema (REQ to be created)
-- ✅ Sanitize environment variables passed to plugins
+- ✅ Validate and sanitize JSON input to plugins
 - ✅ Document plugin security guidelines for users
 - ✅ Plugin execution error isolation
 - ⚠️ Plugin sandboxing (future enhancement - TD-007)
@@ -565,7 +565,7 @@ Trust boundaries represent points where data crosses from one security context t
 | **SC-001** | Input Path Validation | 1, 5 | Required | Canonicalize paths, reject traversal attempts |
 | **SC-002** | Filter Syntax Validation | 2 | Required | Validate glob patterns, timeout complex filters |
 | **SC-003** | Plugin Descriptor Validation | 3 | Required | JSON schema validation, required field checks |
-| **SC-004** | Environment Variable Sanitization | 3 | Required | Escape special characters in FILE_PATH, OUTPUT_DIR |
+| **SC-004** | JSON Input Validation | 3 | Required | Validate JSON against descriptor schema, type checking, size limits |
 | **SC-005** | Template Variable Escaping | 4 | Required | Safe string substitution, no shell expansion |
 | **SC-006** | Error Message Sanitization | 6 | Required | Generic user errors, detailed debug mode |
 | **SC-007** | File Permission Enforcement | 5 | Required | Respect Unix permissions, no privilege escalation |
@@ -611,13 +611,21 @@ Based on the threat analysis, the following security requirements should be crea
 
 7. **REQ_SEC_007**: Plugin Security Documentation
    - User guide must warn about third-party plugin risks
-   - Plugin development guide must include security guidelines
+   - Plugin development guide must include security guidelines for JSON stdin/stdout
    - Active plugin list must identify third-party vs. built-in
 
-8. **REQ_SEC_008**: Environment Variable Sanitization
+8. **REQ_SEC_008**: Environment Variable Sanitization - **OBSOLETED**
+   - Superseded by REQ_SEC_009 due to architectural change to JSON stdin/stdout
    - All environment variables passed to plugins must be escaped
    - Special shell characters must be neutralized
    - Test for injection via environment variables
+
+9. **REQ_SEC_009**: JSON Input Validation
+   - All JSON input to plugins must be validated against descriptor schema
+   - Type validation enforced (string, number, boolean, array, object)
+   - Size limits enforced (JSON size, nesting depth, string length)
+   - Malformed JSON rejected before plugin execution
+   - JSON injection prevention
 
 ---
 
@@ -692,23 +700,22 @@ eval "echo \"$template\""  # NEVER USE - allows arbitrary code execution
 
 **Plugin Execution**:
 ```bash
-# GOOD: Sanitized environment variables
+# GOOD: Validated JSON input to plugin via stdin
 execute_plugin() {
     local plugin_cmd="$1"
     local file_path="$2"
     
-    # Sanitize file path
-    file_path=$(printf '%s' "$file_path" | sed "s/'/'\\\\''/g")
+    # Construct JSON input (validated against descriptor schema)
+    local json_input=$(jq -n --arg path "$file_path" '{filePath: $path}')
     
-    # Execute with controlled environment
-    env -i \
-        FILE_PATH="$file_path" \
-        OUTPUT_DIR="$output_dir" \
-        PLUGIN_DATA_DIR="$plugin_data_dir" \
-        /bin/bash -c "$plugin_cmd"
+    # Validate JSON against descriptor schema
+    validate_plugin_json_input "$descriptor_file" "$json_input"
+    
+    # Pass JSON to plugin via stdin
+    echo "$json_input" | /bin/bash -c "$plugin_cmd"
 }
 
-# BAD: Direct environment variable exposure
+# BAD: Direct variable exposure (old architecture)
 FILE_PATH="$user_input" eval "$plugin_cmd"  # Vulnerable to injection
 ```
 
@@ -730,7 +737,7 @@ Before merging any code:
 - [ ] All user inputs validated before use
 - [ ] All file paths canonicalized and bounded
 - [ ] No use of `eval`, `exec`, or uncontrolled shell expansion
-- [ ] Environment variables escaped before passing to plugins
+- [ ] JSON input validated against descriptor schema before passing to plugins
 - [ ] Template processing uses safe string substitution
 - [ ] Error messages sanitized (no leak of internals)
 - [ ] Security unit tests included and passing

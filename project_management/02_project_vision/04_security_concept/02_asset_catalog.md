@@ -34,7 +34,7 @@ This section catalogs all assets of this project, categorizing them by type and 
 | ASSET-0202 | User Configuration | SUPPORTING | Configuration | Future: User preferences, default templates, excluded paths. May contain sensitive defaults. | 2 | 2 | 2 |
 | ASSET-0203 | Installation Paths | SUPPORTING | Configuration | System-wide (/usr/local) or user-local installation paths. Path confusion can cause privilege issues. | 1 | 2 | 2 |
 | ASSET-0204 | Log Files | SUPPORTING | Data | Error logs, processing logs, debug output. May inadvertently contain sensitive file content or paths. | 2 | 2 | 1 |
-| ASSET-0205 | Environment Variables | SUPPORTING | Configuration | FILE_PATH, OUTPUT_DIR, PLUGIN_DATA_DIR passed to plugins. Injection vector if not sanitized. | 1 | 3 | 3 |
+| ASSET-0205 | Plugin JSON Input | SUPPORTING | Data | JSON objects passed to plugins via stdin containing filePath and custom parameters. Injection vector if not validated against descriptor schema. | 1 | 3 | 3 |
 | **SUPPORTING ASSETS (Access)** |
 | ASSET-0301 | File System Permissions | SUPPORTING | Access Control | Read access to input directory, write access to output directory, execute access to plugins. | 1 | 3 | 3 |
 | ASSET-0302 | User Execution Context | SUPPORTING | Access Control | Unix user context running doc.doc.sh. Determines accessible files and system resources. | 1 | 3 | 3 |

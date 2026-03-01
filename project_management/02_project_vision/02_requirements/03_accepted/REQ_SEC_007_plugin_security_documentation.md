@@ -1,20 +1,22 @@
 # Requirement: Plugin Security Documentation
 
 - **ID:** REQ_SEC_007
-- **Status:** FUNNEL
+- **Status:** ACCEPTED
 - **Created at:** 2026-02-25
 - **Created by:** Security Agent
+- **Last Updated:** 2026-03-01
+- **Updated by:** Security Agent
 - **Source:** Security threat analysis (STRIDE/DREAD Scope 3)
 - **Type:** Documentation + Security Requirement
 - **Priority:** HIGH
 - **Related Threats:** Malicious Plugin Installation, User Unawareness, Social Engineering
 
----
+## Change History
 
-> **FUNNEL STATUS NOTE:**  
-> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
-
----
+| Date | Author | Change |
+|------|--------|--------|
+| 2026-02-25 | Security Agent | Initial requirement created |
+| 2026-03-01 | Security Agent | Updated plugin developer guidelines from environment variables to JSON stdin/stdout architecture (ADR-003, ARC_0003) |
 
 ## Description
 
@@ -149,18 +151,22 @@ Must include:
    ## Plugin Security Guidelines
    
    ### Input Validation
-   Your plugin receives FILE_PATH via environment variable:
-   - **Always** validate FILE_PATH exists and is readable
-   - **Always** check FILE_PATH is within expected directory
-   - **Never** execute FILE_PATH content without validation
-   - **Never** assume FILE_PATH format or content
+   Your plugin receives JSON input via stdin (per ADR-003):
+   - **Always** parse and validate JSON input from stdin
+   - **Always** validate filePath parameter exists and is readable
+   - **Always** check filePath is within expected directory
+   - **Never** execute file content without validation
+   - **Never** assume filePath format or content
+   - **Always** validate input matches descriptor input schema types
    
    ### Output Sanitization
-   Your plugin returns JSON via stdout:
-   - **Always** escape special characters in output values
-   - **Never** include raw file content without escaping
+   Your plugin returns JSON via stdout (per ADR-003):
+   - **Always** return valid JSON matching descriptor output schema
+   - **Always** escape special characters in JSON string values
+   - **Always** use proper JSON encoding (use jq or json library)
+   - **Never** include raw file content without JSON escaping
    - **Never** include system paths unnecessarily
-   - **Never** log sensitive information
+   - **Never** log sensitive information to stdout (use stderr for logging)
    
    ### Resource Management
    - **Always** implement timeout for long operations
@@ -170,9 +176,11 @@ Must include:
    
    ### System Interaction
    - **Never** require root/sudo for plugin operation
-   - **Never** modify files outside PLUGIN_DATA_DIR
+   - **Never** modify files outside designated plugin data directory
    - **Never** access network unless absolutely necessary (document clearly)
    - **Never** execute user-controllable commands
+   - **Always** read input from stdin, write output to stdout
+   - **Always** use stderr for error messages and logging
    
    ### Dependencies
    - **Minimize** external tool dependencies
@@ -187,14 +195,16 @@ Must include:
    
    Before publishing your plugin:
    
-   - [ ] Input validation: FILE_PATH checked and sanitized
-   - [ ] Output sanitization: All output properly escaped
-   - [ ] Error handling: No sensitive data in error messages
+   - [ ] Input validation: JSON input from stdin parsed and validated
+   - [ ] Schema compliance: Input matches descriptor input schema
+   - [ ] Output validation: JSON output matches descriptor output schema
+   - [ ] JSON formatting: Output is valid JSON (use jq or JSON library)
+   - [ ] Error handling: Errors to stderr, no sensitive data in messages
    - [ ] Resource limits: Timeouts and cleanup implemented
    - [ ] Dependencies documented: install.sh and installed.sh complete
    - [ ] No hardcoded paths: Works on different systems
    - [ ] No network access: Or clearly documented if necessary
-   - [ ] Tested with malicious inputs: Adversarial testing done
+   - [ ] Tested with malicious inputs: Adversarial JSON testing done
    - [ ] Code reviewed: Another developer reviewed for security
    - [ ] Documentation complete: README explains what plugin does
    ```
@@ -206,34 +216,59 @@ Must include:
    ### ❌ DON'T: Execute file content
    ```bash
    # VULNERABLE - Executes file content as code
-   bash < "$FILE_PATH"
-   eval "$(cat "$FILE_PATH")"
+   bash < "$file_path"
+   eval "$(cat "$file_path")"
    ```
    
    ### ❌ DON'T: Use unvalidated input
    ```bash
-   # VULNERABLE - FILE_PATH could contain injection
-   grep "pattern" $FILE_PATH  # Missing quotes, injection risk
+   # VULNERABLE - Unvalidated JSON input
+   # Read stdin without validation
+   file_path=$(jq -r '.filePath')  # No validation!
    ```
    
-   ### ✅ DO: Validate and quote inputs
+   ### ✅ DO: Read and validate JSON input from stdin
    ```bash
-   # SAFE - Validated and properly quoted
-   if [[ -f "$FILE_PATH" ]] && [[ -r "$FILE_PATH" ]]; then
-       grep "pattern" "$FILE_PATH"
+   # SAFE - Read JSON from stdin and validate
+   input=$(cat)  # Read stdin
+   file_path=$(echo "$input" | jq -r '.filePath')
+   
+   # Validate the parsed value
+   if [[ -f "$file_path" ]] && [[ -r "$file_path" ]]; then
+       # Process file safely
+       result=$(process_file "$file_path")
+       # Return JSON to stdout
+       jq -n --arg res "$result" '{result: $res}'
+   else
+       echo "Error: Invalid or unreadable file" >&2
+       exit 1
    fi
    ```
    
-   ### ❌ DON'T: Modify core files
+   ### ❌ DON'T: Return invalid JSON
    ```bash
-   # DANGEROUS - Modifies core system
-   echo "malicious" >> /usr/local/bin/doc.doc.sh
+   # WRONG - Not valid JSON
+   echo "result: $value"
    ```
    
-   ### ✅ DO: Use provided directories
+   ### ✅ DO: Return valid JSON using jq
    ```bash
-   # SAFE - Uses designated plugin directory
-   echo "data" > "$PLUGIN_DATA_DIR/cache.txt"
+   # CORRECT - Valid JSON output
+   jq -n --arg val "$value" '{result: $val}'
+   ```
+   
+   ### ❌ DON'T: Log to stdout
+   ```bash
+   # WRONG - Pollutes JSON output
+   echo "Processing file..." 
+   jq -n '{result: "done"}'
+   ```
+   
+   ### ✅ DO: Log to stderr
+   ```bash
+   # CORRECT - Logging to stderr
+   echo "Processing file..." >&2
+   jq -n '{result: "done"}
    ```
    ```
 
@@ -320,7 +355,8 @@ list_plugins() {
 ### Related Requirements
 
 - REQ_SEC_003 (Plugin Descriptor Validation)
-- REQ_SEC_008 (Environment Variable Sanitization)
+- REQ_SEC_009 (JSON Input Validation) - replaces REQ_SEC_008
+- REQ_SEC_008 (Environment Variable Sanitization) - **OBSOLETED**
 - REQ_0003 (Plugin-Based Architecture)
 - REQ_0004 (Documentation and Help System)
 

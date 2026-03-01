@@ -1,20 +1,13 @@
 # Requirement: Plugin Descriptor Validation
 
 - **ID:** REQ_SEC_003
-- **Status:** FUNNEL
+- **Status:** ACCEPTED
 - **Created at:** 2026-02-25
 - **Created by:** Security Agent
 - **Source:** Security threat analysis (STRIDE/DREAD Scope 3)
 - **Type:** Security Requirement
 - **Priority:** CRITICAL
-- **Related Threats:** Malicious Plugin Execution, System Compromise, Plugin Spoofing
-
----
-
-> **FUNNEL STATUS NOTE:**  
-> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
-
----
+- **Related Threats:** Malicious Plugin Execution, System Compromise
 
 ## Description
 
@@ -221,7 +214,7 @@ All plugin descriptor files (descriptor.json) must be validated against the cano
       "type": "object",
       "required": ["description", "command"],
       "properties": {
-        "description": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 1000 },
         "command": { "type": "string", "maxLength": 1000 },
         "input": {
           "type": "object",
@@ -261,7 +254,8 @@ All plugin descriptor files (descriptor.json) must be validated against the cano
 
 - REQ_0003 (Plugin-Based Architecture)
 - REQ_SEC_007 (Plugin Security Documentation)
-- REQ_SEC_008 (Environment Variable Sanitization)
+- REQ_SEC_009 (JSON Input Validation) - replaces REQ_SEC_008
+- REQ_SEC_008 (Environment Variable Sanitization) - **OBSOLETED**
 
 ### Risk if Not Implemented
 

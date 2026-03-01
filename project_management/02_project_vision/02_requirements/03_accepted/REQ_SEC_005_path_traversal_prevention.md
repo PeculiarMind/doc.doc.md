@@ -1,7 +1,7 @@
 # Requirement: Path Traversal Prevention
 
 - **ID:** REQ_SEC_005
-- **Status:** FUNNEL
+- **Status:** ACCEPTED
 - **Created at:** 2026-02-25
 - **Created by:** Security Agent
 - **Source:** Security threat analysis (STRIDE/DREAD Scope 5), Quality Scenario QS-S01
@@ -9,11 +9,6 @@
 - **Priority:** CRITICAL
 - **Related Threats:** Path Traversal (CWE-22), Arbitrary File Access, Information Disclosure
 
----
-> **FUNNEL STATUS NOTE:**  
-> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
-
----
 ## Description
 
 All file system operations must validate that file paths remain within intended directory boundaries to prevent unauthorized access to files outside the input/output directories.

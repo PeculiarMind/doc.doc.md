@@ -1,20 +1,13 @@
 # Requirement: Template Injection Prevention
 
 - **ID:** REQ_SEC_004
-- **Status:** FUNNEL
+- **Status:** ACCEPTED
 - **Created at:** 2026-02-25
 - **Created by:** Security Agent
 - **Source:** Security threat analysis (STRIDE/DREAD Scope 4), Risk R-T07
 - **Type:** Security Requirement
 - **Priority:** HIGH
 - **Related Threats:** Template Injection, Command Execution, Code Injection
-
----
-
-> **FUNNEL STATUS NOTE:**  
-> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
-
----
 
 ## Description
 

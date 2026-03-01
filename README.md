@@ -171,7 +171,8 @@ Plugins are **language-agnostic** and invoked via shell commands:
 - Defined using `descriptor.json` files
 - Can be implemented in **any language** (Bash, Python, compiled binaries, etc.)
 - Invoked as shell commands, never imported directly
-- Simple interface: receive inputs, produce outputs
+- Simple interface: receive JSON input via stdin, produce JSON output via stdout
+- Type-safe communication using JSON for both input and output
 
 ### Plugin Structure
 
@@ -190,11 +191,13 @@ The `file` plugin detects MIME types using the standard `file` command:
   "name": "file",
   "description": "Detects MIME types using the file command",
   "commands": {
-    "main": {
-      "command": "main.sh {FILE_PATH}",
-      "input": { "FILE_PATH": { "required": true, "type": "string" } },
+    "process": {
+      "command": "main.sh",
+      "input": {
+        "filePath": { "required": true, "type": "string", "description": "Path to file" }
+      },
       "output": {
-        "MIME_TYPE": { "type": "string", "description": "Detected MIME type" }
+        "mimeType": { "type": "string", "description": "Detected MIME type" }
       }
     },
     "install": {
@@ -205,6 +208,11 @@ The `file` plugin detects MIME types using the standard `file` command:
     }
   }
 }
+```
+
+The plugin receives input via stdin:
+```json
+{"filePath": "/path/to/file.pdf"}
 ```
 
 ### Example: stat Plugin (Bash)
@@ -216,12 +224,14 @@ The `stat` plugin extracts file system information:
   "name": "stat",
   "description": "Provides statistical information about a file",
   "commands": {
-    "main": {
-      "command": "main.sh {FILE_PATH}",
-      "input": { "FILE_PATH": { "required": true, "type": "string" } },
+    "process": {
+      "command": "main.sh",
+      "input": {
+        "filePath": { "required": true, "type": "string", "description": "Path to file" }
+      },
       "output": {
-        "FILE_SIZE": { "type": "number", "description": "File size in bytes" },
-        "FILE_OWNER": { "type": "string", "description": "File owner" }
+        "fileSize": { "type": "number", "description": "File size in bytes" },
+        "fileOwner": { "type": "string", "description": "File owner" }
       }
     },
     "install": {
@@ -234,6 +244,11 @@ The `stat` plugin extracts file system information:
 }
 ```
 
+The plugin receives input via stdin:
+```json
+{"filePath": "/path/to/file.pdf"}
+```
+
 ### Example: Python Plugin
 
 Plugins can be implemented in Python:
@@ -242,16 +257,30 @@ Plugins can be implemented in Python:
 {
   "name": "pdf-extractor",
   "commands": {
-    "main": {
-      "command": "python3 extract.py {FILE_PATH}",
-      "input": { "FILE_PATH": { "required": true, "type": "string" } },
+    "process": {
+      "command": "python3 extract.py",
+      "input": {
+        "filePath": { "required": true, "type": "string", "description": "Path to PDF" }
+      },
       "output": {
-        "PDF_TITLE": { "type": "string" },
-        "PDF_AUTHOR": { "type": "string" }
+        "pdfTitle": { "type": "string", "description": "PDF title" },
+        "pdfAuthor": { "type": "string", "description": "PDF author" }
       }
     }
   }
 }
+```
+
+The Python script reads JSON from stdin:
+```python
+import json
+import sys
+
+input_data = json.load(sys.stdin)
+file_path = input_data['filePath']
+# Process file...
+output = {"pdfTitle": "...", "pdfAuthor": "..."}
+json.dump(output, sys.stdout)
 ```
 
 ### Creating Custom Plugins

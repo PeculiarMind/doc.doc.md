@@ -126,10 +126,11 @@ find "$INPUT_DIR" -type f -print0 | \
 - **Invocation method**: Plugins are invoked through shell command execution (e.g., `bash main.sh` or `python3 process.py`)
 - **Language-agnostic**: Plugins define their command in `descriptor.json`; the command is executed through the shell
 - **No direct imports**: The core system never imports or calls plugins directly from Python—always through shell commands
+- **Communication**: Parameters passed via JSON on stdin, output returned as JSON on stdout
 - **Examples**:
-  - Bash plugin: `"command": "main.sh {FILE_PATH}"`
-  - Python plugin: `"command": "python3 process.py {FILE_PATH}"`
-  - Any executable: `"command": "./custom_binary {FILE_PATH}"`
+  - Bash plugin: `"command": "main.sh"` (reads JSON from stdin, outputs JSON to stdout)
+  - Python plugin: `"command": "python3 process.py"` (reads JSON from stdin, outputs JSON to stdout)
+  - Any executable: `"command": "./custom_binary"` (reads JSON from stdin, outputs JSON to stdout)
 
 **Technical Specifications:**
 - **Minimum Python version**: Python 3.12+ (latest stable, modern features)
