@@ -5,7 +5,8 @@
 - **Type:** Bug
 - **Created at:** 2026-03-01
 - **Created by:** security.agent
-- **Status:** BACKLOG
+- **Status:** DONE
+- **Assigned to:** developer.agent
 
 ## TOC
 

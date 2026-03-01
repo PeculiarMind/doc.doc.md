@@ -38,6 +38,10 @@
         "success": {
           "type": "boolean",
           "description": "Indicates whether the file plugin was successfully installed."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message describing the installation result."
         }
       }
     }
