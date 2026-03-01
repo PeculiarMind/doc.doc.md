@@ -27,6 +27,12 @@
 - **Template**: `project_management/01_guidelines/documentation_standards/doc_templates/ADR_template.md`
 - **Linked to:** Relevant CRs, Solution Strategies, and other ADRs
 
+### Architecture Concept (ARC)
+- **Purpose**: Document architectural concepts, patterns, and approaches that address specific problems in the system design.
+- **Location**: `project_management/02_project_vision/03_architecture_vision/08_concepts/ARC_XXXX_*.md`
+- **Template**: `project_management/01_guidelines/documentation_standards/doc_templates/ARC_concept_template.md`
+- **Linked to:** Relevant CRs, ADRs, Solution Strategies, and related architecture concepts
+
 ### Implementation Decision Record (IDR)
 - **Purpose**: Document architecture decisions made during the implementation phase.
 - **Location**: `project_documentation/01_architecture/09_architecture_decisions/IDR_XXXX_*.md`
