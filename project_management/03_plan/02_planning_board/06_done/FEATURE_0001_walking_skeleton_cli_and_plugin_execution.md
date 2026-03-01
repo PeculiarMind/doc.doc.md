@@ -5,7 +5,7 @@
 - **Type:** Feature
 - **Created at:** 2026-03-01
 - **Created by:** Product Owner
-- **Status:** IMPLEMENTING
+- **Status:** DONE
 - **Assigned to:** developer.agent
 
 ## TOC
