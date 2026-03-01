@@ -10,6 +10,14 @@ The script supports a variety of commands and options for customizing document p
 
 ## Processing Documents
 
+Document processing is executed using the `doc.doc.sh process` command. This command runs different phases:
+
+1. **Validation Phase**: Validates the input parameters and verifies if active plugins are installed and available for execution.
+2. **Planning Phase**: Determines the execution order of active plugins based on their dependencies and prepares the execution plan.
+3. **Input Gathering Phase**: Collects the documents from the specified input directory, applying the include and exclude filters to determine which documents will be processed.
+4. **Document Processing Phase**: Executes the active plugins in the determined order, passing each discovered document and parameters to each plugin. The output from each plugin is collected by the script and processed to generate the final markdown files after all plugins have been executed for the document.
+5. **Output Generation Phase**: Generates the markdown files in the specified output directory, mirroring the input directory structure. The generated markdown files are based on the specified template with placeholders replaced by the output from the plugins.
+
 **Command:** `doc.doc.sh process`
 
 **Parameters:**
