@@ -10,6 +10,7 @@ This document catalogs all specialized agents available in this repository. Agen
 | **developer** | `.github/agents/developer.agent.md` | Implements backlog items end-to-end, coordinating tests and quality gates |
 | **documentation** | `.github/agents/documentation.agent.md` | Keeps README.md accurate and concise for users and contributors |
 | **license** | `.github/agents/license.agent.md` | Audits changes for license compatibility and attribution requirements |
+| **product_owner** | `.github/agents/product_owner.agent.md` | Manages product backlog, prioritizes work items, and makes product decisions |
 | **requirements** | `.github/agents/requirements.agent.md` | Extracts requirements from vision documents and manages requirement lifecycle |
 | **security** | `.github/agents/security.agent.md` | Reviews concepts, tests, and implementations for security risks |
 | **tester** | `.github/agents/tester.agent.md` | Creates and executes tests for features, supporting TDD and quality gates |
