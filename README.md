@@ -27,6 +27,7 @@ doc.doc.md is a command-line tool that processes document collections in directo
 ### Prerequisites
 
 - **Bash** shell environment (version 4.0+)
+- **jq** (JSON processor, used by built-in plugins)
 - **Python 3.12+** for advanced filtering and processing
 - **Git** (for cloning the repository)
 
@@ -147,8 +148,16 @@ doc.doc.md/
 ├── doc.doc.md/             # Core directory
 │   ├── components/         # Reusable components (planned)
 │   ├── plugins/            # Plugin directory
-│   │   └── stat/           # File statistics plugin
-│   │       └── descriptor.json
+│   │   ├── stat/           # File statistics plugin
+│   │   │   ├── descriptor.json
+│   │   │   ├── main.sh
+│   │   │   ├── install.sh
+│   │   │   └── installed.sh
+│   │   └── file/           # MIME type detection plugin
+│   │       ├── descriptor.json
+│   │       ├── main.sh
+│   │       ├── install.sh
+│   │       └── installed.sh
 │   └── templates/          # Template directory
 │       └── default.md      # Default markdown template
 ├── project_documentation/  # Project docs (arc42 structure)
@@ -231,7 +240,10 @@ The `stat` plugin extracts file system information:
       },
       "output": {
         "fileSize": { "type": "number", "description": "File size in bytes" },
-        "fileOwner": { "type": "string", "description": "File owner" }
+        "fileOwner": { "type": "string", "description": "File owner" },
+        "fileCreated": { "type": "string", "description": "File creation date (ISO 8601)" },
+        "fileModified": { "type": "string", "description": "Last modification date (ISO 8601)" },
+        "fileMetadataChanged": { "type": "string", "description": "Metadata change date (ISO 8601)" }
       }
     },
     "install": {
