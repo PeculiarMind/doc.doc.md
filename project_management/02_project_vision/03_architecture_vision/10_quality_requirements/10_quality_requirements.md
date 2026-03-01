@@ -84,7 +84,7 @@ Quality scenarios concretize quality requirements and make them measurable.
 | QS-C01 | **macOS Execution** | User runs tool on macOS | Tool works with BSD utilities | All core features function correctly |
 | QS-C02 | **Obsidian Import** | User opens generated markdown in Obsidian | Files open without errors or warnings | All markdown rendered correctly |
 | QS-C03 | **Linux Distribution** | Tool run on Ubuntu, Fedora, Arch | Works on all major distributions | No distribution-specific issues |
-| QS-C04 | **Python Version** | System has Python 3.7 (minimum supported) | Tool runs without import errors | All Python 3.7+ compatible |
+| QS-C04 | **Python Version** | System has Python 3.12 (minimum supported) | Tool runs without import errors | All Python 3.12+ compatible |
 | QS-C05 | **Shell Compatibility** | Running on dash vs bash | POSIX-compliant portions work in both | Core functionality shell-independent |
 
 ### Performance Scenarios

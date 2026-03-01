@@ -13,7 +13,7 @@ The doc.doc.md tool is deployed as a standalone command-line application on Unix
 │  ┌───────────────────────────────────────────┐  │
 │  │         Operating System                  │  │
 │  │  • Bash 4.0+                              │  │
-│  │  • Python 3.7+                            │  │
+│  │  • Python 3.12+                           │  │
 │  │  • Standard Unix utilities (find, file)   │  │
 │  └───────────────────────────────────────────┘  │
 │                      │                          │

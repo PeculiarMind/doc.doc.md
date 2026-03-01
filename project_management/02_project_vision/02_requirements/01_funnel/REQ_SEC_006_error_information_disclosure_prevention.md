@@ -11,6 +11,11 @@
 
 ---
 
+> **FUNNEL STATUS NOTE:**  
+> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
+
+---
+
 ## Description
 
 Error messages and logging must not disclose sensitive information that could aid attackers, while still providing useful feedback for debugging and troubleshooting.

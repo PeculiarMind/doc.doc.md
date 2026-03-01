@@ -11,6 +11,11 @@
 
 ---
 
+> **FUNNEL STATUS NOTE:**  
+> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
+
+---
+
 ## Description
 
 Template processing must prevent injection attacks by using safe string substitution mechanisms that cannot execute arbitrary code or shell commands through template variables or template content.

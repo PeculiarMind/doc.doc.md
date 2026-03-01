@@ -7,7 +7,7 @@
 | ID | Risk | Probability | Impact | Mitigation Strategy |
 |----|------|-------------|--------|---------------------|
 | R-T01 | **Shell Script Portability** | Medium | Medium | Use POSIX-compliant constructs where possible; test on multiple shells (bash, dash); document known incompatibilities |
-| R-T02 | **Python Version Fragmentation** | Low | Medium | Target Python 3.7+ (widely available); use only standard library; provide version check on startup |
+| R-T02 | **Python Version Fragmentation** | Low | Medium | Target Python 3.12+ (Ubuntu 24.04+ / Debian 13+); use only standard library; provide version check on startup; document minimum system requirements |
 | R-T03 | **MIME Type Detection Inaccuracy** | Low | Low | Rely on standard `file` command (battle-tested); allow users to override via explicit patterns |
 | R-T04 | **Plugin System Complexity** | Medium | High | Start simple (no dependency resolution initially); add complexity incrementally; comprehensive plugin developer documentation |
 | R-T05 | **Large Directory Performance** | Medium | Medium | Use streaming pipelines (find + process); avoid loading all files in memory; provide progress indication |

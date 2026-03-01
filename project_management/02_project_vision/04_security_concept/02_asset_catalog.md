@@ -27,7 +27,7 @@ This section catalogs all assets of this project, categorizing them by type and 
 | ASSET-0106 | Plugin Executables | SUPPORTING | Application | Plugin main.sh, install.sh, installed.sh scripts. Untrusted plugins pose execution risk. | 2 | 3 | 3 |
 | ASSET-0107 | Template Files | SUPPORTING | Configuration | Markdown templates with variable placeholders. Template injection risk if not sanitized. | 1 | 3 | 2 |
 | ASSET-0108 | System Utilities | SUPPORTING | Infrastructure | External tools (find, file, stat, grep, etc.) relied upon by core and plugins. Availability critical. | 1 | 2 | 3 |
-| ASSET-0109 | Python Runtime | SUPPORTING | Infrastructure | Python 3.8+ interpreter required for filter engine. Vulnerability in Python affects system. | 1 | 2 | 3 |
+| ASSET-0109 | Python Runtime | SUPPORTING | Infrastructure | Python 3.12+ interpreter required for filter engine. Vulnerability in Python affects system. | 1 | 2 | 3 |
 | ASSET-0110 | Bash Shell | SUPPORTING | Infrastructure | Bash 4.0+ shell environment. Shell vulnerabilities can affect execution. | 1 | 2 | 3 |
 | **SUPPORTING ASSETS (Configuration & State)** |
 | ASSET-0201 | Plugin Activation State | SUPPORTING | Configuration | Tracking which plugins are active/inactive. Incorrect state can lead to unexpected behavior. | 1 | 2 | 2 |

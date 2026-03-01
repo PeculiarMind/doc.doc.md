@@ -56,14 +56,14 @@ Each plugin is a directory containing:
 ```
 plugin_name/
 ├── descriptor.json       # Plugin metadata and configuration
-├── main.sh              # Main plugin entry point
-├── install.sh           # Installation script (optional)
-└── installed.sh         # Installation check script (optional)
+├── main.sh              # Main processing script (referenced in commands.process)
+├── install.sh           # Installation script (referenced in commands.install)
+└── installed.sh         # Installation check script (referenced in commands.installed)
 ```
 
 #### Descriptor Format
 
-The `descriptor.json` file defines plugin metadata:
+The `descriptor.json` file defines plugin metadata (see [ADR-003](../09_architecture_decisions/ADR_003_json_plugin_descriptors.md) for canonical schema):
 
 ```json
 {
@@ -71,22 +71,75 @@ The `descriptor.json` file defines plugin metadata:
   "version": "1.0.0",
   "description": "Provides file metadata using stat command",
   "author": "doc.doc.md team",
-  "entry_point": "main.sh",
-  "dependencies": [],
-  "system_requirements": ["stat"],
-  "input_types": ["*"],
-  "output_variables": [
-    "file_size",
-    "file_size_human",
-    "modified_date",
-    "created_date",
-    "permissions",
-    "owner"
-  ],
-  "install_command": "install.sh",
-  "check_installed": "installed.sh"
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Process a file and output metadata",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Absolute path to the file being processed",
+          "required": true
+        }
+      },
+      "output": {
+        "fileSize": {
+          "type": "number",
+          "description": "File size in bytes"
+        },
+        "fileSizeHuman": {
+          "type": "string",
+          "description": "Human-readable file size"
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Last modified date"
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "File creation date"
+        },
+        "permissions": {
+          "type": "string",
+          "description": "File permissions"
+        },
+        "owner": {
+          "type": "string",
+          "description": "File owner"
+        }
+      }
+    },
+    "install": {
+      "description": "Install plugin dependencies",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether installation succeeded"
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if plugin is installed",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Whether plugin is installed and ready"
+        }
+      }
+    }
+  }
 }
 ```
+
+**Note**: The canonical plugin descriptor schema is defined in [ADR-003](../09_architecture_decisions/ADR_003_json_plugin_descriptors.md). All plugins must implement three standard commands:
+- `process`: Main file processing command - requires `filePath` input parameter, defines plugin-specific output parameters
+- `install`: Plugin installation/setup command - no input parameters, returns installation result
+- `installed`: Check if plugin is properly installed - no input parameters, returns installation status
+
+Each command defines its own input/output parameters with type declarations and descriptions. **All parameter names must follow lowerCamelCase naming convention** (e.g., `filePath`, `mimeType`, `fileSize`). Additional custom commands may be defined for plugin-specific operations.
 
 #### Plugin Interface
 
@@ -98,12 +151,14 @@ The `descriptor.json` file defines plugin metadata:
 **Output** (via stdout, JSON format):
 ```json
 {
-  "file_size": 1048576,
-  "file_size_human": "1.0 MB",
-  "modified_date": "2024-02-25 14:30:00",
+  "fileSize": 1048576,
+  "fileSizeHuman": "1.0 MB",
+  "modifiedDate": "2024-02-25 14:30:00",
   "permissions": "rw-r--r--"
 }
 ```
+
+**Note**: Output variable names must match the lowerCamelCase names defined in the descriptor's `output` object.
 
 #### Plugin Execution Flow
 

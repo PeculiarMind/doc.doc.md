@@ -11,6 +11,11 @@
 
 ---
 
+> **FUNNEL STATUS NOTE:**  
+> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
+
+---
+
 ## Description
 
 Comprehensive documentation must be provided to educate users about plugin security risks and best practices, and to guide plugin developers in creating secure plugins.
@@ -90,12 +95,13 @@ Must include:
       - Unknown source or forum post: ❌ Risky
    
    2. **Review plugin code**:
-      - Plugins are shell scripts (main.sh, install.sh)
+      - Plugins are shell scripts (main.sh, install.sh, installed.sh)
       - Check descriptor.json for commands plugin will run
       - Look for suspicious operations (network access, system modification)
    
    3. **Check dependencies**:
-      - Review system_requirements in descriptor.json
+      - Review install.sh to see what dependencies will be installed
+      - Run installed.sh to verify current system status
       - Ensure required tools are safe and necessary
    
    4. **Start with deactivated**:
@@ -170,8 +176,8 @@ Must include:
    
    ### Dependencies
    - **Minimize** external tool dependencies
-   - **Document** all system_requirements clearly
-   - **Check** dependency availability before use
+   - **Document** dependencies in install.sh and code comments
+   - **Check** dependency availability in installed.sh
    - **Fail gracefully** if dependency missing
    ```
 
@@ -185,7 +191,7 @@ Must include:
    - [ ] Output sanitization: All output properly escaped
    - [ ] Error handling: No sensitive data in error messages
    - [ ] Resource limits: Timeouts and cleanup implemented
-   - [ ] Dependencies documented: system_requirements complete
+   - [ ] Dependencies documented: install.sh and installed.sh complete
    - [ ] No hardcoded paths: Works on different systems
    - [ ] No network access: Or clearly documented if necessary
    - [ ] Tested with malicious inputs: Adversarial testing done

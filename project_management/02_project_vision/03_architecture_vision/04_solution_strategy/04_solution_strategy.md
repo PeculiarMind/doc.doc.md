@@ -112,7 +112,7 @@
 - Standard markdown output format
 - Obsidian-compatible markdown
 - Cross-platform Unix utilities
-- Python 3.7+ (widely available)
+- Python 3.12+ (Ubuntu 24.04+ / Debian 13+)
 
 **Requirements**: REQ_0007, REQ_0008
 

@@ -1,35 +1,61 @@
 {
   "name": "stat",
-  "active": true,
+  "version": "1.0.0",
   "description": "A plugin that provides statistical information about a file, e.g. its size, owner, creation date, last modified date, and metadata change date.",
+  "active": true,
   "commands": {
-    "main": { 
+    "process": {
       "description": "Get statistical information about a file.",
-      "input": { 
-          "FILE_PATH": { "required": true, "type": "string", "description": "The path to the file to be analyzed." }
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the file to be analyzed.",
+          "required": true
+        }
       },
       "output": {
-        "FILE_SIZE":             { "type": "number", "description": "The size of the file in bytes." },
-        "FILE_OWNER":            { "type": "string", "description": "The owner of the file." },
-        "FILE_CREATED":          { "type": "string", "description": "The creation date of the file." },
-        "FILE_MODIFIED":         { "type": "string", "description": "The last modified date of the file." },
-        "FILE_METADATA_CHANGED": { "type": "string", "description": "The date when the file's metadata was last changed." }
-      },
-      "command": "stat --file-path {FILE_PATH}"
+        "fileSize": {
+          "type": "number",
+          "description": "The size of the file in bytes."
+        },
+        "fileOwner": {
+          "type": "string",
+          "description": "The owner of the file."
+        },
+        "fileCreated": {
+          "type": "string",
+          "description": "The creation date of the file."
+        },
+        "fileModified": {
+          "type": "string",
+          "description": "The last modified date of the file."
+        },
+        "fileMetadataChanged": {
+          "type": "string",
+          "description": "The date when the file's metadata was last changed."
+        }
+      }
     },
     "installed": {
       "description": "Check if the stat plugin is installed and available for use.",
+      "command": "installed.sh",
       "output": {
-        "INSTALLED": { "type": "boolean", "description": "Indicates whether the stat plugin is installed." }
-      },
-      "command": "read -r INSTALLED < <(installed.sh > /dev/null && echo true || echo false)"
+        "installed": {
+          "type": "boolean",
+          "description": "Indicates whether the stat plugin is installed."
+        }
+      }
     },
     "install": {
       "description": "Install the stat plugin if it is not already installed.",
+      "command": "install.sh",
       "output": {
-        "INSTALLED": { "type": "boolean", "description": "Indicates whether the stat plugin was successfully installed." }
-      },
-      "command": "read -r INSTALLED < <(install.sh > /dev/null && echo true || echo false)"
+        "success": {
+          "type": "boolean",
+          "description": "Indicates whether the stat plugin was successfully installed."
+        }
+      }
     }
   }
 }

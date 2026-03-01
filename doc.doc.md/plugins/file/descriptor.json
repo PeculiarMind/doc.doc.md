@@ -1,31 +1,45 @@
 {
   "name": "file",
-  "active": true,
+  "version": "1.0.0",
   "description": "A plugin that determines the mime type of a file based on its content, rather than just its file extension. This can be useful for identifying the true nature of a file, especially if it has an incorrect or missing extension.",
+  "active": true,
   "commands": {
-    "main": { 
+    "process": {
       "description": "Determines the mime type of a file based on its content.",
-      "input": { 
-          "FILE_PATH": { "required": true, "type": "string", "description": "The path to the file to be analyzed." }
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the file to be analyzed.",
+          "required": true
+        }
       },
       "output": {
-        "FILE_MIME_TYPE":       { "type": "string", "description": "The mime type of the file." }
-      },
-      "command": "read -r FILE_MIME_TYPE < <(main.sh {FILE_PATH})"
+        "mimeType": {
+          "type": "string",
+          "description": "The mime type of the file."
+        }
+      }
     },
     "installed": {
       "description": "Check if the file plugin is installed and available for use.",
+      "command": "installed.sh",
       "output": {
-        "INSTALLED": { "type": "boolean", "description": "Indicates whether the file plugin is installed." }
-      },
-      "command": "read -r INSTALLED < <(installed.sh > /dev/null && echo true || echo false)"
+        "installed": {
+          "type": "boolean",
+          "description": "Indicates whether the file plugin is installed."
+        }
+      }
     },
     "install": {
       "description": "Install the file plugin if it is not already installed.",
+      "command": "install.sh",
       "output": {
-        "INSTALLED": { "type": "boolean", "description": "Indicates whether the file plugin was successfully installed." }
-      },
-      "command": "read -r INSTALLED < <(install.sh > /dev/null && echo true || echo false)"
+        "success": {
+          "type": "boolean",
+          "description": "Indicates whether the file plugin was successfully installed."
+        }
+      }
     }
   }
 }

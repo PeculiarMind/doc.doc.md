@@ -11,6 +11,11 @@
 
 ---
 
+> **FUNNEL STATUS NOTE:**  
+> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
+
+---
+
 ## Description
 
 All environment variables passed to plugins must be sanitized to prevent command injection and ensure plugins cannot exploit environment variable values for malicious purposes.

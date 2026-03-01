@@ -11,38 +11,65 @@
 
 ---
 
+> **FUNNEL STATUS NOTE:**  
+> This requirement is pending formal review and approval by PeculiarMind. It is referenced in the architecture vision for planning purposes but is not yet formally accepted into the project scope.
+
+---
+
 ## Description
 
-All plugin descriptor files (descriptor.json) must be validated against a defined schema before plugin loading to prevent malformed or malicious plugins from compromising system security and stability.
+All plugin descriptor files (descriptor.json) must be validated against the canonical plugin descriptor schema (defined in [ADR-003](../../03_architecture_vision/09_architecture_decisions/ADR_003_json_plugin_descriptors.md)) before plugin loading to prevent malformed or malicious plugins from compromising system security and stability.
 
 ### Specific Requirements
 
 1. **Schema Validation**:
    - Descriptor must be valid JSON format
-   - Required fields must be present: `name`, `active`, `description`, `commands`
-   - Field types must match schema (string, boolean, object)
+   - Required fields must be present: `name`, `version`, `description`, `commands` (per ADR-003)
+   - Field types must match canonical schema (string, boolean, object, array)
    - Unknown fields should generate warnings but not block loading
 
-2. **Required Fields**:
+2. **Required Fields** (per ADR-003):
    - `name`: String matching `[a-zA-Z0-9_-]+`, max 64 characters
-   - `active`: Boolean indicating activation status
+   - `version`: Semantic version string (e.g., "1.0.0")
    - `description`: String, max 500 characters
-   - `commands`: Object with at least `main` command defined
+   - `commands`: Object - plugin command definitions (REQUIRED)
+     - **Standard Required Commands** (all plugins must implement):
+       - `process`: Main file processing command
+         - Must have `description` and `command` fields
+         - Must define `input.filePath` parameter (type: string, required: true)
+         - Must define `output` parameters (each with type and description)
+       - `install`: Installation script command
+         - Must have `description` and `command` fields
+         - Must NOT have `input` parameters
+         - Should define `output` parameters (e.g., success status)
+       - `installed`: Installation check command
+         - Must have `description` and `command` fields
+         - Must NOT have `input` parameters
+         - Should define `output` parameters (e.g., installed status)
+     - **Optional Custom Commands**: Plugins may define additional commands
+     - Each command structure:
+       - `description` (string, required): What the command does
+       - `command` (string, required): Shell command/script path
+       - `input` (object, optional): Input parameter definitions
+         - Each parameter must have: `type`, `description`
+         - Optional: `required` (boolean, default: false)
+         - **Parameter names must follow lowerCamelCase convention** (pattern: `^[a-z][a-zA-Z0-9]*$`)
+       - `output` (object, optional): Output variable definitions
+         - Each variable must have: `type`, `description`
+         - **Variable names must follow lowerCamelCase convention** (pattern: `^[a-z][a-zA-Z0-9]*$`)
 
-3. **Command Validation**:
-   - Each command must have: `description`, `command` (shell command string)
-   - Optional: `input`, `output` parameter specifications
-   - Command strings must not contain obvious injection patterns
-   - Input/output specs must define parameter names and types
+3. **Optional Fields** (per ADR-003):
+   - `active`: Boolean indicating activation status (default: true)
+   - `author`: String - plugin author information
 
-4. **Dependency Validation** (Future):
-   - Optional `dependencies` array listing required plugins
-   - Dependency names must reference existing plugin names
-   - Circular dependencies must be detected and rejected
-
-5. **System Requirements Validation** (Future):
-   - Optional `system_requirements` array listing required external tools
-   - Tool names must match `[a-zA-Z0-9_-]+` pattern
+4. **Command Parameter Validation**:
+   - All input parameters must specify `type` (string, number, boolean, object, array)
+   - All input parameters must specify `description`
+   - All output parameters must specify `type` and `description`
+   - **Parameter names must follow lowerCamelCase convention** (pattern: `^[a-z][a-zA-Z0-9]*$`)
+   - Examples of valid names: `filePath`, `mimeType`, `fileSize`, `isActive`
+   - Examples of invalid names: `FILE_PATH`, `file_path`, `FilePath`, `_filePath`
+   - `install` and `installed` commands must not define `input` parameters
 
 ### Security Controls
 
@@ -54,41 +81,41 @@ All plugin descriptor files (descriptor.json) must be validated against a define
 | Field | Type | Required | Constraints | Error if Invalid |
 |-------|------|----------|-------------|------------------|
 | `name` | string | Yes | `^[a-zA-Z0-9_-]{1,64}$` | Fatal: reject plugin |
-| `active` | boolean | Yes | true \| false | Fatal: reject plugin |
+| `version` | string | Yes | Semantic version format | Fatal: reject plugin |
 | `description` | string | Yes | max 500 chars | Fatal: reject plugin |
-| `commands` | object | Yes | must contain `main` | Fatal: reject plugin |
+| `commands` | object | Yes | must contain `process`, `install`, `installed` | Fatal: reject plugin |
+| `commands.process` | object | Yes | requires `description`, `command`, `input.filePath`, `output` | Fatal: reject plugin |
+| `commands.process.input.filePath` | object | Yes | must have `type: "string"`, `required: true`, `description` | Fatal: reject plugin |
+| `commands.install` | object | Yes | requires `description`, `command`; must NOT have `input` | Fatal: reject plugin |
+| `commands.installed` | object | Yes | requires `description`, `command`; must NOT have `input` | Fatal: reject plugin |
 | `commands.*.description` | string | Yes | max 200 chars | Fatal: reject command |
-| `commands.*.command` | string | Yes | shell command | Fatal: reject command |
-| `commands.*.input` | object | No | param name → spec | Warning if malformed |
-| `commands.*.output` | object | No | param name → spec | Warning if malformed |
-| `dependencies` | array | No | array of strings | Warning: dependency resolution disabled |
-| `system_requirements` | array | No | array of tool names | Warning only |
+| `commands.*.command` | string | Yes | shell command/script path | Fatal: reject command |
+| `commands.*.input.*` | object | No | must have `type` and `description`; name must match `^[a-z][a-zA-Z0-9]*$` | Fatal: reject parameter |
+| `commands.*.output.*` | object | No | must have `type` and `description`; name must match `^[a-z][a-zA-Z0-9]*$` | Fatal: reject parameter |
+| `active` | boolean | No | true \| false (default: true) | Warning if invalid |
+| `author` | string | No | no specific constraint | Warning only |
 
 ### Test Requirements
 
 **Valid Descriptor Tests**:
-- Minimal valid descriptor (name, active, description, main command)
+- Minimal valid descriptor (name, version, description, commands with process/install/installed)
 - Full descriptor with all optional fields
-- Multiple commands (main, install, installed)
-- Plugin with dependencies
-- Plugin with system requirements
+- Multiple commands (process, install, installed, plus custom commands)
 
 **Invalid Descriptor Tests**:
-- Missing required field (name, active, description, commands)
+- Missing required field (name, version, description, commands)
+- Missing required commands (process, install, or installed)
 - Invalid JSON syntax
 - Invalid field types (active as string, commands as array)
 - Invalid plugin name (spaces, special chars, too long)
 - Command without description or command string
 - Empty commands object
-- Malformed dependency references
-- Malformed system requirements
 
 **Security Tests**:
 - Command injection in command string: `"; rm -rf / #"`
 - Path traversal in plugin name: `../../malicious`
 - Oversized fields (buffer overflow attempt)
 - Unicode/special characters in fields
-- Circular dependency detection
 
 ### Acceptance Criteria
 
@@ -98,6 +125,7 @@ All plugin descriptor files (descriptor.json) must be validated against a define
 - [ ] Valid descriptors loaded successfully
 - [ ] Unknown fields generate warnings (logged)
 - [ ] Plugin name uniqueness enforced
+- [ ] Required commands (process, install, installed) presence validated
 - [ ] All validation tests pass
 - [ ] Security tests detect malicious descriptors
 
@@ -107,41 +135,85 @@ All plugin descriptor files (descriptor.json) must be validated against a define
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["name", "active", "description", "commands"],
+  "required": ["name", "version", "description", "commands"],
   "properties": {
     "name": {
       "type": "string",
       "pattern": "^[a-zA-Z0-9_-]{1,64}$",
       "description": "Unique plugin identifier"
     },
-    "active": {
-      "type": "boolean",
-      "description": "Whether plugin is active"
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version (e.g., 1.0.0)"
     },
     "description": {
       "type": "string",
       "maxLength": 500,
       "description": "Human-readable plugin description"
     },
+    "author": {
+      "type": "string",
+      "description": "Plugin author/maintainer information"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether plugin is active (default: true)"
+    },
     "commands": {
       "type": "object",
-      "required": ["main"],
+      "required": ["process", "install", "installed"],
       "properties": {
-        "main": { "$ref": "#/definitions/command" },
-        "install": { "$ref": "#/definitions/command" },
-        "installed": { "$ref": "#/definitions/command" }
+        "process": {
+          "allOf": [
+            { "$ref": "#/definitions/command" },
+            {
+              "required": ["input", "output"],
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": ["filePath"],
+                  "properties": {
+                    "filePath": {
+                      "$ref": "#/definitions/parameter",
+                      "properties": {
+                        "type": { "const": "string" },
+                        "required": { "const": true }
+                      }
+                    }
+                  },
+                  "additionalProperties": { "$ref": "#/definitions/parameter" },
+                  "propertyNames": {
+                    "pattern": "^[a-z][a-zA-Z0-9]*$",
+                    "description": "Parameter names must follow lowerCamelCase convention"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "install": {
+          "allOf": [
+            { "$ref": "#/definitions/command" },
+            {
+              "not": { "required": ["input"] },
+              "description": "Install command must not have input parameters"
+            }
+          ]
+        },
+        "installed": {
+          "allOf": [
+            { "$ref": "#/definitions/command" },
+            {
+              "not": { "required": ["input"] },
+              "description": "Installed command must not have input parameters"
+            }
+          ]
+        }
       },
-      "additionalProperties": { "$ref": "#/definitions/command" }
-    },
-    "dependencies": {
-      "type": "array",
-      "items": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
-      "description": "List of required plugin names"
-    },
-    "system_requirements": {
-      "type": "array",
-      "items": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
-      "description": "List of required system tools"
+      "additionalProperties": { "$ref": "#/definitions/command" },
+      "description": "Plugin commands - must include process, install, installed"
     }
   },
   "definitions": {
@@ -151,8 +223,34 @@ All plugin descriptor files (descriptor.json) must be validated against a define
       "properties": {
         "description": { "type": "string", "maxLength": 200 },
         "command": { "type": "string", "maxLength": 1000 },
-        "input": { "type": "object" },
-        "output": { "type": "object" }
+        "input": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/parameter" },
+          "propertyNames": {
+            "pattern": "^[a-z][a-zA-Z0-9]*$",
+            "description": "Parameter names must follow lowerCamelCase convention"
+          }
+        },
+        "output": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/parameter" },
+          "propertyNames": {
+            "pattern": "^[a-z][a-zA-Z0-9]*$",
+            "description": "Variable names must follow lowerCamelCase convention"
+          }
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "object", "array"]
+        },
+        "description": { "type": "string" },
+        "required": { "type": "boolean", "default": false }
       }
     }
   }
@@ -175,7 +273,7 @@ Without descriptor validation:
 - **Malicious plugins** could be loaded with crafted descriptors
 - **System crashes** from malformed JSON or invalid data types
 - **Command injection** via unsanitized command strings
-- **Plugin conflicts** from name collisions or circular dependencies
+- **Plugin conflicts** from name collisions
 - **Difficult debugging** when plugins fail to load
 
 ### Implementation Notes

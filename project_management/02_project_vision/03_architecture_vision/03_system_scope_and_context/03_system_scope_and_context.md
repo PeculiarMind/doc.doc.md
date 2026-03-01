@@ -78,7 +78,7 @@
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | **Main CLI** | Bash (POSIX-compliant) | Entry point, orchestration, user interaction |
-| **Filter Engine** | Python 3.7+ | Complex include/exclude logic, pattern matching |
+| **Filter Engine** | Python 3.12+ | Complex include/exclude logic, pattern matching |
 | **File Discovery** | Unix `find` | Efficient directory traversal |
 | **MIME Detection** | Unix `file` command (via plugin) | File type identification |
 | **Plugin System** | Bash + descriptor.json | Extensible processing capabilities |

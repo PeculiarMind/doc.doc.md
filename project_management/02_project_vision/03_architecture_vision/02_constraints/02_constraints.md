@@ -6,7 +6,7 @@
 |------------|-------------|-----------|
 | **TC-1: Unix/Linux Environment** | Primary target is Unix/Linux systems (Linux, macOS). Windows support via WSL/Git Bash only. | Leverages standard Unix utilities (find, file, grep) and shell scripting capabilities. Home-lab enthusiasts typically run Linux. |
 | **TC-2: Bash as Primary Language** | Main orchestration and CLI interface implemented in Bash. | Aligns with Unix philosophy, provides direct access to system utilities, familiar to target users. See ADR-001. |
-| **TC-3: Python for Complex Logic** | Complex filtering and data processing implemented in Python 3.7+. | Shell scripting inadequate for complex AND/OR filter logic and advanced pattern matching. See ADR-001. |
+| **TC-3: Python for Complex Logic** | Complex filtering and data processing implemented in Python 3.12+. | Shell scripting inadequate for complex AND/OR filter logic and advanced pattern matching. Python 3.12+ provides modern features and is available on Ubuntu 24.04+ / Debian 13+. See ADR-001. |
 | **TC-4: Standard Unix Utilities** | Rely on POSIX-compliant utilities (find, file, grep, etc.). | Avoid reinventing the wheel, leverage proven tools. See ADR-002. |
 | **TC-5: Minimal External Dependencies** | Minimize dependencies beyond standard Unix utilities and Python standard library. | Ensure easy installation and maintenance for home users. |
 | **TC-6: Shell-Based Plugin Invocation** | Plugins invoked as shell commands, not direct language imports. | Enables language-agnostic plugin system while maintaining simple interface. |

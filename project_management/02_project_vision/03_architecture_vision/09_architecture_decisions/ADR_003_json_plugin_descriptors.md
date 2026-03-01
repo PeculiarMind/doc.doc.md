@@ -12,6 +12,12 @@
 | Date | Author | Description |
 |------|--------|-------------|
 | 2026-02-25 | Architect Agent | Initial decision document created |
+| 2026-03-01 | GitHub Copilot | Updated canonical schema to include `active` field and `commands` object for plugin-specific commands |
+| 2026-03-01 | GitHub Copilot | Revised schema: moved all commands to `commands` object; removed `entry_point`, `install_command`, `check_installed`; defined standard required commands (process, install, installed) |
+| 2026-03-01 | GitHub Copilot | Revised schema: input/output parameters now defined per command (not globally); removed global `input_types` and `output_variables`; each parameter requires type and description; install/installed commands have no input params |
+| 2026-03-01 | GitHub Copilot | Added naming convention: all input/output parameter names must follow lowerCamelCase (e.g., `filePath`, `mimeType`, `fileSize`) |
+| 2026-03-01 | GitHub Copilot | Removed `system_requirements` field - install and installed commands are responsible for managing and verifying dependencies |
+| 2026-03-01 | GitHub Copilot | Removed `dependencies` field - dependencies discovered automatically by analyzing input/output parameters between plugins |
 
 # TOC
 
@@ -129,12 +135,14 @@ Each plugin consists of a directory containing:
 ```
 plugins/<plugin_name>/
 ├── descriptor.json    # Plugin metadata (required)
-├── main.sh           # Main entry point (required)
-├── install.sh        # Installation script (optional)
-└── installed.sh      # Installation check script (optional)
+├── main.sh           # Main processing script (required - referenced in commands.process)
+├── install.sh        # Installation script (required - referenced in commands.install)
+└── installed.sh      # Installation check script (required - referenced in commands.installed)
 ```
 
 ## Descriptor Format (descriptor.json)
+
+**Canonical Plugin Descriptor Schema** (Updated 2026-03-01):
 
 ```json
 {
@@ -142,52 +150,148 @@ plugins/<plugin_name>/
   "version": "1.0.0",
   "description": "Provides file metadata using stat command",
   "author": "doc.doc.md team",
-  "entry_point": "main.sh",
-  "dependencies": [],
-  "system_requirements": ["stat"],
-  "input_types": ["*"],
-  "output_variables": [
-    "file_size",
-    "file_size_human",
-    "modified_date",
-    "permissions"
-  ],
-  "install_command": "install.sh",
-  "check_installed": "installed.sh"
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Process a file and output metadata",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Absolute path to the file being processed",
+          "required": true
+        }
+      },
+      "output": {
+        "fileSize": {
+          "type": "number",
+          "description": "File size in bytes"
+        },
+        "fileSizeHuman": {
+          "type": "string",
+          "description": "Human-readable file size (e.g., '1.5 MB')"
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Last modified date in ISO format"
+        },
+        "permissions": {
+          "type": "string",
+          "description": "File permissions (e.g., 'rw-r--r--')"
+        }
+      }
+    },
+    "install": {
+      "description": "Install plugin dependencies",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether installation succeeded"
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if plugin is installed",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Whether plugin is installed and ready"
+        }
+      }
+    },
+    "validate": {
+      "description": "Validate stat command is available",
+      "command": "command -v stat",
+      "output": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether stat command is available"
+        }
+      }
+    }
+  }
 }
 ```
+
+**Required Fields**:
+- `name`: String matching `[a-zA-Z0-9_-]+`, max 64 characters - unique plugin identifier
+- `version`: Semantic version string (e.g., "1.0.0")
+- `description`: String, max 500 characters - human-readable description
+- `commands`: Object - plugin command definitions (REQUIRED)
+  - **Standard Required Commands** (must be implemented by all plugins):
+    - `process`: Main file processing command
+      - **Input**: Must define `filePath` parameter (type: string, required: true)
+      - **Output**: Plugin-specific output variables (each with type and description)
+      - **Parameter Naming**: All input/output parameter names must follow lowerCamelCase convention (e.g., `filePath`, `mimeType`, `fileSize`)
+    - `install`: Installation script - NO input parameters required
+      - **Output**: Installation result (typically success/failure boolean)
+    - `installed`: Installation check - NO input parameters required
+      - **Output**: Installation status (typically installed boolean)
+  - **Optional Custom Commands**: Plugins may define additional commands for specific operations
+  - Each command structure:
+    - `description`: String - what the command does
+    - `command`: String - shell command/script to execute (relative to plugin directory)
+    - `input`: Object (optional) - input parameter definitions
+      - Each parameter has: `type` (string/number/boolean/object/array), `description` (string), `required` (boolean, default: false)
+      - **Parameter names must follow lowerCamelCase convention** (pattern: `^[a-z][a-zA-Z0-9]*$`)
+    - `output`: Object (optional) - output variable definitions
+      - Each variable has: `type` (string/number/boolean/object/array), `description` (string)
+      - **Variable names must follow lowerCamelCase convention** (pattern: `^[a-z][a-zA-Z0-9]*$`)
+
+**Optional Fields**:
+- `author`: String - plugin author/maintainer information
+- `active`: Boolean (default: true) - plugin activation status (for future use in plugin management)
 
 ## Plugin Invocation Interface
 
-**Input** (via environment variables):
-```bash
-export FILE_PATH="/input/docs/report.pdf"
-export OUTPUT_DIR="/output/docs"
-export PLUGIN_DATA_DIR="/tmp/plugin_data"
-```
+**Standard Commands**:
 
-**Output** (via stdout, JSON format):
-```json
-{
-  "file_size": 1048576,
-  "file_size_human": "1.0 MB",
-  "modified_date": "2024-02-25",
-  "permissions": "rw-r--r--"
-}
-```
+All plugins must implement three standard commands in the `commands` object:
 
-**Exit codes**:
-- 0: Success
-- 1: Temporary failure (skip file, continue processing)
-- 2: Fatal error (stop processing)
+1. **process**: Main file processing command
+   - **Input** (via environment variables):
+     ```bash
+     export FILE_PATH="/input/docs/report.pdf"
+     export OUTPUT_DIR="/output/docs"
+     export PLUGIN_DATA_DIR="/tmp/plugin_data"
+     ```
+   - **Output** (via stdout, JSON format):
+     ```json
+     {
+       "fileSize": 1048576,
+       "fileSizeHuman": "1.0 MB",
+       "modifiedDate": "2024-02-25",
+       "permissions": "rw-r--r--"
+     }
+     ```
+     **Note**: Output variable names must match the lowerCamelCase names defined in the descriptor.
+   - **Exit codes**:
+     - 0: Success
+     - 1: Temporary failure (skip file, continue processing)
+     - 2: Fatal error (stop processing)
+
+2. **install**: Install plugin dependencies
+   - Executes installation of required system tools or dependencies
+   - **Exit codes**: 0 = success, non-zero = failure
+
+3. **installed**: Check if plugin is installed
+   - Verifies all dependencies and requirements are met
+   - **Exit codes**: 0 = installed and ready, non-zero = not installed or missing requirements
+
+**Custom Commands**:
+- Plugins may define additional commands for specific operations (e.g., `validate`, `configure`, `test`)
+- Custom commands follow the same invocation pattern (shell execution, exit codes)
 
 ## Principles
 
-1. **Language Agnostic**: Plugin entry point can be any executable (shell script, Python script, compiled binary)
-2. **Standard Interface**: All plugins follow same input (env vars) and output (JSON to stdout) contract
+1. **Language Agnostic**: Plugin commands can be any executable (shell script, Python script, compiled binary)
+2. **Standard Interface**: All plugins implement standard commands (process, install, installed) with same contracts
 3. **Process Isolation**: Each plugin invocation is separate process; no shared state
 4. **Structured Metadata**: JSON descriptors easily parsed by Bash (via Python/jq) and other tools
 5. **Self-Contained**: Each plugin directory contains everything needed for that plugin
+6. **Command-Based Invocation**: All plugin functionality accessed through commands object, enabling standardization and extensibility
 6. **Optional Installation**: Plugins without dependencies work immediately; others provide install script
 
 # Consequences
