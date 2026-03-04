@@ -50,6 +50,38 @@
           "description": "Human-readable status message describing the installation result."
         }
       }
+    },
+    "convert": {
+      "description": "Convert an image file (JPEG, PNG, TIFF, BMP, GIF) to a searchable PDF using OCRmyPDF.",
+      "command": "convert.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Path to the input image file. Supported MIME types: image/jpeg, image/png, image/tiff, image/bmp, image/gif.",
+          "required": true
+        },
+        "outputPath": {
+          "type": "string",
+          "description": "Path for the output PDF. If not specified, the PDF is placed next to the source file with a .pdf extension.",
+          "required": false
+        },
+        "imageDpi": {
+          "type": "integer",
+          "description": "DPI to use when processing the image. Defaults to 300 if not provided.",
+          "required": false,
+          "default": 300
+        }
+      },
+      "output": {
+        "outputPdf": {
+          "type": "string",
+          "description": "Absolute path to the generated searchable PDF."
+        },
+        "success": {
+          "type": "boolean",
+          "description": "true if conversion succeeded, false otherwise."
+        }
+      }
     }
   }
 }
