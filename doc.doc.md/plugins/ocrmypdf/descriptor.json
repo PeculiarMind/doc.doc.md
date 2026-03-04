@@ -1,0 +1,66 @@
+{
+  "name": "ocrmypdf",
+  "version": "1.0.0",
+  "description": "A plugin that runs OCR on PDF files using OCRmyPDF, producing a searchable PDF with an embedded text layer and returning the extracted plain text as JSON output. OCR'd output PDFs are cached in pluginStorage to avoid redundant re-processing.",
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Run OCR on a PDF file and return extracted text, page count, cache status, and output PDF path.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the PDF file to be processed.",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Directory path for storing cached OCR'd PDFs. Created if it does not exist.",
+          "required": true
+        }
+      },
+      "output": {
+        "ocrText": {
+          "type": "string",
+          "description": "Full plain-text content extracted from the OCR'd PDF."
+        },
+        "pageCount": {
+          "type": "number",
+          "description": "Number of pages in the PDF."
+        },
+        "wasCached": {
+          "type": "boolean",
+          "description": "true if the cached OCR'd PDF was reused, false if OCR was freshly run."
+        },
+        "outputPdf": {
+          "type": "string",
+          "description": "Absolute path to the OCR'd PDF stored in pluginStorage."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if both ocrmypdf and pdftotext are available on the system.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "true only if both ocrmypdf and pdftotext are available, false otherwise."
+        }
+      }
+    },
+    "install": {
+      "description": "Install ocrmypdf and pdftotext (poppler-utils) if not already available.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "true if both tools are available after the installation attempt."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message describing the installation result."
+        }
+      }
+    }
+  }
+}
