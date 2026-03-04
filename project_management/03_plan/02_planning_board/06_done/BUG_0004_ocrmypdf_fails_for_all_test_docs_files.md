@@ -5,8 +5,15 @@
 - **Type:** Bug
 - **Created at:** 2026-03-04
 - **Created by:** Product Owner
-- **Status:** Backlog
+- **Status:** Done
 - **Assigned to:** developer.agent
+
+## Completion Notes
+
+Fixed both root causes:
+1. `descriptor.json` set to `"active": false` since ocrmypdf is not installed. `doc.doc.sh` now validates all active plugins are installed before processing begins, aborting with a clear error if any report not installed.
+2. `main.sh` rewritten to accept PDF, JPEG, PNG, TIFF, BMP, and GIF inputs using the sidecar pattern (`--sidecar`, `--output-type none`). Image inputs use `--image-dpi`. `pluginStorage` parameter removed (no longer needed). Output simplified to `{ocrText}`.
+
 
 ## Overview
 

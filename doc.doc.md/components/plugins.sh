@@ -37,6 +37,32 @@ discover_plugins() {
   printf '%s\n' "${plugins[@]}"
 }
 
+# Discover ALL plugins (active and inactive) in the plugin directory.
+# Returns plugin names sorted alphabetically.
+discover_all_plugins() {
+  local plugin_dir="$1"
+
+  if [ ! -d "$plugin_dir" ]; then
+    echo "Error: Plugin directory not found: $plugin_dir" >&2
+    return 1
+  fi
+
+  for dir in "$plugin_dir"/*/; do
+    [ -d "$dir" ] || continue
+    local descriptor="$dir/descriptor.json"
+    [ -f "$descriptor" ] || continue
+    jq -e '.name and .commands' "$descriptor" >/dev/null 2>&1 || continue
+    basename "$dir"
+  done | sort
+}
+
+# Get the activation status of a plugin from its descriptor.json.
+# Returns "true" if active (or absent), "false" if explicitly false.
+get_plugin_active_status() {
+  local descriptor="$1"
+  jq -r 'if .active == false then "false" else "true" end' "$descriptor"
+}
+
 # --- Plugin execution ---
 
 run_plugin() {

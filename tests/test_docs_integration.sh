@@ -244,24 +244,25 @@ assert_json_count "exclude image/* → exactly 1 result (only PDF remains)" "1" 
 echo ""
 
 # ---------------------------------------------------------------------------
-# Group 5: ocrmypdf graceful degradation
+# Group 5: ocrmypdf inactive — no errors expected
+# BUG_0004: ocrmypdf is inactive (active: false) since not installed on this system
 # ---------------------------------------------------------------------------
-echo "--- Group 5: ocrmypdf graceful degradation ---"
+echo "--- Group 5: ocrmypdf inactive (BUG_0004 fixed) ---"
 
 _STDERR_TMP=$(mktemp)
 output5=$("$DOC_DOC_SH" process -d "$DOCS_DIR" 2>"$_STDERR_TMP")
 stderr5=$(cat "$_STDERR_TMP")
 
-assert_contains "stderr contains ocrmypdf failure message" \
+assert_not_contains "stderr does NOT contain ocrmypdf failure (plugin inactive)" \
   "Plugin 'ocrmypdf' failed" "$stderr5"
 
 echo "$output5" | jq '.' > /dev/null 2>&1
-assert_exit_code "despite ocrmypdf errors, stdout is valid JSON" "0" "$?"
+assert_exit_code "stdout is valid JSON (ocrmypdf inactive)" "0" "$?"
 
-assert_json_count "despite ocrmypdf errors, JSON array has 4 elements" "4" "$output5"
+assert_json_count "JSON array has 4 elements (ocrmypdf inactive)" "4" "$output5"
 
 all_have_mimetype=$(echo "$output5" | jq '[.[] | has("mimeType")] | all')
-assert_eq "all 4 entries have mimeType (stat+file results present despite ocrmypdf failure)" \
+assert_eq "all 4 entries have mimeType (stat+file results present)" \
   "true" "$all_have_mimetype"
 
 # ---------------------------------------------------------------------------

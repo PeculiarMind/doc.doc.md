@@ -1,17 +1,16 @@
 #!/bin/bash
 # ocrmypdf plugin - process command
-# Reads JSON input from stdin with filePath and pluginStorage parameters.
-# Runs OCRmyPDF on a PDF file (if not already cached), extracts plain text,
-# and returns structured JSON output.
+# Reads JSON input from stdin with filePath and optional imageDpi parameters.
+# Runs OCRmyPDF on a PDF or image file and returns extracted text as JSON.
 #
-# Caching: the OCR'd output PDF is cached in pluginStorage as <sha256_of_filePath>.pdf
-# so subsequent calls with the same filePath skip expensive re-processing.
+# Supported input types: application/pdf, image/jpeg, image/png, image/tiff,
+#                        image/bmp, image/gif
+#
+# Uses the sidecar pattern for text extraction:
+#   ocrmypdf [--image-dpi <dpi>] --sidecar <sidecar.txt> --output-type none <input> /dev/null
 #
 # Output JSON fields:
-#   ocrText    - full plain-text extracted from the OCR'd PDF
-#   pageCount  - number of pages in the PDF
-#   wasCached  - true if cached OCR'd PDF was reused, false if freshly run
-#   outputPdf  - absolute path to the OCR'd PDF in pluginStorage
+#   ocrText    - full plain-text extracted by OCR
 #
 # Exit code: 0 on success, 1 on error
 
@@ -20,25 +19,22 @@ set -euo pipefail
 # Read JSON input from stdin (limit to 1MB to prevent memory exhaustion per REQ_SEC_009)
 input=$(head -c 1048576)
 
-# Parse filePath and pluginStorage from JSON input
+# Parse filePath and optional imageDpi from JSON input
 file_path=$(echo "$input" | jq -r '.filePath // empty' 2>/dev/null) || {
   echo "Error: Invalid JSON input" >&2
   exit 1
 }
 
-plugin_storage=$(echo "$input" | jq -r '.pluginStorage // empty' 2>/dev/null) || {
-  echo "Error: Invalid JSON input" >&2
-  exit 1
-}
+image_dpi=$(echo "$input" | jq -r '.imageDpi // 300' 2>/dev/null) || image_dpi=300
+# Validate imageDpi is a positive integer; warn and fall back to 300 if invalid
+if ! echo "$image_dpi" | grep -qE '^[0-9]+$' || [ "$image_dpi" -lt 1 ] 2>/dev/null; then
+  echo "Warning: Invalid imageDpi value '${image_dpi}'; using default of 300." >&2
+  image_dpi=300
+fi
 
 # Validate required parameters
 if [ -z "$file_path" ]; then
   echo "Error: Missing required parameter 'filePath' in JSON input" >&2
-  exit 1
-fi
-
-if [ -z "$plugin_storage" ]; then
-  echo "Error: Missing required parameter 'pluginStorage' in JSON input" >&2
   exit 1
 fi
 
@@ -63,21 +59,33 @@ if [ ! -f "$resolved_path" ] || [ ! -r "$resolved_path" ]; then
   exit 1
 fi
 
-# Validate the file is a PDF (by MIME type or extension)
+# Detect MIME type
 mime_type=""
 if command -v file >/dev/null 2>&1; then
   mime_type=$(file --mime-type -b "$resolved_path" 2>/dev/null | tr -d '[:space:]')
 fi
 
+# Determine if this is a PDF or a supported image type
 is_pdf=false
-if [ "$mime_type" = "application/pdf" ]; then
-  is_pdf=true
-elif [[ "$resolved_path" == *.pdf ]] || [[ "$resolved_path" == *.PDF ]]; then
-  is_pdf=true
-fi
+is_image=false
 
-if [ "$is_pdf" = false ]; then
-  echo "Error: Input file is not a PDF (detected MIME type: ${mime_type:-unknown})" >&2
+case "$mime_type" in
+  application/pdf)
+    is_pdf=true
+    ;;
+  image/jpeg|image/png|image/tiff|image/bmp|image/gif)
+    is_image=true
+    ;;
+  *)
+    # Fall back to extension check for PDF
+    case "$resolved_path" in
+      *.pdf|*.PDF) is_pdf=true ;;
+    esac
+    ;;
+esac
+
+if [ "$is_pdf" = false ] && [ "$is_image" = false ]; then
+  echo "Error: Unsupported file type (detected MIME type: ${mime_type:-unknown}). Supported types: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif." >&2
   exit 1
 fi
 
@@ -87,67 +95,34 @@ if ! command -v ocrmypdf >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! command -v pdftotext >/dev/null 2>&1; then
-  echo "Error: pdftotext is not installed. Run the install command first." >&2
-  exit 1
-fi
+# Create a temporary directory for sidecar output
+tmp_dir=$(mktemp -d)
+trap 'rm -rf "$tmp_dir"' EXIT
 
-if ! command -v pdfinfo >/dev/null 2>&1; then
-  echo "Error: pdfinfo is not installed. Run the install command first." >&2
-  exit 1
-fi
+sidecar_file="$tmp_dir/ocr_output.txt"
 
-# Validate pluginStorage path (prevent path traversal)
-resolved_storage=$(readlink -m "$plugin_storage" 2>/dev/null) || {
-  echo "Error: Invalid pluginStorage path" >&2
-  exit 1
-}
-
-# Create pluginStorage directory if it does not exist
-mkdir -p "$resolved_storage" || {
-  echo "Error: Cannot create pluginStorage directory: $resolved_storage" >&2
-  exit 1
-}
-
-# Compute cache key: sha256 of the filePath string (not file content, per spec)
-hash=$(echo -n "$file_path" | sha256sum | awk '{print $1}')
-cached_pdf="$resolved_storage/${hash}.pdf"
-
-# Check cache and run OCR if needed
-was_cached=false
-if [ -f "$cached_pdf" ]; then
-  # Cache hit: reuse the existing OCR'd PDF
-  was_cached=true
+# Run OCRmyPDF with sidecar pattern to extract text
+if [ "$is_image" = true ]; then
+  # Image input: pass --image-dpi
+  if ! ocrmypdf --image-dpi "$image_dpi" --sidecar "$sidecar_file" --output-type none "$resolved_path" /dev/null >/dev/null 2>&1; then
+    echo "Error: OCRmyPDF processing failed for: $resolved_path" >&2
+    exit 1
+  fi
 else
-  # Cache miss: run OCRmyPDF on the input PDF
-  # --skip-text preserves pages that already have a text layer (prevents double-OCR)
-  if ! ocrmypdf --skip-text "$resolved_path" "$cached_pdf" >/dev/null 2>&1; then
+  # PDF input: no --image-dpi needed
+  if ! ocrmypdf --sidecar "$sidecar_file" --output-type none "$resolved_path" /dev/null >/dev/null 2>&1; then
     echo "Error: OCRmyPDF processing failed for: $resolved_path" >&2
     exit 1
   fi
 fi
 
-# Extract plain text from the OCR'd PDF
-ocr_text=$(pdftotext "$cached_pdf" - 2>/dev/null) || {
-  echo "Error: pdftotext failed to extract text from: $cached_pdf" >&2
-  exit 1
-}
-
-# Extract page count from the OCR'd PDF
-page_count=$(pdfinfo "$cached_pdf" 2>/dev/null | grep "^Pages:" | awk '{print $2}') || page_count="0"
-if [ -z "$page_count" ]; then
-  page_count="0"
+# Read extracted text from sidecar
+ocr_text=""
+if [ -f "$sidecar_file" ]; then
+  ocr_text=$(cat "$sidecar_file")
 fi
 
-# Output valid JSON with all required fields
+# Output valid JSON
 jq -n \
   --arg ocrText "$ocr_text" \
-  --argjson pageCount "$page_count" \
-  --argjson wasCached "$was_cached" \
-  --arg outputPdf "$cached_pdf" \
-  '{
-    ocrText: $ocrText,
-    pageCount: $pageCount,
-    wasCached: $wasCached,
-    outputPdf: $outputPdf
-  }'
+  '{ocrText: $ocrText}'
