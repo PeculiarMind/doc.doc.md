@@ -5,7 +5,8 @@
 - **Type:** Feature
 - **Created at:** 2026-03-03
 - **Created by:** Product Owner
-- **Status:** Backlog
+- **Status:** Implementing
+- **Assigned to:** developer.agent
 
 ## TOC
 1. [Overview](#overview)

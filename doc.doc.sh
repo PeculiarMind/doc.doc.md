@@ -15,6 +15,10 @@ PLUGINS_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/plugins.sh"
 # Source components
 source "$PLUGINS_COMPONENT"
 
+# Global MIME filter criteria (set by main, consumed by process_file)
+_MIME_INCLUDE_ARGS=()
+_MIME_EXCLUDE_ARGS=()
+
 # --- Usage ---
 
 usage() {
@@ -59,6 +63,30 @@ process_file() {
     else
       # Graceful degradation: continue with partial results
       continue
+    fi
+
+    # After the file plugin runs (always position 0), apply the MIME filter gate
+    if [ "$plugin_name" = "file" ]; then
+      local _has_mime_criteria=false
+      [ ${#_MIME_INCLUDE_ARGS[@]} -gt 0 ] && _has_mime_criteria=true
+      [ ${#_MIME_EXCLUDE_ARGS[@]} -gt 0 ] && _has_mime_criteria=true
+      if [ "$_has_mime_criteria" = true ]; then
+        local mime_type
+        mime_type=$(echo "$combined_result" | jq -r '.mimeType // empty')
+        if [ -n "$mime_type" ]; then
+          local mime_filter_args=()
+          for _inc in "${_MIME_INCLUDE_ARGS[@]+"${_MIME_INCLUDE_ARGS[@]}"}"; do
+            mime_filter_args+=("--include" "$_inc")
+          done
+          for _exc in "${_MIME_EXCLUDE_ARGS[@]+"${_MIME_EXCLUDE_ARGS[@]}"}"; do
+            mime_filter_args+=("--exclude" "$_exc")
+          done
+          local mime_check
+          mime_check=$(echo "$mime_type" | python3 "$FILTER_SCRIPT" "${mime_filter_args[@]+"${mime_filter_args[@]}"}")
+          # Empty result means MIME filter rejected this file — skip it silently
+          [ -n "$mime_check" ] || return 0
+        fi
+      fi
     fi
   done
 
@@ -145,12 +173,58 @@ main() {
     exit 1
   fi
 
-  # Build filter arguments
-  local -a filter_args=()
+  # Enforce file plugin is present and at position 0
+  # (discover_plugins already excludes inactive plugins via descriptor.json active field)
+  local file_plugin_found=false
+  for p in "${plugins[@]}"; do
+    if [ "$p" = "file" ]; then
+      file_plugin_found=true
+      break
+    fi
+  done
+  if [ "$file_plugin_found" = false ]; then
+    echo "Error: file plugin must be active and installed to run the process command." >&2
+    exit 1
+  fi
+  local -a ordered_plugins=("file")
+  for p in "${plugins[@]}"; do
+    [ "$p" != "file" ] || continue
+    ordered_plugins+=("$p")
+  done
+  plugins=("${ordered_plugins[@]}")
+
+  # Split include/exclude args into MIME criteria and path criteria.
+  # Path criteria: contain '**' (recursive globs like **/2024/**) or have no '/'
+  # MIME criteria: contain '/' but not '**' (e.g., text/plain, image/*, text/*)
+  local -a mime_include_args=()
+  local -a mime_exclude_args=()
+  local -a path_include_args=()
+  local -a path_exclude_args=()
   for inc in "${include_args[@]+"${include_args[@]}"}"; do
-    filter_args+=("--include" "$inc")
+    if [[ "$inc" == *"/"* ]] && [[ "$inc" != *"**"* ]]; then
+      mime_include_args+=("$inc")
+    else
+      path_include_args+=("$inc")
+    fi
   done
   for exc in "${exclude_args[@]+"${exclude_args[@]}"}"; do
+    if [[ "$exc" == *"/"* ]] && [[ "$exc" != *"**"* ]]; then
+      mime_exclude_args+=("$exc")
+    else
+      path_exclude_args+=("$exc")
+    fi
+  done
+
+  # Publish MIME criteria for process_file to consume via globals
+  _MIME_INCLUDE_ARGS=("${mime_include_args[@]+"${mime_include_args[@]}"}")
+  _MIME_EXCLUDE_ARGS=("${mime_exclude_args[@]+"${mime_exclude_args[@]}"}")
+
+  # Build path-only filter arguments for the pre-processing find step
+  local -a filter_args=()
+  for inc in "${path_include_args[@]+"${path_include_args[@]}"}"; do
+    filter_args+=("--include" "$inc")
+  done
+  for exc in "${path_exclude_args[@]+"${path_exclude_args[@]}"}"; do
     filter_args+=("--exclude" "$exc")
   done
 
@@ -166,20 +240,34 @@ main() {
     exit 0
   fi
 
-  # Process each file through all plugins and collect results
+  # Process each file through all plugins and stream results
+  # Track bracket state: print '[' only on first non-skipped result to handle
+  # the case where all files are MIME-filtered out (need to print '[]' then).
   local first=true
-  echo "["
+  local printed_bracket=false
   for file_path in "${file_list[@]}"; do
     [ -n "$file_path" ] || continue
+    local result
+    result=$(process_file "$file_path" "${plugins[@]}")
+    [ -n "$result" ] || continue
+    if [ "$printed_bracket" = false ]; then
+      echo "["
+      printed_bracket=true
+    fi
     if [ "$first" = true ]; then
       first=false
     else
       echo ","
     fi
-    process_file "$file_path" "${plugins[@]}"
+    echo "$result"
   done
-  echo ""
-  echo "]"
+
+  if [ "$printed_bracket" = false ]; then
+    echo "[]"
+  else
+    echo ""
+    echo "]"
+  fi
 }
 
 main "$@"

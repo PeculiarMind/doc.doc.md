@@ -23,9 +23,9 @@ discover_plugins() {
         echo "Warning: Invalid descriptor in $(basename "$dir"), skipping" >&2
         continue
       fi
-      # Check plugin is active
+      # Check plugin is active (.active defaults to true when absent; explicit false disables)
       local active
-      active=$(jq -r '.active // true' "$descriptor")
+      active=$(jq -r 'if .active == false then "false" else "true" end' "$descriptor")
       if [ "$active" = "true" ]; then
         plugins+=("$(basename "$dir")")
       fi
