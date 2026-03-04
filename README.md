@@ -6,12 +6,6 @@ doc.doc.md is a command-line tool that processes document collections in directo
 
 ---
 
-## ⚠️ Development Status
-
-**This project is in early development.** The core structure is in place, but the main `doc.doc.sh` script is not yet fully implemented. Contributions and feedback are welcome!
-
----
-
 ## Features
 
 - **Directory Mirroring**: Automatically mirrors your input directory structure in the output location
@@ -180,14 +174,20 @@ doc.doc.md/
 ├── doc.doc.md/             # Core directory
 │   ├── components/         # Reusable components (planned)
 │   ├── plugins/            # Plugin directory
+│   │   ├── file/           # MIME type detection plugin
+│   │   │   ├── descriptor.json
+│   │   │   ├── main.sh
+│   │   │   ├── install.sh
+│   │   │   └── installed.sh
 │   │   ├── stat/           # File statistics plugin
 │   │   │   ├── descriptor.json
 │   │   │   ├── main.sh
 │   │   │   ├── install.sh
 │   │   │   └── installed.sh
-│   │   └── file/           # MIME type detection plugin
+│   │   └── ocrmypdf/       # OCR processing plugin
 │   │       ├── descriptor.json
 │   │       ├── main.sh
+│   │       ├── convert.sh
 │   │       ├── install.sh
 │   │       └── installed.sh
 │   └── templates/          # Template directory
@@ -205,6 +205,7 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 
 - **file**: Detects MIME types using the standard `file` command — **always runs first** in the processing chain; must be installed and active
 - **stat**: Extracts file system metadata (size, owner, timestamps)
+- **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
 
 ### Plugin Architecture
 
@@ -214,6 +215,7 @@ Plugins are **language-agnostic** and invoked via shell commands:
 - Invoked as shell commands, never imported directly
 - Simple interface: receive JSON input via stdin, produce JSON output via stdout
 - Type-safe communication using JSON for both input and output
+- **Dependency ordering**: Execution order is derived automatically by matching `output` parameter names of one plugin to `input` parameter names of another — no explicit dependency declarations in descriptors
 
 ### Plugin Structure
 
