@@ -170,7 +170,6 @@ When run with `--verbose` flag:
 A well-designed error handling strategy is critical for user satisfaction and system reliability. By categorizing errors and defining appropriate responses for each category, doc.doc.md can provide helpful feedback while continuing to process files when possible. The consistent error format and clear exit codes make the tool easier to use and integrate into scripts and workflows.
 
 ### References
-- Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)
 - Plugin architecture concept: [ARC_0003_plugin_architecture.md](ARC_0003_plugin_architecture.md)
 - Unix exit code conventions
 - Error handling best practices

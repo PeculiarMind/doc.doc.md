@@ -263,6 +263,6 @@ These are not defects, but are noted for completeness:
 ## Attachments
 
 - Test script: [`tests/test_plugins.sh`](../../../tests/test_plugins.sh)
-- Feature spec: [`FEATURE_0002_implement_stat_and_file_plugins.md`](../../03_plan/02_planning_board/05_implementing/FEATURE_0002_implement_stat_and_file_plugins.md)
+- Feature spec: [`FEATURE_0002_implement_stat_and_file_plugins.md`](../../03_plan/02_planning_board/06_done/FEATURE_0002_implement_stat_and_file_plugins.md)
 - stat plugin source: [`doc.doc.md/plugins/stat/`](../../../doc.doc.md/plugins/stat/)
 - file plugin source: [`doc.doc.md/plugins/file/`](../../../doc.doc.md/plugins/file/)

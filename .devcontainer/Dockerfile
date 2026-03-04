@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     lsb-release \
     build-essential \
+    jq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python

@@ -248,7 +248,6 @@ The system runs `installed.sh` before executing a plugin and automatically runs 
 The plugin architecture provides a flexible and extensible foundation for doc.doc.md. By defining a simple interface based on JSON stdin/stdout communication, plugins can be written in any language and use any tools. The JSON-based communication format enables type preservation, avoids environment variable limitations, and provides better security. The dependency resolution system allows complex plugin interactions while maintaining simplicity for basic use cases. This architecture enables the system to grow and adapt to new file types and use cases without requiring changes to the core system.
 
 ### References
-- Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)
 - Template processing concept: [ARC_0002_template_processing.md](ARC_0002_template_processing.md)
 - Error handling concept: [ARC_0004_error_handling.md](ARC_0004_error_handling.md)
 - JSON output format specifications

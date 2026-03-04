@@ -187,6 +187,5 @@ def matches_criterion(file_path, criterion):
 The filtering logic concept provides a powerful and flexible way to control which files are processed by doc.doc.md. By supporting multiple filter criteria types and intuitive boolean logic, users can precisely define which files to include or exclude from documentation generation. The proposed solution balances simplicity for common use cases with expressiveness for complex filtering requirements.
 
 ### References
-- Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)
 - Glob pattern matching: Python `fnmatch` module documentation
 - MIME type detection strategies

@@ -74,6 +74,6 @@ fi
 ## Related Links
 
 - Security Review: [SECREV_002](../../../04_reporting/03_security_reviews/SECREV_002_FEATURE_0002_stat_file_plugins.md)
-- Feature: [FEATURE_0002](../05_implementing/FEATURE_0002_implement_stat_and_file_plugins.md)
-- Requirement: [REQ_SEC_006](../../02_project_vision/02_requirements/03_accepted/REQ_SEC_006_error_information_disclosure_prevention.md)
-- Security Concept: [SC-006](../../02_project_vision/04_security_concept/01_security_concept.md)
+- Feature: [FEATURE_0002](FEATURE_0002_implement_stat_and_file_plugins.md)
+- Requirement: [REQ_SEC_006](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_006_error_information_disclosure_prevention.md)
+- Security Concept: [SC-006](../../../02_project_vision/04_security_concept/01_security_concept.md)

@@ -23,7 +23,7 @@ The install command output in both stat and file plugin scripts includes a `mess
 ## Origin
 
 - **Architecture Review:** [ARCHREV_001](../../../04_reporting/01_architecture_reviews/ARCHREV_001_FEATURE_0002_stat_file_plugins.md)
-- **Feature:** [FEATURE_0002](../05_implementing/FEATURE_0002_implement_stat_and_file_plugins.md)
+- **Feature:** [FEATURE_0002](FEATURE_0002_implement_stat_and_file_plugins.md)
 - **Deviation:** DEV-001 — Install command output includes undeclared `message` field
 
 ## Description

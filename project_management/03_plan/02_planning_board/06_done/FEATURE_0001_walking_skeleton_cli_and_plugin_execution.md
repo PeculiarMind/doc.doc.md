@@ -198,23 +198,23 @@ Both already conform to current schema (lowerCamelCase, JSON I/O).
 ## Related Links
 
 ### Architecture Vision
-- [ADR-001: Mixed Bash/Python Implementation](../../02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_001_mixed_bash_python_implementation.md)
-- [ADR-003: JSON Plugin Descriptors](../../02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_003_json_plugin_descriptors.md)
-- [ARC_0001: Filtering Logic](../../02_project_vision/03_architecture_vision/08_concepts/ARC_0001_filtering_logic.md)
-- [ARC_0003: Plugin Architecture](../../02_project_vision/03_architecture_vision/08_concepts/ARC_0003_plugin_architecture.md)
-- [Building Block View](../../02_project_vision/03_architecture_vision/05_building_block_view/05_building_block_view.md)
+- [ADR-001: Mixed Bash/Python Implementation](../../../02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_001_mixed_bash_python_implementation.md)
+- [ADR-003: JSON Plugin Descriptors](../../../02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_003_json_plugin_descriptors.md)
+- [ARC_0001: Filtering Logic](../../../02_project_vision/03_architecture_vision/08_concepts/ARC_0001_filtering_logic.md)
+- [ARC_0003: Plugin Architecture](../../../02_project_vision/03_architecture_vision/08_concepts/ARC_0003_plugin_architecture.md)
+- [Building Block View](../../../02_project_vision/03_architecture_vision/05_building_block_view/05_building_block_view.md)
 
 ### Requirements
-- [REQ_0001: Command-Line Tool](../../02_project_vision/02_requirements/03_accepted/REQ_0001_command_line_tool.md)
-- [REQ_0003: Plugin-Based Architecture](../../02_project_vision/02_requirements/03_accepted/REQ_0003_plugin_based_architecture.md)
-- [REQ_0009: Process Command](../../02_project_vision/02_requirements/03_accepted/REQ_0009_process_command.md)
+- [REQ_0001: Command-Line Tool](../../../02_project_vision/02_requirements/03_accepted/REQ_0001_command-line-tool.md)
+- [REQ_0003: Plugin-Based Architecture](../../../02_project_vision/02_requirements/03_accepted/REQ_0003_plugin-system.md)
+- [REQ_0009: Process Command](../../../02_project_vision/02_requirements/03_accepted/REQ_0009_process-command.md)
 
 ### Plugin Descriptors
-- [stat plugin descriptor](../../../doc.doc.md/plugins/stat/descriptor.json)
-- [file plugin descriptor](../../../doc.doc.md/plugins/file/descriptor.json)
+- [stat plugin descriptor](../../../../doc.doc.md/plugins/stat/descriptor.json)
+- [file plugin descriptor](../../../../doc.doc.md/plugins/file/descriptor.json)
 
 ### Workflows
-- [Implementation Workflow](../../01_guidelines/workflows/implementation_workflow.md)
+- [Implementation Workflow](../../../01_guidelines/workflows/implementation_workflow.md)
 
 ## Next Steps
 

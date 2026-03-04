@@ -229,7 +229,6 @@ unset API_KEY
 Security is a critical consideration for a file processing tool. While the initial version of doc.doc.md does not include full plugin sandboxing, it implements essential security measures through input validation, path sanitization, and secure credential handling guidelines. The architecture is designed to support future security enhancements, particularly plugin sandboxing, without requiring major redesign. Users must be aware of the security implications of running third-party plugins and follow best practices for secure usage.
 
 ### References
-- Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)
 - Plugin architecture concept: [ARC_0003_plugin_architecture.md](ARC_0003_plugin_architecture.md)
 - OWASP security guidelines
 - Bash security best practices

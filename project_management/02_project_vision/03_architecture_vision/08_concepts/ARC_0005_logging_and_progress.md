@@ -196,7 +196,6 @@ Complete!
 Effective logging and progress indication significantly improve user experience by providing clear feedback about system operation. The combination of progress bars, status messages, and configurable verbosity levels allows doc.doc.md to serve both casual users who want simple feedback and power users who need detailed diagnostics. The design balances informativeness with performance and terminal compatibility.
 
 ### References
-- Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)
 - Error handling concept: [ARC_0004_error_handling.md](ARC_0004_error_handling.md)
 - Terminal progress bar libraries and techniques
 - ANSI color codes and terminal control sequences

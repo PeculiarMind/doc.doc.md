@@ -3,7 +3,7 @@
 - **ID:** ARCHREV_001
 - **Created at:** 2026-03-01
 - **Created by:** architect.agent
-- **Work Item:** [FEATURE_0002](../../../project_management/03_plan/02_planning_board/05_implementing/FEATURE_0002_implement_stat_and_file_plugins.md)
+- **Work Item:** [FEATURE_0002](../../../project_management/03_plan/02_planning_board/06_done/FEATURE_0002_implement_stat_and_file_plugins.md)
 - **Status:** Conditionally Compliant
 
 ## TOC
@@ -83,7 +83,7 @@ Both install.sh scripts output a JSON object with two fields: `success` (boolean
 
 **Remediation:** Update both `descriptor.json` files to declare the `message` output parameter for the install command, aligning the descriptor with the implementation and the acceptance criteria.
 
-**DEBTR Record:** [DEBTR_001](../../03_plan/02_planning_board/04_backlog/DEBTR_001_update_install_command_descriptors.md)
+**DEBTR Record:** [DEBTR_001](../../03_plan/02_planning_board/06_done/DEBTR_001_update_install_command_descriptors.md)
 
 ## Recommendations
 

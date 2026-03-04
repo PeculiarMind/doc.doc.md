@@ -142,6 +142,5 @@ The first template found is used for processing.
 The template processing concept provides a simple yet flexible way to customize documentation output. By using markdown templates with variable placeholders, users can define their preferred output format while the system handles data collection and substitution. The template resolution order ensures users can customize templates without modifying system files, and the extensible variable system allows plugins to contribute additional data.
 
 ### References
-- Original concepts documentation: [08_concepts_old.md](08_concepts_old.md)
 - Markdown syntax specification
 - Plugin architecture concept: [ARC_0003_plugin_architecture.md](ARC_0003_plugin_architecture.md)

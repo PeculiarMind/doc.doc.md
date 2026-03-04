@@ -10,6 +10,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_DIR="$SCRIPT_DIR/doc.doc.md/plugins"
 FILTER_SCRIPT="$SCRIPT_DIR/doc.doc.md/components/filter.py"
+PLUGINS_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/plugins.sh"
+
+# Source components
+source "$PLUGINS_COMPONENT"
 
 # --- Usage ---
 
@@ -37,81 +41,6 @@ Examples:
 EOF
 }
 
-# --- Plugin discovery and validation ---
-
-discover_plugins() {
-  local plugin_dir="$1"
-  local plugins=()
-
-  if [ ! -d "$plugin_dir" ]; then
-    echo "Error: Plugin directory not found: $plugin_dir" >&2
-    return 1
-  fi
-
-  for dir in "$plugin_dir"/*/; do
-    [ -d "$dir" ] || continue
-    local descriptor="$dir/descriptor.json"
-    if [ -f "$descriptor" ]; then
-      # Validate descriptor has required fields
-      if ! jq -e '.name and .version and .description and .commands' "$descriptor" >/dev/null 2>&1; then
-        echo "Warning: Invalid descriptor in $(basename "$dir"), skipping" >&2
-        continue
-      fi
-      # Check plugin is active
-      local active
-      active=$(jq -r '.active // true' "$descriptor")
-      if [ "$active" = "true" ]; then
-        plugins+=("$(basename "$dir")")
-      fi
-    else
-      echo "Warning: No descriptor.json in $(basename "$dir"), skipping" >&2
-    fi
-  done
-
-  printf '%s\n' "${plugins[@]}"
-}
-
-# --- Plugin execution ---
-
-run_plugin() {
-  local plugin_name="$1"
-  local file_path="$2"
-  local plugin_dir="$PLUGIN_DIR/$plugin_name"
-  local descriptor="$plugin_dir/descriptor.json"
-
-  # Get the process command from descriptor
-  local command_script
-  command_script=$(jq -r '.commands.process.command // empty' "$descriptor")
-  if [ -z "$command_script" ]; then
-    echo "Error: No process command defined for plugin '$plugin_name'" >&2
-    return 1
-  fi
-
-  local script_path="$plugin_dir/$command_script"
-  if [ ! -x "$script_path" ]; then
-    echo "Error: Plugin script not found or not executable: $plugin_name/$command_script" >&2
-    return 1
-  fi
-
-  # Build JSON input and execute plugin
-  local json_input
-  json_input=$(jq -n --arg filePath "$file_path" '{filePath: $filePath}')
-
-  local plugin_output
-  plugin_output=$(echo "$json_input" | "$script_path" 2>/dev/null) || {
-    echo "Error: Plugin '$plugin_name' failed for file: $(basename "$file_path")" >&2
-    return 1
-  }
-
-  # Validate output is valid JSON
-  if ! echo "$plugin_output" | jq empty 2>/dev/null; then
-    echo "Error: Plugin '$plugin_name' returned invalid JSON for file: $(basename "$file_path")" >&2
-    return 1
-  fi
-
-  echo "$plugin_output"
-}
-
 # --- Main processing ---
 
 process_file() {
@@ -124,7 +53,7 @@ process_file() {
 
   for plugin_name in "${plugins[@]}"; do
     local plugin_output
-    if plugin_output=$(run_plugin "$plugin_name" "$file_path"); then
+    if plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR"); then
       # Merge plugin output into combined result
       combined_result=$(echo "$combined_result" "$plugin_output" | jq -s '.[0] * .[1]')
     else
@@ -228,7 +157,7 @@ main() {
   # Discover files and apply filters
   local -a file_list
   mapfile -t file_list < <(
-    find "$input_dir" -type f | sort | \
+    find "$input_dir" -type f | \
     python3 "$FILTER_SCRIPT" "${filter_args[@]+"${filter_args[@]}"}"
   )
 

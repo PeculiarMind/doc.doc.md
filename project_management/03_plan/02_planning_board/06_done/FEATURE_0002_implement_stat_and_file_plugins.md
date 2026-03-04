@@ -239,19 +239,19 @@ None - this feature has no dependencies (can be implemented immediately)
 ## Related Links
 
 ### Architecture Vision
-- [ADR-003: JSON Plugin Descriptors](../../02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_003_json_plugin_descriptors.md)
-- [ARC_0003: Plugin Architecture](../../02_project_vision/03_architecture_vision/08_concepts/ARC_0003_plugin_architecture.md)
+- [ADR-003: JSON Plugin Descriptors](../../../02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_003_json_plugin_descriptors.md)
+- [ARC_0003: Plugin Architecture](../../../02_project_vision/03_architecture_vision/08_concepts/ARC_0003_plugin_architecture.md)
 
 ### Requirements
-- [REQ_0003: Plugin-Based Architecture](../../02_project_vision/02_requirements/03_accepted/REQ_0003_plugin_based_architecture.md)
-- [REQ_SEC_009: JSON Input Validation](../../02_project_vision/02_requirements/01_funnel/REQ_SEC_009_json_input_validation.md)
+- [REQ_0003: Plugin-Based Architecture](../../../02_project_vision/02_requirements/03_accepted/REQ_0003_plugin-system.md)
+- [REQ_SEC_009: JSON Input Validation](../../../02_project_vision/02_requirements/01_funnel/REQ_SEC_009_json_input_validation.md)
 
 ### Plugin Descriptors
-- [stat plugin descriptor](../../../doc.doc.md/plugins/stat/descriptor.json)
-- [file plugin descriptor](../../../doc.doc.md/plugins/file/descriptor.json)
+- [stat plugin descriptor](../../../../doc.doc.md/plugins/stat/descriptor.json)
+- [file plugin descriptor](../../../../doc.doc.md/plugins/file/descriptor.json)
 
 ### Security
-- [Plugin Security Documentation](../../02_project_vision/02_requirements/03_accepted/REQ_SEC_007_plugin_security_documentation.md)
+- [Plugin Security Documentation](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_007_plugin_security_documentation.md)
 
 ## Next Steps
 
@@ -299,14 +299,14 @@ These plugins serve as reference implementations for future plugin developers. C
 - **Agent:** architect.agent
 - **Result:** Conditionally Compliant
 - **Report:** [ARCHREV_001](../../../04_reporting/01_architecture_reviews/ARCHREV_001_FEATURE_0002_stat_file_plugins.md)
-- **Summary:** All core architecture requirements are met: JSON stdin/stdout (ADR-003), lowerCamelCase naming, jq-based JSON handling, standard command structure (ARC-0003), tool reuse (ADR-002), proper error handling (stderr/stdout separation), and cross-platform Linux/macOS support. One low-severity deviation found: install.sh scripts output a `message` field not declared in descriptor.json. Technical debt item [DEBTR_001](../../04_backlog/DEBTR_001_update_install_command_descriptors.md) created for descriptor update. No blocking issues.
+- **Summary:** All core architecture requirements are met: JSON stdin/stdout (ADR-003), lowerCamelCase naming, jq-based JSON handling, standard command structure (ARC-0003), tool reuse (ADR-002), proper error handling (stderr/stdout separation), and cross-platform Linux/macOS support. One low-severity deviation found: install.sh scripts output a `message` field not declared in descriptor.json. Technical debt item [DEBTR_001](DEBTR_001_update_install_command_descriptors.md) created for descriptor update. No blocking issues.
 
 ### Step 7: Security Assessment
 - **Date:** 2026-03-01
 - **Agent:** security.agent
 - **Result:** Issues Found
 - **Report:** [SECREV_002](../../../04_reporting/03_security_reviews/SECREV_002_FEATURE_0002_stat_file_plugins.md)
-- **Summary:** Good security fundamentals confirmed: proper variable quoting prevents command injection, jq-based JSON handling, strict bash mode, stderr/stdout separation, and no dangerous shell constructs. ShellCheck clean. However, two issues found: (1) HIGH — no path boundary enforcement allows plugins to read metadata of any readable file including `/etc/passwd`, `/proc/self/environ`, and symlink targets (violates REQ_SEC_005, SC-001); (2) MEDIUM — error messages disclose full file paths and differentiate not-found from not-readable, creating a file-existence oracle (violates REQ_SEC_006, SC-006). Bug work items [BUG_0001](../../04_backlog/BUG_0001_plugin_path_traversal_no_boundary_enforcement.md) and [BUG_0002](../../04_backlog/BUG_0002_plugin_error_message_information_disclosure.md) created in backlog for developer.agent remediation.
+- **Summary:** Good security fundamentals confirmed: proper variable quoting prevents command injection, jq-based JSON handling, strict bash mode, stderr/stdout separation, and no dangerous shell constructs. ShellCheck clean. However, two issues found: (1) HIGH — no path boundary enforcement allows plugins to read metadata of any readable file including `/etc/passwd`, `/proc/self/environ`, and symlink targets (violates REQ_SEC_005, SC-001); (2) MEDIUM — error messages disclose full file paths and differentiate not-found from not-readable, creating a file-existence oracle (violates REQ_SEC_006, SC-006). Bug work items [BUG_0001](BUG_0001_plugin_path_traversal_no_boundary_enforcement.md) and [BUG_0002](BUG_0002_plugin_error_message_information_disclosure.md) created in backlog for developer.agent remediation.
 
 ### Step 8: License Assessment
 - **Date:** 2026-03-01

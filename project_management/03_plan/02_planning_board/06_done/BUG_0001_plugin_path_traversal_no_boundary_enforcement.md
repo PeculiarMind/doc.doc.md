@@ -62,6 +62,6 @@ Additionally, `input=$(cat)` reads all of stdin without any size constraint. A c
 ## Related Links
 
 - Security Review: [SECREV_002](../../../04_reporting/03_security_reviews/SECREV_002_FEATURE_0002_stat_file_plugins.md)
-- Feature: [FEATURE_0002](../05_implementing/FEATURE_0002_implement_stat_and_file_plugins.md)
-- Requirements: [REQ_SEC_005](../../02_project_vision/02_requirements/03_accepted/REQ_SEC_005_path_traversal_prevention.md), [REQ_SEC_001](../../02_project_vision/02_requirements/03_accepted/REQ_SEC_001_input_validation_sanitization.md)
-- Security Concept: [Scope 3 & SC-001](../../02_project_vision/04_security_concept/01_security_concept.md)
+- Feature: [FEATURE_0002](FEATURE_0002_implement_stat_and_file_plugins.md)
+- Requirements: [REQ_SEC_005](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_005_path_traversal_prevention.md), [REQ_SEC_001](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_001_input_validation_sanitization.md)
+- Security Concept: [Scope 3 & SC-001](../../../02_project_vision/04_security_concept/01_security_concept.md)

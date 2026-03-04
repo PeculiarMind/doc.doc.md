@@ -393,8 +393,8 @@ All plugins must implement three standard commands in the `commands` object:
 
 # References
 
-- [REQ_0002: Modular Architecture](../../../02_requirements/03_accepted/REQ_0002_modular-architecture.md)
-- [REQ_0003: Plugin-Based Architecture](../../../02_requirements/03_accepted/REQ_0003_plugin-system.md)
+- [REQ_0002: Modular Architecture](../../02_requirements/03_accepted/REQ_0002_modular-architecture.md)
+- [REQ_0003: Plugin-Based Architecture](../../02_requirements/03_accepted/REQ_0003_plugin-system.md)
 - [ADR-001: Mixed Bash/Python Implementation](ADR_001_mixed_bash_python_implementation.md)
 - [ADR-002: Prioritize Tool Reuse](ADR_002_prioritize_tool_reuse.md)
 - [Building Block View - Plugin Architecture](../05_building_block_view/05_building_block_view.md#level-4-plugin-architecture)
