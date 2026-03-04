@@ -2,14 +2,15 @@
 
 **Author:** Architect Agent  
 **Created on:** 2026-03-01  
-**Last Updated:** 2026-03-01  
-**Status:** Proposed
+**Last Updated:** 2026-03-04  
+**Status:** Accepted
 
 
 **Version History**  
 | Date       | Author       | Description                |
 |------------|--------------|----------------------------|
 | 2026-03-01 | Architect Agent | Initial concept creation from legacy documentation |
+| 2026-03-04 | developer.agent | Updated MIME matching pseudocode and routing notes to reflect actual FEATURE_0007 implementation (DEBTR_002) |
 
 **Table of Contents:**  
 - [Problem Statement](#problem-statement)
@@ -52,7 +53,16 @@ The system supports three types of filter criteria:
 
 1. **File Extensions**: Match files by extension (e.g., `.pdf`, `.txt`, `.md`)
 2. **Glob Patterns**: Match files by path pattern (e.g., `**/2024/**`, `**/temp/**`)
-3. **MIME Types**: Match files by MIME type (e.g., `application/pdf`, `text/plain`)
+3. **MIME Types**: Match files by MIME type, with optional glob wildcard support (e.g., `application/pdf`, `text/plain`, `image/*`, `text/*`)
+
+#### Criterion Routing in doc.doc.sh
+
+Before evaluation begins, `doc.doc.sh` splits all user-supplied filter criteria into two groups:
+
+- **Path criteria** — used for the initial `find`-based file discovery pass. A criterion is classified as a path criterion when it contains `**` (recursive glob) or contains no `/` at all (e.g., `.pdf`, `**/2024/**`).
+- **MIME criteria** — applied after the `file` plugin detects the MIME type for each file. A criterion is classified as a MIME criterion when it contains `/` but does **not** contain `**` (e.g., `application/pdf`, `image/*`, `text/*`).
+
+MIME criteria are evaluated in a dedicated *MIME filter gate* that runs immediately after the `file` plugin executes. The `file` plugin emits the detected MIME type as the `mimeType` field in its JSON output. `doc.doc.sh` extracts this value and pipes it as a single line to `filter.py` stdin, passing the MIME criteria as `--include`/`--exclude` arguments. Because `filter.py` treats all non-extension, non-`**` values as glob patterns (matched with `fnmatch`), both literal MIME strings and wildcard MIME patterns (e.g., `image/*`) are evaluated consistently with no MIME-specific code path in `filter.py` itself.
 
 #### Boolean Logic for Filters
 
@@ -90,13 +100,17 @@ The system supports three types of filter criteria:
 
 #### Filter Evaluation Algorithm
 
+The filter algorithm runs in two distinct passes:
+
+**Pass 1 — Path filtering** (performed by `filter.py` operating on file paths):
+
 ```python
 def should_process_file(file_path, include_params, exclude_params):
     """
     Determine if a file should be processed based on include/exclude filters.
     
     Args:
-        file_path: Path to the file
+        file_path: Path to the file (or MIME type string when invoked for MIME gate)
         include_params: List of include parameter strings (comma-separated criteria)
         exclude_params: List of exclude parameter strings (comma-separated criteria)
     
@@ -130,22 +144,27 @@ def should_process_file(file_path, include_params, exclude_params):
     # Include if matches include criteria and does not match exclude criteria
     return include_match and not exclude_match
 
-def matches_criterion(file_path, criterion):
-    """Check if file matches a single criterion."""
+def matches_criterion(value, criterion):
+    """Check if a value (file path or MIME type string) matches a single criterion."""
     criterion = criterion.strip()
     
     # Extension match
     if criterion.startswith('.'):
-        return file_path.endswith(criterion)
+        return value.endswith(criterion)
     
-    # MIME type match
-    elif '/' in criterion:
-        mime_type = get_mime_type(file_path)
-        return mime_type == criterion
-    
-    # Glob pattern match
-    else:
-        return fnmatch.fnmatch(file_path, criterion)
+    # Glob pattern match (handles path globs and MIME glob patterns such as image/*)
+    return fnmatch.fnmatch(value, criterion)
+```
+
+**Pass 2 — MIME filter gate** (performed by `doc.doc.sh` after the `file` plugin runs):
+
+`doc.doc.sh` extracts the `mimeType` value emitted by the `file` plugin and invokes `filter.py` again, this time feeding the MIME type string as stdin. The MIME criteria (criteria containing `/` but not `**`) are passed as `--include`/`--exclude` arguments. `filter.py` is stateless and general-purpose: it does not distinguish between path and MIME invocations — `fnmatch` handles both cases equally.
+
+```bash
+# Pseudocode for the MIME filter gate in doc.doc.sh
+mime_type=$(extract_mime_type_from_plugin_output)
+echo "$mime_type" | python3 filter.py --include "image/*" --include "text/plain"
+# Non-empty output → MIME criteria satisfied; empty output → file skipped
 ```
 
 #### Filter Examples
@@ -159,6 +178,10 @@ def matches_criterion(file_path, criterion):
 | `.pdf,.txt` | `.txt` | `doc.txt` | ❌ Exclude | Matches include but also exclude |
 | `.pdf,.txt` | `.log`, `**/temp/**` | `temp/file.csv` | ✅ Include | Not excluded (doesn't match both exclude params) |
 | `.pdf,.txt` | `.log`, `**/temp/**` | `temp/debug.log` | ❌ Exclude | Matches both `.log` AND `**/temp/**` |
+| `image/*` | None | MIME `image/jpeg` | ✅ Include | `fnmatch("image/jpeg", "image/*")` matches |
+| `image/*` | None | MIME `text/plain` | ❌ Exclude | `fnmatch("text/plain", "image/*")` does not match |
+| `text/*` | `text/csv` | MIME `text/plain` | ✅ Include | Matches `text/*` and does not match `text/csv` |
+| `text/*` | `text/csv` | MIME `text/csv` | ❌ Exclude | Matches both include `text/*` and exclude `text/csv` |
 
 ### Benefits
 - **Flexibility**: Supports multiple types of filter criteria (extensions, patterns, MIME types)

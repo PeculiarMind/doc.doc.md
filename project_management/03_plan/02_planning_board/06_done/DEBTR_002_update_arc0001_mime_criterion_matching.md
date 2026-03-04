@@ -6,7 +6,7 @@
 - **Created at:** 2026-03-03
 - **Created by:** architect.agent
 - **Assigned to:** developer.agent
-- **Status:** BACKLOG
+- **Status:** DONE
 
 ## TOC
 
@@ -59,11 +59,11 @@ ARC_0001 pseudocode should be updated to document this actual design, including 
 
 ## Acceptance Criteria
 
-- [ ] `ARC_0001_filtering_logic.md` "Proposed Solution" section updated to reflect the actual MIME matching approach: MIME type string is fed directly as stdin to filter.py; `fnmatch` handles both literal and glob MIME criteria
-- [ ] The `matches_criterion` pseudocode no longer references `get_mime_type(file_path)` for MIME criteria
-- [ ] A note is added explaining criterion routing in `doc.doc.sh`: criteria containing `/` (but not `**`) are classified as MIME criteria and evaluated against the detected MIME type
-- [ ] The filter examples table is updated or extended to include at least one MIME type filter example showing glob matching (e.g., `image/*` matching `image/jpeg`)
-- [ ] ARC_0001 status updated from "Proposed" to "Accepted" if appropriate (architecture team decision)
+- [x] `ARC_0001_filtering_logic.md` "Proposed Solution" section updated to reflect the actual MIME matching approach: MIME type string is fed directly as stdin to filter.py; `fnmatch` handles both literal and glob MIME criteria
+- [x] The `matches_criterion` pseudocode no longer references `get_mime_type(file_path)` for MIME criteria
+- [x] A note is added explaining criterion routing in `doc.doc.sh`: criteria containing `/` (but not `**`) are classified as MIME criteria and evaluated against the detected MIME type
+- [x] The filter examples table is updated or extended to include at least one MIME type filter example showing glob matching (e.g., `image/*` matching `image/jpeg`)
+- [x] ARC_0001 status updated from "Proposed" to "Accepted"
 
 ## Affected Files
 
