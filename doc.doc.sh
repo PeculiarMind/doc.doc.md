@@ -195,7 +195,6 @@ main() {
       ;;
     list)
       cmd_list "$@"
-      exit $?
       ;;
     *)
       echo "Error: Unknown command '$command'. Use --help for usage." >&2
