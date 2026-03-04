@@ -20,6 +20,9 @@ import shutil
 import subprocess
 import sys
 
+# Cache the availability of the `file` command at module load time.
+_FILE_CMD = shutil.which('file')
+
 
 def _get_mime_type(file_path: str) -> str:
     """Return the MIME type of file_path using the `file` command.
@@ -27,18 +30,23 @@ def _get_mime_type(file_path: str) -> str:
     Raises SystemExit with a non-zero code if `file` is not available.
     Returns an empty string if the command fails for a specific file.
     """
-    if shutil.which('file') is None:
+    if _FILE_CMD is None:
         print(
             "error: 'file' command not found — required for MIME type filtering",
             file=sys.stderr,
         )
         sys.exit(1)
     result = subprocess.run(
-        ['file', '--mime-type', '-b', file_path],
+        [_FILE_CMD, '--mime-type', '-b', file_path],
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
+        print(
+            f"warning: could not determine MIME type for '{file_path}': "
+            f"{result.stderr.strip()}",
+            file=sys.stderr,
+        )
         return ''
     return result.stdout.strip()
 
