@@ -28,3 +28,4 @@
 | [REQ_SEC_009](01_funnel/REQ_SEC_009_json_input_validation.md) | JSON Input Validation | Critical | Funnel | Security |
 | [REQ_0029](03_accepted/REQ_0029_plugin-state-storage.md) | Plugin State Storage | Medium | Accepted | Functional |
 | [REQ_0030](03_accepted/REQ_0030_list-plugin-commands.md) | List Plugin Commands | Medium | Accepted | Functional |
+| [REQ_0031](03_accepted/REQ_0031_filter-include-exclude-precedence.md) | Filter Include/Exclude Evaluation Precedence | High | Accepted | Functional |

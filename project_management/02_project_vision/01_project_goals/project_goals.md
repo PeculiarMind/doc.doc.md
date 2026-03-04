@@ -14,7 +14,7 @@ Document processing is executed using the `doc.doc.sh process` command. This com
 
 1. **Validation Phase**: Validates the input parameters and verifies if active plugins are installed and available for execution.
 2. **Planning Phase**: Determines the execution order of active plugins based on their dependencies and prepares the execution plan.
-3. **Input Gathering Phase**: Collects the documents from the specified input directory, applying the include and exclude filters to determine which documents will be processed.
+3. **Input Gathering Phase**: Collects the documents from the specified input directory, applying the include and exclude filters to determine which documents will be processed. Include filters are evaluated first to build the candidate set of files (all files if no include filters are given); exclude filters are then applied to reduce that candidate set. Exclude filters can only remove files — they can never add files back or override the include result in a permissive direction.
 4. **Document Processing Phase**: Executes the active plugins in the determined order, passing each discovered document and parameters to each plugin. The output from each plugin is collected by the script and processed to generate the final markdown files after all plugins have been executed for the document.
 5. **Output Generation Phase**: Generates the markdown files in the specified output directory, mirroring the input directory structure. The generated markdown files are based on the specified template with placeholders replaced by the output from the plugins.
 
@@ -53,6 +53,7 @@ The script processes documents in the input directory according to the specified
 - Multiple `--include` parameters are **ANDed** together (a file must match at least one criterion from each `--include` parameter)
 - Values within a single `--exclude` parameter are **ORed** together (a file is excluded if it matches at least one criterion)
 - Multiple `--exclude` parameters are **ANDed** together (a file is excluded only if it matches at least one criterion from each `--exclude` parameter)
+- **Include filters are evaluated before exclude filters**: include filters build the candidate set first (all files if no `--include` is given), then exclude filters reduce that set. Exclude filters can only remove files from the candidate set — they can never add files back or override the include result in a permissive direction.
 
 ### Example Explanation
 

@@ -212,3 +212,4 @@ The filtering logic concept provides a powerful and flexible way to control whic
 ### References
 - Glob pattern matching: Python `fnmatch` module documentation
 - MIME type detection strategies
+- REQ_0031: Include-before-exclude filter evaluation order requirement

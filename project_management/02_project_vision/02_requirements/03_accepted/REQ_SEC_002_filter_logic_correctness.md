@@ -22,6 +22,7 @@ The file filtering logic must correctly implement the documented AND/OR semantic
    - Between multiple `--include` parameters: ANDed together
    - Within single `--exclude` parameter: values ORed together
    - Between multiple `--exclude` parameters: ANDed together
+   - Include filters are evaluated before exclude filters; exclude filters reduce the include result set
    - Final result: include AND NOT exclude
 
 2. **Filter Type Support**:
