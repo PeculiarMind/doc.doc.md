@@ -39,6 +39,9 @@ process Options:
                   Examples: -e ".log" -e "**/temp/**"
 
 list Options:
+  plugins            List all plugins with activation status
+  plugins active     List only active plugins
+  plugins inactive   List only inactive plugins
   --plugin <name>    Name of the plugin to inspect (required with --commands)
   --commands         List all commands declared by the specified plugin
 
@@ -49,12 +52,71 @@ Examples:
   $(basename "$0") process -d /path/to/documents -i ".pdf,.txt"
   $(basename "$0") process -d /path/to/documents -i ".pdf" -e "**/temp/**"
   $(basename "$0") list --plugin stat --commands
+  $(basename "$0") list plugins
+  $(basename "$0") list plugins active
+  $(basename "$0") list plugins inactive
 EOF
+}
+
+# --- _list_plugins helper ---
+
+_list_plugins() {
+  local filter="$1"  # "all", "active", or "inactive"
+  local plugin_dir="$PLUGIN_DIR"
+
+  local all_plugins
+  mapfile -t all_plugins < <(discover_all_plugins "$plugin_dir")
+
+  if [ ${#all_plugins[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  for plugin_name in "${all_plugins[@]}"; do
+    local descriptor="$plugin_dir/$plugin_name/descriptor.json"
+    [ -f "$descriptor" ] || continue
+    local active
+    active=$(get_plugin_active_status "$descriptor")
+    case "$filter" in
+      all)
+        if [ "$active" = "true" ]; then
+          echo "$plugin_name  [active]"
+        else
+          echo "$plugin_name  [inactive]"
+        fi
+        ;;
+      active)
+        if [ "$active" = "true" ]; then echo "$plugin_name"; fi
+        ;;
+      inactive)
+        if [ "$active" = "false" ]; then echo "$plugin_name"; fi
+        ;;
+    esac
+  done
 }
 
 # --- List command ---
 
 cmd_list() {
+  # Handle 'plugins' sub-command (FEATURE_0008)
+  if [ "${1:-}" = "plugins" ]; then
+    local filter="${2:-all}"
+    # Validate no extra arguments
+    if [ $# -gt 2 ]; then
+      echo "Error: Too many arguments for 'list plugins'. Use: list plugins [active|inactive]" >&2
+      exit 1
+    fi
+    case "$filter" in
+      all|"")  _list_plugins "all" ;;
+      active)  _list_plugins "active" ;;
+      inactive) _list_plugins "inactive" ;;
+      *)
+        echo "Error: Unknown filter '$filter'. Use: list plugins [active|inactive]" >&2
+        exit 1
+        ;;
+    esac
+    return 0
+  fi
+
   local plugin_name=""
   local show_commands=false
 
@@ -195,6 +257,8 @@ main() {
       ;;
     list)
       cmd_list "$@"
+      # Exit explicitly to prevent fallthrough into the process argument parser below.
+      exit $?
       ;;
     *)
       echo "Error: Unknown command '$command'. Use --help for usage." >&2
