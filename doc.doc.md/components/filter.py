@@ -9,12 +9,46 @@ Exclude logic: OR within parameter (comma-separated), AND between parameters.
 
 Filter types auto-detected:
   - File extensions: start with '.' (e.g., '.pdf', '.txt')
+  - MIME types: contain '/' (e.g., 'text/plain', 'image/*')
   - Glob patterns: everything else (e.g., '**/2024/**')
 """
 
 import argparse
 import fnmatch
+import os
+import shutil
+import subprocess
 import sys
+
+# Cache the availability of the `file` command at module load time.
+_FILE_CMD = shutil.which('file')
+
+
+def _get_mime_type(file_path: str) -> str:
+    """Return the MIME type of file_path using the `file` command.
+
+    Raises SystemExit with a non-zero code if `file` is not available.
+    Returns an empty string if the command fails for a specific file.
+    """
+    if _FILE_CMD is None:
+        print(
+            "error: 'file' command not found — required for MIME type filtering",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    result = subprocess.run(
+        [_FILE_CMD, '--mime-type', '-b', file_path],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(
+            f"warning: could not determine MIME type for '{file_path}': "
+            f"{result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        return ''
+    return result.stdout.strip()
 
 
 def matches_criterion(file_path: str, criterion: str) -> bool:
@@ -26,6 +60,17 @@ def matches_criterion(file_path: str, criterion: str) -> bool:
     # Extension match: criterion starts with '.'
     if criterion.startswith('.'):
         return file_path.endswith(criterion)
+
+    # MIME type match: criterion contains '/' but not '**'
+    # (consistent with ARC_0001 criterion routing: MIME criteria have '/' but not '**')
+    if '/' in criterion and '**' not in criterion:
+        if os.path.isfile(file_path):
+            # Actual file path: resolve MIME type via `file` command and compare
+            mime_type = _get_mime_type(file_path)
+            return fnmatch.fnmatch(mime_type, criterion)
+        # MIME type string passed directly (e.g. from doc.doc.sh MIME gate):
+        # match the string itself against the criterion pattern
+        return fnmatch.fnmatch(file_path, criterion)
 
     # Glob pattern match
     return fnmatch.fnmatch(file_path, criterion)
