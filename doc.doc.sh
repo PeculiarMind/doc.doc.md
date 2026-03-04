@@ -26,8 +26,13 @@ usage() {
 Usage: $(basename "$0") <command> [OPTIONS]
 
 Commands:
-  process    Process files in the input directory through plugins
-  list       List information about plugins
+  process      Process files in the input directory through plugins
+  list         List information about plugins
+  activate     Activate a plugin
+  deactivate   Deactivate a plugin
+  install      Install plugins
+  installed    Check if a plugin is installed
+  tree         Display a dependency tree of all plugins
 
 process Options:
   -d <dir>   Input directory to process (required)
@@ -45,6 +50,22 @@ list Options:
   --plugin <name>    Name of the plugin to inspect (required with --commands)
   --commands         List all commands declared by the specified plugin
 
+activate Options:
+  --plugin <name>, -p <name>   Name of the plugin to activate (required)
+
+deactivate Options:
+  --plugin <name>, -p <name>   Name of the plugin to deactivate (required)
+
+install Options:
+  --plugin <name>, -p <name>   Install a single named plugin
+  plugins --all                Install all plugins
+
+installed Options:
+  --plugin <name>, -p <name>   Check if a named plugin is installed (required)
+
+tree Options:
+  (no options)   Render dependency tree for all plugins
+
   --help     Show this help message
 
 Examples:
@@ -55,7 +76,549 @@ Examples:
   $(basename "$0") list plugins
   $(basename "$0") list plugins active
   $(basename "$0") list plugins inactive
+  $(basename "$0") activate --plugin stat
+  $(basename "$0") deactivate --plugin ocrmypdf
+  $(basename "$0") install --plugin stat
+  $(basename "$0") install plugins --all
+  $(basename "$0") installed --plugin stat
+  $(basename "$0") tree
 EOF
+}
+
+# --- Activate command (FEATURE_0012) ---
+
+cmd_activate() {
+  local plugin_name=""
+
+  if [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") activate --plugin <plugin_name>
+       $(basename "$0") activate -p <plugin_name>
+
+Sets the 'active' field to true in the plugin's descriptor.json.
+If the plugin is already active, exits 0 with an informational message.
+
+Options:
+  --plugin <name>, -p <name>   Name of the plugin to activate (required)
+  --help                       Show this help message
+EOF
+    exit 0
+  fi
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --plugin|-p)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        plugin_name="$2"
+        shift 2
+        ;;
+      *)
+        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "$plugin_name" ]; then
+    echo "Error: --plugin / -p is required" >&2
+    exit 1
+  fi
+
+  local plugin_dir="$PLUGIN_DIR/$plugin_name"
+  local descriptor="$plugin_dir/descriptor.json"
+
+  if [ ! -d "$plugin_dir" ]; then
+    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    exit 1
+  fi
+
+  if [ ! -f "$descriptor" ]; then
+    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    exit 1
+  fi
+
+  local current_status
+  current_status=$(get_plugin_active_status "$descriptor")
+  if [ "$current_status" = "true" ]; then
+    echo "plugin '$plugin_name' is already active"
+    exit 0
+  fi
+
+  local tmp
+  tmp=$(mktemp)
+  if jq '.active = true' "$descriptor" > "$tmp" && mv "$tmp" "$descriptor"; then
+    echo "plugin '$plugin_name' activated"
+  else
+    rm -f "$tmp"
+    echo "Error: Could not update descriptor.json for plugin '$plugin_name'" >&2
+    exit 1
+  fi
+}
+
+# --- Deactivate command (FEATURE_0013) ---
+
+cmd_deactivate() {
+  local plugin_name=""
+
+  if [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") deactivate --plugin <plugin_name>
+       $(basename "$0") deactivate -p <plugin_name>
+
+Sets the 'active' field to false in the plugin's descriptor.json.
+If the plugin is already inactive, exits 0 with an informational message.
+
+Options:
+  --plugin <name>, -p <name>   Name of the plugin to deactivate (required)
+  --help                       Show this help message
+EOF
+    exit 0
+  fi
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --plugin|-p)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        plugin_name="$2"
+        shift 2
+        ;;
+      *)
+        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "$plugin_name" ]; then
+    echo "Error: --plugin / -p is required" >&2
+    exit 1
+  fi
+
+  local plugin_dir="$PLUGIN_DIR/$plugin_name"
+  local descriptor="$plugin_dir/descriptor.json"
+
+  if [ ! -d "$plugin_dir" ]; then
+    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    exit 1
+  fi
+
+  if [ ! -f "$descriptor" ]; then
+    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    exit 1
+  fi
+
+  local current_status
+  current_status=$(get_plugin_active_status "$descriptor")
+  if [ "$current_status" = "false" ]; then
+    echo "plugin '$plugin_name' is already inactive"
+    exit 0
+  fi
+
+  local tmp
+  tmp=$(mktemp)
+  if jq '.active = false' "$descriptor" > "$tmp" && mv "$tmp" "$descriptor"; then
+    echo "plugin '$plugin_name' deactivated"
+  else
+    rm -f "$tmp"
+    echo "Error: Could not update descriptor.json for plugin '$plugin_name'" >&2
+    exit 1
+  fi
+}
+
+# --- Install command (FEATURE_0011 + FEATURE_0014) ---
+
+cmd_install() {
+  if [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") install --plugin <plugin_name>
+       $(basename "$0") install -p <plugin_name>
+       $(basename "$0") install plugins --all
+
+Install one or all plugins.
+
+Options:
+  --plugin <name>, -p <name>   Install a single named plugin
+  plugins --all                Install all plugins in PLUGIN_DIR
+  --help                       Show this help message
+EOF
+    exit 0
+  fi
+
+  # Sub-command: install plugins --all (FEATURE_0011)
+  if [ "${1:-}" = "plugins" ]; then
+    shift
+    if [ "${1:-}" != "--all" ]; then
+      echo "Error: Expected '--all' after 'plugins'. Use --help for usage." >&2
+      exit 1
+    fi
+    _install_all_plugins
+    return $?
+  fi
+
+  # Single plugin install (FEATURE_0014)
+  local plugin_name=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --plugin|-p)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        plugin_name="$2"
+        shift 2
+        ;;
+      *)
+        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "$plugin_name" ]; then
+    echo "Error: --plugin / -p is required" >&2
+    exit 1
+  fi
+
+  _install_single_plugin "$plugin_name"
+}
+
+_install_single_plugin() {
+  local plugin_name="$1"
+  local plugin_dir="$PLUGIN_DIR/$plugin_name"
+  local descriptor="$plugin_dir/descriptor.json"
+
+  if [ ! -d "$plugin_dir" ]; then
+    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    exit 1
+  fi
+
+  if [ ! -f "$descriptor" ]; then
+    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    exit 1
+  fi
+
+  local installed_sh="$plugin_dir/installed.sh"
+  local install_sh="$plugin_dir/install.sh"
+
+  # Check if already installed
+  if [ -f "$installed_sh" ]; then
+    local installed_output installed_val
+    installed_output=$(bash "$installed_sh" 2>/dev/null) || true
+    installed_val=$(echo "$installed_output" | jq -r '.installed // "false"' 2>/dev/null) || installed_val="false"
+    if [ "$installed_val" = "true" ]; then
+      echo "$plugin_name: already installed"
+      return 0
+    fi
+  fi
+
+  # Run install.sh
+  if [ ! -f "$install_sh" ]; then
+    echo "$plugin_name: no install.sh found, skipping"
+    return 0
+  fi
+
+  echo "$plugin_name: installing..."
+  if bash "$install_sh"; then
+    echo "$plugin_name: installed"
+  else
+    echo "Error: Installation failed for plugin '$plugin_name'" >&2
+    exit 1
+  fi
+}
+
+_install_all_plugins() {
+  local all_plugins
+  mapfile -t all_plugins < <(discover_all_plugins "$PLUGIN_DIR")
+
+  if [ ${#all_plugins[@]} -eq 0 ]; then
+    echo "No plugins found in $PLUGIN_DIR"
+    return 0
+  fi
+
+  local failed=0
+
+  for plugin_name in "${all_plugins[@]}"; do
+    local plugin_dir="$PLUGIN_DIR/$plugin_name"
+    local descriptor="$plugin_dir/descriptor.json"
+    [ -f "$descriptor" ] || continue
+
+    local installed_sh="$plugin_dir/installed.sh"
+    local install_sh="$plugin_dir/install.sh"
+
+    # Check if already installed
+    local already_installed=false
+    if [ -f "$installed_sh" ]; then
+      local installed_output installed_val
+      installed_output=$(bash "$installed_sh" 2>/dev/null) || true
+      installed_val=$(echo "$installed_output" | jq -r '.installed // "false"' 2>/dev/null) || installed_val="false"
+      if [ "$installed_val" = "true" ]; then
+        already_installed=true
+      fi
+    fi
+
+    if [ "$already_installed" = "true" ]; then
+      echo "$plugin_name: already installed"
+      continue
+    fi
+
+    if [ ! -f "$install_sh" ]; then
+      echo "$plugin_name: no install.sh found, skipping"
+      continue
+    fi
+
+    echo "$plugin_name: installing..."
+    if bash "$install_sh"; then
+      echo "$plugin_name: installed"
+    else
+      echo "Error: Installation failed for plugin '$plugin_name'" >&2
+      failed=$((failed + 1))
+    fi
+  done
+
+  if [ "$failed" -gt 0 ]; then
+    echo "Error: $failed plugin(s) failed to install" >&2
+    return 1
+  fi
+  return 0
+}
+
+# --- Installed command (FEATURE_0015) ---
+
+cmd_installed() {
+  if [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") installed --plugin <plugin_name>
+       $(basename "$0") installed -p <plugin_name>
+
+Checks whether a plugin is installed by running its installed.sh script.
+
+Exit codes:
+  0   Plugin is installed
+  1   Plugin is not installed
+  2   Plugin does not exist or other error
+
+Options:
+  --plugin <name>, -p <name>   Name of the plugin to check (required)
+  --help                       Show this help message
+EOF
+    exit 0
+  fi
+
+  local plugin_name=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --plugin|-p)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        plugin_name="$2"
+        shift 2
+        ;;
+      *)
+        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        exit 2
+        ;;
+    esac
+  done
+
+  if [ -z "$plugin_name" ]; then
+    echo "Error: --plugin / -p is required" >&2
+    exit 2
+  fi
+
+  local plugin_dir="$PLUGIN_DIR/$plugin_name"
+  local descriptor="$plugin_dir/descriptor.json"
+
+  if [ ! -d "$plugin_dir" ]; then
+    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    exit 2
+  fi
+
+  if [ ! -f "$descriptor" ]; then
+    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    exit 2
+  fi
+
+  local installed_sh="$plugin_dir/installed.sh"
+
+  if [ ! -f "$installed_sh" ]; then
+    echo "$plugin_name: no installed.sh found — assuming not installed"
+    exit 1
+  fi
+
+  local installed_output installed_val
+  installed_output=$(bash "$installed_sh" 2>/dev/null) || true
+  installed_val=$(echo "$installed_output" | jq -r '.installed // "false"' 2>/dev/null) || installed_val="false"
+
+  if [ "$installed_val" = "true" ]; then
+    echo "$plugin_name: installed"
+    exit 0
+  else
+    echo "$plugin_name: not installed"
+    exit 1
+  fi
+}
+
+# --- Tree command (FEATURE_0016) ---
+
+cmd_tree() {
+  if [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") tree
+
+Renders a dependency tree of all plugins showing activation status.
+Active plugins are shown in green; inactive plugins in red.
+Plugins declared as dependencies appear as children under their consumers.
+
+Exit codes:
+  0   Success
+  1   Circular dependency detected
+EOF
+    exit 0
+  fi
+
+  local all_plugins
+  mapfile -t all_plugins < <(discover_all_plugins "$PLUGIN_DIR")
+
+  if [ ${#all_plugins[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  # Build dependency map: for each plugin, load its dependencies array
+  declare -A plugin_deps   # plugin_name -> space-separated dep names
+  declare -A plugin_active # plugin_name -> true/false
+
+  for plugin_name in "${all_plugins[@]}"; do
+    local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
+    [ -f "$descriptor" ] || continue
+    local active
+    active=$(get_plugin_active_status "$descriptor")
+    plugin_active["$plugin_name"]="$active"
+
+    local deps_json
+    deps_json=$(jq -r '(.dependencies // []) | join(" ")' "$descriptor" 2>/dev/null) || deps_json=""
+    plugin_deps["$plugin_name"]="$deps_json"
+  done
+
+  # Detect circular dependencies using DFS
+  # Returns 0 if no cycle, 1 if cycle found
+  _detect_cycle() {
+    local start="$1"
+    local -n _visited="$2"
+    local -n _in_stack="$3"
+
+    _in_stack["$start"]=1
+    _visited["$start"]=1
+
+    local deps="${plugin_deps[$start]:-}"
+    for dep in $deps; do
+      if [ -z "${_visited[$dep]+x}" ]; then
+        if ! _detect_cycle "$dep" "$2" "$3"; then
+          return 1
+        fi
+      elif [ "${_in_stack[$dep]+x}" ]; then
+        return 1
+      fi
+    done
+    unset '_in_stack[$start]'
+    return 0
+  }
+
+  declare -A visited_global
+  for plugin_name in "${all_plugins[@]}"; do
+    [ -z "${visited_global[$plugin_name]+x}" ] || continue
+    declare -A in_stack_local=()
+    if ! _detect_cycle "$plugin_name" visited_global in_stack_local; then
+      echo "Error: Circular dependency detected involving plugin '$plugin_name'" >&2
+      return 1
+    fi
+  done
+
+  # Determine which plugins are dependencies of others (children)
+  declare -A is_child
+  for plugin_name in "${all_plugins[@]}"; do
+    local deps="${plugin_deps[$plugin_name]:-}"
+    for dep in $deps; do
+      is_child["$dep"]=1
+    done
+  done
+
+  # Find root plugins (not a child of any other plugin)
+  local root_plugins=()
+  for plugin_name in "${all_plugins[@]}"; do
+    if [ -z "${is_child[$plugin_name]+x}" ]; then
+      root_plugins+=("$plugin_name")
+    fi
+  done
+
+  # Render a plugin node with color
+  _render_plugin_label() {
+    local name="$1"
+    local active="${plugin_active[$name]:-true}"
+    # Check if plugin exists in our list
+    local exists=false
+    for p in "${all_plugins[@]}"; do
+      [ "$p" = "$name" ] && exists=true && break
+    done
+
+    if [ "$exists" = "false" ]; then
+      # Missing dependency
+      echo "${name} [missing]"
+      return
+    fi
+
+    if [ "$active" = "true" ]; then
+      printf '\033[32m%s\033[0m' "$name"
+    else
+      printf '\033[31m%s\033[0m' "$name"
+    fi
+  }
+
+  # Recursively print tree
+  _print_tree() {
+    local plugin_name="$1"
+    local prefix="$2"
+    local is_last="$3"
+
+    local connector
+    if [ "$is_last" = "true" ]; then
+      connector="└──"
+    else
+      connector="├──"
+    fi
+
+    local label
+    label=$(_render_plugin_label "$plugin_name")
+    echo "${prefix}${connector} ${label}"
+
+    local child_prefix
+    if [ "$is_last" = "true" ]; then
+      child_prefix="${prefix}    "
+    else
+      child_prefix="${prefix}│   "
+    fi
+
+    local deps="${plugin_deps[$plugin_name]:-}"
+    local dep_arr=()
+    for dep in $deps; do
+      dep_arr+=("$dep")
+    done
+
+    local n=${#dep_arr[@]}
+    local i=0
+    for dep in "${dep_arr[@]}"; do
+      i=$((i + 1))
+      local last="false"
+      [ "$i" -eq "$n" ] && last="true"
+      _print_tree "$dep" "$child_prefix" "$last"
+    done
+  }
+
+  local n=${#root_plugins[@]}
+  local i=0
+  for plugin_name in "${root_plugins[@]}"; do
+    i=$((i + 1))
+    local last="false"
+    [ "$i" -eq "$n" ] && last="true"
+    _print_tree "$plugin_name" "" "$last"
+  done
 }
 
 # --- _list_plugins helper ---
@@ -258,6 +821,26 @@ main() {
     list)
       cmd_list "$@"
       # Exit explicitly to prevent fallthrough into the process argument parser below.
+      exit $?
+      ;;
+    activate)
+      cmd_activate "$@"
+      exit $?
+      ;;
+    deactivate)
+      cmd_deactivate "$@"
+      exit $?
+      ;;
+    install)
+      cmd_install "$@"
+      exit $?
+      ;;
+    installed)
+      cmd_installed "$@"
+      exit $?
+      ;;
+    tree)
+      cmd_tree "$@"
       exit $?
       ;;
     *)
