@@ -1,6 +1,6 @@
 #!/bin/bash
 # ocrmypdf plugin - process command
-# Reads JSON input from stdin with filePath and optional imageDpi parameters.
+# Reads JSON input from stdin with filePath, mimeType, and optional imageDpi parameters.
 # Runs OCRmyPDF on a PDF or image file and returns extracted text as JSON.
 #
 # Supported input types: application/pdf, image/jpeg, image/png, image/tiff,
@@ -19,11 +19,13 @@ set -euo pipefail
 # Read JSON input from stdin (limit to 1MB to prevent memory exhaustion per REQ_SEC_009)
 input=$(head -c 1048576)
 
-# Parse filePath and optional imageDpi from JSON input
+# Parse filePath, mimeType, and optional imageDpi from JSON input
 file_path=$(echo "$input" | jq -r '.filePath // empty' 2>/dev/null) || {
   echo "Error: Invalid JSON input" >&2
   exit 1
 }
+
+mime_type=$(echo "$input" | jq -r '.mimeType // empty' 2>/dev/null) || mime_type=""
 
 image_dpi=$(echo "$input" | jq -r '.imageDpi // 300' 2>/dev/null) || image_dpi=300
 # Validate imageDpi is a positive integer; warn and fall back to 300 if invalid
@@ -37,6 +39,28 @@ if [ -z "$file_path" ]; then
   echo "Error: Missing required parameter 'filePath' in JSON input" >&2
   exit 1
 fi
+
+if [ -z "$mime_type" ]; then
+  echo "Error: Missing required parameter 'mimeType' in JSON input" >&2
+  exit 1
+fi
+
+# Determine if this is a PDF or a supported image type based on mimeType
+is_pdf=false
+is_image=false
+
+case "$mime_type" in
+  application/pdf)
+    is_pdf=true
+    ;;
+  image/jpeg|image/png|image/tiff|image/bmp|image/gif)
+    is_image=true
+    ;;
+  *)
+    echo "Error: Unsupported MIME type '${mime_type}'. Supported types: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif." >&2
+    exit 1
+    ;;
+esac
 
 # Resolve and validate filePath (path traversal prevention per REQ_SEC_005)
 resolved_path=$(readlink -f "$file_path" 2>/dev/null) || resolved_path=""
@@ -56,36 +80,6 @@ esac
 # Validate file exists and is readable
 if [ ! -f "$resolved_path" ] || [ ! -r "$resolved_path" ]; then
   echo "Error: Cannot access the specified file" >&2
-  exit 1
-fi
-
-# Detect MIME type
-mime_type=""
-if command -v file >/dev/null 2>&1; then
-  mime_type=$(file --mime-type -b "$resolved_path" 2>/dev/null | tr -d '[:space:]')
-fi
-
-# Determine if this is a PDF or a supported image type
-is_pdf=false
-is_image=false
-
-case "$mime_type" in
-  application/pdf)
-    is_pdf=true
-    ;;
-  image/jpeg|image/png|image/tiff|image/bmp|image/gif)
-    is_image=true
-    ;;
-  *)
-    # Fall back to extension check for PDF
-    case "$resolved_path" in
-      *.pdf|*.PDF) is_pdf=true ;;
-    esac
-    ;;
-esac
-
-if [ "$is_pdf" = false ] && [ "$is_image" = false ]; then
-  echo "Error: Unsupported file type (detected MIME type: ${mime_type:-unknown}). Supported types: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif." >&2
   exit 1
 fi
 

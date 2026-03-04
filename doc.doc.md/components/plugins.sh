@@ -69,6 +69,7 @@ run_plugin() {
   local plugin_name="$1"
   local file_path="$2"
   local plugin_base_dir="$3"
+  local context_json="${4:-}"
   local plugin_dir="$plugin_base_dir/$plugin_name"
   local descriptor="$plugin_dir/descriptor.json"
 
@@ -86,9 +87,12 @@ run_plugin() {
     return 1
   fi
 
-  # Build JSON input and execute plugin
+  # Build JSON input: start with filePath, then merge any accumulated context
   local json_input
   json_input=$(jq -n --arg filePath "$file_path" '{filePath: $filePath}')
+  if [ -n "$context_json" ]; then
+    json_input=$(printf '%s\n%s' "$json_input" "$context_json" | jq -s '.[0] * .[1]')
+  fi
 
   local plugin_output
   plugin_output=$(echo "$json_input" | "$script_path" 2>/dev/null) || {

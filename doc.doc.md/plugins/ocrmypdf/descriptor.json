@@ -13,6 +13,11 @@
           "description": "Path to the PDF or image file to be processed. Supported MIME types: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif.",
           "required": true
         },
+        "mimeType": {
+          "type": "string",
+          "description": "MIME type of the input file. Must be one of: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif.",
+          "required": true
+        },
         "imageDpi": {
           "type": "integer",
           "description": "DPI to use when processing image inputs. Defaults to 300 if not provided.",

@@ -760,7 +760,7 @@ process_file() {
 
   for plugin_name in "${plugins[@]}"; do
     local plugin_output
-    if plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR"); then
+    if plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR" "$combined_result"); then
       # Merge plugin output into combined result
       combined_result=$(echo "$combined_result" "$plugin_output" | jq -s '.[0] * .[1]')
     else
