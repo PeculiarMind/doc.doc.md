@@ -1,60 +1,49 @@
 {
   "name": "ocrmypdf",
-  "version": "1.0.0",
-  "description": "A plugin that runs OCR on PDF files using OCRmyPDF, producing a searchable PDF with an embedded text layer and returning the extracted plain text as JSON output. OCR'd output PDFs are cached in pluginStorage to avoid redundant re-processing.",
-  "active": true,
+  "version": "1.1.0",
+  "description": "A plugin that runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF, extracting plain text as JSON output.",
+  "active": false,
   "commands": {
     "process": {
-      "description": "Run OCR on a PDF file and return extracted text, page count, cache status, and output PDF path.",
+      "description": "Run OCR on a PDF or image file and return extracted text.",
       "command": "main.sh",
       "input": {
         "filePath": {
           "type": "string",
-          "description": "The path to the PDF file to be processed.",
+          "description": "Path to the PDF or image file to be processed. Supported MIME types: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif.",
           "required": true
         },
-        "pluginStorage": {
-          "type": "string",
-          "description": "Directory path for storing cached OCR'd PDFs. Created if it does not exist.",
-          "required": true
+        "imageDpi": {
+          "type": "integer",
+          "description": "DPI to use when processing image inputs. Defaults to 300 if not provided.",
+          "required": false,
+          "default": 300
         }
       },
       "output": {
         "ocrText": {
           "type": "string",
-          "description": "Full plain-text content extracted from the OCR'd PDF."
-        },
-        "pageCount": {
-          "type": "number",
-          "description": "Number of pages in the PDF."
-        },
-        "wasCached": {
-          "type": "boolean",
-          "description": "true if the cached OCR'd PDF was reused, false if OCR was freshly run."
-        },
-        "outputPdf": {
-          "type": "string",
-          "description": "Absolute path to the OCR'd PDF stored in pluginStorage."
+          "description": "Full plain-text content extracted by OCR."
         }
       }
     },
     "installed": {
-      "description": "Check if both ocrmypdf and pdftotext are available on the system.",
+      "description": "Check if ocrmypdf is available on the system.",
       "command": "installed.sh",
       "output": {
         "installed": {
           "type": "boolean",
-          "description": "true only if both ocrmypdf and pdftotext are available, false otherwise."
+          "description": "true if ocrmypdf is available, false otherwise."
         }
       }
     },
     "install": {
-      "description": "Install ocrmypdf and pdftotext (poppler-utils) if not already available.",
+      "description": "Install ocrmypdf if not already available.",
       "command": "install.sh",
       "output": {
         "success": {
           "type": "boolean",
-          "description": "true if both tools are available after the installation attempt."
+          "description": "true if ocrmypdf is available after the installation attempt."
         },
         "message": {
           "type": "string",

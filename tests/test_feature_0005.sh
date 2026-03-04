@@ -169,7 +169,7 @@ fi
 desc=$(cat "$PLUGIN_DIR/descriptor.json")
 
 # process command input fields
-for field in filePath pluginStorage; do
+for field in filePath; do
   TOTAL=$((TOTAL + 1))
   if echo "$desc" | jq -e ".commands.process.input.$field" >/dev/null 2>&1; then
     echo "  PASS: descriptor declares process input '$field'"
@@ -181,7 +181,7 @@ for field in filePath pluginStorage; do
 done
 
 # process command output fields
-for field in ocrText pageCount wasCached outputPdf; do
+for field in ocrText; do
   TOTAL=$((TOTAL + 1))
   if echo "$desc" | jq -e ".commands.process.output.$field" >/dev/null 2>&1; then
     echo "  PASS: descriptor declares process output '$field'"
@@ -254,10 +254,10 @@ output=$(echo '{}' | "$PLUGIN_DIR/main.sh" 2>/dev/null)
 exit_code=$?
 assert_exit_code "missing filePath exits with 1" "1" "$exit_code"
 
-# Missing pluginStorage
-output=$(echo "{\"filePath\":\"/tmp/test.pdf\"}" | "$PLUGIN_DIR/main.sh" 2>/dev/null)
+# Missing pluginStorage (now optional — exits 1 due to nonexistent file, not missing param)
+output=$(echo "{\"filePath\":\"/tmp/nonexistent_test.pdf\"}" | "$PLUGIN_DIR/main.sh" 2>/dev/null)
 exit_code=$?
-assert_exit_code "missing pluginStorage exits with 1" "1" "$exit_code"
+assert_exit_code "nonexistent file without pluginStorage exits 1 (file not found)" "1" "$exit_code"
 
 # Malformed JSON
 output=$(echo 'not json' | "$PLUGIN_DIR/main.sh" 2>/dev/null)
@@ -265,18 +265,18 @@ exit_code=$?
 assert_exit_code "malformed JSON exits with 1" "1" "$exit_code"
 
 # Non-existent file
-output=$(echo '{"filePath":"/nonexistent/file.pdf","pluginStorage":"/tmp/storage"}' \
+output=$(echo '{"filePath":"/nonexistent/file.pdf"}' \
   | "$PLUGIN_DIR/main.sh" 2>/dev/null)
 exit_code=$?
 assert_exit_code "non-existent file exits with 1" "1" "$exit_code"
 
-# Non-PDF file
+# Non-PDF/non-image file
 non_pdf="$TEST_DIR/test.txt"
 echo "not a pdf" > "$non_pdf"
-output=$(echo "{\"filePath\":\"$non_pdf\",\"pluginStorage\":\"$TEST_DIR/storage\"}" \
+output=$(echo "{\"filePath\":\"$non_pdf\"}" \
   | "$PLUGIN_DIR/main.sh" 2>/dev/null)
 exit_code=$?
-assert_exit_code "non-PDF file exits with 1" "1" "$exit_code"
+assert_exit_code "non-PDF/non-image file exits with 1" "1" "$exit_code"
 
 # Error messages go to stderr, not stdout
 error_stdout=$(echo '{}' | "$PLUGIN_DIR/main.sh" 2>/dev/null)
@@ -291,11 +291,12 @@ assert_contains "error message in stderr" "Error" "$error_stderr"
 echo ""
 echo "--- main.sh with ocrmypdf (skipped if tools not installed) ---"
 
-if command -v ocrmypdf >/dev/null 2>&1 && command -v pdftotext >/dev/null 2>&1; then
+if command -v ocrmypdf >/dev/null 2>&1; then
   # Find a real PDF for testing (use existing test file if available)
   test_pdf=""
   for candidate in /usr/share/doc/*/copyright \
                    "$REPO_ROOT/tests/fixtures/"*.pdf \
+                   "$REPO_ROOT/tests/docs/README-PDF.pdf" \
                    /tmp/test_ocr_input.pdf; do
     if [ -f "$candidate" ] && file --mime-type -b "$candidate" 2>/dev/null | grep -q "application/pdf"; then
       test_pdf="$candidate"
@@ -304,10 +305,8 @@ if command -v ocrmypdf >/dev/null 2>&1 && command -v pdftotext >/dev/null 2>&1; 
   done
 
   if [ -n "$test_pdf" ]; then
-    storage_dir="$TEST_DIR/ocr_storage"
-
     # First run: fresh OCR
-    output=$(echo "{\"filePath\":\"$test_pdf\",\"pluginStorage\":\"$storage_dir\"}" \
+    output=$(echo "{\"filePath\":\"$test_pdf\"}" \
       | "$PLUGIN_DIR/main.sh" 2>/dev/null)
     exit_code=$?
     assert_exit_code "main.sh exits with 0 on success" "0" "$exit_code"
@@ -323,39 +322,6 @@ if command -v ocrmypdf >/dev/null 2>&1 && command -v pdftotext >/dev/null 2>&1; 
     fi
 
     assert_json_field_type "ocrText is string" "$output" "ocrText" "string"
-    assert_json_field_type "pageCount is number" "$output" "pageCount" "number"
-    assert_json_field_type "wasCached is boolean" "$output" "wasCached" "boolean"
-    assert_json_field_type "outputPdf is string" "$output" "outputPdf" "string"
-    assert_json_field "wasCached is false on first run" "$output" "wasCached" "false"
-
-    output_pdf=$(echo "$output" | jq -r '.outputPdf')
-    TOTAL=$((TOTAL + 1))
-    if [ -f "$output_pdf" ]; then
-      echo "  PASS: outputPdf file exists at $output_pdf"
-      PASS=$((PASS + 1))
-    else
-      echo "  FAIL: outputPdf file does not exist: $output_pdf"
-      FAIL=$((FAIL + 1))
-    fi
-
-    # Verify output is inside pluginStorage
-    TOTAL=$((TOTAL + 1))
-    resolved_storage=$(readlink -f "$storage_dir")
-    if [[ "$output_pdf" == "$resolved_storage"/* ]]; then
-      echo "  PASS: outputPdf is inside pluginStorage"
-      PASS=$((PASS + 1))
-    else
-      echo "  FAIL: outputPdf is outside pluginStorage: $output_pdf"
-      FAIL=$((FAIL + 1))
-    fi
-
-    # Second run: should use cache
-    output2=$(echo "{\"filePath\":\"$test_pdf\",\"pluginStorage\":\"$storage_dir\"}" \
-      | "$PLUGIN_DIR/main.sh" 2>/dev/null)
-    exit_code=$?
-    assert_exit_code "main.sh exits with 0 on cache hit" "0" "$exit_code"
-    assert_json_field "wasCached is true on second run" "$output2" "wasCached" "true"
-    assert_json_field "outputPdf is same on cache hit" "$output2" "outputPdf" "$output_pdf"
   else
     echo "  SKIP: no test PDF available — skipping OCR integration tests"
   fi

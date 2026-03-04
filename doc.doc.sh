@@ -286,6 +286,20 @@ main() {
   done
   plugins=("${ordered_plugins[@]}")
 
+  # Validate that all active plugins are installed
+  for p in "${plugins[@]}"; do
+    local p_descriptor="$PLUGIN_DIR/$p/descriptor.json"
+    local p_installed_sh="$PLUGIN_DIR/$p/installed.sh"
+    if [ -x "$p_installed_sh" ]; then
+      local install_check
+      install_check=$(bash "$p_installed_sh" 2>/dev/null | jq -r '.installed // "true"' 2>/dev/null) || install_check="false"
+      if [ "$install_check" = "false" ]; then
+        echo "Error: Plugin '$p' is active but not installed. Run: $(basename "$0") list --plugin $p --commands to see install options." >&2
+        exit 1
+      fi
+    fi
+  done
+
   # Split include/exclude args into MIME criteria and path criteria.
   # Path criteria: contain '**' (recursive globs like **/2024/**) or have no '/'
   # MIME criteria: contain '/' but not '**' (e.g., text/plain, image/*, text/*)
