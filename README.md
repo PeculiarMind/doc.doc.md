@@ -89,6 +89,38 @@ Filter files using powerful include/exclude logic:
 - Same logic applies to `--exclude` parameters
 - Auto-detects filter types: file extensions (`.pdf`), glob patterns (`**/2024/**`), or MIME types (`application/pdf`)
 
+#### MIME Type Filtering
+
+Criteria containing `/` (but not `**`) are treated as MIME type criteria, evaluated against the MIME type detected by the `file` plugin:
+
+```bash
+# Include only plain-text files
+./doc.doc.sh process \
+  --input-directory /path/to/documents \
+  --output-directory /path/to/output \
+  --include "text/plain"
+
+# Exclude all image files using a wildcard MIME pattern
+./doc.doc.sh process \
+  --input-directory /path/to/documents \
+  --output-directory /path/to/output \
+  --exclude "image/*"
+
+# Combine MIME type and extension filters
+./doc.doc.sh process \
+  --input-directory /path/to/documents \
+  --output-directory /path/to/output \
+  --include "application/pdf,.docx" \
+  --exclude "image/*"
+```
+
+**MIME filter behaviour:**
+- Wildcard patterns are supported: `image/*` matches `image/png`, `image/jpeg`, etc.
+- Files that do not pass the MIME filter are **silently skipped** (no output, no error)
+- MIME detection requires the `file` plugin to be installed and active; if it is not, an error is raised and processing stops
+
+> **Note:** The `file` plugin always runs first in the processing chain to ensure MIME type information is available for all subsequent filters and plugins.
+
 ### Example Workflow
 
 **Input Directory:**
@@ -171,8 +203,8 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 
 ### Built-in Plugins
 
+- **file**: Detects MIME types using the standard `file` command — **always runs first** in the processing chain; must be installed and active
 - **stat**: Extracts file system metadata (size, owner, timestamps)
-- **file**: Detects MIME types using the standard `file` command
 
 ### Plugin Architecture
 
