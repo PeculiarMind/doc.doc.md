@@ -23,12 +23,13 @@ _MIME_EXCLUDE_ARGS=()
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") process -d <input-dir> [OPTIONS]
+Usage: $(basename "$0") <command> [OPTIONS]
 
 Commands:
   process    Process files in the input directory through plugins
+  list       List information about plugins
 
-Options:
+process Options:
   -d <dir>   Input directory to process (required)
   -i <criteria>  Include filter criteria (repeatable)
                   Comma-separated values are ORed; multiple -i flags are ANDed
@@ -36,13 +37,90 @@ Options:
   -e <criteria>  Exclude filter criteria (repeatable)
                   Comma-separated values are ORed; multiple -e flags are ANDed
                   Examples: -e ".log" -e "**/temp/**"
+
+list Options:
+  --plugin <name>    Name of the plugin to inspect (required with --commands)
+  --commands         List all commands declared by the specified plugin
+
   --help     Show this help message
 
 Examples:
   $(basename "$0") process -d /path/to/documents
   $(basename "$0") process -d /path/to/documents -i ".pdf,.txt"
   $(basename "$0") process -d /path/to/documents -i ".pdf" -e "**/temp/**"
+  $(basename "$0") list --plugin stat --commands
 EOF
+}
+
+# --- List command ---
+
+cmd_list() {
+  local plugin_name=""
+  local show_commands=false
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --plugin)
+        [ $# -ge 2 ] || { echo "Error: --plugin requires an argument" >&2; exit 1; }
+        plugin_name="$2"
+        shift 2
+        ;;
+      --commands)
+        show_commands=true
+        shift
+        ;;
+      --help)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate flag combinations
+  if [ -n "$plugin_name" ] && [ "$show_commands" = false ]; then
+    echo "Error: --plugin requires --commands to be specified" >&2
+    exit 1
+  fi
+
+  if [ "$show_commands" = true ] && [ -z "$plugin_name" ]; then
+    echo "Error: --commands requires --plugin <name> to be specified" >&2
+    exit 1
+  fi
+
+  if [ "$show_commands" = true ] && [ -n "$plugin_name" ]; then
+    local plugin_dir="$PLUGIN_DIR/$plugin_name"
+    local descriptor="$plugin_dir/descriptor.json"
+
+    # Validate plugin directory exists
+    if [ ! -d "$plugin_dir" ]; then
+      echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+      exit 1
+    fi
+
+    # Validate descriptor exists and is valid JSON
+    if [ ! -f "$descriptor" ]; then
+      echo "Error: Plugin descriptor not found: $descriptor" >&2
+      exit 1
+    fi
+
+    if ! jq empty "$descriptor" 2>/dev/null; then
+      echo "Error: Plugin descriptor is not valid JSON: $descriptor" >&2
+      exit 1
+    fi
+
+    # Extract and print commands sorted alphabetically
+    jq -r '.commands | to_entries[] | "\(.key)\t\(.value.description)"' "$descriptor" \
+      | sort
+    exit 0
+  fi
+
+  # No recognized sub-command given
+  usage >&2
+  exit 1
 }
 
 # --- Main processing ---
@@ -111,10 +189,19 @@ main() {
   local command="$1"
   shift
 
-  if [ "$command" != "process" ]; then
-    echo "Error: Unknown command '$command'. Use --help for usage." >&2
-    exit 1
-  fi
+  case "$command" in
+    process)
+      : # fall through to process logic below
+      ;;
+    list)
+      cmd_list "$@"
+      exit $?
+      ;;
+    *)
+      echo "Error: Unknown command '$command'. Use --help for usage." >&2
+      exit 1
+      ;;
+  esac
 
   local input_dir=""
   local -a include_args=()
