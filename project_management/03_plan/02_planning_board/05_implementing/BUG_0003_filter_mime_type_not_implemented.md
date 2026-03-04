@@ -5,7 +5,7 @@
 - **Type:** Bug
 - **Created at:** 2026-03-04
 - **Created by:** tester.agent
-- **Status:** Backlog
+- **Status:** Implementing
 - **Assigned to:** developer.agent
 
 ## Overview
