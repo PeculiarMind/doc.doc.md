@@ -61,6 +61,13 @@ process_file() {
       # Merge plugin output into combined result
       combined_result=$(echo "$combined_result" "$plugin_output" | jq -s '.[0] * .[1]')
     else
+      # If the file plugin fails and MIME criteria are active, skip this file (fail-closed)
+      if [ "$plugin_name" = "file" ]; then
+        local _has_mime=false
+        [ ${#_MIME_INCLUDE_ARGS[@]} -gt 0 ] && _has_mime=true
+        [ ${#_MIME_EXCLUDE_ARGS[@]} -gt 0 ] && _has_mime=true
+        [ "$_has_mime" = false ] || return 0
+      fi
       # Graceful degradation: continue with partial results
       continue
     fi
