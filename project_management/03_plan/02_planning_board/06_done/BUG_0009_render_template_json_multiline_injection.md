@@ -5,7 +5,7 @@
 - **Type:** Bug
 - **Created at:** 2026-03-10
 - **Created by:** security.agent
-- **Status:** BACKLOG
+- **Status:** DONE
 - **Assigned to:** developer.agent
 
 ## TOC
@@ -87,13 +87,13 @@ This approach:
 
 ## Acceptance Criteria
 
-- [ ] A document whose first line is `filePath=/evil` does NOT cause `{{filePath}}` in the template to be substituted with `/evil`
-- [ ] `{{documentText}}` is substituted with the full multiline markitdown output (resolves DEBTR_003)
-- [ ] `{{ocrText}}` is substituted with the full multiline OCR output (resolves DEBTR_003)
-- [ ] Single-line placeholder substitutions continue to work correctly (regression)
-- [ ] Template variables with no matching JSON key are left unchanged (or substituted with empty string per current behavior)
-- [ ] No shell injection is possible through multiline values (bash parameter expansion remains the substitution mechanism; no `eval`)
-- [ ] ShellCheck passes on the modified function
+- [x] A document whose first line is `filePath=/evil` does NOT cause `{{filePath}}` in the template to be substituted with `/evil`
+- [x] `{{documentText}}` is substituted with the full multiline markitdown output (resolves DEBTR_003)
+- [x] `{{ocrText}}` is substituted with the full multiline OCR output (resolves DEBTR_003)
+- [x] Single-line placeholder substitutions continue to work correctly (regression)
+- [x] Template variables with no matching JSON key are left unchanged (or substituted with empty string per current behavior)
+- [x] No shell injection is possible through multiline values (bash parameter expansion remains the substitution mechanism; no `eval`)
+- [x] ShellCheck passes on the modified function
 
 ## Dependencies
 
@@ -105,3 +105,13 @@ This approach:
 - Technical Debt: [DEBTR_003](DEBTR_003_render_template_json_multiline_values.md) — same root cause, functional manifestation
 - Security Requirement: [REQ_SEC_004](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_004_template_injection_prevention.md) — template injection prevention
 - Feature: [FEATURE_0019](../06_done/FEATURE_0019_process_output_directory.md)
+
+## Workflow Assessment Log
+
+- **Step 3 (TDD):** tester.agent — Tests in test_bug_0009.sh (12 assertions) covering safe jq pattern, injection prevention, single-line regression, unmatched placeholders
+- **Step 4 (Implementation):** developer.agent — Replaced line-by-line `to_entries[]` parsing with per-key extraction via `keys[]` + `jq --arg`. Also resolves DEBTR_003.
+- **Step 5 (Tester Assessment):** tester.agent — All 12 tests pass. Template substitution works correctly for both single-line and multiline values.
+- **Step 6 (Architect Assessment):** architect.agent — Fix aligns with ARC-0002 (Template Processing Concept). Per-key extraction preserves arbitrary string values correctly.
+- **Step 7 (Security Assessment):** security.agent — Fix prevents template variable injection via multiline document content. No `eval`, no code execution risk. Compliant with REQ_SEC_004.
+- **Step 8 (License Assessment):** license.agent — No new dependencies. No license impact.
+- **Step 9 (Documentation Assessment):** documentation.agent — No user-facing documentation changes needed.

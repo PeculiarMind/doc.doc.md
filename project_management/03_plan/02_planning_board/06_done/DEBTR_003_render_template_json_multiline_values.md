@@ -1,7 +1,7 @@
 # render_template_json Truncates Multiline Plugin Output Values
 
 - **ID:** DEBTR_003
-- **Status:** Open
+- **Status:** DONE
 - **Created at:** 2026-03-06
 - **Created by:** architect.agent
 - **Priority:** Medium
@@ -89,12 +89,12 @@ render_template_json() {
 ```
 
 Acceptance criteria for remediation:
-- [ ] `render_template_json` correctly substitutes `{{documentText}}` with the full multiline markitdown output
-- [ ] `render_template_json` correctly substitutes `{{ocrText}}` with the full multiline OCR output
-- [ ] Single-line placeholder substitutions continue to work correctly (regression)
-- [ ] No shell injection is possible through multiline values (bash parameter expansion remains the substitution mechanism; no `eval`)
-- [ ] Existing tests continue to pass
+- [x] `render_template_json` correctly substitutes `{{documentText}}` with the full multiline markitdown output
+- [x] `render_template_json` correctly substitutes `{{ocrText}}` with the full multiline OCR output
+- [x] Single-line placeholder substitutions continue to work correctly (regression)
+- [x] No shell injection is possible through multiline values (bash parameter expansion remains the substitution mechanism; no `eval`)
+- [x] Existing tests continue to pass
 
 ## Resolution
 
-_Pending._
+Resolved as part of BUG_0009 fix. The `render_template_json()` function was rewritten to use per-key extraction via `jq -r 'keys[]'` and individual value extraction via `jq -r --arg k "$key" '.[$k] // empty'`. This preserves multiline values correctly. All acceptance criteria verified by tests in `tests/test_bug_0009.sh`.
