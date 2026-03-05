@@ -274,6 +274,25 @@ Extracts file system statistics using the `stat` command.
 | `fileModified` | string | Last modification date (ISO 8601) |
 | `fileMetadataChanged` | string | Last metadata change date (ISO 8601) |
 
+#### `markitdown` — MS Office to Markdown Conversion
+
+Converts MS Office documents to markdown text using the `markitdown` Python library (maintained by Microsoft). Requires the `file` plugin (uses `mimeType` to gate on supported types).
+
+**Supported input types:** `.docx`, `.xlsx`, `.pptx` (OOXML) and `.doc`, `.xls`, `.ppt` (legacy binary formats)
+
+| Output field | Type | Description |
+|-------------|------|-------------|
+| `documentText` | string | Extracted document content as markdown |
+
+Install the `markitdown` plugin before activating it:
+
+```bash
+./doc.doc.sh install --plugin markitdown
+./doc.doc.sh activate --plugin markitdown
+```
+
+> **Note:** `markitdown` is installed as a Python package via `pip`. Python 3 and pip must be available on your system.
+
 #### `ocrmypdf` — Text Extraction via OCR
 
 Extracts text from PDFs and images using OCRmyPDF. Requires the `file` plugin (uses `mimeType` to determine how to process the file).
@@ -309,7 +328,7 @@ Shows which plugins depend on which. For example, `ocrmypdf` depends on `file` (
 
 | Type | Examples | Trust Level |
 |------|----------|------------|
-| **Built-in** | `file`, `stat`, `ocrmypdf` | Maintained by the doc.doc.md core team; included in this repository |
+| **Built-in** | `file`, `stat`, `ocrmypdf`, `markitdown` | Maintained by the doc.doc.md core team; included in this repository |
 | **Third-party** | Any plugin not in this repository | Created by the community; varying trust level; review before use |
 
 #### What Plugins Can Do
@@ -364,6 +383,7 @@ Template variables use `{{variableName}}` syntax in lowerCamelCase. Variable nam
 | `{{fileModified}}` | stat | Last modification date |
 | `{{fileMetadataChanged}}` | stat | Last metadata change date |
 | `{{ocrText}}` | ocrmypdf | Extracted OCR text |
+| `{{documentText}}` | markitdown | Extracted markdown content from MS Office documents |
 
 Custom plugins add their own variables using the same naming convention.
 
@@ -452,6 +472,8 @@ Process files in a directory through active plugins.
 ```
 ./doc.doc.sh list plugins [active|inactive]
 ./doc.doc.sh list --plugin <name> --commands
+./doc.doc.sh list parameters
+./doc.doc.sh list --plugin <name> --parameters
 ```
 
 | Form | Description |
@@ -460,6 +482,8 @@ Process files in a directory through active plugins.
 | `list plugins active` | Active plugins only |
 | `list plugins inactive` | Inactive plugins only |
 | `list --plugin <name> --commands` | Commands declared by a specific plugin |
+| `list parameters` | All input/output parameters for every plugin |
+| `list --plugin <name> --parameters` | Input/output parameters for a specific plugin |
 
 ---
 

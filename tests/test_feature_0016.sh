@@ -33,7 +33,6 @@ trap cleanup EXIT
 make_plugin() {
   local name="$1"
   local active="${2:-true}"
-  local deps_json="${3:-[]}"
   local dir="$PLUGIN_DIR/$name"
   rm -rf "$dir"
   mkdir -p "$dir"
@@ -43,8 +42,59 @@ make_plugin() {
   "version": "1.0.0",
   "description": "Test plugin $name",
   "active": $active,
-  "dependencies": $deps_json,
   "commands": {}
+}
+EOF
+}
+
+# make_plugin_with_io creates a plugin with process input/output params for dependency testing
+make_plugin_with_io() {
+  local name="$1"
+  local active="${2:-true}"
+  local input_params="${3:-}"   # space-separated param names
+  local output_params="${4:-}"  # space-separated param names
+  local dir="$PLUGIN_DIR/$name"
+  rm -rf "$dir"
+  mkdir -p "$dir"
+
+  local input_json="{}"
+  if [ -n "$input_params" ]; then
+    input_json="{"
+    local first=true
+    for p in $input_params; do
+      [ "$first" = true ] || input_json+=","
+      input_json+="\"$p\":{\"type\":\"string\",\"description\":\"$p\",\"required\":true}"
+      first=false
+    done
+    input_json+="}"
+  fi
+
+  local output_json="{}"
+  if [ -n "$output_params" ]; then
+    output_json="{"
+    local first=true
+    for p in $output_params; do
+      [ "$first" = true ] || output_json+=","
+      output_json+="\"$p\":{\"type\":\"string\",\"description\":\"$p\"}"
+      first=false
+    done
+    output_json+="}"
+  fi
+
+  cat > "$dir/descriptor.json" <<EOF
+{
+  "name": "$name",
+  "version": "1.0.0",
+  "description": "Test plugin $name",
+  "active": $active,
+  "commands": {
+    "process": {
+      "description": "test",
+      "command": "main.sh",
+      "input": $input_json,
+      "output": $output_json
+    }
+  }
 }
 EOF
 }
@@ -113,8 +163,8 @@ echo ""
 # =========================================
 echo "--- Group 1: Basic tree output ---"
 
-make_plugin "$TEST_PLUGIN_ROOT" "true" '[]'
-make_plugin "$TEST_PLUGIN_CHILD" "false" "[]"
+make_plugin "$TEST_PLUGIN_ROOT" "true"
+make_plugin "$TEST_PLUGIN_CHILD" "false"
 
 output=$(bash "$CLI" tree 2>&1)
 exit_code=$?
@@ -176,8 +226,8 @@ fi
 echo ""
 echo "--- Group 4: ANSI colors ---"
 
-make_plugin "$TEST_PLUGIN_ROOT" "true" "[]"
-make_plugin "$TEST_PLUGIN_CHILD" "false" "[]"
+make_plugin "$TEST_PLUGIN_ROOT" "true"
+make_plugin "$TEST_PLUGIN_CHILD" "false"
 
 output=$(bash "$CLI" tree 2>&1)
 # Active plugins should have green ANSI code \033[32m
@@ -207,8 +257,12 @@ fi
 echo ""
 echo "--- Group 5: Circular dependency ---"
 
-make_plugin "$TEST_PLUGIN_CIRC_A" "true" "[\"$TEST_PLUGIN_CIRC_B\"]"
-make_plugin "$TEST_PLUGIN_CIRC_B" "true" "[\"$TEST_PLUGIN_CIRC_A\"]"
+# Create circular dependency via I/O matching:
+# CIRC_A outputs "param_a", CIRC_B inputs "param_a" -> CIRC_B depends on CIRC_A
+# CIRC_B outputs "param_b", CIRC_A inputs "param_b" -> CIRC_A depends on CIRC_B
+# This creates a cycle: CIRC_A <-> CIRC_B
+make_plugin_with_io "$TEST_PLUGIN_CIRC_A" "true" "param_b" "param_a"
+make_plugin_with_io "$TEST_PLUGIN_CIRC_B" "true" "param_a" "param_b"
 
 output=$(bash "$CLI" tree 2>&1)
 exit_code=$?
@@ -219,20 +273,22 @@ assert_contains "circular dep error mentions circular" "ircular" "$output"
 rm -rf "$PLUGIN_DIR/$TEST_PLUGIN_CIRC_A" "$PLUGIN_DIR/$TEST_PLUGIN_CIRC_B"
 
 # =========================================
-# Group 6: Missing dependency marker
+# Group 6: No spurious [missing] with unresolved inputs
 # =========================================
 echo ""
-echo "--- Group 6: Missing dependency ---"
+echo "--- Group 6: No spurious missing marker ---"
 
-make_plugin "$TEST_PLUGIN_ROOT" "true" '["nonexistent_dep_xyz"]'
+# A plugin with an input that no other plugin provides should not show [missing]
+make_plugin_with_io "$TEST_PLUGIN_ROOT" "true" "unresolvable_input_xyz" ""
 
 output=$(bash "$CLI" tree 2>&1)
 exit_code=$?
-assert_exit_code "missing dep exits 0" "0" "$exit_code"
-assert_contains "missing dep shows [missing] marker" "[missing]" "$output"
+assert_exit_code "unresolved input exits 0" "0" "$exit_code"
+assert_contains "plugin still appears in tree" "$TEST_PLUGIN_ROOT" "$output"
+assert_not_contains "no [missing] marker for unresolved input" "[missing]" "$output"
 
 # Reset
-make_plugin "$TEST_PLUGIN_ROOT" "true" "[]"
+make_plugin "$TEST_PLUGIN_ROOT" "true"
 
 # =========================================
 # Group 7: Help text

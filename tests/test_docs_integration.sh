@@ -16,10 +16,14 @@ TOTAL=0
 
 # Cleanup trap for temp files
 _STDERR_TMP=""
+OUTPUT_DIR=""
 cleanup() {
   [ -n "${_STDERR_TMP:-}" ] && rm -f "$_STDERR_TMP"
+  [ -n "${OUTPUT_DIR:-}" ] && [ -d "$OUTPUT_DIR" ] && rm -rf "$OUTPUT_DIR"
 }
 trap cleanup EXIT
+
+OUTPUT_DIR=$(mktemp -d)
 
 # ---------------------------------------------------------------------------
 # Test helper functions
@@ -166,7 +170,7 @@ echo "  Integration Test Suite — tests/docs"
 echo "============================================"
 echo ""
 
-output=$("$DOC_DOC_SH" process -d "$DOCS_DIR" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" 2>/dev/null)
 main_exit=$?
 
 # ---------------------------------------------------------------------------
@@ -204,22 +208,22 @@ echo ""
 echo "--- Group 3: Extension/glob filter ---"
 
 assert_json_count "include .pdf → exactly 1 result" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i ".pdf" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i ".pdf" 2>/dev/null)"
 
 assert_json_count "include .gif → exactly 1 result" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i ".gif" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i ".gif" 2>/dev/null)"
 
 assert_json_count "include .jpg → exactly 1 result" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i ".jpg" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i ".jpg" 2>/dev/null)"
 
 assert_json_count "include .png → exactly 1 result" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i ".png" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i ".png" 2>/dev/null)"
 
 assert_json_count "exclude .gif,.jpg,.png → exactly 1 result (PDF)" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -e ".gif,.jpg,.png" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -e ".gif,.jpg,.png" 2>/dev/null)"
 
 assert_json_count "include .gif,.jpg,.png → exactly 3 results" "3" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i ".gif,.jpg,.png" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i ".gif,.jpg,.png" 2>/dev/null)"
 
 echo ""
 
@@ -230,16 +234,16 @@ echo ""
 echo "--- Group 4: MIME type filter (BUG_0003) ---"
 
 assert_json_count "include application/pdf → exactly 1 result" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i "application/pdf" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i "application/pdf" 2>/dev/null)"
 
 assert_json_count "include image/jpeg → exactly 1 result" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i "image/jpeg" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i "image/jpeg" 2>/dev/null)"
 
 assert_json_count "include image/* → exactly 3 results (GIF, JPG, PNG)" "3" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -i "image/*" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i "image/*" 2>/dev/null)"
 
 assert_json_count "exclude image/* → exactly 1 result (only PDF remains)" "1" \
-  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -e "image/*" 2>/dev/null)"
+  "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -e "image/*" 2>/dev/null)"
 
 echo ""
 
@@ -250,7 +254,7 @@ echo ""
 echo "--- Group 5: ocrmypdf inactive (BUG_0004 fixed) ---"
 
 _STDERR_TMP=$(mktemp)
-output5=$("$DOC_DOC_SH" process -d "$DOCS_DIR" 2>"$_STDERR_TMP")
+output5=$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" 2>"$_STDERR_TMP")
 stderr5=$(cat "$_STDERR_TMP")
 
 assert_not_contains "stderr does NOT contain ocrmypdf failure (plugin inactive)" \

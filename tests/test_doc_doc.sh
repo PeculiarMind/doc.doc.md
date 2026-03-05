@@ -12,12 +12,16 @@ FILTER_PY="$REPO_ROOT/doc.doc.md/components/filter.py"
 PASS=0
 FAIL=0
 TOTAL=0
+OUTPUT_DIR=""
 
 # Cleanup trap
 cleanup() {
   if [ -n "${TEST_DIR:-}" ] && [ -d "$TEST_DIR" ]; then
     chmod -R u+rw "$TEST_DIR" 2>/dev/null || true
     rm -rf "$TEST_DIR"
+  fi
+  if [ -n "${OUTPUT_DIR:-}" ] && [ -d "$OUTPUT_DIR" ]; then
+    rm -rf "$OUTPUT_DIR"
   fi
 }
 trap cleanup EXIT
@@ -73,6 +77,7 @@ assert_contains() {
 
 # Setup: create test directory structure
 TEST_DIR=$(mktemp -d)
+OUTPUT_DIR=$(mktemp -d)
 mkdir -p "$TEST_DIR/2024" "$TEST_DIR/2025" "$TEST_DIR/temp"
 echo "Hello, World!" > "$TEST_DIR/2024/doc.txt"
 echo '{"key": "value"}' > "$TEST_DIR/2025/data.json"
@@ -135,7 +140,7 @@ assert_contains "non-existent dir shows error" "does not exist" "$output"
 echo ""
 echo "--- CLI: unknown option ---"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" --unknown 2>&1)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" --unknown 2>&1)
 exit_code=$?
 assert_exit_code "unknown option exits with 1" "1" "$exit_code"
 assert_contains "unknown option shows error" "Unknown option" "$output"
@@ -224,7 +229,7 @@ assert_eq "empty input produces empty output" "" "$output"
 echo ""
 echo "--- Integration: process all files ---"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process exits with 0" "0" "$exit_code"
 
@@ -261,21 +266,21 @@ done
 echo ""
 echo "--- Integration: process with include filter ---"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i ".txt" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i ".txt" 2>/dev/null)
 file_count=$(echo "$output" | jq 'length')
 assert_eq "include .txt returns 2 files" "2" "$file_count"
 
 echo ""
 echo "--- Integration: process with exclude filter ---"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -e ".log" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -e ".log" 2>/dev/null)
 file_count=$(echo "$output" | jq 'length')
 assert_eq "exclude .log returns 5 files" "5" "$file_count"
 
 echo ""
 echo "--- Integration: process with AND include filters ---"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i ".txt" -i "**/2024/**" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i ".txt" -i "**/2024/**" 2>/dev/null)
 file_count=$(echo "$output" | jq 'length')
 assert_eq "include .txt AND **/2024/** returns 1 file" "1" "$file_count"
 
@@ -286,16 +291,17 @@ echo ""
 echo "--- Integration: empty dir returns empty array ---"
 
 empty_dir=$(mktemp -d)
-output=$("$DOC_DOC_SH" process -d "$empty_dir" 2>/dev/null)
+empty_out=$(mktemp -d)
+output=$("$DOC_DOC_SH" process -d "$empty_dir" -o "$empty_out" 2>/dev/null)
 exit_code=$?
-rmdir "$empty_dir"
+rmdir "$empty_dir" "$empty_out"
 assert_exit_code "empty dir exits with 0" "0" "$exit_code"
 assert_eq "empty dir returns []" "[]" "$output"
 
 echo ""
 echo "--- Integration: filter returns no matches ---"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i ".xyz" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i ".xyz" 2>/dev/null)
 exit_code=$?
 assert_exit_code "no matches exits with 0" "0" "$exit_code"
 assert_eq "no matches returns []" "[]" "$output"

@@ -227,13 +227,14 @@ echo ""
 echo "--- Integration: doc.doc.sh process -i text/plain ---"
 
 INT_DIR=$(mktemp -d)
+INT_OUT=$(mktemp -d)
 echo "plain text file" > "$INT_DIR/note.txt"
 echo "markdown file"   > "$INT_DIR/readme.md"
 printf '\x89PNG\r\n\x1a\n' > "$INT_DIR/icon.png"
 
-output=$("$DOC_DOC_SH" process -d "$INT_DIR" -i "text/plain" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$INT_DIR" -o "$INT_OUT" -i "text/plain" 2>/dev/null)
 exit_code=$?
-rm -rf "$INT_DIR"
+rm -rf "$INT_DIR" "$INT_OUT"
 
 assert_exit_code "process -i text/plain exits 0" "0" "$exit_code"
 

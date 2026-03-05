@@ -35,7 +35,12 @@ Commands:
   tree         Display a dependency tree of all plugins
 
 process Options:
-  -d <dir>   Input directory to process (required)
+  -d <dir>, --input-directory <dir>
+                 Input directory to process (required)
+  -o <dir>, --output-directory <dir>
+                 Output directory for sidecar .md files (required)
+  -t <file>, --template <file>
+                 Markdown template file (optional, defaults to doc.doc.md/templates/default.md)
   -i <criteria>  Include filter criteria (repeatable)
                   Comma-separated values are ORed; multiple -i flags are ANDed
                   Examples: -i ".pdf,.txt" -i "**/2024/**"
@@ -47,8 +52,10 @@ list Options:
   plugins            List all plugins with activation status
   plugins active     List only active plugins
   plugins inactive   List only inactive plugins
-  --plugin <name>    Name of the plugin to inspect (required with --commands)
+  parameters         List all parameters for all plugins
+  --plugin <name>    Name of the plugin to inspect (required with --commands or --parameters)
   --commands         List all commands declared by the specified plugin
+  --parameters       List all parameters for the specified plugin
 
 activate Options:
   --plugin <name>, -p <name>   Name of the plugin to activate (required)
@@ -69,10 +76,13 @@ tree Options:
   --help     Show this help message
 
 Examples:
-  $(basename "$0") process -d /path/to/documents
-  $(basename "$0") process -d /path/to/documents -i ".pdf,.txt"
-  $(basename "$0") process -d /path/to/documents -i ".pdf" -e "**/temp/**"
+  $(basename "$0") process -d /path/to/documents -o /path/to/output
+  $(basename "$0") process -d /path/to/documents -o /path/to/output -i ".pdf,.txt"
+  $(basename "$0") process -d /path/to/documents -o /path/to/output -i ".pdf" -e "**/temp/**"
+  $(basename "$0") process -d /path/to/documents -o /path/to/output -t /path/to/template.md
   $(basename "$0") list --plugin stat --commands
+  $(basename "$0") list --plugin stat --parameters
+  $(basename "$0") list parameters
   $(basename "$0") list plugins
   $(basename "$0") list plugins active
   $(basename "$0") list plugins inactive
@@ -465,7 +475,7 @@ Usage: $(basename "$0") tree
 
 Renders a dependency tree of all plugins showing activation status.
 Active plugins are shown in green; inactive plugins in red.
-Plugins declared as dependencies appear as children under their consumers.
+Dependencies are derived from matching plugin process output parameters to input parameters.
 
 Exit codes:
   0   Success
@@ -481,10 +491,14 @@ EOF
     return 0
   fi
 
-  # Build dependency map: for each plugin, load its dependencies array
-  declare -A plugin_deps   # plugin_name -> space-separated dep names
-  declare -A plugin_active # plugin_name -> true/false
+  # Build dependency map: derive dependencies from output→input parameter name matching.
+  # Plugin A depends on plugin B if any of B's process.output parameter names
+  # appear in A's process.input parameter names.
+  declare -A plugin_deps    # plugin_name -> space-separated dep names
+  declare -A plugin_active  # plugin_name -> true/false
+  declare -A plugin_outputs # plugin_name -> space-separated output param names
 
+  # First pass: collect active status and output parameter names
   for plugin_name in "${all_plugins[@]}"; do
     local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
     [ -f "$descriptor" ] || continue
@@ -492,9 +506,34 @@ EOF
     active=$(get_plugin_active_status "$descriptor")
     plugin_active["$plugin_name"]="$active"
 
-    local deps_json
-    deps_json=$(jq -r '(.dependencies // []) | join(" ")' "$descriptor" 2>/dev/null) || deps_json=""
-    plugin_deps["$plugin_name"]="$deps_json"
+    local outputs
+    outputs=$(jq -r '(.commands.process.output // {}) | keys[]' "$descriptor" 2>/dev/null | tr '\n' ' ') || outputs=""
+    plugin_outputs["$plugin_name"]="${outputs% }"
+  done
+
+  # Second pass: for each plugin, find which other plugins provide its inputs
+  for plugin_name in "${all_plugins[@]}"; do
+    local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
+    [ -f "$descriptor" ] || continue
+
+    local inputs
+    inputs=$(jq -r '(.commands.process.input // {}) | keys[]' "$descriptor" 2>/dev/null) || inputs=""
+
+    local deps=""
+    for input_param in $inputs; do
+      for other_plugin in "${all_plugins[@]}"; do
+        [ "$other_plugin" = "$plugin_name" ] && continue
+        local other_outputs="${plugin_outputs[$other_plugin]:-}"
+        for out_param in $other_outputs; do
+          if [ "$input_param" = "$out_param" ]; then
+            if ! echo " $deps " | grep -q " $other_plugin "; then
+              deps="${deps:+$deps }$other_plugin"
+            fi
+          fi
+        done
+      done
+    done
+    plugin_deps["$plugin_name"]="$deps"
   done
 
   # Detect circular dependencies using DFS
@@ -680,8 +719,45 @@ cmd_list() {
     return 0
   fi
 
+  # Handle 'parameters' sub-command (FEATURE_0018): list parameters for all plugins
+  if [ "${1:-}" = "parameters" ]; then
+    if [ $# -gt 1 ]; then
+      echo "Error: Too many arguments for 'list parameters'. Use: list parameters" >&2
+      exit 1
+    fi
+    local all_plugins
+    mapfile -t all_plugins < <(discover_all_plugins "$PLUGIN_DIR")
+    {
+      printf 'PLUGIN\tCOMMAND\tDIRECTION\tPARAMETER\tTYPE\tREQUIRED\tDEFAULT\tDESCRIPTION\n'
+      for plugin_name in "${all_plugins[@]}"; do
+        local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
+        [ -f "$descriptor" ] || continue
+        jq -r '
+          .name as $plugin |
+          .commands | to_entries[] |
+          .key as $cmd |
+          .value as $cmdval |
+          (
+            ($cmdval.input // {} | to_entries[] |
+              [$plugin, $cmd, "input", .key, .value.type,
+               (if .value.required then "required" else "optional" end),
+               (.value.default | if . != null then "default:\(.)" else "-" end),
+               .value.description]
+            ),
+            ($cmdval.output // {} | to_entries[] |
+              [$plugin, $cmd, "output", .key, .value.type, "-", "-",
+               .value.description]
+            )
+          ) | @tsv
+        ' "$descriptor" 2>/dev/null | sort
+      done
+    } | column -t -s $'\t'
+    return 0
+  fi
+
   local plugin_name=""
   local show_commands=false
+  local show_parameters=false
 
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -692,6 +768,10 @@ cmd_list() {
         ;;
       --commands)
         show_commands=true
+        shift
+        ;;
+      --parameters)
+        show_parameters=true
         shift
         ;;
       --help)
@@ -706,8 +786,13 @@ cmd_list() {
   done
 
   # Validate flag combinations
-  if [ -n "$plugin_name" ] && [ "$show_commands" = false ]; then
-    echo "Error: --plugin requires --commands to be specified" >&2
+  if [ "$show_parameters" = true ] && [ -z "$plugin_name" ]; then
+    echo "Error: --parameters requires --plugin <name> to be specified" >&2
+    exit 1
+  fi
+
+  if [ -n "$plugin_name" ] && [ "$show_commands" = false ] && [ "$show_parameters" = false ]; then
+    echo "Error: --plugin requires --commands or --parameters to be specified" >&2
     exit 1
   fi
 
@@ -743,9 +828,81 @@ cmd_list() {
     exit 0
   fi
 
+  if [ "$show_parameters" = true ] && [ -n "$plugin_name" ]; then
+    local plugin_dir="$PLUGIN_DIR/$plugin_name"
+    local descriptor="$plugin_dir/descriptor.json"
+
+    if [ ! -d "$plugin_dir" ]; then
+      echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+      exit 1
+    fi
+
+    if [ ! -f "$descriptor" ]; then
+      echo "Error: Plugin descriptor not found: $descriptor" >&2
+      exit 1
+    fi
+
+    if ! jq empty "$descriptor" 2>/dev/null; then
+      echo "Error: Plugin descriptor is not valid JSON: $descriptor" >&2
+      exit 1
+    fi
+
+    {
+      printf 'COMMAND\tDIRECTION\tPARAMETER\tTYPE\tREQUIRED\tDEFAULT\tDESCRIPTION\n'
+      jq -r '
+        .commands | to_entries[] |
+        .key as $cmd |
+        .value as $cmdval |
+        (
+          ($cmdval.input // {} | to_entries[] |
+            [$cmd, "input", .key, .value.type,
+             (if .value.required then "required" else "optional" end),
+             (.value.default | if . != null then "default:\(.)" else "-" end),
+             .value.description]
+          ),
+          ($cmdval.output // {} | to_entries[] |
+            [$cmd, "output", .key, .value.type, "-", "-",
+             .value.description]
+          )
+        ) | @tsv
+      ' "$descriptor" 2>/dev/null | sort
+    } | column -t -s $'\t'
+    exit 0
+  fi
+
   # No recognized sub-command given
   usage >&2
   exit 1
+}
+
+# --- Template rendering (FEATURE_0019) ---
+
+# render_template_json renders a template file replacing {{key}} placeholders
+# with values from the provided JSON string.
+render_template_json() {
+  local template="$1"
+  local result_json="$2"
+  local content
+  content="$(cat "$template")"
+
+  # Replace placeholders from JSON fields
+  while IFS= read -r line; do
+    local key="${line%%=*}"
+    local val="${line#*=}"
+    [ -n "$key" ] || continue
+    content="${content//\{\{${key}\}\}/${val}}"
+  done < <(echo "$result_json" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+
+  # Derive and replace fileName from filePath
+  local fp
+  fp=$(echo "$result_json" | jq -r '.filePath // empty')
+  if [ -n "$fp" ]; then
+    local fname
+    fname="$(basename "$fp")"
+    content="${content//\{\{fileName\}\}/${fname}}"
+  fi
+
+  printf '%s' "$content"
 }
 
 # --- Main processing ---
@@ -850,14 +1007,26 @@ main() {
   esac
 
   local input_dir=""
+  local output_dir=""
+  local template_file="$SCRIPT_DIR/doc.doc.md/templates/default.md"
   local -a include_args=()
   local -a exclude_args=()
 
   while [ $# -gt 0 ]; do
     case "$1" in
-      -d)
-        [ $# -ge 2 ] || { echo "Error: -d requires an argument" >&2; exit 1; }
+      -d|--input-directory)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
         input_dir="$2"
+        shift 2
+        ;;
+      -o|--output-directory)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        output_dir="$2"
+        shift 2
+        ;;
+      -t|--template)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        template_file="$2"
         shift 2
         ;;
       -i)
@@ -897,6 +1066,24 @@ main() {
     echo "Error: Input directory is not readable: $input_dir" >&2
     exit 1
   fi
+
+  # Validate output directory (required)
+  if [ -z "$output_dir" ]; then
+    echo "Error: Output directory is required (-o <dir>)" >&2
+    usage >&2
+    exit 1
+  fi
+
+  # Validate template file
+  if [ ! -f "$template_file" ]; then
+    echo "Error: Template file not found: $template_file" >&2
+    exit 1
+  fi
+
+  # Canonicalize and create output directory
+  mkdir -p "$output_dir" || { echo "Error: Cannot create output directory: $output_dir" >&2; exit 1; }
+  local canonical_out
+  canonical_out="$(readlink -f "$output_dir")"
 
   # Verify filter script exists
   if [ ! -f "$FILTER_SCRIPT" ]; then
@@ -994,7 +1181,7 @@ main() {
     exit 0
   fi
 
-  # Process each file through all plugins and stream results
+  # Process each file through all plugins, write sidecar .md files, stream JSON results
   # Track bracket state: print '[' only on first non-skipped result to handle
   # the case where all files are MIME-filtered out (need to print '[]' then).
   local first=true
@@ -1014,6 +1201,30 @@ main() {
       echo ","
     fi
     echo "$result"
+
+    # Write sidecar .md file to output directory
+    local relative_path="${file_path#${input_dir}/}"
+    local sidecar_path="${canonical_out}/${relative_path}.md"
+    local sidecar_dir
+    sidecar_dir="$(dirname "$sidecar_path")"
+
+    # Create sidecar dir first so readlink -f can canonicalize it
+    mkdir -p "$sidecar_dir"
+    local canonical_sidecar
+    canonical_sidecar="$(readlink -f "$sidecar_dir" 2>/dev/null)"
+    if [ -z "$canonical_sidecar" ]; then
+      echo "Error: Cannot resolve sidecar path for '$file_path'" >&2
+      continue
+    fi
+
+    # Boundary check: ensure sidecar stays within output_dir
+    if [[ "$canonical_sidecar" != "${canonical_out}"* ]]; then
+      echo "Error: path traversal detected for '$file_path'" >&2
+      continue
+    fi
+
+    render_template_json "$template_file" "$result" > "$sidecar_path"
+    echo "Processed: $file_path -> $sidecar_path" >&2
   done
 
   if [ "$printed_bracket" = false ]; then

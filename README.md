@@ -159,6 +159,8 @@ Each `.md` file contains metadata and content extracted from the original docume
 ./doc.doc.sh list plugins                    # List all available plugins
 ./doc.doc.sh list plugins active             # List active plugins only
 ./doc.doc.sh list plugins inactive           # List inactive plugins only
+./doc.doc.sh list parameters                 # List all parameters for every plugin
+./doc.doc.sh list --plugin <name> --parameters  # List parameters for a specific plugin
 ./doc.doc.sh activate --plugin <name>        # Activate a plugin
 ./doc.doc.sh deactivate --plugin <name>      # Deactivate a plugin
 ./doc.doc.sh install --plugin <name>         # Install plugin dependencies
@@ -184,10 +186,15 @@ doc.doc.md/
 │   │   │   ├── main.sh
 │   │   │   ├── install.sh
 │   │   │   └── installed.sh
-│   │   └── ocrmypdf/       # OCR processing plugin
+│   │   ├── ocrmypdf/       # OCR processing plugin
+│   │   │   ├── descriptor.json
+│   │   │   ├── main.sh
+│   │   │   ├── convert.sh
+│   │   │   ├── install.sh
+│   │   │   └── installed.sh
+│   │   └── markitdown/     # MS Office to markdown plugin
 │   │       ├── descriptor.json
 │   │       ├── main.sh
-│   │       ├── convert.sh
 │   │       ├── install.sh
 │   │       └── installed.sh
 │   └── templates/          # Template directory
@@ -206,6 +213,7 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **file**: Detects MIME types using the standard `file` command — **always runs first** in the processing chain; must be installed and active
 - **stat**: Extracts file system metadata (size, owner, timestamps)
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
+- **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
 
 ### Plugin Architecture
 

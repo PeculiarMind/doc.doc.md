@@ -5,8 +5,8 @@
 - **Type:** Feature
 - **Created at:** 2026-03-05
 - **Created by:** Product Owner
-- **Status:** BACKLOG
-- **Assigned to:** —
+- **Status:** DONE
+- **Assigned to:** developer
 
 ## TOC
 1. [Overview](#overview)
@@ -189,3 +189,38 @@ Both `output_dir` and `template_file` validated after parsing, before any proces
 - Requirements: [REQ_0009](../../../02_project_vision/02_requirements/03_accepted/REQ_0009_process-command.md), [REQ_0013](../../../02_project_vision/02_requirements/03_accepted/REQ_0013_directory-mirroring.md), [REQ_0007](../../../02_project_vision/02_requirements/03_accepted/REQ_0007_markdown-output.md)
 - Architecture: [05_building_block_view.md](../../../../project_documentation/01_architecture/05_building_block_view/05_building_block_view.md)
 - Template: [default.md](../../../../doc.doc.md/templates/default.md)
+
+## Workflow Assessment Log
+
+### Step 5: Tester Assessment
+- **Date:** 2026-03-05
+- **Agent:** tester.agent
+- **Result:** PASS
+- **Report:** [TESTREP_006](../../../04_reporting/02_tests_reports/TESTREP_006_FEATURE_0019_process_output_directory.md)
+- **Summary:** All 19 tests pass. `-o`/`--output-directory` flag parsing, output directory creation, directory mirroring, sidecar `.md` file generation, template substitution, custom template support, invalid template rejection, and stderr progress reporting all verified.
+
+### Step 6: Architect Assessment
+- **Date:** 2026-03-05
+- **Agent:** architect.agent
+- **Result:** Conditionally Compliant
+- **Report:** [ARCHREV_008](../../../04_reporting/01_architecture_reviews/ARCHREV_008_FEATURE_0019_process_output_directory.md)
+- **Summary:** Compliant with ARC-0002 (template syntax, variable sources, resolution order), ARC-0006 (output path canonicalization, path traversal protection, required flag validation), and ARC-0004 (error categorisation). One medium-severity deviation: `render_template_json` truncates multiline string values (e.g., `documentText`). DEBTR_003 created to track remediation before activating markitdown with templates.
+
+### Step 7: Security Assessment
+- **Date:** 2026-03-05
+- **Agent:** security.agent
+- **Result:** Issues Found
+- **Report:** [SECREV_008](../../../04_reporting/03_security_reviews/SECREV_008_FEATURE_0019_process_output_directory.md)
+- **Summary:** Two medium-severity issues found: (1) boundary check uses bare string prefix instead of directory-aware prefix, allowing sibling-directory paths to bypass the sidecar escape check — BUG_0008 filed; (2) `render_template_json` processes multiline JSON values line-by-line, allowing embedded newlines in plugin output to inject fake `key=value` pairs and override template placeholder values — BUG_0009 filed (also resolves DEBTR_003).
+
+### Step 8: License Assessment
+- **Date:** 2026-03-05
+- **Agent:** license.agent
+- **Result:** PASS
+- **Summary:** Pure Bash implementation with no new dependencies and no third-party code. Template rendering uses only standard Bash parameter expansion. No CREDITS.md update required. Full compatibility with project AGPL-3.0 license maintained.
+
+### Step 9: Documentation Assessment
+- **Date:** 2026-03-05
+- **Agent:** documentation.agent
+- **Result:** PASS
+- **Summary:** README.md already correctly documents `-o`/`--output-directory` as a required flag in the Process Command options table, with full usage examples. No additional changes required for this item.

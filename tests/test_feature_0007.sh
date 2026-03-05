@@ -33,6 +33,10 @@ cleanup() {
     chmod -R u+rw "$TEST_DIR" 2>/dev/null || true
     rm -rf "$TEST_DIR"
   fi
+  # Remove output directory
+  if [ -n "${OUTPUT_DIR:-}" ] && [ -d "$OUTPUT_DIR" ]; then
+    rm -rf "$OUTPUT_DIR"
+  fi
 }
 trap cleanup EXIT
 
@@ -119,6 +123,7 @@ assert_json_valid() {
 # ---- Setup: create test files of known MIME types ----
 
 TEST_DIR=$(mktemp -d)
+OUTPUT_DIR=$(mktemp -d)
 
 # text/plain
 echo "Hello, World!" > "$TEST_DIR/text_file.txt"
@@ -288,7 +293,7 @@ cp "$FILE_DESCRIPTOR" "$SAVED_FILE_DESCRIPTOR"
 jq '.active = false' "$FILE_DESCRIPTOR" > "${FILE_DESCRIPTOR}.tmp" \
   && mv "${FILE_DESCRIPTOR}.tmp" "$FILE_DESCRIPTOR"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" 2>&1)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" 2>&1)
 exit_code=$?
 
 # Restore immediately
@@ -310,7 +315,7 @@ FILE_PLUGIN_DIR_BACKUP="$PLUGIN_DIR/_file_backup_test_$$"
 
 mv "$FILE_PLUGIN_DIR" "$FILE_PLUGIN_DIR_BACKUP"
 
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" 2>&1)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" 2>&1)
 exit_code=$?
 
 # Restore immediately
@@ -328,7 +333,7 @@ echo "--- Integration: file plugin is always first in execution order ---"
 # other plugins so its output is available to the MIME filter gate.
 # We test this by verifying mimeType is present in all output entries
 # (it would be absent if stat ran first and file plugin was skipped by gate).
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process succeeds with file plugin active" "0" "$exit_code"
 
@@ -354,7 +359,7 @@ echo "--- Integration: MIME include filter — text/plain ---"
 # TEST_DIR contains: text_file.txt, another.txt (text/plain),
 #                    image_file.png (image/png), page.html (text/html),
 #                    subdir/nested.txt (text/plain) — 3 text/plain total.
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i "text/plain" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i "text/plain" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process --include text/plain exits with 0" "0" "$exit_code"
 assert_json_valid "process --include text/plain output is valid JSON" "$output"
@@ -389,7 +394,7 @@ echo ""
 echo "--- Integration: MIME exclude filter — image/png ---"
 
 # All files except image/png should appear.
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -e "image/png" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -e "image/png" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process --exclude image/png exits with 0" "0" "$exit_code"
 
@@ -414,7 +419,7 @@ echo ""
 echo "--- Integration: MIME include filter — image/* glob ---"
 
 # Only image/* files should appear (just image_file.png in test dir).
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i "image/*" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i "image/*" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process --include image/* exits with 0" "0" "$exit_code"
 
@@ -428,7 +433,7 @@ echo ""
 echo "--- Integration: MIME exclude filter — text/* glob ---"
 
 # All text/* files should be skipped; only non-text files remain.
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -e "text/*" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -e "text/*" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process --exclude text/* exits with 0" "0" "$exit_code"
 
@@ -444,7 +449,7 @@ echo ""
 echo "--- Integration: MIME include with OR — text/plain,image/png ---"
 
 # text/plain OR image/png should include both text files and the PNG.
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i "text/plain,image/png" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i "text/plain,image/png" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process --include text/plain,image/png exits with 0" "0" "$exit_code"
 
@@ -458,7 +463,7 @@ echo ""
 echo "--- Integration: skipped files produce no output entry ---"
 
 # When a file is MIME-filtered out, it must not appear in the JSON output at all.
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i "image/png" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i "image/png" 2>/dev/null)
 
 # image_file.png should be present
 assert_contains "skipped files absent: image_file.png present" "image_file.png" "$output"
@@ -475,7 +480,7 @@ echo ""
 echo "--- Integration: no MIME criteria — backward compatibility ---"
 
 # Without MIME criteria, all files are processed as before (no filtering by MIME).
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process without MIME filter exits with 0" "0" "$exit_code"
 
@@ -487,7 +492,7 @@ echo ""
 echo "--- Integration: extension filter still works alongside MIME criteria ---"
 
 # Extension-based filter must still work unchanged alongside MIME filter gate.
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i ".txt" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i ".txt" 2>/dev/null)
 exit_code=$?
 assert_exit_code "extension filter -i .txt exits with 0" "0" "$exit_code"
 
@@ -502,7 +507,7 @@ echo ""
 echo "--- Integration: MIME filter returns empty array when no files match ---"
 
 # No files in test dir have MIME type application/pdf → returns [].
-output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -i "application/pdf" 2>/dev/null)
+output=$("$DOC_DOC_SH" process -d "$TEST_DIR" -o "$OUTPUT_DIR" -i "application/pdf" 2>/dev/null)
 exit_code=$?
 assert_exit_code "process --include application/pdf (no matches) exits with 0" "0" "$exit_code"
 assert_eq "--include application/pdf with no matching files returns []" "[]" "$output"

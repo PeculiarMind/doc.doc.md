@@ -26,10 +26,14 @@ cleanup() {
     chmod -R u+rw "$TEST_DIR" 2>/dev/null || true
     rm -rf "$TEST_DIR"
   fi
+  if [ -n "${OUTPUT_DIR:-}" ] && [ -d "$OUTPUT_DIR" ]; then
+    rm -rf "$OUTPUT_DIR"
+  fi
 }
 trap cleanup EXIT
 
 TEST_DIR=$(mktemp -d)
+OUTPUT_DIR=$(mktemp -d)
 
 # ---- Helpers ----
 
@@ -285,7 +289,7 @@ chmod +x "$fake_plugin_dir/main.sh"
 # Since we can't override PLUGIN_DIR in doc.doc.sh easily,
 # test the real behavior: ocrmypdf active:false means no abort
 # (which is the desired state after the fix)
-stderr_process=$("$DOC_DOC_SH" process -d "$REPO_ROOT/tests/docs" 2>&1 >/dev/null)
+stderr_process=$("$DOC_DOC_SH" process -d "$REPO_ROOT/tests/docs" -o "$OUTPUT_DIR" 2>&1 >/dev/null)
 exit_code=$?
 assert_exit_code "process with ocrmypdf inactive exits 0" "0" "$exit_code"
 assert_not_contains "no abort error for inactive ocrmypdf" \

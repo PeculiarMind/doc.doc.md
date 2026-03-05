@@ -32,6 +32,12 @@
 | `pdftotext` (poppler-utils) | Fast text extraction from PDFs with an existing text layer; falls back to OCRmyPDF if absent |
 | `python3-pillow` (Pillow) | Alpha channel detection and conversion for RGBA images before OCR |
 
+### Optional Dependencies (for `markitdown` plugin)
+
+| Dependency | Notes |
+|------------|-------|
+| `markitdown` (pip) | MS Office to markdown conversion; install with `pip install markitdown` |
+
 ### Operating System
 
 Linux and macOS are supported. The `stat` plugin detects the platform at runtime and uses the appropriate `stat` format specifiers.
@@ -105,11 +111,13 @@ Plugins are stored under `doc.doc.md/plugins/<plugin-name>/`. Each plugin has a 
 ./doc.doc.sh list plugins inactive   # inactive plugins only
 ```
 
-### Inspecting Plugin Commands
+### Inspecting Plugin Commands and Parameters
 
 ```bash
 ./doc.doc.sh list --plugin stat --commands
 ./doc.doc.sh list --plugin ocrmypdf --commands
+./doc.doc.sh list parameters                     # all parameters for every plugin
+./doc.doc.sh list --plugin <name> --parameters   # parameters for one plugin
 ```
 
 ### Activating and Deactivating Plugins

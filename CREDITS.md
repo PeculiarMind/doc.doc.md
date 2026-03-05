@@ -17,3 +17,12 @@ The project structure and organization are inspired by the **PeculiarMind/ProTem
 - **GitHub Repository**: [https://github.com/PeculiarMind/ProTemp.AI](https://github.com/PeculiarMind/ProTemp.AI)
 - **License**: ProTemp.AI is available under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license.
 - **Author**: PeculiarMind
+
+## markitdown
+
+The `markitdown` plugin uses the **markitdown** Python library to convert MS Office documents to markdown.
+
+- **GitHub Repository**: [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown)
+- **License**: MIT License
+- **Author**: Microsoft Corporation
+- **Usage note**: `markitdown` is invoked as an external process (shell command). It is not imported, linked, or distributed with this project. No license propagation applies.
