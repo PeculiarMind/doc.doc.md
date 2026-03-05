@@ -901,15 +901,15 @@ render_template_json() {
   local content
   content="$(cat "$template")"
 
-  # Replace placeholders from JSON fields
-  while IFS= read -r line; do
-    local key="${line%%=*}"
-    local val="${line#*=}"
+  # Iterate over keys; extract each value preserving all lines (fixes DEBTR_003 and BUG_0009)
+  while IFS= read -r key; do
     [ -n "$key" ] || continue
+    local val
+    val="$(echo "$result_json" | jq -r --arg k "$key" '.[$k] // empty')"
     content="${content//\{\{${key}\}\}/${val}}"
-  done < <(echo "$result_json" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+  done < <(echo "$result_json" | jq -r 'keys[]')
 
-  # Derive and replace fileName from filePath
+  # Derive fileName from filePath
   local fp
   fp=$(echo "$result_json" | jq -r '.filePath // empty')
   if [ -n "$fp" ]; then
