@@ -660,6 +660,25 @@ EOF
   done
 }
 
+# Validate that a plugin path stays within PLUGIN_DIR (prevents path traversal).
+# Usage: _validate_plugin_dir "$PLUGIN_DIR" "$plugin_name"
+# Returns 0 if valid, 1 if traversal detected. Prints canonical path on success.
+_validate_plugin_dir() {
+  local base_dir="$1" plugin_name="$2"
+  local raw_dir="$base_dir/$plugin_name"
+
+  local canonical_base canonical_dir
+  canonical_base="$(cd "$base_dir" 2>/dev/null && pwd -P)" || return 1
+  canonical_dir="$(cd "$raw_dir" 2>/dev/null && pwd -P)" || return 1
+
+  # Ensure resolved path is strictly inside the base directory
+  if [ "${canonical_dir#"$canonical_base/"}" = "$canonical_dir" ]; then
+    return 1
+  fi
+
+  printf '%s' "$canonical_dir"
+}
+
 # --- _list_plugins helper ---
 
 _list_plugins() {
@@ -802,14 +821,12 @@ cmd_list() {
   fi
 
   if [ "$show_commands" = true ] && [ -n "$plugin_name" ]; then
-    local plugin_dir="$PLUGIN_DIR/$plugin_name"
-    local descriptor="$plugin_dir/descriptor.json"
-
-    # Validate plugin directory exists
-    if [ ! -d "$plugin_dir" ]; then
+    local plugin_dir
+    plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
       echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
       exit 1
-    fi
+    }
+    local descriptor="$plugin_dir/descriptor.json"
 
     # Validate descriptor exists and is valid JSON
     if [ ! -f "$descriptor" ]; then
@@ -829,13 +846,12 @@ cmd_list() {
   fi
 
   if [ "$show_parameters" = true ] && [ -n "$plugin_name" ]; then
-    local plugin_dir="$PLUGIN_DIR/$plugin_name"
-    local descriptor="$plugin_dir/descriptor.json"
-
-    if [ ! -d "$plugin_dir" ]; then
+    local plugin_dir
+    plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
       echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
       exit 1
-    fi
+    }
+    local descriptor="$plugin_dir/descriptor.json"
 
     if [ ! -f "$descriptor" ]; then
       echo "Error: Plugin descriptor not found: $descriptor" >&2
