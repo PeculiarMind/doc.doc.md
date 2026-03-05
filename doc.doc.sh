@@ -1207,8 +1207,15 @@ main() {
     local sidecar_path="${canonical_out}/${relative_path}.md"
     local sidecar_dir
     sidecar_dir="$(dirname "$sidecar_path")"
+
+    # Create sidecar dir first so readlink -f can canonicalize it
+    mkdir -p "$sidecar_dir"
     local canonical_sidecar
-    canonical_sidecar="$(readlink -f "$sidecar_dir" 2>/dev/null || echo "$sidecar_dir")"
+    canonical_sidecar="$(readlink -f "$sidecar_dir" 2>/dev/null)"
+    if [ -z "$canonical_sidecar" ]; then
+      echo "Error: Cannot resolve sidecar path for '$file_path'" >&2
+      continue
+    fi
 
     # Boundary check: ensure sidecar stays within output_dir
     if [[ "$canonical_sidecar" != "${canonical_out}"* ]]; then
@@ -1216,7 +1223,6 @@ main() {
       continue
     fi
 
-    mkdir -p "$sidecar_dir"
     render_template_json "$template_file" "$result" > "$sidecar_path"
     echo "Processed: $file_path -> $sidecar_path" >&2
   done
