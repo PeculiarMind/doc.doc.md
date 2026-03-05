@@ -301,6 +301,35 @@ Install the `ocrmypdf` plugin before activating it:
 
 Shows which plugins depend on which. For example, `ocrmypdf` depends on `file` (it needs the `mimeType` value that `file` produces). Active plugins are shown in green; inactive in red.
 
+### Plugin Security
+
+> ⚠️ **Plugins execute code on your system with your user permissions.** Read this section before installing any third-party plugin.
+
+#### Built-in vs. Third-Party Plugins
+
+| Type | Examples | Trust Level |
+|------|----------|------------|
+| **Built-in** | `file`, `stat`, `ocrmypdf` | Maintained by the doc.doc.md core team; included in this repository |
+| **Third-party** | Any plugin not in this repository | Created by the community; varying trust level; review before use |
+
+#### What Plugins Can Do
+
+A plugin runs with the same OS permissions as the `doc.doc.sh` process. It can:
+
+- **Read** any file your user account can read
+- **Write or delete** any file your user account can write
+- **Execute** system commands
+- **Access the network** (unless blocked by the OS)
+- **Consume** CPU, memory, and disk space
+
+#### Before Installing a Third-Party Plugin
+
+1. **Check the source** — prefer well-known repositories with a public change history.
+2. **Read the code** — plugins are shell scripts (`main.sh`, `install.sh`) and a JSON descriptor (`descriptor.json`). Read them before installing.
+3. **Check `install.sh`** — it reveals what external tools will be installed.
+4. **Start deactivated** — install the plugin but leave it inactive (`deactivate --plugin <name>`) until you have verified it.
+5. **Run as a low-privilege user** — never run doc.doc.md as root unless the input directory requires it.
+
 ---
 
 ## Templates
@@ -523,4 +552,4 @@ On Ubuntu/Debian: `sudo apt install ocrmypdf`
 
 **Does doc.doc.md modify my original files?**
 
-No. doc.doc.md reads files but never modifies them. The `ocrmypdf` plugin uses a temporary directory for sidecar text extraction and cleans it up on exit.
+The built-in plugins (`file`, `stat`, `ocrmypdf`) only read files and never modify them. The `ocrmypdf` plugin uses a temporary directory for sidecar text extraction and cleans it up on exit. Third-party plugins are not bound by this guarantee — they execute with your user permissions and can read, write, or delete files. Always review third-party plugin code before use (see [Plugin Security](#plugin-security)).

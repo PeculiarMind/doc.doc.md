@@ -32,6 +32,10 @@ doc.doc.md is a command-line tool for processing document collections within dir
 | REQ_0026 | Install Plugin Command | ✅ Implemented |
 | REQ_0027 | Check Plugin Installation Command | ✅ Implemented |
 | REQ_0028 | Plugin Tree View Command | ✅ Implemented |
+| REQ_SEC_001 | Input Validation and Sanitization | ✅ Implemented |
+| REQ_SEC_004 | Template Injection Prevention | ⏳ Pending (template engine not yet released) |
+| REQ_SEC_005 | Path Traversal Prevention | ✅ Implemented |
+| REQ_SEC_007 | Plugin Security Documentation | ✅ Implemented |
 
 All accepted requirements are documented in `project_management/02_project_vision/02_requirements/03_accepted/`.
 

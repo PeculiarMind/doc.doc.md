@@ -393,6 +393,76 @@ exit 0
 - Always exit `0` (reporting status, not failing)
 - Only check availability; do not install anything
 
+### Plugin Security Guidelines
+
+All plugins — built-in and third-party — must follow these guidelines.
+
+#### Input Validation
+
+- **Always** parse and validate the JSON object received from stdin before use.
+- **Always** verify that `filePath` is a non-empty string, resolves to a regular file, and is readable.
+- **Always** canonicalize `filePath` with `readlink -f` (Bash) or `os.path.realpath` (Python) and verify the resolved path is within expected boundaries.
+- **Never** execute file content (no `bash <`, `eval`, `source`).
+
+```bash
+# Bash — path validation pattern
+resolved=$(readlink -f "$file_path" 2>/dev/null) || { echo "Cannot resolve path" >&2; exit 1; }
+case "$resolved" in /proc/*|/dev/*|/sys/*|/etc/*) echo "Restricted path" >&2; exit 1 ;; esac
+[ -f "$resolved" ] && [ -r "$resolved" ] || { echo "Not a readable file" >&2; exit 1; }
+```
+
+```python
+# Python — path validation pattern
+import os, sys
+resolved = os.path.realpath(file_path)
+for restricted in ("/proc/", "/dev/", "/sys/", "/etc/"):
+    if resolved.startswith(restricted):
+        print("Restricted path", file=sys.stderr); sys.exit(1)
+if not os.path.isfile(resolved) or not os.access(resolved, os.R_OK):
+    print("Not a readable file", file=sys.stderr); sys.exit(1)
+```
+
+#### Output Safety
+
+- **Always** write only valid JSON to stdout; diagnostics go to stderr.
+- **Always** use `jq -n --arg` (Bash) or `json.dump` (Python) to build output — never construct JSON by string concatenation.
+- **Never** include raw file content in JSON output without ensuring it is properly escaped.
+
+#### Resource Management
+
+- **Always** limit stdin reads to 1 MB (`head -c 1048576` / `sys.stdin.read(1048576)`).
+- **Always** clean up temporary files (`trap cleanup EXIT`).
+- **Never** spawn background processes that outlive the plugin execution.
+- **Never** require root/sudo.
+
+#### What Plugins Must NOT Do
+
+| ❌ Anti-pattern | Risk |
+|----------------|------|
+| `eval "$(cat "$file_path")"` | Executes file content as shell code |
+| `bash < "$file_path"` | Same as above |
+| `echo "result: $value"` (raw stdout) | Corrupts JSON output stream |
+| Construct JSON by `echo "{ \"key\": $var }"` | JSON injection if `$var` contains `"` |
+| Write to files outside the plugin temp dir | Unauthorized filesystem modification |
+| Access the network without documenting it clearly | Unexpected data exfiltration |
+| `echo "Processing…"` to stdout | Pollutes JSON stream |
+
+#### Plugin Security Checklist
+
+Before publishing a plugin:
+
+- [ ] JSON input parsed and validated from stdin
+- [ ] `filePath` canonicalized and boundary-checked
+- [ ] Stdin read bounded to 1 MB
+- [ ] Output is valid JSON produced by `jq` or equivalent library
+- [ ] All diagnostic messages go to stderr
+- [ ] Temporary files cleaned up via `trap`
+- [ ] No background processes survive plugin exit
+- [ ] `install.sh` and `installed.sh` present and correct
+- [ ] Tested with adversarial input: missing fields, wrong types, path traversal attempts
+- [ ] No hardcoded absolute paths (works on any machine)
+- [ ] No network access, or network access clearly documented in `descriptor.json`
+
 ---
 
 ## Testing
