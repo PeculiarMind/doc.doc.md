@@ -24,7 +24,7 @@ if [ -z "$file_path" ]; then
   exit 1
 fi
 
-canonical_path="$(readlink -f "$file_path" 2>/dev/null || true)"
+canonical_path="$(readlink -f "$file_path" 2>/dev/null || echo "")"
 if [ -z "$canonical_path" ]; then
   echo "Error: Cannot resolve file path" >&2
   exit 1
@@ -60,11 +60,13 @@ if [ "$mime_supported" = false ]; then
   exit 1
 fi
 
-if ! document_text="$(markitdown "$canonical_path" 2>/tmp/markitdown_err_$$)"; then
+# Run markitdown to convert the file
+_mkd_err_file="$(mktemp)"
+if ! document_text="$(markitdown "$canonical_path" 2>"$_mkd_err_file")"; then
   echo "Error: markitdown conversion failed" >&2
-  rm -f /tmp/markitdown_err_$$
+  rm -f "$_mkd_err_file"
   exit 1
 fi
-rm -f /tmp/markitdown_err_$$
+rm -f "$_mkd_err_file"
 
 jq -n --arg documentText "$document_text" '{"documentText": $documentText}'
