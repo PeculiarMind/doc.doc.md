@@ -14,7 +14,7 @@ FAIL=0
 TOTAL=0
 
 cleanup() {
-  for name in "${TEST_PLUGINS[@]:-}"; do
+  for name in "${TEST_PLUGINS[@]+"${TEST_PLUGINS[@]}"}"; do
     local d="$PLUGIN_DIR/$name"
     [ -d "$d" ] && rm -rf "$d"
   done

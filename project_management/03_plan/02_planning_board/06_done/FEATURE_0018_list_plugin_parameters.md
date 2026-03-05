@@ -5,8 +5,8 @@
 - **Type:** Feature
 - **Created at:** 2026-03-05
 - **Created by:** Product Owner
-- **Status:** BACKLOG
-- **Assigned to:** —
+- **Status:** DONE
+- **Assigned to:** developer
 
 ## TOC
 1. [Overview](#overview)
