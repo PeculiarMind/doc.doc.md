@@ -197,3 +197,38 @@ cmd_list() {
 - Project Goals: [project_goals.md](../../../02_project_vision/01_project_goals/project_goals.md)
 - Requirements: [REQ_0030](../../../02_project_vision/02_requirements/03_accepted/REQ_0030_list-plugin-commands.md), [REQ_0002](../../../02_project_vision/02_requirements/03_accepted/REQ_0002_modular-extensible-architecture.md), [REQ_0003](../../../02_project_vision/02_requirements/03_accepted/REQ_0003_plugin-based-architecture.md)
 - Architecture: [05_building_block_view.md](../../../../project_documentation/01_architecture/05_building_block_view/05_building_block_view.md)
+
+## Workflow Assessment Log
+
+### Step 5: Tester Assessment
+- **Date:** 2026-03-05
+- **Agent:** tester.agent
+- **Result:** PASS
+- **Report:** [TESTREP_005](../../../04_reporting/02_tests_reports/TESTREP_005_FEATURE_0018_list_plugin_parameters.md)
+- **Summary:** All 37 tests pass. `list parameters` and `list --plugin <name> --parameters` commands verified: column headers, direction labelling, plugin filtering, error handling for invalid flag combinations, and correct output for all known plugins.
+
+### Step 6: Architect Assessment
+- **Date:** 2026-03-05
+- **Agent:** architect.agent
+- **Result:** PASS
+- **Report:** [ARCHREV_007](../../../04_reporting/01_architecture_reviews/ARCHREV_007_FEATURE_0018_list_plugin_parameters.md)
+- **Summary:** Compliant with ADR-003 (read-only descriptor inspection, jq usage) and ARC-0003 (descriptor as single source of truth, consistent plugin discovery). Output format (direction column, column alignment, sort order) meets acceptance criteria.
+
+### Step 7: Security Assessment
+- **Date:** 2026-03-05
+- **Agent:** security.agent
+- **Result:** Issues Found
+- **Report:** [SECREV_007](../../../04_reporting/03_security_reviews/SECREV_007_FEATURE_0018_list_plugin_parameters.md)
+- **Summary:** One medium-severity path traversal issue found: `--plugin <name>` argument used to construct `plugin_dir` path without canonicalization, allowing `../../` traversal to read arbitrary `descriptor.json` files outside the plugin directory. BUG_0007 filed in backlog for remediation.
+
+### Step 8: License Assessment
+- **Date:** 2026-03-05
+- **Agent:** license.agent
+- **Result:** PASS
+- **Summary:** Pure Bash implementation with no new dependencies and no third-party code. All processing uses `jq` and `column` (both already project dependencies). No CREDITS.md update required. Full compatibility with project AGPL-3.0 license maintained.
+
+### Step 9: Documentation Assessment
+- **Date:** 2026-03-05
+- **Agent:** documentation.agent
+- **Result:** CHANGES MADE
+- **Summary:** README.md updated: `list parameters` and `list --plugin <name> --parameters` added to Plugin Commands section. `user_guide.md` updated: both new `list` forms added to the command reference table. `ops_guide.md` updated: "Inspecting Plugin Commands" section expanded to include both new parameter-listing commands.

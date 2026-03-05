@@ -126,3 +126,38 @@ The plugin is invoked automatically per-file during the `process` command when t
 - Project Goals: [project_goals.md](../../../02_project_vision/01_project_goals/project_goals.md)
 - Requirements: [REQ_0002](../../../02_project_vision/02_requirements/03_accepted/REQ_0002_modular-extensible-architecture.md), [REQ_0003](../../../02_project_vision/02_requirements/03_accepted/REQ_0003_plugin-based-architecture.md), [REQ_0007](../../../02_project_vision/02_requirements/03_accepted/REQ_0007_markdown-output-format.md)
 - Architecture: [05_building_block_view.md](../../../../project_documentation/01_architecture/05_building_block_view/05_building_block_view.md)
+
+## Workflow Assessment Log
+
+### Step 5: Tester Assessment
+- **Date:** 2026-03-05
+- **Agent:** tester.agent
+- **Result:** PASS
+- **Report:** [TESTREP_004](../../../04_reporting/02_tests_reports/TESTREP_004_FEATURE_0017_markitdown_plugin.md)
+- **Summary:** All 45 tests pass. Plugin structure, descriptor validation, input validation, MIME-type gating, path traversal prevention, and CLI integration (`list`, `tree`) all verified. Environment-constrained tests (markitdown binary not in CI) noted as non-defects.
+
+### Step 6: Architect Assessment
+- **Date:** 2026-03-05
+- **Agent:** architect.agent
+- **Result:** PASS
+- **Report:** [ARCHREV_006](../../../04_reporting/01_architecture_reviews/ARCHREV_006_FEATURE_0017_markitdown_plugin.md)
+- **Summary:** Fully compliant with ADR-003 (four-file structure, JSON stdin/stdout, jq usage, lowerCamelCase, no `dependencies` key) and ARC-0003 (standard commands, plugin interface contract). Dependency on `file` plugin correctly expressed via `mimeType` parameter name matching.
+
+### Step 7: Security Assessment
+- **Date:** 2026-03-05
+- **Agent:** security.agent
+- **Result:** Issues Found
+- **Report:** [SECREV_006](../../../04_reporting/03_security_reviews/SECREV_006_FEATURE_0017_markitdown_plugin.md)
+- **Summary:** One medium-severity issue found: `main.sh` reads stdin without a size limit (`cat` instead of `head -c 1048576`), inconsistent with the 1 MB standard established by BUG_0001. BUG_0006 filed in backlog for remediation.
+
+### Step 8: License Assessment
+- **Date:** 2026-03-05
+- **Agent:** license.agent
+- **Result:** PASS
+- **Summary:** `markitdown` (Microsoft, MIT License) is invoked as an external shell process — not imported, linked, or distributed with this project. No license propagation applies. MIT is compatible with AGPL-3.0 for external-tool invocation. CREDITS.md updated to acknowledge `markitdown` and document the invocation-only relationship.
+
+### Step 9: Documentation Assessment
+- **Date:** 2026-03-05
+- **Agent:** documentation.agent
+- **Result:** CHANGES MADE
+- **Summary:** README.md updated: `markitdown` added to Built-in Plugins list and Project Structure tree. `user_guide.md` updated: new `markitdown` plugin section added (description, supported types, output fields, install commands), `{{documentText}}` added to template variables table, built-in plugins trust table updated. `dev_guide.md` updated: `markitdown/` added to project structure tree, `{{documentText}}` added to template variables, optional dev dependency noted.

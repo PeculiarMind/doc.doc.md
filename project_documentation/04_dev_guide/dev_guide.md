@@ -34,6 +34,12 @@ Optional (for OCR plugin development):
 | `pdftotext` | Fast PDF text extraction (poppler-utils) |
 | Pillow (Python) | Image alpha channel handling |
 
+Optional (for markitdown plugin development):
+
+| Tool | Notes |
+|------|-------|
+| `markitdown` (pip) | MS Office to markdown conversion |
+
 ### Dev Container
 
 A VS Code Dev Container is configured in the repository. Open the repository in VS Code and select **Reopen in Container** to get a fully provisioned environment with all dependencies.
@@ -62,6 +68,11 @@ doc.doc.md/
     │       ├── descriptor.json
     │       ├── main.sh
     │       ├── convert.sh
+    │       ├── install.sh
+    │       └── installed.sh
+    │   └── markitdown/              # MS Office to markdown plugin
+    │       ├── descriptor.json
+    │       ├── main.sh
     │       ├── install.sh
     │       └── installed.sh
     └── templates/
@@ -566,6 +577,7 @@ Variables are only available if the corresponding plugin is active. Referencing 
 | `{{fileModified}}` | stat | string (ISO 8601) |
 | `{{fileMetadataChanged}}` | stat | string (ISO 8601) |
 | `{{ocrText}}` | ocrmypdf | string |
+| `{{documentText}}` | markitdown | string |
 
 Custom plugin output fields are referenced the same way — use the exact field name from `descriptor.json`.
 
