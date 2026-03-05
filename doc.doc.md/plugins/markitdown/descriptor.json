@@ -1,0 +1,54 @@
+{
+  "name": "markitdown",
+  "version": "1.0.0",
+  "description": "A plugin that converts MS Office documents (docx, xlsx, pptx, doc, xls, ppt) to markdown text using the markitdown Python library.",
+  "active": false,
+  "commands": {
+    "process": {
+      "description": "Convert an MS Office document to markdown text.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Path to the MS Office file to convert.",
+          "required": true
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "MIME type of the input file. Must be a supported MS Office MIME type.",
+          "required": true
+        }
+      },
+      "output": {
+        "documentText": {
+          "type": "string",
+          "description": "Extracted markdown content from the MS Office document."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if markitdown is available on the system.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "true if markitdown is available, false otherwise."
+        }
+      }
+    },
+    "install": {
+      "description": "Install markitdown via pip.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "true if markitdown is available after the installation attempt."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message describing the installation result."
+        }
+      }
+    }
+  }
+}
