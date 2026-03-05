@@ -39,7 +39,7 @@ Implementation decisions that arose during development and require documentation
 **Rationale**: MIME-based filtering requires MIME type detection to have already run. Routing MIME criteria through the same `filter.py` mechanism (with `fnmatch`) provides consistency with path/glob filtering and avoids a separate code path in `filter.py`.
 
 **Implementation details**:
-- `doc.doc.sh` (lines 176–194) re-orders the active plugin list post-discovery to ensure `file` is at index 0.
+- `doc.doc.sh` (lines 916–934) re-orders the active plugin list post-discovery to ensure `file` is at index 0.
 - Criteria classification occurs before the processing loop: `_MIME_INCLUDE_ARGS` and `_MIME_EXCLUDE_ARGS` global arrays hold MIME criteria.
 - After `file` plugin returns `mimeType`, `doc.doc.sh` pipes the MIME string to `filter.py` with the MIME criteria arrays. Empty output = file skipped.
 - `filter.py` is unchanged; it applies `fnmatch` uniformly to both file paths and MIME type strings.

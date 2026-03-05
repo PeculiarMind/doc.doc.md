@@ -52,7 +52,7 @@
 **Decision**: The `file` plugin is always first in the processing chain; MIME criteria are evaluated after it runs via a dedicated filter gate.
 
 **Implemented as**:
-- `doc.doc.sh` (lines 176–194) re-orders the plugin list post-discovery, placing `file` first.
+- `doc.doc.sh` (lines 916–934) re-orders the plugin list post-discovery, placing `file` first.
 - Criteria containing `/` but not `**` are extracted as MIME criteria before the processing loop.
 - After `file` plugin returns `mimeType`, `doc.doc.sh` pipes the MIME string to `filter.py` with the MIME criteria.
 - `filter.py` is stateless and reused as-is for MIME gate evaluation; it applies `fnmatch` uniformly to both path and MIME inputs.
