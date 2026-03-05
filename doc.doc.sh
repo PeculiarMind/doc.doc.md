@@ -1234,7 +1234,7 @@ main() {
     fi
 
     # Boundary check: ensure sidecar stays within output_dir
-    if [[ "$canonical_sidecar" != "${canonical_out}"* ]]; then
+    if [[ "$canonical_sidecar" != "${canonical_out}" && "$canonical_sidecar" != "${canonical_out}/"* ]]; then
       echo "Error: path traversal detected for '$file_path'" >&2
       continue
     fi
