@@ -446,11 +446,17 @@ See [LICENSE.md](LICENSE.md) for full details.
 
 See [CREDITS.md](CREDITS.md) for complete attribution.
 
+## Documentation
+
+- [User Guide](project_documentation/03_user_guide/user_guide.md) — installation, usage, filtering, plugins, and templates for end users
+- [Operations Guide](project_documentation/02_ops_guide/ops_guide.md) — system requirements, plugin management, troubleshooting, and security
+- [Development Guide](project_documentation/04_dev_guide/dev_guide.md) — architecture, plugin development, testing, and contribution guidelines
+- [Architecture Documentation](project_documentation/01_architecture/) — arc42 architecture docs including building-block view and decisions
+
 ## Support
 
 - **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/PeculiarMind/doc.doc.md/issues)
 - **Discussions**: Join conversations about the project
-- **Documentation**: Comprehensive guides in `project_documentation/`
 
 ---
 
