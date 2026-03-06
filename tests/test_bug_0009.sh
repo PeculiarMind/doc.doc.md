@@ -16,6 +16,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CLI="$REPO_ROOT/doc.doc.sh"
+TEMPLATES_SH="$REPO_ROOT/doc.doc.md/components/templates.sh"
 
 PASS=0
 FAIL=0
@@ -115,7 +116,13 @@ echo "--- Group 1: Source code uses safe jq pattern ---"
 source_code=$(cat "$CLI")
 
 # Extract only the render_template_json function body for targeted checks
-func_body=$(sed -n '/^render_template_json()/,/^}/p' "$CLI")
+# (function may be in doc.doc.sh or in components/templates.sh)
+func_body=""
+if grep -q '^render_template_json()' "$CLI" 2>/dev/null; then
+  func_body=$(sed -n '/^render_template_json()/,/^}/p' "$CLI")
+elif [ -f "$TEMPLATES_SH" ]; then
+  func_body=$(sed -n '/^render_template_json()/,/^}/p' "$TEMPLATES_SH")
+fi
 
 assert_contains \
   "render_template_json uses jq 'keys[]' for iteration" \

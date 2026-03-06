@@ -1,9 +1,15 @@
 #!/bin/bash
-# plugins.sh - Plugin execution component
+# plugin_execution.sh - Plugin Execution module for doc.doc.md
 # Part of doc.doc.md architecture (Level 3: Bash Components)
-# Handles plugin command invocation and JSON I/O per ADR-003
-# NOTE: Plugin discovery and management functions have been moved to
-# plugin_management.sh (FEATURE_0021).
+# Handles plugin command invocation, stdin/stdout JSON I/O wiring,
+# exit-code classification (0 = success, 1 = plugin error, 2 = fatal),
+# and output validation per ADR-003.
+# Contains NO plugin discovery, descriptor loading, or activation state logic.
+#
+# Public Interface:
+#   run_plugin <name> <file_path> <plugin_base_dir> [context_json]
+#       - Invoke a plugin's process command with JSON I/O
+#       - Returns 0 on success, 1 on plugin error
 
 # --- Plugin execution ---
 
