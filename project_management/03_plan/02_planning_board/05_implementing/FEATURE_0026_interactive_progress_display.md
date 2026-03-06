@@ -5,7 +5,7 @@
 - **Type:** Feature
 - **Created at:** 2026-03-06
 - **Created by:** Product Owner
-- **Status:** BACKLOG
+- **Status:** IMPLEMENTING
 
 ## Overview
 When `process` is run in an interactive terminal (stdin/stdout attached to a TTY), display a live-updating progress dashboard showing an ASCII progress bar with percentage display, the current phase, the current step, counts of discovered documents, and the currently executing plugin. In non-interactive (piped / redirected) mode the display is suppressed so output remains machine-readable.
