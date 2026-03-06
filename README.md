@@ -174,7 +174,7 @@ Each `.md` file contains metadata and content extracted from the original docume
 doc.doc.md/
 ├── doc.doc.sh              # Main script
 ├── doc.doc.md/             # Core directory
-│   ├── components/         # Reusable components (planned)
+│   ├── components/         # Reusable components (filter, plugins, UI)
 │   ├── plugins/            # Plugin directory
 │   │   ├── file/           # MIME type detection plugin
 │   │   │   ├── descriptor.json

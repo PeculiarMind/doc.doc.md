@@ -5,7 +5,7 @@
 - **Type:** Task
 - **Created at:** 2026-03-06
 - **Created by:** developer.agent
-- **Status:** IMPLEMENTING
+- **Status:** DONE
 - **Assigned to:** tester.agent
 
 ## TOC
