@@ -11,10 +11,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_DIR="$SCRIPT_DIR/doc.doc.md/plugins"
 FILTER_SCRIPT="$SCRIPT_DIR/doc.doc.md/components/filter.py"
 PLUGINS_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/plugins.sh"
+PLUGIN_MGMT_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/plugin_management.sh"
 UI_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/ui.sh"
 
 # Source components
 source "$PLUGINS_COMPONENT"
+source "$PLUGIN_MGMT_COMPONENT"
 source "$UI_COMPONENT"
 
 # Global MIME filter criteria (set by main, consumed by process_file)
