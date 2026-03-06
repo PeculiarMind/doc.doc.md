@@ -5,7 +5,8 @@
 - **Type:** Bug
 - **Created at:** 2026-03-06
 - **Created by:** Tester
-- **Status:** BACKLOG
+- **Status:** DONE
+- **Assigned to:** developer
 
 ## Overview
 When `./doc.doc.sh process -d <input> -o <output>` is executed in an interactive terminal, a raw JSON array of all plugin results is printed to **stdout** while progress/log messages are printed to **stderr**. A terminal displays both streams simultaneously, so the user sees a confusing interleaving of JSON data fragments and human-readable progress lines.
@@ -74,3 +75,28 @@ When the user specifies `-o <dir>`, the markdown files written to disk are the i
 - Source: `doc.doc.sh` (process command JSON printing block ~line 1095–1165)
 - Component: `doc.doc.md/components/ui.sh` (`log_processed`)
 - Test reference: `tests/test_feature_0019.sh` (process output directory)
+
+## License Assessment
+
+- **Status:** PASS
+- **Date:** 2026-03-06
+- **Finding:** No new dependencies, third-party code, or assets introduced. Pure bash implementation using standard POSIX/bash built-ins (`[ -t 1 ]` TTY check and conditional `echo` statements). No changes to `CREDITS.md` or `LICENSE.md` required. All modifications remain within the existing AGPL-3.0 project scope.
+
+## Documentation Assessment
+
+- **Status:** PASS
+- **Date:** 2026-03-06
+
+### What Was Checked
+
+| Location | Finding | Action Taken |
+|----------|---------|--------------|
+| `README.md` — Features section | No mention of TTY-aware JSON suppression | Added bullet describing the new TTY-aware output behaviour alongside the existing Interactive Progress Display bullet |
+| `README.md` — Process Command options table | Table ended at `--no-progress`; no note about JSON stream suppression | Added a callout block beneath the table explaining TTY vs. non-TTY stdout behaviour |
+| `project_documentation/03_user_guide/user_guide.md` — "What the Output Looks Like" | Said "The command prints a JSON array to stdout" with no TTY caveat | Updated heading text and added a TTY-aware behaviour callout explaining when JSON is suppressed vs. streamed |
+| `project_documentation/03_user_guide/user_guide.md` — Command Reference `process` section | "Output: JSON array to stdout." with no caveat | Updated to reference the TTY-aware behaviour and link to the relevant section |
+| `doc.doc.md/components/ui.sh` — `usage()` function | `--progress`/`--no-progress` were the last process options; no stdout output behaviour described | Added an "Output:" block beneath those flags documenting the piped vs. TTY JSON behaviour |
+
+### Summary
+
+All user-facing documentation now accurately reflects the TTY-aware JSON suppression introduced by BUG_0010. No new dependencies, assets, or structural documentation changes were required.

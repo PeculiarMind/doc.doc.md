@@ -1040,6 +1040,13 @@ main() {
     show_progress=true
   fi
 
+  # Suppress JSON output when stdout is an interactive TTY and an output
+  # directory is provided — JSON is only meaningful for Unix pipelines.
+  local suppress_json=false
+  if [ -t 1 ]; then
+    suppress_json=true
+  fi
+
   # Build path-only filter arguments for the pre-processing find step
   local -a filter_args=()
   for inc in "${path_include_args[@]+"${path_include_args[@]}"}"; do
@@ -1067,7 +1074,9 @@ main() {
     if [ "$show_progress" = true ]; then
       ui_progress_done 0
     fi
-    echo "[]"
+    if [ "$suppress_json" = false ]; then
+      echo "[]"
+    fi
     exit 0
   fi
 
@@ -1098,16 +1107,21 @@ main() {
     local result
     result=$(process_file "$file_path" "${plugins[@]}")
     [ -n "$result" ] || continue
-    if [ "$printed_bracket" = false ]; then
-      echo "["
-      printed_bracket=true
-    fi
-    if [ "$first" = true ]; then
-      first=false
+    if [ "$suppress_json" = false ]; then
+      if [ "$printed_bracket" = false ]; then
+        echo "["
+        printed_bracket=true
+      fi
+      if [ "$first" = true ]; then
+        first=false
+      else
+        echo ","
+      fi
+      echo "$result"
     else
-      echo ","
+      printed_bracket=true
+      first=false
     fi
-    echo "$result"
 
     # Write sidecar .md file to output directory
     local sidecar_path="${canonical_out}/${relative_path}.md"
@@ -1151,11 +1165,13 @@ main() {
     echo "Processed $processed_count documents." >&2
   fi
 
-  if [ "$printed_bracket" = false ]; then
-    echo "[]"
-  else
-    echo ""
-    echo "]"
+  if [ "$suppress_json" = false ]; then
+    if [ "$printed_bracket" = false ]; then
+      echo "[]"
+    else
+      echo ""
+      echo "]"
+    fi
   fi
 }
 

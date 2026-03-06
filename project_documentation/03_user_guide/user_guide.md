@@ -86,7 +86,9 @@ This processes every file in `~/Documents` and prints a JSON array to your termi
 
 ### What the Output Looks Like
 
-The command prints a JSON array to stdout. Each entry represents one file and contains all fields produced by the active plugins:
+The command streams a JSON array to stdout. Each entry represents one file and contains all fields produced by the active plugins:
+
+> **TTY-aware behaviour:** When stdout is an interactive terminal and `-o <dir>` is given, the JSON array is **suppressed** — only the `Processed N documents.` summary line appears on stderr. To receive the JSON stream in a terminal session, pipe stdout to another command (e.g., `| jq .`) or redirect it to a file. When stdout is piped or redirected, the full JSON array is always produced (backward-compatible Unix pipeline behaviour).
 
 ```json
 [
@@ -463,7 +465,7 @@ Process files in a directory through active plugins.
 | `-e <criteria>` | No | Exclude criteria (repeatable) |
 | `--help` | No | Show help |
 
-**Output:** JSON array to stdout.
+**Output:** JSON array to stdout (suppressed when stdout is a TTY and `-o` is given; human-readable summary on stderr instead — see [What the Output Looks Like](#what-the-output-looks-like)).
 
 ---
 

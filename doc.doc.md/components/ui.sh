@@ -47,6 +47,15 @@ process Options:
   --progress     Force progress display even when stdout is not a TTY
   --no-progress  Suppress progress display even on a TTY
 
+Output:
+  When stdout is piped or redirected:
+    A JSON array is streamed to stdout — one object per processed file (Unix
+    pipeline behaviour; backward-compatible).
+  When stdout is an interactive TTY and -o is given:
+    The JSON array is suppressed; only the "Processed N documents." summary
+    is printed to stderr.  Pipe stdout (e.g. | jq .) to receive JSON in a
+    terminal session.
+
 list Options:
   plugins            List all plugins with activation status
   plugins active     List only active plugins

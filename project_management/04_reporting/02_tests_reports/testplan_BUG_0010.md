@@ -31,9 +31,9 @@ TTY detection is exercised via the `script` utility (`util-linux`), which alloca
 - [x] `file` and `stat` plugins active and installed (default dev-container state)
 
 ## Exit Criteria
-- [ ] All scenarios in `tests/test_bug_0010.sh` pass
-- [ ] Existing `tests/test_feature_0019.sh` (process output directory) still passes
-- [ ] `tests/test_doc_doc.sh` still passes (regression gate)
+- [x] All scenarios in `tests/test_bug_0010.sh` pass
+- [x] Existing `tests/test_feature_0019.sh` (process output directory) still passes
+- [x] `tests/test_doc_doc.sh` still passes (regression gate)
 
 ## Test Scenarios
 
@@ -71,3 +71,4 @@ Test file: `tests/test_bug_0010.sh`
 | Date | Report | Result |
 |------|--------|--------|
 | 2026-03-06 | — | Red phase: TS_008 and TS_009 FAIL (bug confirmed); TS_001–TS_007, TS_010 PASS |
+| 2026-03-06 | [TESTREP_008](./TESTREP_008_BUG_0010_json_stdout_pollution.md) | Green phase: all 10 scenarios PASS; regression suites FEATURE_0019 (19/19) and test_doc_doc (47/47) pass |
