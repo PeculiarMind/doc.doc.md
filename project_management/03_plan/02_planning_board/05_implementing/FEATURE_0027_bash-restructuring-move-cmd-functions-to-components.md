@@ -5,7 +5,7 @@
 - **Type:** Feature
 - **Created at:** 2026-03-06
 - **Created by:** product_owner
-- **Status:** BACKLOG
+- **Status:** IMPLEMENTING
 
 ## TOC
 
@@ -13,14 +13,17 @@
 Move all `cmd_*` command functions and their private helpers out of the monolithic `doc.doc.sh` entry point into the appropriate existing component files, without changing any observable behaviour. After this restructuring, `doc.doc.sh` shall contain only `main`, top-level usage strings, global variable declarations, and `source` statements (~450 lines), satisfying the orchestration-isolation requirement REQ_0036.
 
 ## Acceptance Criteria
-- [ ] `cmd_activate` and `cmd_deactivate` are moved verbatim into `doc.doc.md/components/plugin_management.sh` and are removed from `doc.doc.sh`
-- [ ] `cmd_install`, `_install_single_plugin`, `_install_all_plugins`, and `cmd_installed` are moved verbatim into `doc.doc.md/components/plugin_management.sh` and are removed from `doc.doc.sh`
-- [ ] `cmd_tree`, `_validate_plugin_dir`, `_list_plugins`, and `cmd_list` are moved verbatim into `doc.doc.md/components/plugin_management.sh` and are removed from `doc.doc.sh`
-- [ ] `process_file` is moved verbatim into `doc.doc.md/components/plugin_execution.sh` and is removed from `doc.doc.sh`
-- [ ] `doc.doc.sh` retains only `main`, top-level variable declarations, usage/help strings, and `source` statements; its line count does not exceed 450 lines after the move
-- [ ] Each receiving component file (`plugin_management.sh`, `plugin_execution.sh`) gains a header comment block listing its updated public interface (satisfying REQ_0037)
-- [ ] All existing automated tests in `tests/` pass without modification after the restructuring
-- [ ] No change in observable CLI behaviour: all commands (`activate`, `deactivate`, `install`, `installed`, `list`, `tree`, `process`) produce identical output to the pre-refactoring baseline
+- [x] `cmd_activate` and `cmd_deactivate` are moved verbatim into `doc.doc.md/components/plugin_management.sh` and are removed from `doc.doc.sh`
+- [x] `cmd_install`, `_install_single_plugin`, `_install_all_plugins`, and `cmd_installed` are moved verbatim into `doc.doc.md/components/plugin_management.sh` and are removed from `doc.doc.sh`
+- [x] `cmd_tree`, `_validate_plugin_dir`, `_list_plugins`, and `cmd_list` are moved verbatim into `doc.doc.md/components/plugin_management.sh` and are removed from `doc.doc.sh`
+- [x] `process_file` is moved verbatim into `doc.doc.md/components/plugin_execution.sh` and is removed from `doc.doc.sh`
+- [x] `doc.doc.sh` retains only `main`, top-level variable declarations, usage/help strings, and `source` statements; its line count does not exceed 450 lines after the move
+- [x] Each receiving component file (`plugin_management.sh`, `plugin_execution.sh`) gains a header comment block listing its updated public interface (satisfying REQ_0037)
+- [x] All existing automated tests in `tests/` pass without modification after the restructuring
+- [x] No change in observable CLI behaviour: all commands (`activate`, `deactivate`, `install`, `installed`, `list`, `tree`, `process`) produce identical output to the pre-refactoring baseline
+
+## Status
+IMPLEMENTING → ready for review
 
 ## Dependencies
 - No blocking predecessors; this item may be started independently.
