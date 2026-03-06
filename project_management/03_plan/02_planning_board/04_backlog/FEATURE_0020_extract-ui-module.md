@@ -5,7 +5,7 @@
 - **Type:** Feature
 - **Created at:** 2026-03-06
 - **Created by:** Product Owner
-- **Status:** FUNNEL
+- **Status:** BACKLOG
 
 ## TOC
 1. [Overview](#overview)
