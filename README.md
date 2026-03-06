@@ -16,6 +16,7 @@ doc.doc.md is a command-line tool that processes document collections in directo
 - **Unix Pipeline Architecture**: Efficient file processing using standard Unix pipes and streams
 - **Simple CLI**: Straightforward command-line interface with clear options
 - **Interactive Progress Display**: Live-updating ASCII progress bar when running in a terminal, with TTY auto-detection
+- **TTY-Aware Output**: JSON result stream is automatically suppressed when stdout is an interactive terminal and `-o` is given — only the human-readable summary is shown; piped/redirected invocations still receive the full JSON array (Unix pipeline compatible)
 
 ## Installation
 
@@ -155,6 +156,8 @@ Each `.md` file contains metadata and content extracted from the original docume
 | `--exclude` | `-e` | Comma-separated file extensions, glob patterns, or MIME types to exclude | No | |
 | `--progress` | | Force progress display even when stdout is not a TTY | No | Auto-detect TTY |
 | `--no-progress` | | Suppress progress display even on a TTY | No | Auto-detect TTY |
+
+> **TTY-aware JSON output:** When `-o <dir>` is provided and stdout is an interactive terminal, the JSON result array is **not** printed to stdout — only the `Processed N documents.` summary appears on stderr. When stdout is piped or redirected, the full JSON array is streamed to stdout as normal (backward-compatible Unix pipeline behaviour).
 
 #### Plugin Commands
 
