@@ -5,7 +5,7 @@
 - **Type:** Feature
 - **Created at:** 2026-03-06
 - **Created by:** product_owner
-- **Status:** IMPLEMENTING
+- **Status:** DONE
 
 ## TOC
 
@@ -34,3 +34,13 @@ Rewrite the complex logic of `cmd_tree` (~200 Bash lines: DFS dependency graph, 
 - Requirements: [REQ_0028 Plugin Tree View](../../../02_project_vision/02_requirements/03_accepted/REQ_0028_plugin-tree-view.md)
 - Requirements: [REQ_0038 Backward-Compatible CLI](../../../02_project_vision/02_requirements/03_accepted/REQ_0038_backward-compatible-cli.md)
 - Predecessor: FEATURE_0027 (Bash restructuring — move cmd_* to components)
+
+## Quality Gate Assessments
+
+| Assessment | Result | Report |
+|------------|--------|--------|
+| Tester | ✅ PASS — 29/29 shell tests, 16/16 Python unit tests | [TESTREP_010](../../../04_reporting/02_tests_reports/TESTREP_010_FEATURE_0028_python-rewrite-plugin-info-tree-table-logic.md) |
+| Architect | ✅ Compliant — REQ_0036, REQ_0037, REQ_0002, REQ_0035, REQ_0038 all satisfied | [ARCHREV_012](../../../04_reporting/01_architecture_reviews/ARCHREV_012_FEATURE_0028_python-rewrite-plugin-info-tree-table-logic.md) |
+| Security | ✅ Passed — No vulnerabilities; stdlib-only, no shell injection surface | [SECREV_012](../../../04_reporting/03_security_reviews/SECREV_012_FEATURE_0028_python-rewrite-plugin-info-tree-table-logic.md) |
+| License | ✅ Passed — `plugin_info.py` uses only Python stdlib (json, sys, os); no new dependencies | (inline) |
+| Documentation | ✅ Passed — README.md contains no `column`/`bsdextrautils` references; Building Block View updated | (inline) |

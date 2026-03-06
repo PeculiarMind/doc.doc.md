@@ -54,11 +54,13 @@
 ```
 doc.doc.md/
 ├── components/
-│   ├── plugins.sh       # Plugin discovery, invocation, dependency tree
-│   ├── filter.py        # Python filter engine
-│   ├── help.sh          # Help text generation
-│   ├── logging.sh       # Logging utilities
-│   └── templates.sh     # Template loading and variable substitution
+│   ├── plugin_management.sh  # Plugin discovery, descriptor loading, activation state, tree/list commands
+│   ├── plugin_execution.sh   # Plugin command invocation, I/O routing, exit-code classification
+│   ├── plugin_info.py        # Python component: DFS dependency tree rendering and table formatting
+│   ├── filter.py             # Python filter engine
+│   ├── help.sh               # Help text generation
+│   ├── logging.sh            # Logging utilities
+│   └── templates.sh          # Template loading and variable substitution
 └── plugins/
     ├── file/
     │   ├── descriptor.json
