@@ -1152,9 +1152,9 @@ main() {
 
     if [ "$show_progress" = true ]; then
       ui_progress_update done "$processed_count"
+    else
+      log_processed "$file_path" "$sidecar_path"
     fi
-
-    log_processed "$file_path" "$sidecar_path"
   done
 
   if [ "$show_progress" = true ]; then

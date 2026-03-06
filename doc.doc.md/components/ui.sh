@@ -210,6 +210,7 @@ _UI_PROGRESS_FOUND=0
 _UI_PROGRESS_FILE=""
 _UI_PROGRESS_PLUGIN=""
 _UI_PROGRESS_DRAWN=false
+_UI_PROGRESS_FRAME=0
 
 ui_progress_init() {
   local total="${1:-0}"
@@ -222,6 +223,7 @@ ui_progress_init() {
   _UI_PROGRESS_FILE=""
   _UI_PROGRESS_PLUGIN=""
   _UI_PROGRESS_DRAWN=false
+  _UI_PROGRESS_FRAME=0
 
   trap '_ui_progress_clear; exit 130' INT
 }
@@ -261,26 +263,29 @@ _ui_progress_render() {
   local filled=$(( (pct * bar_width) / 100 ))
   local empty=$(( bar_width - filled ))
 
+  # Advance animation frame on every render (cycles 0→1→0→…)
+  _UI_PROGRESS_FRAME=$(( (_UI_PROGRESS_FRAME + 1) % 2 ))
+
+  # Pick fill character for this frame — alternates to create a pulse effect
+  local fill_char
+  if   [ "$pct" -eq 100 ]; then fill_char="▓"
+  elif [ "$_UI_PROGRESS_FRAME" -eq 0 ]; then fill_char="▒"
+  else fill_char="▓"
+  fi
+
   local bar=""
   local i
-  if [ "$pct" -eq 100 ]; then
-    for (( i=0; i<bar_width; i++ )); do bar+="▓"; done
-  elif [ "$pct" -eq 0 ]; then
+  if [ "$pct" -eq 0 ]; then
     for (( i=0; i<bar_width; i++ )); do bar+="░"; done
-  elif [ "$pct" -le 50 ]; then
-    for (( i=0; i<filled; i++ )); do
-      if (( i % 2 == 0 )); then bar+="▒"; else bar+="░"; fi
-    done
-    for (( i=0; i<empty; i++ )); do bar+="░"; done
   else
-    for (( i=0; i<filled; i++ )); do
-      if (( i % 2 == 0 )); then bar+="▓"; else bar+="▒"; fi
-    done
-    for (( i=0; i<empty; i++ )); do bar+="░"; done
+    for (( i=0; i<filled; i++ )); do bar+="${fill_char}"; done
+    for (( i=0; i<empty;  i++ )); do bar+="░"; done
   fi
 
   if [ "$_UI_PROGRESS_DRAWN" = true ]; then
-    printf '\033[6A' >&2
+    printf '\033[u' >&2   # restore to saved position (robust against extra stderr lines)
+  else
+    printf '\033[s' >&2   # save cursor position before first render
   fi
 
   printf '\r\033[K%s\n' "Progress: ${bar} ${pct}%" >&2
@@ -295,11 +300,11 @@ _ui_progress_render() {
 
 _ui_progress_clear() {
   [ "$_UI_PROGRESS_DRAWN" = true ] || return 0
-  printf '\033[6A' >&2
+  printf '\033[u' >&2   # restore to saved position (start of progress block)
   local i
   for (( i=0; i<6; i++ )); do
     printf '\r\033[K\n' >&2
   done
-  printf '\033[6A' >&2
+  printf '\033[u' >&2   # leave cursor at start of cleared block for summary output
   _UI_PROGRESS_DRAWN=false
 }
