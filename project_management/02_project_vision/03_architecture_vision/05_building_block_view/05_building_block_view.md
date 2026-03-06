@@ -3,24 +3,22 @@
 ## Level 1: System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      doc.doc.sh System                      │
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Main Entry Point (doc.doc.sh)           │   │
-│  │  • Command routing                                   │   │
-│  │  • Argument parsing                                  │   │
-│  │  • Workflow orchestration                            │   │
-│  └────────────────────┬─────────────────────────────────┘   │
-│                       │                                     │
-│       ┌───────────────┼───────────────┐                     │
-│       │               │               │                     │
-│  ┌────▼────┐    ┌─────▼─────┐   ┌────▼─────┐               │
-│  │  Bash   │    │  Python   │   │ Plugin   │               │
-│  │Components│   │  Filter   │   │ System   │               │
-│  │         │    │  Engine   │   │          │               │
-│  └─────────┘    └───────────┘   └──────────┘               │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                       doc.doc.sh System                          │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │              Main Entry Point (doc.doc.sh)                 │  │
+│  │  • Command routing  • Argument parsing                     │  │
+│  │  • Workflow orchestration                                  │  │
+│  └─────────────────────────┬──────────────────────────────────┘  │
+│                            │                                     │
+│   ┌────┬──────┬─────────────┬──────────┬─────────┬──────────┐  │
+│   │    │      │             │          │         │          │  │
+│ ┌─▼──┐ ┌▼──────┐ ┌─────▼──────┐ ┌───▼────┐ ┌──▼─────┐ ┌──▼──────┐│
+│ │ UI │ │Plugin │ │  Plugin    │ │Template│ │Python  │ │ Plugin  ││
+│ │    │ │ Mgmt  │ │   Exec     │ │  Mgmt  │ │Filter  │ │ System  ││
+│ └────┘ └───────┘ └────────────┘ └────────┘ └────────┘ └─────────┘│
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Responsibilities
@@ -28,7 +26,10 @@
 | Component | Responsibility |
 |-----------|---------------|
 | **doc.doc.sh** | CLI entry point, command routing, parameter validation, workflow coordination |
-| **Bash Components** | Help system, logging, plugin management, template handling |
+| **UI** | All user interactions: help display, CLI argument presentation, progress indication, error and status feedback |
+| **Plugin Management** | Plugin discovery, descriptor loading, activation/deactivation, plugin configuration |
+| **Plugin Execution** | Plugin command invocation, failure handling, input/output validation; future: sandboxing |
+| **Template Management** | Template loading, resolution order, variable substitution, markdown output generation |
 | **Python Filter Engine** | Complex include/exclude logic, pattern matching, file filtering |
 | **Plugin System** | Extensible processing capabilities, file type handlers, metadata extraction |
 
@@ -82,6 +83,80 @@ find "$INPUT_DIR" -type f -print0 | \
 # 6. Report completion
 report_summary
 ```
+
+## Level 2: UI
+
+**Purpose**: Encapsulate all user-facing interaction so that other building blocks remain free of presentation concerns.
+
+**Responsibilities**:
+- Display usage, command help, and examples (context-sensitive help)
+- Parse and present CLI arguments to the orchestrator
+- Indicate processing progress (per-file, overall)
+- Deliver error, warning, info, and debug messages to the user
+
+**Interfaces**:
+- **Input**: Raw CLI `$@`; internal log/progress calls from other blocks
+- **Output**: Formatted text to stdout/stderr; structured argument map back to the orchestrator
+
+**Current implementation**: `doc.doc.sh` (argument parsing section), `components/help.sh`, `components/logging.sh`
+
+---
+
+## Level 2: Plugin Management
+
+**Purpose**: Own the lifecycle and configuration of plugins, keeping plugin metadata and state consistent.
+
+**Responsibilities**:
+- Discover plugins by scanning the plugin directory
+- Load and validate `descriptor.json` for each plugin
+- Manage activation and deactivation state (`active` field in descriptor)
+- Support install and installed-check commands
+- Expose the ordered, active plugin list to Plugin Execution
+
+**Interfaces**:
+- **Input**: Plugin directory path; activation/deactivation commands from the orchestrator
+- **Output**: Ordered list of active plugin descriptors; human-readable status for list/activate/deactivate commands
+
+**Current implementation**: `components/plugins.sh` (discovery, activation, descriptor management portions)
+
+---
+
+## Level 2: Plugin Execution
+
+**Purpose**: Encapsulate the mechanics of running plugin commands so that callers deal only with logical inputs and outputs.
+
+**Responsibilities**:
+- Invoke plugin shell commands with JSON input via stdin
+- Capture JSON output from stdout
+- Validate outputs against the descriptor's declared parameter schema
+- Classify and handle exit codes (success / skip-file / fatal-stop)
+- Future: sandbox plugin execution to restrict filesystem and network access
+
+**Interfaces**:
+- **Input**: Plugin descriptor, accumulated data map for a file
+- **Output**: Merged data map after plugin execution; error/skip/fatal signal
+
+**Current implementation**: `components/plugins.sh` (execution, stdin/stdout I/O, exit-code handling portions)
+
+---
+
+## Level 2: Template Management
+
+**Purpose**: Decouple output formatting from processing logic by owning how collected file data is rendered into markdown.
+
+**Responsibilities**:
+- Resolve the active template (user-specified → user config → built-in)
+- Load the template file
+- Substitute `{{variable}}` placeholders with values from the accumulated plugin data map
+- Write rendered markdown to the output directory
+
+**Interfaces**:
+- **Input**: Template path (optional), accumulated data map for a file, output directory
+- **Output**: Rendered `.md` file written to the output directory
+
+**Current implementation**: `components/templates.sh`
+
+---
 
 ## Level 3: Components Detail
 
