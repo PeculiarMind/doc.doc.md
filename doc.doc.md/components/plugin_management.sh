@@ -6,6 +6,9 @@
 # Contains NO plugin invocation, stdin/stdout JSON I/O, or exit-code
 # classification logic.
 #
+# Requires: plugin_info.py (sibling Python component) for tree rendering
+#           and table formatting in cmd_tree and cmd_list.
+#
 # Public Interface:
 #   discover_plugins <plugin_dir>            - Discover active plugins with valid descriptors
 #   discover_all_plugins <plugin_dir>        - Discover all plugins (active + inactive), sorted
@@ -411,180 +414,16 @@ cmd_tree() {
     exit 0
   fi
 
-  local all_plugins
-  mapfile -t all_plugins < <(discover_all_plugins "$PLUGIN_DIR")
+  local plugin_info_script
+  plugin_info_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugin_info.py"
 
-  if [ ${#all_plugins[@]} -eq 0 ]; then
-    return 0
+  if [ ! -f "$plugin_info_script" ]; then
+    echo "Error: plugin_info.py not found: $plugin_info_script" >&2
+    exit 1
   fi
 
-  # Build dependency map: derive dependencies from output→input parameter name matching.
-  # Plugin A depends on plugin B if any of B's process.output parameter names
-  # appear in A's process.input parameter names.
-  declare -A plugin_deps    # plugin_name -> space-separated dep names
-  declare -A plugin_active  # plugin_name -> true/false
-  declare -A plugin_outputs # plugin_name -> space-separated output param names
-
-  # First pass: collect active status and output parameter names
-  for plugin_name in "${all_plugins[@]}"; do
-    local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
-    [ -f "$descriptor" ] || continue
-    local active
-    active=$(get_plugin_active_status "$descriptor")
-    plugin_active["$plugin_name"]="$active"
-
-    local outputs
-    outputs=$(jq -r '(.commands.process.output // {}) | keys[]' "$descriptor" 2>/dev/null | tr '\n' ' ') || outputs=""
-    plugin_outputs["$plugin_name"]="${outputs% }"
-  done
-
-  # Second pass: for each plugin, find which other plugins provide its inputs
-  for plugin_name in "${all_plugins[@]}"; do
-    local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
-    [ -f "$descriptor" ] || continue
-
-    local inputs
-    inputs=$(jq -r '(.commands.process.input // {}) | keys[]' "$descriptor" 2>/dev/null) || inputs=""
-
-    local deps=""
-    for input_param in $inputs; do
-      for other_plugin in "${all_plugins[@]}"; do
-        [ "$other_plugin" = "$plugin_name" ] && continue
-        local other_outputs="${plugin_outputs[$other_plugin]:-}"
-        for out_param in $other_outputs; do
-          if [ "$input_param" = "$out_param" ]; then
-            if ! echo " $deps " | grep -q " $other_plugin "; then
-              deps="${deps:+$deps }$other_plugin"
-            fi
-          fi
-        done
-      done
-    done
-    plugin_deps["$plugin_name"]="$deps"
-  done
-
-  # Detect circular dependencies using DFS
-  # Returns 0 if no cycle, 1 if cycle found
-  _detect_cycle() {
-    local start="$1"
-    local -n _visited="$2"
-    local -n _in_stack="$3"
-
-    _in_stack["$start"]=1
-    _visited["$start"]=1
-
-    local deps="${plugin_deps[$start]:-}"
-    for dep in $deps; do
-      if [ -z "${_visited[$dep]+x}" ]; then
-        if ! _detect_cycle "$dep" "$2" "$3"; then
-          return 1
-        fi
-      elif [ "${_in_stack[$dep]+x}" ]; then
-        return 1
-      fi
-    done
-    unset '_in_stack[$start]'
-    return 0
-  }
-
-  declare -A visited_global
-  for plugin_name in "${all_plugins[@]}"; do
-    [ -z "${visited_global[$plugin_name]+x}" ] || continue
-    declare -A in_stack_local=()
-    if ! _detect_cycle "$plugin_name" visited_global in_stack_local; then
-      echo "Error: Circular dependency detected involving plugin '$plugin_name'" >&2
-      return 1
-    fi
-  done
-
-  # Determine which plugins are dependencies of others (children)
-  declare -A is_child
-  for plugin_name in "${all_plugins[@]}"; do
-    local deps="${plugin_deps[$plugin_name]:-}"
-    for dep in $deps; do
-      is_child["$dep"]=1
-    done
-  done
-
-  # Find root plugins (not a child of any other plugin)
-  local root_plugins=()
-  for plugin_name in "${all_plugins[@]}"; do
-    if [ -z "${is_child[$plugin_name]+x}" ]; then
-      root_plugins+=("$plugin_name")
-    fi
-  done
-
-  # Render a plugin node with color
-  _render_plugin_label() {
-    local name="$1"
-    local active="${plugin_active[$name]:-true}"
-    # Check if plugin exists in our list
-    local exists=false
-    for p in "${all_plugins[@]}"; do
-      [ "$p" = "$name" ] && exists=true && break
-    done
-
-    if [ "$exists" = "false" ]; then
-      # Missing dependency
-      echo "${name} [missing]"
-      return
-    fi
-
-    if [ "$active" = "true" ]; then
-      printf '\033[32m%s\033[0m' "$name"
-    else
-      printf '\033[31m%s\033[0m' "$name"
-    fi
-  }
-
-  # Recursively print tree
-  _print_tree() {
-    local plugin_name="$1"
-    local prefix="$2"
-    local is_last="$3"
-
-    local connector
-    if [ "$is_last" = "true" ]; then
-      connector="└──"
-    else
-      connector="├──"
-    fi
-
-    local label
-    label=$(_render_plugin_label "$plugin_name")
-    echo "${prefix}${connector} ${label}"
-
-    local child_prefix
-    if [ "$is_last" = "true" ]; then
-      child_prefix="${prefix}    "
-    else
-      child_prefix="${prefix}│   "
-    fi
-
-    local deps="${plugin_deps[$plugin_name]:-}"
-    local dep_arr=()
-    for dep in $deps; do
-      dep_arr+=("$dep")
-    done
-
-    local n=${#dep_arr[@]}
-    local i=0
-    for dep in "${dep_arr[@]}"; do
-      i=$((i + 1))
-      local last="false"
-      [ "$i" -eq "$n" ] && last="true"
-      _print_tree "$dep" "$child_prefix" "$last"
-    done
-  }
-
-  local n=${#root_plugins[@]}
-  local i=0
-  for plugin_name in "${root_plugins[@]}"; do
-    i=$((i + 1))
-    local last="false"
-    [ "$i" -eq "$n" ] && last="true"
-    _print_tree "$plugin_name" "" "$last"
-  done
+  python3 "$plugin_info_script" tree "$PLUGIN_DIR"
+  return $?
 }
 
 # Validate that a plugin path stays within PLUGIN_DIR (prevents path traversal).
@@ -645,6 +484,9 @@ _list_plugins() {
 # --- List command ---
 
 cmd_list() {
+  local plugin_info_script
+  plugin_info_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugin_info.py"
+
   # Handle 'plugins' sub-command (FEATURE_0008)
   if [ "${1:-}" = "plugins" ]; then
     local filter="${2:-all}"
@@ -697,13 +539,13 @@ cmd_list() {
           ) | @tsv
         ' "$descriptor" 2>/dev/null | sort
       done
-    } | column -t -s $'\t'
+    } | python3 "$plugin_info_script" table
     return 0
   fi
 
-  local plugin_name=""
   local show_commands=false
   local show_parameters=false
+  local plugin_name=""
 
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -809,7 +651,7 @@ cmd_list() {
           )
         ) | @tsv
       ' "$descriptor" 2>/dev/null | sort
-    } | column -t -s $'\t'
+    } | python3 "$plugin_info_script" table
     exit 0
   fi
 
