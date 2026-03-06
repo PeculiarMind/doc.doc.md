@@ -1,5 +1,13 @@
 # doc.doc.md
 
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE.md)
+[![Shell: Bash 4.0+](https://img.shields.io/badge/shell-bash_4.0%2B-4EAA25?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Python: 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Last Commit](https://img.shields.io/github/last-commit/PeculiarMind/doc.doc.md)](https://github.com/PeculiarMind/doc.doc.md/commits)
+[![GitHub Stars](https://img.shields.io/github/stars/PeculiarMind/doc.doc.md?style=social)](https://github.com/PeculiarMind/doc.doc.md/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/PeculiarMind/doc.doc.md)](https://github.com/PeculiarMind/doc.doc.md/issues)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/PeculiarMind/doc.doc.md/blob/main/README.md#contributing)
+
 **Transform your document collections into organized, searchable markdown files.**
 
 doc.doc.md is a command-line tool that processes document collections in directory structures and generates markdown files for each document. Perfect for managing personal documents, home labs, or any collection where you want markdown-based organization without a complex document management system.
