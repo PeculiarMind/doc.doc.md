@@ -5,20 +5,20 @@
 # progress messages, and log formatting.
 #
 # Public Interface:
-#   usage()                    - Print main CLI help text to stdout
-#   usage_activate()           - Print activate sub-command help
-#   usage_deactivate()         - Print deactivate sub-command help
-#   usage_install()            - Print install sub-command help
-#   usage_installed()          - Print installed sub-command help
-#   usage_tree()               - Print tree sub-command help
+#   ui_usage()                    - Print main CLI help text to stdout
+#   ui_usage_activate()           - Print activate sub-command help
+#   ui_usage_deactivate()         - Print deactivate sub-command help
+#   ui_usage_install()            - Print install sub-command help
+#   ui_usage_installed()          - Print installed sub-command help
+#   ui_usage_tree()               - Print tree sub-command help
 #   log_info <msg>             - Print informational message to stderr
 #   log_warn <msg>             - Print warning message to stderr
 #   log_error <msg>            - Print error message to stderr
 #   log_processed <src> <dst>  - Print file-processed progress to stderr
 
-# --- Main help ---
+# --- Main help (Relocated from doc.doc.sh - FEATURE_0029) ---
 
-usage() {
+ui_usage() {
   cat <<EOF
 Usage: $(basename "$0") <command> [OPTIONS]
 
@@ -103,9 +103,9 @@ Examples:
 EOF
 }
 
-# --- Sub-command help ---
+# --- Sub-command help (Relocated from doc.doc.sh - FEATURE_0029) ---
 
-usage_activate() {
+ui_usage_activate() {
   cat <<EOF
 Usage: $(basename "$0") activate --plugin <plugin_name>
        $(basename "$0") activate -p <plugin_name>
@@ -119,7 +119,7 @@ Options:
 EOF
 }
 
-usage_deactivate() {
+ui_usage_deactivate() {
   cat <<EOF
 Usage: $(basename "$0") deactivate --plugin <plugin_name>
        $(basename "$0") deactivate -p <plugin_name>
@@ -133,7 +133,7 @@ Options:
 EOF
 }
 
-usage_install() {
+ui_usage_install() {
   cat <<EOF
 Usage: $(basename "$0") install --plugin <plugin_name>
        $(basename "$0") install -p <plugin_name>
@@ -148,7 +148,7 @@ Options:
 EOF
 }
 
-usage_installed() {
+ui_usage_installed() {
   cat <<EOF
 Usage: $(basename "$0") installed --plugin <plugin_name>
        $(basename "$0") installed -p <plugin_name>
@@ -166,7 +166,7 @@ Options:
 EOF
 }
 
-usage_tree() {
+ui_usage_tree() {
   cat <<EOF
 Usage: $(basename "$0") tree
 
@@ -179,6 +179,14 @@ Exit codes:
   1   Circular dependency detected
 EOF
 }
+
+# --- Backward-compatible aliases (FEATURE_0029) ---
+usage()            { ui_usage "$@"; }
+usage_activate()   { ui_usage_activate "$@"; }
+usage_deactivate() { ui_usage_deactivate "$@"; }
+usage_install()    { ui_usage_install "$@"; }
+usage_installed()  { ui_usage_installed "$@"; }
+usage_tree()       { ui_usage_tree "$@"; }
 
 # --- Logging helpers ---
 

@@ -5,7 +5,7 @@
 - **Type:** Feature
 - **Created at:** 2026-03-06
 - **Created by:** product_owner
-- **Status:** BACKLOG
+- **Status:** DONE
 
 ## TOC
 
@@ -17,12 +17,12 @@ FEATURE_0027 reorganises the `cmd_*` command functions and deliberately defers t
 **Prerequisite:** FEATURE_0027 must be completed and merged before starting this item.
 
 ## Acceptance Criteria
-- [ ] All usage/help text functions (including but not limited to `usage()`, `usage_activate()`, `usage_process()`, and any per-command usage helpers) are removed from `doc.doc.sh` and implemented inside `doc.doc.md/components/ui.sh`
-- [ ] `doc.doc.sh` contains no `echo`/`printf` statements that produce user-facing help or usage output after this change; it only sources `ui.sh` and delegates to the relocated functions
-- [ ] All existing automated tests in `tests/` continue to pass without modification, confirming that the visible CLI usage output is byte-for-byte identical before and after the move (REQ_0038 backward compatibility)
-- [ ] `ui.sh` exports the relocated functions under the `ui_` naming convention (e.g. `ui_usage`, `ui_usage_activate`, `ui_usage_process`) or an equivalent documented convention consistent with REQ_0037 module interface contracts
-- [ ] `doc.doc.sh` line count is measurably reduced (target: ≤ 450 lines, consistent with the cap introduced in FEATURE_0027), with the reduction attributable entirely to the moved usage/help functions
-- [ ] Each relocated function carries a brief inline comment identifying its origin and purpose, consistent with the module documentation convention in REQ_0037
+- [x] All usage/help text functions (including but not limited to `usage()`, `usage_activate()`, `usage_process()`, and any per-command usage helpers) are removed from `doc.doc.sh` and implemented inside `doc.doc.md/components/ui.sh`
+- [x] `doc.doc.sh` contains no `echo`/`printf` statements that produce user-facing help or usage output after this change; it only sources `ui.sh` and delegates to the relocated functions
+- [x] All existing automated tests in `tests/` continue to pass without modification, confirming that the visible CLI usage output is byte-for-byte identical before and after the move (REQ_0038 backward compatibility)
+- [x] `ui.sh` exports the relocated functions under the `ui_` naming convention (e.g. `ui_usage`, `ui_usage_activate`, `ui_usage_process`) or an equivalent documented convention consistent with REQ_0037 module interface contracts
+- [x] `doc.doc.sh` line count is measurably reduced (target: ≤ 450 lines, consistent with the cap introduced in FEATURE_0027), with the reduction attributable entirely to the moved usage/help functions
+- [x] Each relocated function carries a brief inline comment identifying its origin and purpose, consistent with the module documentation convention in REQ_0037
 
 ## Dependencies
 - **Blocked by FEATURE_0027**: The `cmd_*` reorganisation must be complete and merged before relocating usage strings, so that the final function structure in `doc.doc.sh` is stable. Do not begin implementation until FEATURE_0027 is in state DONE.
