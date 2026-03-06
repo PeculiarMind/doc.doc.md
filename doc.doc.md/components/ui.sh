@@ -44,6 +44,8 @@ process Options:
   -e <criteria>  Exclude filter criteria (repeatable)
                   Comma-separated values are ORed; multiple -e flags are ANDed
                   Examples: -e ".log" -e "**/temp/**"
+  --progress     Force progress display even when stdout is not a TTY
+  --no-progress  Suppress progress display even on a TTY
 
 list Options:
   plugins            List all plugins with activation status
@@ -186,4 +188,109 @@ log_error() {
 log_processed() {
   local src="$1" dst="$2"
   echo "Processed: $src -> $dst" >&2
+}
+
+# --- Progress display (FEATURE_0026) ---
+# Global state for progress display
+_UI_PROGRESS_ENABLED=false
+_UI_PROGRESS_TOTAL=0
+_UI_PROGRESS_DONE=0
+_UI_PROGRESS_PHASE=""
+_UI_PROGRESS_STEP=""
+_UI_PROGRESS_FOUND=0
+_UI_PROGRESS_FILE=""
+_UI_PROGRESS_PLUGIN=""
+_UI_PROGRESS_DRAWN=false
+
+ui_progress_init() {
+  local total="${1:-0}"
+  _UI_PROGRESS_ENABLED=true
+  _UI_PROGRESS_TOTAL="$total"
+  _UI_PROGRESS_DONE=0
+  _UI_PROGRESS_PHASE=""
+  _UI_PROGRESS_STEP=""
+  _UI_PROGRESS_FOUND=0
+  _UI_PROGRESS_FILE=""
+  _UI_PROGRESS_PLUGIN=""
+  _UI_PROGRESS_DRAWN=false
+
+  trap '_ui_progress_clear; exit 130' INT
+}
+
+ui_progress_update() {
+  local key="$1" value="$2"
+  case "$key" in
+    phase)   _UI_PROGRESS_PHASE="$value" ;;
+    step)    _UI_PROGRESS_STEP="$value" ;;
+    found)   _UI_PROGRESS_FOUND="$value" ;;
+    file)    _UI_PROGRESS_FILE="$value" ;;
+    plugin)  _UI_PROGRESS_PLUGIN="$value" ;;
+    done)    _UI_PROGRESS_DONE="$value" ;;
+    total)   _UI_PROGRESS_TOTAL="$value" ;;
+  esac
+  _ui_progress_render
+}
+
+ui_progress_done() {
+  local count="${1:-$_UI_PROGRESS_DONE}"
+  _ui_progress_clear
+  _UI_PROGRESS_ENABLED=false
+  echo "Processed $count documents." >&2
+  trap - INT
+}
+
+_ui_progress_render() {
+  [ "$_UI_PROGRESS_ENABLED" = true ] || return 0
+
+  local pct=0
+  if [ "$_UI_PROGRESS_TOTAL" -gt 0 ]; then
+    pct=$(( (_UI_PROGRESS_DONE * 100) / _UI_PROGRESS_TOTAL ))
+  fi
+  [ "$pct" -gt 100 ] && pct=100
+
+  local bar_width=50
+  local filled=$(( (pct * bar_width) / 100 ))
+  local empty=$(( bar_width - filled ))
+
+  local bar=""
+  local i
+  if [ "$pct" -eq 100 ]; then
+    for (( i=0; i<bar_width; i++ )); do bar+="▓"; done
+  elif [ "$pct" -eq 0 ]; then
+    for (( i=0; i<bar_width; i++ )); do bar+="░"; done
+  elif [ "$pct" -le 50 ]; then
+    for (( i=0; i<filled; i++ )); do
+      if (( i % 2 == 0 )); then bar+="▒"; else bar+="░"; fi
+    done
+    for (( i=0; i<empty; i++ )); do bar+="░"; done
+  else
+    for (( i=0; i<filled; i++ )); do
+      if (( i % 2 == 0 )); then bar+="▓"; else bar+="▒"; fi
+    done
+    for (( i=0; i<empty; i++ )); do bar+="░"; done
+  fi
+
+  if [ "$_UI_PROGRESS_DRAWN" = true ]; then
+    printf '\033[6A' >&2
+  fi
+
+  printf '\r\033[K%s\n' "Progress: ${bar} ${pct}%" >&2
+  printf '\033[K%s\n' "Phase:    ${_UI_PROGRESS_PHASE}" >&2
+  printf '\033[K%s\n' "Step:     ${_UI_PROGRESS_STEP}" >&2
+  printf '\033[K%s\n' "Found:    ${_UI_PROGRESS_FOUND} documents" >&2
+  printf '\033[K%s\n' "Process:  ${_UI_PROGRESS_FILE}" >&2
+  printf '\033[K%s\n' "Execute:  ${_UI_PROGRESS_PLUGIN}" >&2
+
+  _UI_PROGRESS_DRAWN=true
+}
+
+_ui_progress_clear() {
+  [ "$_UI_PROGRESS_DRAWN" = true ] || return 0
+  printf '\033[6A' >&2
+  local i
+  for (( i=0; i<6; i++ )); do
+    printf '\r\033[K\n' >&2
+  done
+  printf '\033[6A' >&2
+  _UI_PROGRESS_DRAWN=false
 }
