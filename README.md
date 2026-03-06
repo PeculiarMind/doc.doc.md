@@ -15,6 +15,7 @@ doc.doc.md is a command-line tool that processes document collections in directo
 - **Template-Based Output**: Full control over the structure of generated markdown files
 - **Unix Pipeline Architecture**: Efficient file processing using standard Unix pipes and streams
 - **Simple CLI**: Straightforward command-line interface with clear options
+- **Interactive Progress Display**: Live-updating ASCII progress bar when running in a terminal, with TTY auto-detection
 
 ## Installation
 
@@ -152,6 +153,8 @@ Each `.md` file contains metadata and content extracted from the original docume
 | `--template` | `-t` | Path to the markdown template file | No | Built-in default |
 | `--include` | `-i` | Comma-separated file extensions, glob patterns, or MIME types to include | No | All files |
 | `--exclude` | `-e` | Comma-separated file extensions, glob patterns, or MIME types to exclude | No | |
+| `--progress` | | Force progress display even when stdout is not a TTY | No | Auto-detect TTY |
+| `--no-progress` | | Suppress progress display even on a TTY | No | Auto-detect TTY |
 
 #### Plugin Commands
 

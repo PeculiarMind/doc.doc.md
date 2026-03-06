@@ -872,6 +872,7 @@ main() {
   local template_file="$SCRIPT_DIR/doc.doc.md/templates/default.md"
   local -a include_args=()
   local -a exclude_args=()
+  local progress_flag=""
 
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -899,6 +900,14 @@ main() {
         [ $# -ge 2 ] || { echo "Error: -e requires an argument" >&2; exit 1; }
         exclude_args+=("$2")
         shift 2
+        ;;
+      --progress)
+        progress_flag="on"
+        shift
+        ;;
+      --no-progress)
+        progress_flag="off"
+        shift
         ;;
       --help)
         usage
@@ -1021,6 +1030,16 @@ main() {
   _MIME_INCLUDE_ARGS=("${mime_include_args[@]+"${mime_include_args[@]}"}")
   _MIME_EXCLUDE_ARGS=("${mime_exclude_args[@]+"${mime_exclude_args[@]}"}")
 
+  # Determine whether to show progress display
+  local show_progress=false
+  if [ "$progress_flag" = "on" ]; then
+    show_progress=true
+  elif [ "$progress_flag" = "off" ]; then
+    show_progress=false
+  elif [ -t 2 ]; then
+    show_progress=true
+  fi
+
   # Build path-only filter arguments for the pre-processing find step
   local -a filter_args=()
   for inc in "${path_include_args[@]+"${path_include_args[@]}"}"; do
@@ -1030,6 +1049,13 @@ main() {
     filter_args+=("--exclude" "$exc")
   done
 
+  # Progress: Scan phase
+  if [ "$show_progress" = true ]; then
+    ui_progress_init 0
+    ui_progress_update phase "Scan directory"
+    ui_progress_update step "Reading directory tree"
+  fi
+
   # Discover files and apply filters
   local -a file_list
   mapfile -t file_list < <(
@@ -1038,8 +1064,19 @@ main() {
   )
 
   if [ ${#file_list[@]} -eq 0 ]; then
+    if [ "$show_progress" = true ]; then
+      ui_progress_done 0
+    fi
     echo "[]"
     exit 0
+  fi
+
+  # Progress: Update found count and transition to process phase
+  if [ "$show_progress" = true ]; then
+    ui_progress_update step "Apply include/exclude filters"
+    ui_progress_update found "${#file_list[@]}"
+    ui_progress_update total "${#file_list[@]}"
+    ui_progress_update phase "Process documents"
   fi
 
   # Process each file through all plugins, write sidecar .md files, stream JSON results
@@ -1047,8 +1084,17 @@ main() {
   # the case where all files are MIME-filtered out (need to print '[]' then).
   local first=true
   local printed_bracket=false
+  local processed_count=0
   for file_path in "${file_list[@]}"; do
     [ -n "$file_path" ] || continue
+
+    local relative_path="${file_path#${input_dir}/}"
+
+    if [ "$show_progress" = true ]; then
+      ui_progress_update step "Execute plugins"
+      ui_progress_update file "$relative_path"
+    fi
+
     local result
     result=$(process_file "$file_path" "${plugins[@]}")
     [ -n "$result" ] || continue
@@ -1064,7 +1110,6 @@ main() {
     echo "$result"
 
     # Write sidecar .md file to output directory
-    local relative_path="${file_path#${input_dir}/}"
     local sidecar_path="${canonical_out}/${relative_path}.md"
     local sidecar_dir
     sidecar_dir="$(dirname "$sidecar_path")"
@@ -1084,9 +1129,27 @@ main() {
       continue
     fi
 
+    if [ "$show_progress" = true ]; then
+      ui_progress_update step "Write output"
+    fi
+
     render_template_json "$template_file" "$result" > "$sidecar_path"
+    processed_count=$((processed_count + 1))
+
+    if [ "$show_progress" = true ]; then
+      ui_progress_update done "$processed_count"
+    fi
+
     log_processed "$file_path" "$sidecar_path"
   done
+
+  if [ "$show_progress" = true ]; then
+    ui_progress_update phase "Done"
+    ui_progress_update step ""
+    ui_progress_done "$processed_count"
+  else
+    echo "Processed $processed_count documents." >&2
+  fi
 
   if [ "$printed_bracket" = false ]; then
     echo "[]"
