@@ -169,7 +169,9 @@ else
   # exits when CMD exits. Redirect stderr of the subprocess to /dev/null so the
   # typescript contains only what would appear on the PTY terminal (stdout).
   script -q -c "bash '$CLI' process -d '$TTY_INDIR' -o '$TTY_OUT' 2>/dev/null" "$TTY_TS" >/dev/null 2>&1
-  tty_captured=$(cat "$TTY_TS" 2>/dev/null | tr -d '\r')  # remove CR from PTY framing
+  # Strip the `script` utility's own header/footer lines ("Script started/done on ...")
+  # which contain '[' characters unrelated to JSON output, then remove blank lines.
+  tty_captured=$(cat "$TTY_TS" 2>/dev/null | tr -d '\r' | grep -v '^Script ' | grep -v '^$')
   rm -f "$TTY_TS"
 
   # After the fix, TTY stdout should show only the human-readable summary;
