@@ -13,11 +13,13 @@ FILTER_SCRIPT="$SCRIPT_DIR/doc.doc.md/components/filter.py"
 PLUGIN_MGMT_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/plugin_management.sh"
 PLUGIN_EXEC_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/plugin_execution.sh"
 UI_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/ui.sh"
+TEMPLATES_COMPONENT="$SCRIPT_DIR/doc.doc.md/components/templates.sh"
 
 # Source components
 source "$PLUGIN_MGMT_COMPONENT"
 source "$PLUGIN_EXEC_COMPONENT"
 source "$UI_COMPONENT"
+source "$TEMPLATES_COMPONENT"
 
 # Global MIME filter criteria (set by main, consumed by process_file)
 _MIME_INCLUDE_ARGS=()
@@ -762,36 +764,6 @@ cmd_list() {
   # No recognized sub-command given
   usage >&2
   exit 1
-}
-
-# --- Template rendering (FEATURE_0019) ---
-
-# render_template_json renders a template file replacing {{key}} placeholders
-# with values from the provided JSON string.
-render_template_json() {
-  local template="$1"
-  local result_json="$2"
-  local content
-  content="$(cat "$template")"
-
-  # Iterate over keys; extract each value preserving all lines (fixes DEBTR_003 and BUG_0009)
-  while IFS= read -r key; do
-    [ -n "$key" ] || continue
-    local val
-    val="$(echo "$result_json" | jq -r --arg k "$key" '.[$k] // empty')"
-    content="${content//\{\{${key}\}\}/${val}}"
-  done < <(echo "$result_json" | jq -r 'keys[]')
-
-  # Derive fileName from filePath
-  local fp
-  fp=$(echo "$result_json" | jq -r '.filePath // empty')
-  if [ -n "$fp" ]; then
-    local fname
-    fname="$(basename "$fp")"
-    content="${content//\{\{fileName\}\}/${fname}}"
-  fi
-
-  printf '%s' "$content"
 }
 
 # --- Main processing ---
