@@ -5,7 +5,7 @@
 - **Type:** Bug
 - **Created at:** 2026-03-10
 - **Created by:** security.agent
-- **Status:** BACKLOG
+- **Status:** DONE
 - **Assigned to:** developer.agent
 
 ## TOC
@@ -58,11 +58,11 @@ Apply the same fix to both the `--commands` and `--parameters` branches.
 
 ## Acceptance Criteria
 
-- [ ] `list --plugin '../../../../etc' --parameters` is rejected with an error before any filesystem access outside `$PLUGIN_DIR`
-- [ ] `list --plugin '../../../../etc' --commands` is likewise rejected
-- [ ] Legitimate plugin names (no `../`) continue to work correctly (regression test)
-- [ ] Plugin name with leading `../` sequences is sanitized before path construction
-- [ ] ShellCheck passes on the modified function
+- [x] `list --plugin '../../../../etc' --parameters` is rejected with an error before any filesystem access outside `$PLUGIN_DIR`
+- [x] `list --plugin '../../../../etc' --commands` is likewise rejected
+- [x] Legitimate plugin names (no `../`) continue to work correctly (regression test)
+- [x] Plugin name with leading `../` sequences is sanitized before path construction
+- [x] ShellCheck passes on the modified function
 
 ## Dependencies
 
@@ -74,3 +74,13 @@ None — standalone fix within `cmd_list()`.
 - Security Requirement: [REQ_SEC_005](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_005_path_traversal_prevention.md)
 - Security Requirement: [REQ_SEC_001](../../../02_project_vision/02_requirements/03_accepted/REQ_SEC_001_input_validation_sanitization.md)
 - Feature: [FEATURE_0018](../06_done/FEATURE_0018_list_plugin_parameters.md)
+
+## Workflow Assessment Log
+
+- **Step 3 (TDD):** tester.agent — Tests in test_bug_0007.sh (33 assertions) covering traversal via --parameters, --commands, various patterns, regression, bare '..'
+- **Step 4 (Implementation):** developer.agent — Added `_validate_plugin_dir()` helper using `cd`/`pwd -P` canonicalization. Applied to both --commands and --parameters branches.
+- **Step 5 (Tester Assessment):** tester.agent — All 33 tests pass. Legitimate plugins (file, stat) continue working. All traversal patterns correctly rejected.
+- **Step 6 (Architect Assessment):** architect.agent — Helper function follows single-responsibility principle. Uses cd/pwd -P for canonicalization which is portable. No architectural concerns.
+- **Step 7 (Security Assessment):** security.agent — Fix prevents path traversal via `list --plugin`. Canonicalization prevents both direct and nested traversal. No new vulnerabilities introduced.
+- **Step 8 (License Assessment):** license.agent — No new dependencies. No license impact.
+- **Step 9 (Documentation Assessment):** documentation.agent — No user-facing documentation changes needed. Error messages preserved.

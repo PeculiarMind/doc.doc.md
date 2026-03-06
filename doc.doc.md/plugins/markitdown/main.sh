@@ -15,7 +15,7 @@ SUPPORTED_MIME_TYPES=(
   "application/vnd.ms-powerpoint"
 )
 
-input_json="$(cat)"
+input_json="$(head -c 1048576)"
 file_path="$(echo "$input_json" | jq -r '.filePath // empty')"
 mime_type="$(echo "$input_json" | jq -r '.mimeType // empty')"
 
