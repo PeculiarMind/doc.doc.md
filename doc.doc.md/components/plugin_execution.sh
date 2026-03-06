@@ -10,6 +10,8 @@
 #   run_plugin <name> <file_path> <plugin_base_dir> [context_json]
 #       - Invoke a plugin's process command with JSON I/O
 #       - Returns 0 on success, 1 on plugin error
+#   process_file <file_path> <plugin...>
+#       - Run a file through a sequence of plugins, merging JSON output
 
 # --- Plugin execution ---
 
@@ -55,4 +57,59 @@ run_plugin() {
   fi
 
   echo "$plugin_output"
+}
+
+# --- Main processing ---
+
+process_file() {
+  local file_path="$1"
+  shift
+  local plugins=("$@")
+
+  local combined_result
+  combined_result=$(jq -n --arg filePath "$file_path" '{filePath: $filePath}')
+
+  for plugin_name in "${plugins[@]}"; do
+    local plugin_output
+    if plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR" "$combined_result"); then
+      # Merge plugin output into combined result
+      combined_result=$(echo "$combined_result" "$plugin_output" | jq -s '.[0] * .[1]')
+    else
+      # If the file plugin fails and MIME criteria are active, skip this file (fail-closed)
+      if [ "$plugin_name" = "file" ]; then
+        local _has_mime=false
+        [ ${#_MIME_INCLUDE_ARGS[@]} -gt 0 ] && _has_mime=true
+        [ ${#_MIME_EXCLUDE_ARGS[@]} -gt 0 ] && _has_mime=true
+        [ "$_has_mime" = false ] || return 0
+      fi
+      # Graceful degradation: continue with partial results
+      continue
+    fi
+
+    # After the file plugin runs (always position 0), apply the MIME filter gate
+    if [ "$plugin_name" = "file" ]; then
+      local _has_mime_criteria=false
+      [ ${#_MIME_INCLUDE_ARGS[@]} -gt 0 ] && _has_mime_criteria=true
+      [ ${#_MIME_EXCLUDE_ARGS[@]} -gt 0 ] && _has_mime_criteria=true
+      if [ "$_has_mime_criteria" = true ]; then
+        local mime_type
+        mime_type=$(echo "$combined_result" | jq -r '.mimeType // empty')
+        if [ -n "$mime_type" ]; then
+          local mime_filter_args=()
+          for _inc in "${_MIME_INCLUDE_ARGS[@]+"${_MIME_INCLUDE_ARGS[@]}"}"; do
+            mime_filter_args+=("--include" "$_inc")
+          done
+          for _exc in "${_MIME_EXCLUDE_ARGS[@]+"${_MIME_EXCLUDE_ARGS[@]}"}"; do
+            mime_filter_args+=("--exclude" "$_exc")
+          done
+          local mime_check
+          mime_check=$(echo "$mime_type" | python3 "$FILTER_SCRIPT" "${mime_filter_args[@]+"${mime_filter_args[@]}"}")
+          # Empty result means MIME filter rejected this file — skip it silently
+          [ -n "$mime_check" ] || return 0
+        fi
+      fi
+    fi
+  done
+
+  echo "$combined_result"
 }
