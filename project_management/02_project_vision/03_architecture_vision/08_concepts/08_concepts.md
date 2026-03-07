@@ -12,6 +12,9 @@ This section captures the key concepts that are relevant to the architecture vis
 | [Error Handling](ARC_0004_error_handling.md) | Establishes error categorization, response strategies, and reporting format for consistent and user-friendly error management | Proposed |
 | [Logging and Progress Indication](ARC_0005_logging_and_progress.md) | Defines logging levels, progress output format, and user feedback mechanisms for transparency and debugging | Proposed |
 | [Security Considerations](ARC_0006_security_considerations.md) | Outlines security measures including input validation, plugin security guidelines, credential handling, and future sandboxing plans | Proposed |
+| [Plugin MIME Type Skip](ARC_0007_plugin_mime_type_skip.md) | Defines how the framework silently skips unsupported file types instead of printing spurious errors, using descriptor-declared MIME type lists | Draft |
+| [Interactive Process Banner](ARC_0008_interactive_process_banner.md) | Describes screen-clear and ASCII art banner display at the start of interactive process mode, gated on TTY detection | Draft |
+| [Base Path Parameter](ARC_0009_base_path_parameter.md) | Defines the `--base-path` parameter for controlling how source document references are resolved in generated markdown output | Draft |
 
 ## Concept Relationships
 
