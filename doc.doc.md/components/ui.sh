@@ -30,12 +30,13 @@ Commands:
   install      Install plugins
   installed    Check if a plugin is installed
   tree         Display a dependency tree of all plugins
+  setup        Verify dependencies and configure plugins interactively
 
 process Options:
   -d <dir>, --input-directory <dir>
                  Input directory to process (required)
   -o <dir>, --output-directory <dir>
-                 Output directory for sidecar .md files (required)
+                 Output directory for sidecar .md files (required unless --echo)
   -t <file>, --template <file>
                  Markdown template file (optional, defaults to doc.doc.md/templates/default.md)
   -i <criteria>  Include filter criteria (repeatable)
@@ -44,6 +45,10 @@ process Options:
   -e <criteria>  Exclude filter criteria (repeatable)
                   Comma-separated values are ORed; multiple -e flags are ANDed
                   Examples: -e ".log" -e "**/temp/**"
+  --echo         Print rendered markdown to stdout instead of writing files (dry-run)
+                  Mutually exclusive with -o
+  -b <dir>, --base-path <dir>
+                 Base path for computing relative file references in rendered output
   --progress     Force progress display even when stdout is not a TTY
   --no-progress  Suppress progress display even on a TTY
 
@@ -81,6 +86,10 @@ installed Options:
 tree Options:
   (no options)   Render dependency tree for all plugins
 
+setup Options:
+  -y, --yes              Auto-answer yes to all prompts
+  -n, --non-interactive  Report status only, no prompts (dry-run)
+
   --help     Show this help message
 
 Examples:
@@ -88,6 +97,8 @@ Examples:
   $(basename "$0") process -d /path/to/documents -o /path/to/output -i ".pdf,.txt"
   $(basename "$0") process -d /path/to/documents -o /path/to/output -i ".pdf" -e "**/temp/**"
   $(basename "$0") process -d /path/to/documents -o /path/to/output -t /path/to/template.md
+  $(basename "$0") process -d /path/to/documents --echo
+  $(basename "$0") process -d /path/to/documents -o /path/to/output -b /path/to/base
   $(basename "$0") list --plugin stat --commands
   $(basename "$0") list --plugin stat --parameters
   $(basename "$0") list parameters
@@ -100,6 +111,8 @@ Examples:
   $(basename "$0") install plugins --all
   $(basename "$0") installed --plugin stat
   $(basename "$0") tree
+  $(basename "$0") setup
+  $(basename "$0") setup --yes
 EOF
 }
 
@@ -180,6 +193,20 @@ Exit codes:
 EOF
 }
 
+ui_usage_setup() {
+  cat <<EOF
+Usage: $(basename "$0") setup [OPTIONS]
+
+Verifies core dependencies, discovers all plugins, checks their installation
+and activation status, and interactively prompts to install/activate.
+
+Options:
+  -y, --yes              Auto-answer yes to all prompts (automated setup)
+  -n, --non-interactive  Report status only, no prompts (dry-run check)
+  --help                 Show this help message
+EOF
+}
+
 # --- Backward-compatible aliases (FEATURE_0029) ---
 usage()            { ui_usage "$@"; }
 usage_activate()   { ui_usage_activate "$@"; }
@@ -187,6 +214,7 @@ usage_deactivate() { ui_usage_deactivate "$@"; }
 usage_install()    { ui_usage_install "$@"; }
 usage_installed()  { ui_usage_installed "$@"; }
 usage_tree()       { ui_usage_tree "$@"; }
+usage_setup()      { ui_usage_setup "$@"; }
 
 # --- Logging helpers ---
 
@@ -207,8 +235,35 @@ log_processed() {
   echo "Processed: $src -> $dst" >&2
 }
 
-# --- Progress display (FEATURE_0026) ---
-# Global state for progress display
+# --- Banner display (FEATURE_0030) ---
+
+ui_show_banner() {
+  # Only display when stderr is a TTY
+  [ -t 2 ] || return 0
+
+  # Clear screen and print ASCII art banner to stderr
+  printf '\033c' >&2
+  cat >&2 <<'BANNER'
+  ___     ___    ____      ____    ___    ____      __  __  ____    
+ |  _ \  / _ \  / ___|    |  _ \  / _ \  / ___|    |  \/  ||  _ \   
+ | | | || | | || |        | | | || | | || |        | |\/| || | | |  
+ | |_| || |_| || |___  _  | |_| || |_| || |___  _  | |  | || |_| | 
+ |____/  \___/  \____|(_) |____/  \___/  \____|(_) |_|  |_||____/  
+
+               ~ document your documents in markdown ~ 
+
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+ ▓▓▓ [ PAPER STACK ] >> [ SCAN ] >> [ doc.doc.sh ] >> [ .MD SIDECAR ] ▓▓▓
+ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+BANNER
+}
+
+# --- Progress state struct (DEBTR_004) ---
+# All progress display state variables are grouped here.
+# Reset all state via ui_progress_init; no other function re-initialises from scratch.
 _UI_PROGRESS_ENABLED=false
 _UI_PROGRESS_TOTAL=0
 _UI_PROGRESS_DONE=0
@@ -282,12 +337,11 @@ _ui_progress_render() {
   fi
 
   local bar=""
-  local i
   if [ "$pct" -eq 0 ]; then
-    for (( i=0; i<bar_width; i++ )); do bar+="░"; done
+    bar=$(printf '%.0s░' $(seq 1 "$bar_width"))
   else
-    for (( i=0; i<filled; i++ )); do bar+="${fill_char}"; done
-    for (( i=0; i<empty;  i++ )); do bar+="░"; done
+    [ "$filled" -gt 0 ] && bar=$(printf "%.0s${fill_char}" $(seq 1 "$filled"))
+    [ "$empty" -gt 0 ] && bar+=$(printf '%.0s░' $(seq 1 "$empty"))
   fi
 
   if [ "$_UI_PROGRESS_DRAWN" = true ]; then
@@ -309,10 +363,7 @@ _ui_progress_render() {
 _ui_progress_clear() {
   [ "$_UI_PROGRESS_DRAWN" = true ] || return 0
   printf '\033[u' >&2   # restore to saved position (start of progress block)
-  local i
-  for (( i=0; i<6; i++ )); do
-    printf '\r\033[K\n' >&2
-  done
+  printf '\r\033[K\n%.0s' $(seq 1 6) >&2
   printf '\033[u' >&2   # leave cursor at start of cleared block for summary output
   _UI_PROGRESS_DRAWN=false
 }

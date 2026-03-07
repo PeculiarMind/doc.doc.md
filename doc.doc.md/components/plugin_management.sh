@@ -659,3 +659,190 @@ cmd_list() {
   usage >&2
   exit 1
 }
+
+# --- Setup command (FEATURE_0025) ---
+
+cmd_setup() {
+  local auto_yes=false
+  local non_interactive=false
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -y|--yes)
+        auto_yes=true
+        shift
+        ;;
+      -n|--non-interactive)
+        non_interactive=true
+        shift
+        ;;
+      --help)
+        ui_usage_setup
+        exit 0
+        ;;
+      *)
+        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        exit 1
+        ;;
+    esac
+  done
+
+  local deps_satisfied=0
+  local deps_installed=0
+  local deps_failed=0
+  local plugins_activated=0
+  local plugins_failed=0
+
+  # --- Section 1: Dependency checks ---
+  echo "=== Dependency Check ===" >&2
+  local -a mandatory_deps=("jq" "column" "awk" "sed" "find" "python3" "file" "stat" "bash")
+  for dep in "${mandatory_deps[@]}"; do
+    if command -v "$dep" >/dev/null 2>&1; then
+      echo "  ✓ $dep — found" >&2
+      deps_satisfied=$((deps_satisfied + 1))
+    else
+      echo "  ✗ $dep — missing" >&2
+      if [ "$non_interactive" = true ]; then
+        deps_failed=$((deps_failed + 1))
+        continue
+      fi
+      # Attempt auto-install
+      local install_ok=false
+      if command -v apt-get >/dev/null 2>&1; then
+        if apt-get install -y "$dep" >/dev/null 2>&1; then
+          install_ok=true
+        fi
+      fi
+      if [ "$install_ok" = true ]; then
+        echo "  ✓ $dep — installed" >&2
+        deps_installed=$((deps_installed + 1))
+      else
+        echo "  ✗ $dep — could not install automatically. Please install manually." >&2
+        deps_failed=$((deps_failed + 1))
+      fi
+    fi
+  done
+
+  if [ "$deps_failed" -gt 0 ] && [ "$non_interactive" = false ]; then
+    echo "" >&2
+    echo "Error: $deps_failed mandatory dependency(ies) missing and could not be installed." >&2
+    exit 1
+  fi
+
+  # --- Section 2: Plugin discovery and status ---
+  echo "" >&2
+  echo "=== Plugin Status ===" >&2
+
+  local -a all_plugins
+  mapfile -t all_plugins < <(
+    find "$PLUGIN_DIR" -maxdepth 2 -name "descriptor.json" -exec dirname {} \; | \
+    while read -r pdir; do basename "$pdir"; done | sort
+  )
+
+  # Print status table
+  printf "  %-20s %-12s %-12s\n" "Plugin" "Installed" "Active" >&2
+  printf "  %-20s %-12s %-12s\n" "------" "---------" "------" >&2
+
+  local -a plugins_to_install=()
+  local -a plugins_to_activate=()
+
+  for pname in "${all_plugins[@]}"; do
+    local p_descriptor="$PLUGIN_DIR/$pname/descriptor.json"
+    local p_active
+    p_active=$(jq -r '.active // false' "$p_descriptor" 2>/dev/null) || p_active="false"
+
+    local p_installed="unknown"
+    local p_installed_sh="$PLUGIN_DIR/$pname/installed.sh"
+    if [ -x "$p_installed_sh" ]; then
+      local check
+      check=$(bash "$p_installed_sh" 2>/dev/null | jq -r '.installed // "true"' 2>/dev/null) || check="false"
+      p_installed="$check"
+    else
+      p_installed="true"
+    fi
+
+    printf "  %-20s %-12s %-12s\n" "$pname" "$p_installed" "$p_active" >&2
+
+    if [ "$p_installed" = "false" ]; then
+      plugins_to_install+=("$pname")
+    fi
+    if [ "$p_active" = "false" ] && [ "$p_installed" != "false" ]; then
+      plugins_to_activate+=("$pname")
+    fi
+  done
+
+  # --- Section 3: Interactive prompting ---
+  echo "" >&2
+
+  if [ "$non_interactive" = true ]; then
+    echo "=== Non-interactive mode: skipping prompts ===" >&2
+  else
+    # Install missing plugins
+    for pname in "${plugins_to_install[@]+"${plugins_to_install[@]}"}"; do
+      local answer="n"
+      if [ "$auto_yes" = true ]; then
+        answer="y"
+      elif [ -t 0 ]; then
+        printf "Plugin '%s' is not installed. Install now? [y/N] " "$pname" >&2
+        read -r answer </dev/tty 2>/dev/null || answer="n"
+      fi
+
+      if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+        local install_sh="$PLUGIN_DIR/$pname/install.sh"
+        if [ -x "$install_sh" ]; then
+          if bash "$install_sh" >/dev/null 2>&1; then
+            echo "  ✓ Plugin '$pname' installed" >&2
+            deps_installed=$((deps_installed + 1))
+          else
+            echo "  ✗ Plugin '$pname' installation failed" >&2
+            plugins_failed=$((plugins_failed + 1))
+          fi
+        else
+          echo "  ✗ Plugin '$pname' has no install script" >&2
+          plugins_failed=$((plugins_failed + 1))
+        fi
+      fi
+    done
+
+    # Activate inactive plugins
+    for pname in "${plugins_to_activate[@]+"${plugins_to_activate[@]}"}"; do
+      local answer="n"
+      if [ "$auto_yes" = true ]; then
+        answer="y"
+      elif [ -t 0 ]; then
+        printf "Plugin '%s' is installed but inactive. Activate now? [y/N] " "$pname" >&2
+        read -r answer </dev/tty 2>/dev/null || answer="n"
+      fi
+
+      if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+        local p_descriptor="$PLUGIN_DIR/$pname/descriptor.json"
+        local tmp_desc
+        tmp_desc=$(mktemp)
+        if jq '.active = true' "$p_descriptor" > "$tmp_desc" 2>/dev/null && mv "$tmp_desc" "$p_descriptor"; then
+          echo "  ✓ Plugin '$pname' activated" >&2
+          plugins_activated=$((plugins_activated + 1))
+        else
+          echo "  ✗ Plugin '$pname' activation failed" >&2
+          rm -f "$tmp_desc"
+          plugins_failed=$((plugins_failed + 1))
+        fi
+      fi
+    done
+  fi
+
+  # --- Section 4: Final summary ---
+  echo "" >&2
+  echo "=== Summary ===" >&2
+  echo "  Dependencies already satisfied: $deps_satisfied" >&2
+  echo "  Dependencies installed: $deps_installed" >&2
+  echo "  Plugins activated: $plugins_activated" >&2
+  if [ "$deps_failed" -gt 0 ] || [ "$plugins_failed" -gt 0 ]; then
+    echo "  Failures: $((deps_failed + plugins_failed))" >&2
+  fi
+  echo "" >&2
+
+  if [ "$deps_failed" -gt 0 ]; then
+    return 1
+  fi
+  return 0
+}

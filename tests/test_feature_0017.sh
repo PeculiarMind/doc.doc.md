@@ -255,8 +255,8 @@ tmp_txt=$(mktemp --suffix=.txt)
 output=$(echo "{\"filePath\": \"$tmp_txt\", \"mimeType\": \"text/plain\"}" | bash "$MARKITDOWN_DIR/main.sh" 2>&1)
 exit_code=$?
 rm -f "$tmp_txt"
-assert_exit_code "unsupported MIME type exits non-zero" "1" "$exit_code"
-assert_contains "unsupported MIME type error" "Unsupported MIME type" "$output"
+assert_exit_code "unsupported MIME type exits 65 (ADR-004 skip)" "65" "$exit_code"
+assert_contains "unsupported MIME type skip message" "skipped" "$output"
 
 # Restricted path
 output=$(echo '{"filePath": "/etc/passwd", "mimeType": "application/msword"}' | bash "$MARKITDOWN_DIR/main.sh" 2>&1)
