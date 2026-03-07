@@ -2,14 +2,14 @@
 # plugin_execution.sh - Plugin Execution module for doc.doc.md
 # Part of doc.doc.md architecture (Level 3: Bash Components)
 # Handles plugin command invocation, stdin/stdout JSON I/O wiring,
-# exit-code classification (0 = success, 1 = plugin error, 2 = fatal),
+# exit-code classification (ADR-004: 0 = success, 65 = skip, 1 = error, 2 = fatal),
 # and output validation per ADR-003.
 # Contains NO plugin discovery, descriptor loading, or activation state logic.
 #
 # Public Interface:
 #   run_plugin <name> <file_path> <plugin_base_dir> [context_json]
 #       - Invoke a plugin's process command with JSON I/O
-#       - Returns 0 on success, 1 on plugin error
+#       - Returns the plugin's exit code (0 success, 65 skip, other = error)
 #   process_file <file_path> <plugin...>
 #       - Run a file through a sequence of plugins, merging JSON output
 
@@ -45,10 +45,20 @@ run_plugin() {
   fi
 
   local plugin_output
-  plugin_output=$(echo "$json_input" | "$script_path" 2>/dev/null) || {
+  local plugin_exit=0
+  plugin_output=$(echo "$json_input" | "$script_path" 2>/dev/null) || plugin_exit=$?
+
+  # Propagate exit 65 (ADR-004 intentional skip) directly to caller
+  if [ "$plugin_exit" -eq 65 ]; then
+    echo "$plugin_output"
+    return 65
+  fi
+
+  # Any other non-zero exit is a plugin error
+  if [ "$plugin_exit" -ne 0 ]; then
     echo "Error: Plugin '$plugin_name' failed for file: $(basename "$file_path")" >&2
     return 1
-  }
+  fi
 
   # Validate output is valid JSON
   if ! echo "$plugin_output" | jq empty 2>/dev/null; then
@@ -71,10 +81,17 @@ process_file() {
 
   for plugin_name in "${plugins[@]}"; do
     local plugin_output
-    if plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR" "$combined_result"); then
-      # Merge plugin output into combined result
+    local plugin_rc=0
+    plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR" "$combined_result") || plugin_rc=$?
+
+    if [ "$plugin_rc" -eq 0 ]; then
+      # Success: merge plugin output into combined result
       combined_result=$(echo "$combined_result" "$plugin_output" | jq -s '.[0] * .[1]')
+    elif [ "$plugin_rc" -eq 65 ]; then
+      # ADR-004 intentional skip: silently discard — no merge, no error
+      continue
     else
+      # Plugin error
       # If the file plugin fails and MIME criteria are active, skip this file (fail-closed)
       if [ "$plugin_name" = "file" ]; then
         local _has_mime=false
