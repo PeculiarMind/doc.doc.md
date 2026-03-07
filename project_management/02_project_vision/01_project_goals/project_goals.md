@@ -125,4 +125,45 @@ Displays a tree view of the plugins, showing their dependencies and activation s
 doc.doc.sh executes active plugins in a specific order based on their dependencies. The execution order is determined by performing a topological sort on the plugin dependency graph. This ensures that plugins are executed in the correct sequence, with dependencies being executed before the plugins that depend on them. Each plugin receives the input parameters as a json object. Consequently plugins create output in the form of a json object that is written to stdout. This output will be consumed and processed by the doc.doc.md framework. 
 
 
+# TODOs
 
+1. create a bug that doc.doc.sh process in interactive process mode prints Errors like
+"Error: Plugin 'markitdown' failed for file: README-Screenshot-PNG.png" this is expected behavior for mimetypes that can not be handled by a specific plugin and should not be handled and printed out as an error. Instead, the framework should recognize that the plugin is not designed to handle that file type and simply skip it without printing an error message. The framework should only print error messages for actual errors that occur during plugin execution, such as a plugin crashing or encountering an unexpected issue while processing a file that it is designed to handle.
+
+2. create a feature that doc.doc.sh clears the screen before starting the interactive process mode to provide a cleaner and more focused user experience. This can be achieved by adding a command to clear the terminal screen at the beginning of the interactive process mode, ensuring that users can focus on the current processing tasks without distractions from previous output or commands.
+An ascii art could be printed after clearing the screen to add a touch of personality to the tool. This would enhance the user experience by providing a clear visual cue that the screen has been refreshed and that the user can now focus on the current processing tasks.  
+
+```bash                                                                          
+  ___     ___    ____      ____    ___    ____      __  __  ____    
+ |  _ \  / _ \  / ___|    |  _ \  / _ \  / ___|    |  \/  ||  _ \   
+ | | | || | | || |        | | | || | | || |        | |\/| || | | |  
+ | |_| || |_| || |___  _  | |_| || |_| || |___  _  | |  | || |_| | 
+ |____/  \___/  \____|(_) |____/  \___/  \____|(_) |_|  |_||____/  
+
+             ~ document your documents in markdown ~ 
+
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+▓▓▓ [ PAPER STACK ] >> [ SCAN ] >> [ doc.doc.sh ] >> [ .MD SIDECAR ] ▓▓▓
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+all other output from the interactive process mode should be printed below the ascii art, providing a clear separation between the user interface and the processing output. This would enhance the overall user experience by creating a visually appealing and organized layout for the interactive process mode.
+
+3. create a feature that doc.doc.sh allows to specify a custom base path, which is the assumed root directory for both input and output directories. This directory serves as the reference point for references in the generated markdown files. It is not intended to be used as the actual input or output directory. The purpose is to clearly separate the locations of 
+- doc.doc.sh (the script itself)
+- the input directory (where the source documents are located)
+- the output directory (where the generated markdown files will be saved)
+during the processing time from the directory structure used by the user during management time.
+
+E.g. the user could have the following directory structure:
+```bash
+/home/peculiarmind/documentstore/
+/usr/local/bin/doc.doc.md/
+/home/peculiarmind/doc.doc.out/
+/home/peculiarmind/doc.doc.out/.plugins/
+/home/peculiarmind/obsidianvault/attachments -(symlink)-> /home/peculiarmind/documentstore
+/home/peculiarmind/obsidianvault/documents   -(symlink)-> /home/peculiarmind/doc.doc.out
+```
+
+From obsidian vault perspective, the attachments and documents are located in the same directory structure below the obsidian vault. However, from doc.doc.sh perspective, the input directory is `/home/peculiarmind/documentstore` and the output directory is `/home/peculiarmind/doc.doc.out`. The base directory could be set to a relative path, such as `../attachments`. This path is intended to be used to resolve the references to the source documents relative to the generated markdown files, ensuring that the generated markdown files point to the correct locations of the attachments.
