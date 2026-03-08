@@ -210,7 +210,9 @@ echo ""
 echo "--- Group 6: Help text ---"
 
 output=$(bash "$CLI" --help 2>&1)
-assert_contains "--help includes install plugins --all" "install plugins --all" "$output"
+# install plugins --all now in install --help (FEATURE_0038)
+install_help=$(bash "$CLI" install --help 2>&1)
+assert_contains "install --help includes install plugins --all" "install plugins --all" "$install_help"
 
 output=$(bash "$CLI" install --help 2>&1)
 assert_exit_code "install --help exits 0" "0" "$?"

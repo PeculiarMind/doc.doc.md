@@ -500,6 +500,12 @@ _list_plugins() {
 # --- List command ---
 
 cmd_list() {
+  # Handle --help (FEATURE_0038)
+  if [ "${1:-}" = "--help" ]; then
+    ui_usage_list
+    return 0
+  fi
+
   local plugin_info_script
   plugin_info_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugin_info.py"
 

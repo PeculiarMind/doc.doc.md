@@ -16,11 +16,29 @@
 #   log_error <msg>            - Print error message to stderr
 #   log_processed <src> <dst>  - Print file-processed progress to stderr
 
-# --- Main help (Relocated from doc.doc.sh - FEATURE_0029) ---
+# --- Banner display for help (no screen-clear, FEATURE_0038) ---
+
+ui_show_help_banner() {
+  cat <<'BANNER'
+  ___     ___    ____      ____    ___    ____      __  __  ____    
+ |  _ \  / _ \  / ___|    |  _ \  / _ \  / ___|    |  \/  ||  _ \   
+ | | | || | | || |        | | | || | | || |        | |\/| || | | |  
+ | |_| || |_| || |___  _  | |_| || |_| || |___  _  | |  | || |_| | 
+ |____/  \___/  \____|(_) |____/  \___/  \____|(_) |_|  |_||____/  
+
+              ~ documents your documents in markdown ~ 
+
+BANNER
+}
+
+# --- Main help (Relocated from doc.doc.sh - FEATURE_0029, trimmed FEATURE_0038) ---
 
 ui_usage() {
-  cat <<EOF
-Usage: $(basename "$0") <command> [OPTIONS]
+  ui_show_help_banner
+  cat <<'EOF'
+doc.doc.md — command-line tool for processing document collections into Markdown
+
+Usage: ./doc.doc.sh <command> [OPTIONS]
 
 Commands:
   process      Process files in the input directory through plugins
@@ -32,7 +50,26 @@ Commands:
   tree         Display a dependency tree of all plugins
   setup        Verify dependencies and configure plugins interactively
 
-process Options:
+Examples:
+  ./doc.doc.sh process -d /path/to/documents -o /path/to/output
+  ./doc.doc.sh list plugins
+  ./doc.doc.sh install --plugin markitdown
+  ./doc.doc.sh setup
+
+Run ./doc.doc.sh <command> --help for full options of a specific command.
+EOF
+}
+
+# --- Sub-command help (Relocated from doc.doc.sh - FEATURE_0029, updated FEATURE_0038) ---
+
+ui_usage_process() {
+  ui_show_help_banner
+  cat <<'EOF'
+Process files in the input directory through the active plugin chain.
+
+Usage: ./doc.doc.sh process [OPTIONS]
+
+Options:
   -d <dir>, --input-directory <dir>
                  Input directory to process (required)
   -o <dir>, --output-directory <dir>
@@ -51,6 +88,7 @@ process Options:
                  Base path for computing relative file references in rendered output
   --progress     Force progress display even when stdout is not a TTY
   --no-progress  Suppress progress display even on a TTY
+  --help         Show this help message
 
 Output:
   When stdout is piped or redirected:
@@ -61,112 +99,109 @@ Output:
     is printed to stderr.  Pipe stdout (e.g. | jq .) to receive JSON in a
     terminal session.
 
-list Options:
+Examples:
+  ./doc.doc.sh process -d /path/to/documents -o /path/to/output
+  ./doc.doc.sh process -d /path/to/documents -o /path/to/output -i ".pdf,.txt"
+  ./doc.doc.sh process -d /path/to/documents -o /path/to/output -i ".pdf" -e "**/temp/**"
+  ./doc.doc.sh process -d /path/to/documents -o /path/to/output -t /path/to/template.md
+  ./doc.doc.sh process -d /path/to/documents --echo
+  ./doc.doc.sh process -d /path/to/documents -o /path/to/output -b /path/to/base
+EOF
+}
+
+ui_usage_list() {
+  ui_show_help_banner
+  cat <<'EOF'
+List information about plugins — activation status, commands, and parameters.
+
+Usage: ./doc.doc.sh list [SUB-COMMAND] [OPTIONS]
+
+Sub-commands:
   plugins            List all plugins with activation status
   plugins active     List only active plugins
   plugins inactive   List only inactive plugins
   parameters         List all parameters for all plugins
+
+Options:
   --plugin <name>    Name of the plugin to inspect (required with --commands or --parameters)
   --commands         List all commands declared by the specified plugin
   --parameters       List all parameters for the specified plugin
-
-activate Options:
-  --plugin <name>, -p <name>   Name of the plugin to activate (required)
-
-deactivate Options:
-  --plugin <name>, -p <name>   Name of the plugin to deactivate (required)
-
-install Options:
-  --plugin <name>, -p <name>   Install a single named plugin
-  plugins --all                Install all plugins
-
-installed Options:
-  --plugin <name>, -p <name>   Check if a named plugin is installed (required)
-
-tree Options:
-  (no options)   Render dependency tree for all plugins
-
-setup Options:
-  -y, --yes              Auto-answer yes to all prompts
-  -n, --non-interactive  Report status only, no prompts (dry-run)
-
-  --help     Show this help message
+  --help             Show this help message
 
 Examples:
-  $(basename "$0") process -d /path/to/documents -o /path/to/output
-  $(basename "$0") process -d /path/to/documents -o /path/to/output -i ".pdf,.txt"
-  $(basename "$0") process -d /path/to/documents -o /path/to/output -i ".pdf" -e "**/temp/**"
-  $(basename "$0") process -d /path/to/documents -o /path/to/output -t /path/to/template.md
-  $(basename "$0") process -d /path/to/documents --echo
-  $(basename "$0") process -d /path/to/documents -o /path/to/output -b /path/to/base
-  $(basename "$0") list --plugin stat --commands
-  $(basename "$0") list --plugin stat --parameters
-  $(basename "$0") list parameters
-  $(basename "$0") list plugins
-  $(basename "$0") list plugins active
-  $(basename "$0") list plugins inactive
-  $(basename "$0") activate --plugin stat
-  $(basename "$0") deactivate --plugin ocrmypdf
-  $(basename "$0") install --plugin stat
-  $(basename "$0") install plugins --all
-  $(basename "$0") installed --plugin stat
-  $(basename "$0") tree
-  $(basename "$0") setup
-  $(basename "$0") setup --yes
+  ./doc.doc.sh list plugins
+  ./doc.doc.sh list plugins active
+  ./doc.doc.sh list plugins inactive
+  ./doc.doc.sh list parameters
+  ./doc.doc.sh list --plugin stat --commands
+  ./doc.doc.sh list --plugin stat --parameters
 EOF
 }
 
-# --- Sub-command help (Relocated from doc.doc.sh - FEATURE_0029) ---
-
 ui_usage_activate() {
-  cat <<EOF
-Usage: $(basename "$0") activate --plugin <plugin_name>
-       $(basename "$0") activate -p <plugin_name>
+  ui_show_help_banner
+  cat <<'EOF'
+Activate a plugin by setting its 'active' field to true in descriptor.json.
 
-Sets the 'active' field to true in the plugin's descriptor.json.
-If the plugin is already active, exits 0 with an informational message.
+Usage: ./doc.doc.sh activate --plugin <plugin_name>
+       ./doc.doc.sh activate -p <plugin_name>
 
 Options:
   --plugin <name>, -p <name>   Name of the plugin to activate (required)
   --help                       Show this help message
+
+Examples:
+  ./doc.doc.sh activate --plugin stat
+  ./doc.doc.sh activate -p ocrmypdf
 EOF
 }
 
 ui_usage_deactivate() {
-  cat <<EOF
-Usage: $(basename "$0") deactivate --plugin <plugin_name>
-       $(basename "$0") deactivate -p <plugin_name>
+  ui_show_help_banner
+  cat <<'EOF'
+Deactivate a plugin by setting its 'active' field to false in descriptor.json.
 
-Sets the 'active' field to false in the plugin's descriptor.json.
-If the plugin is already inactive, exits 0 with an informational message.
+Usage: ./doc.doc.sh deactivate --plugin <plugin_name>
+       ./doc.doc.sh deactivate -p <plugin_name>
 
 Options:
   --plugin <name>, -p <name>   Name of the plugin to deactivate (required)
   --help                       Show this help message
+
+Examples:
+  ./doc.doc.sh deactivate --plugin ocrmypdf
+  ./doc.doc.sh deactivate -p markitdown
 EOF
 }
 
 ui_usage_install() {
-  cat <<EOF
-Usage: $(basename "$0") install --plugin <plugin_name>
-       $(basename "$0") install -p <plugin_name>
-       $(basename "$0") install plugins --all
-
+  ui_show_help_banner
+  cat <<'EOF'
 Install one or all plugins.
+
+Usage: ./doc.doc.sh install --plugin <plugin_name>
+       ./doc.doc.sh install -p <plugin_name>
+       ./doc.doc.sh install plugins --all
 
 Options:
   --plugin <name>, -p <name>   Install a single named plugin
   plugins --all                Install all plugins in PLUGIN_DIR
   --help                       Show this help message
+
+Examples:
+  ./doc.doc.sh install --plugin markitdown
+  ./doc.doc.sh install -p stat
+  ./doc.doc.sh install plugins --all
 EOF
 }
 
 ui_usage_installed() {
-  cat <<EOF
-Usage: $(basename "$0") installed --plugin <plugin_name>
-       $(basename "$0") installed -p <plugin_name>
+  ui_show_help_banner
+  cat <<'EOF'
+Check whether a plugin is installed by running its installed.sh script.
 
-Checks whether a plugin is installed by running its installed.sh script.
+Usage: ./doc.doc.sh installed --plugin <plugin_name>
+       ./doc.doc.sh installed -p <plugin_name>
 
 Exit codes:
   0   Plugin is installed
@@ -176,39 +211,56 @@ Exit codes:
 Options:
   --plugin <name>, -p <name>   Name of the plugin to check (required)
   --help                       Show this help message
+
+Examples:
+  ./doc.doc.sh installed --plugin stat
+  ./doc.doc.sh installed -p markitdown
 EOF
 }
 
 ui_usage_tree() {
-  cat <<EOF
-Usage: $(basename "$0") tree
+  ui_show_help_banner
+  cat <<'EOF'
+Render a dependency tree of all plugins showing activation status.
 
-Renders a dependency tree of all plugins showing activation status.
+Usage: ./doc.doc.sh tree
+
 Active plugins are shown in green; inactive plugins in red.
 Dependencies are derived from matching plugin process output parameters to input parameters.
 
 Exit codes:
   0   Success
   1   Circular dependency detected
+
+Examples:
+  ./doc.doc.sh tree
 EOF
 }
 
 ui_usage_setup() {
-  cat <<EOF
-Usage: $(basename "$0") setup [OPTIONS]
+  ui_show_help_banner
+  cat <<'EOF'
+Verify core dependencies, discover all plugins, check their installation
+and activation status, and interactively prompt to install/activate.
 
-Verifies core dependencies, discovers all plugins, checks their installation
-and activation status, and interactively prompts to install/activate.
+Usage: ./doc.doc.sh setup [OPTIONS]
 
 Options:
   -y, --yes              Auto-answer yes to all prompts (automated setup)
   -n, --non-interactive  Report status only, no prompts (dry-run check)
   --help                 Show this help message
+
+Examples:
+  ./doc.doc.sh setup
+  ./doc.doc.sh setup --yes
+  ./doc.doc.sh setup --non-interactive
 EOF
 }
 
 # --- Backward-compatible aliases (FEATURE_0029) ---
 usage()            { ui_usage "$@"; }
+usage_process()    { ui_usage_process "$@"; }
+usage_list()       { ui_usage_list "$@"; }
 usage_activate()   { ui_usage_activate "$@"; }
 usage_deactivate() { ui_usage_deactivate "$@"; }
 usage_install()    { ui_usage_install "$@"; }

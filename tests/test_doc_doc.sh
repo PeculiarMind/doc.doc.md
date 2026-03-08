@@ -102,8 +102,11 @@ assert_exit_code "--help exits with 0" "0" "$exit_code"
 assert_contains "--help shows usage" "Usage:" "$output"
 assert_contains "--help shows process command" "process" "$output"
 assert_contains "--help shows -d option" "-d" "$output"
-assert_contains "--help shows -i option" "-i" "$output"
-assert_contains "--help shows -e option" "-e" "$output"
+
+# -i and -e are now in process --help (FEATURE_0038)
+process_help=$("$DOC_DOC_SH" process --help 2>&1)
+assert_contains "process --help shows -i option" "-i" "$process_help"
+assert_contains "process --help shows -e option" "-e" "$process_help"
 
 echo ""
 echo "--- CLI: no arguments ---"

@@ -28,7 +28,7 @@ _MIME_EXCLUDE_ARGS=()
 # --- Entry point ---
 
 main() {
-  if [ $# -eq 0 ] || [ "$1" = "--help" ]; then
+  if [ $# -eq 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     usage
     exit 0
   fi
@@ -129,7 +129,7 @@ main() {
         shift 2
         ;;
       --help)
-        usage
+        ui_usage_process
         exit 0
         ;;
       *)

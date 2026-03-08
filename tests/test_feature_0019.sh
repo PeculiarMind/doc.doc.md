@@ -278,7 +278,10 @@ echo "--- Group 11: Help text ---"
 
 output=$(bash "$CLI" --help 2>&1)
 assert_contains "help mentions -o" "-o" "$output"
-assert_contains "help mentions output-directory" "output-directory" "$output"
+
+# output-directory is now in process --help (FEATURE_0038)
+process_help=$(bash "$CLI" process --help 2>&1)
+assert_contains "help mentions output-directory" "output-directory" "$process_help"
 
 # =========================================
 # Summary

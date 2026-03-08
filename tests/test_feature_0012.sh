@@ -152,7 +152,9 @@ echo "--- Group 4: Help text ---"
 
 output=$(bash "$CLI" --help 2>&1)
 assert_contains "--help includes activate command" "activate" "$output"
-assert_contains "--help includes --plugin for activate" "activate --plugin" "$output"
+# activate --plugin detail now in activate --help (FEATURE_0038)
+activate_help=$(bash "$CLI" activate --help 2>&1)
+assert_contains "activate --help includes --plugin for activate" "activate --plugin" "$activate_help"
 
 output=$(bash "$CLI" activate --help 2>&1)
 exit_code=$?
