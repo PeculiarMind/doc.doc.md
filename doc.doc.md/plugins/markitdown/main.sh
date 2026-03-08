@@ -64,9 +64,16 @@ fi
 
 # Run markitdown to convert the file
 _mkd_err_file="$(mktemp)"
+_mkd_exit=0
 if ! document_text="$(markitdown "$canonical_path" 2>"$_mkd_err_file")"; then
-  echo "Error: markitdown conversion failed" >&2
+  _mkd_exit=$?
+  _mkd_err_content="$(cat "$_mkd_err_file" 2>/dev/null)" || _mkd_err_content=""
   rm -f "$_mkd_err_file"
+  if [ -n "$_mkd_err_content" ]; then
+    echo "Error: markitdown conversion failed: $_mkd_err_content" >&2
+  else
+    echo "Error: markitdown conversion failed (exit code: $_mkd_exit)" >&2
+  fi
   exit 1
 fi
 rm -f "$_mkd_err_file"

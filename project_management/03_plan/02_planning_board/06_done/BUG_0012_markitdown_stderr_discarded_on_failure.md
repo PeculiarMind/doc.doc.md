@@ -5,7 +5,7 @@
 - **Type:** Bug
 - **Created at:** 2026-03-08
 - **Created by:** Tester
-- **Status:** BACKLOG
+- **Status:** DONE
 
 ## TOC
 1. [Overview](#overview)
