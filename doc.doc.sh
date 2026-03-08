@@ -65,6 +65,10 @@ main() {
       cmd_tree "$@"
       exit $?
       ;;
+    setup)
+      cmd_setup "$@"
+      exit $?
+      ;;
     *)
       echo "Error: Unknown command '$command'. Use --help for usage." >&2
       exit 1
@@ -77,6 +81,8 @@ main() {
   local -a include_args=()
   local -a exclude_args=()
   local progress_flag=""
+  local echo_mode=false
+  local base_path=""
 
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -113,6 +119,15 @@ main() {
         progress_flag="off"
         shift
         ;;
+      --echo)
+        echo_mode=true
+        shift
+        ;;
+      -b|--base-path)
+        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        base_path="$2"
+        shift 2
+        ;;
       --help)
         usage
         exit 0
@@ -141,8 +156,14 @@ main() {
     exit 1
   fi
 
-  # Validate output directory (required)
-  if [ -z "$output_dir" ]; then
+  # Validate --echo and -o mutual exclusivity
+  if [ "$echo_mode" = true ] && [ -n "$output_dir" ]; then
+    echo "Error: --echo and -o are mutually exclusive" >&2
+    exit 1
+  fi
+
+  # Validate output directory (required unless --echo)
+  if [ "$echo_mode" = false ] && [ -z "$output_dir" ]; then
     echo "Error: Output directory is required (-o <dir>)" >&2
     usage >&2
     exit 1
@@ -154,10 +175,22 @@ main() {
     exit 1
   fi
 
-  # Canonicalize and create output directory
-  mkdir -p "$output_dir" || { echo "Error: Cannot create output directory: $output_dir" >&2; exit 1; }
-  local canonical_out
-  canonical_out="$(readlink -f "$output_dir")"
+  # Validate --base-path if provided
+  local base_path_resolved=""
+  if [ -n "$base_path" ]; then
+    base_path_resolved="$(readlink -f "$base_path" 2>/dev/null || echo "")"
+    if [ -z "$base_path_resolved" ] || [ ! -d "$base_path_resolved" ]; then
+      echo "Error: Base path does not exist or is not a directory: $base_path" >&2
+      exit 1
+    fi
+  fi
+
+  # Canonicalize and create output directory (only when not in echo mode)
+  local canonical_out=""
+  if [ "$echo_mode" = false ]; then
+    mkdir -p "$output_dir" || { echo "Error: Cannot create output directory: $output_dir" >&2; exit 1; }
+    canonical_out="$(readlink -f "$output_dir")"
+  fi
 
   # Verify filter script exists
   if [ ! -f "$FILTER_SCRIPT" ]; then
@@ -236,7 +269,9 @@ main() {
 
   # Determine whether to show progress display
   local show_progress=false
-  if [ "$progress_flag" = "on" ]; then
+  if [ "$echo_mode" = true ]; then
+    show_progress=false
+  elif [ "$progress_flag" = "on" ]; then
     show_progress=true
   elif [ "$progress_flag" = "off" ]; then
     show_progress=false
@@ -247,7 +282,9 @@ main() {
   # Suppress JSON output when stdout is an interactive TTY and an output
   # directory is provided — JSON is only meaningful for Unix pipelines.
   local suppress_json=false
-  if [ -t 1 ]; then
+  if [ "$echo_mode" = true ]; then
+    suppress_json=true
+  elif [ -t 1 ]; then
     suppress_json=true
   fi
 
@@ -259,6 +296,11 @@ main() {
   for exc in "${path_exclude_args[@]+"${path_exclude_args[@]}"}"; do
     filter_args+=("--exclude" "$exc")
   done
+
+  # Banner: Show ASCII art when interactive and not in echo mode (FEATURE_0030)
+  if [ "$show_progress" = true ] && [ "$echo_mode" = false ]; then
+    ui_show_banner
+  fi
 
   # Progress: Scan phase
   if [ "$show_progress" = true ]; then
@@ -311,6 +353,29 @@ main() {
     local result
     result=$(process_file "$file_path" "${plugins[@]}")
     [ -n "$result" ] || continue
+
+    # Apply --base-path rewrite for template rendering (FEATURE_0031)
+    local render_json="$result"
+    if [ -n "$base_path_resolved" ]; then
+      local bp_relative
+      bp_relative=$(python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))" "$file_path" "$base_path_resolved")
+      render_json=$(echo "$result" | jq --arg fp "$bp_relative" '. + {filePath: $fp}')
+    fi
+
+    if [ "$echo_mode" = true ]; then
+      # --echo mode: print rendered content to stdout with delimiter
+      if [ "$first" = true ]; then
+        first=false
+      else
+        echo ""
+      fi
+      echo "=== $relative_path ==="
+      render_template_json "$template_file" "$render_json"
+      echo ""
+      processed_count=$((processed_count + 1))
+      continue
+    fi
+
     if [ "$suppress_json" = false ]; then
       if [ "$printed_bracket" = false ]; then
         echo "["
@@ -351,7 +416,7 @@ main() {
       ui_progress_update step "Write output"
     fi
 
-    render_template_json "$template_file" "$result" > "$sidecar_path"
+    render_template_json "$template_file" "$render_json" > "$sidecar_path"
     processed_count=$((processed_count + 1))
 
     if [ "$show_progress" = true ]; then

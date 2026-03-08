@@ -254,8 +254,54 @@ The doc.doc.md framework passes an accumulated JSON object to each plugin via **
 Rules:
 - Read from stdin only; never read the file path from CLI arguments
 - Write only valid JSON to stdout; all other output (logs, errors) must go to stderr
-- Exit code `0` on success, non-zero on failure
 - Limit stdin reads to prevent memory exhaustion (built-in plugins use `head -c 1048576`)
+- Follow the exit code contract described below
+
+### Plugin Exit Code Contract (ADR-004)
+
+Every plugin's `process` command must follow the **three-state exit code contract** defined in [ADR-004](../../project_management/02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_004_plugin_exit_code_strategy.md). This contract determines how the framework handles each plugin's result:
+
+| Exit Code | Constant | Meaning | stdout | Framework Action |
+|-----------|----------|---------|--------|------------------|
+| **0** | `EX_OK` | Success | Output JSON as declared in `descriptor.json` | Merge JSON into combined result |
+| **65** | `EX_DATAERR` | Intentional skip / unsupported input | `{}` or `{"message":"<reason>"}` | Silently discard — no error printed |
+| **1** (or other ≠ 0, 65) | — | Unexpected failure | Any (ignored) | Print error message to stderr |
+
+**Key rules:**
+- Exit **65** must only be used when the plugin decides **not to handle** the input (e.g., unsupported MIME type). It must **never** be used for processing errors.
+- The skip message (`{"message":"..."}`) must be written to **stdout** as valid JSON — not to stderr as plain text.
+- Plugins that handle all file types (e.g., `file`, `stat`) should **never** return exit 65.
+
+**Code example — three exit paths in `main.sh`:**
+
+```bash
+#!/bin/bash
+# Exit codes: 0 success (EX_OK), 65 unsupported input (EX_DATAERR, ADR-004), 1 failure
+set -euo pipefail
+
+input=$(head -c 1048576)
+file_path=$(echo "$input" | jq -r '.filePath // empty')
+mime_type=$(echo "$input" | jq -r '.mimeType // empty')
+
+# ... validate inputs ...
+
+# Exit 65: unsupported MIME type — intentional skip
+if [ "$mime_supported" = false ]; then
+  echo "{\"message\":\"skipped: unsupported MIME type $mime_type\"}"
+  exit 65
+fi
+
+# Exit 1: genuine processing failure
+if ! result=$(my_tool "$file_path" 2>/dev/null); then
+  echo "Error: processing failed" >&2
+  exit 1
+fi
+
+# Exit 0: success
+jq -n --arg myField "$result" '{myField: $myField}'
+```
+
+See [ADR-004](../../project_management/02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_004_plugin_exit_code_strategy.md) for the full rationale and design decision behind this contract.
 
 ### Dependency Resolution
 

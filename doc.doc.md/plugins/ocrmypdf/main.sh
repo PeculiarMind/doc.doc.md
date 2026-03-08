@@ -12,7 +12,8 @@
 # Output JSON fields:
 #   ocrText    - full plain-text extracted by OCR
 #
-# Exit code: 0 on success, 1 on error
+# Exit codes: 0 success (EX_OK), 65 unsupported input (EX_DATAERR, ADR-004), 1 failure
+# Exit code contract: ADR-004 (project_management/02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_004_plugin_exit_code_strategy.md)
 
 set -euo pipefail
 
@@ -57,8 +58,8 @@ case "$mime_type" in
     is_image=true
     ;;
   *)
-    echo "Error: Unsupported MIME type '${mime_type}'. Supported types: application/pdf, image/jpeg, image/png, image/tiff, image/bmp, image/gif." >&2
-    exit 1
+    echo "{\"message\":\"skipped: unsupported MIME type $mime_type\"}"
+    exit 65
     ;;
 esac
 

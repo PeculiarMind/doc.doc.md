@@ -3,6 +3,8 @@
 # Converts MS Office documents to markdown using the markitdown Python library.
 # Input: JSON from stdin with filePath and mimeType
 # Output: JSON with documentText
+# Exit codes: 0 success (EX_OK), 65 unsupported input (EX_DATAERR, ADR-004), 1 failure
+# Exit code contract: ADR-004 (project_management/02_project_vision/03_architecture_vision/09_architecture_decisions/ADR_004_plugin_exit_code_strategy.md)
 
 set -euo pipefail
 
@@ -56,8 +58,8 @@ for supported in "${SUPPORTED_MIME_TYPES[@]}"; do
 done
 
 if [ "$mime_supported" = false ]; then
-  echo "Error: Unsupported MIME type: $mime_type" >&2
-  exit 1
+  echo "{\"message\":\"skipped: unsupported MIME type $mime_type\"}"
+  exit 65
 fi
 
 # Run markitdown to convert the file

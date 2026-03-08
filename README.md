@@ -25,6 +25,10 @@ doc.doc.md is a command-line tool that processes document collections in directo
 - **Simple CLI**: Straightforward command-line interface with clear options
 - **Interactive Progress Display**: Live-updating ASCII progress bar when running in a terminal, with TTY auto-detection
 - **TTY-Aware Output**: JSON result stream is automatically suppressed when stdout is an interactive terminal and `-o` is given — only the human-readable summary is shown; piped/redirected invocations still receive the full JSON array (Unix pipeline compatible)
+- **Dry-Run Mode**: `--echo` flag previews rendered markdown output without writing files
+- **Interactive Setup**: `setup` command verifies dependencies and configures plugins interactively
+- **Custom Base Path**: `--base-path` parameter for controlling relative file references in rendered output
+- **Graceful Plugin Skipping**: Plugins silently skip unsupported file types (ADR-004) — no spurious error messages
 
 ## Installation
 
@@ -55,6 +59,11 @@ The tool uses a mixed Bash+Python architecture:
 3. Run your first command:
    ```bash
    ./doc.doc.sh --help
+   ```
+
+4. Verify dependencies and configure plugins:
+   ```bash
+   ./doc.doc.sh setup
    ```
 
 ### Development Container
@@ -158,10 +167,12 @@ Each `.md` file contains metadata and content extracted from the original docume
 | Option | Short | Description | Required | Default |
 |--------|-------|-------------|----------|----------|
 | `--input-directory` | `-d` | Path to the input directory containing documents | Yes | |
-| `--output-directory` | `-o` | Path where the markdown files will be created | Yes | |
+| `--output-directory` | `-o` | Path where the markdown files will be created | Yes (unless `--echo`) | |
 | `--template` | `-t` | Path to the markdown template file | No | Built-in default |
 | `--include` | `-i` | Comma-separated file extensions, glob patterns, or MIME types to include | No | All files |
 | `--exclude` | `-e` | Comma-separated file extensions, glob patterns, or MIME types to exclude | No | |
+| `--echo` | | Print rendered markdown to stdout instead of writing files (dry-run) | No | |
+| `--base-path` | `-b` | Base path for computing relative file references in templates | No | |
 | `--progress` | | Force progress display even when stdout is not a TTY | No | Auto-detect TTY |
 | `--no-progress` | | Suppress progress display even on a TTY | No | Auto-detect TTY |
 
@@ -180,6 +191,8 @@ Each `.md` file contains metadata and content extracted from the original docume
 ./doc.doc.sh install --plugin <name>         # Install plugin dependencies
 ./doc.doc.sh installed --plugin <name>       # Check if plugin is installed
 ./doc.doc.sh tree                            # Display plugin dependency tree
+./doc.doc.sh setup                           # Verify dependencies and configure plugins
+./doc.doc.sh setup --yes                     # Auto-configure everything (non-interactive)
 ```
 
 ## Project Structure
