@@ -62,10 +62,16 @@ if [ "$mime_supported" = false ]; then
   exit 65
 fi
 
-# Run markitdown to convert the file
+# Run markitdown from the plugin-local venv
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MARKITDOWN_BIN="$PLUGIN_DIR/.venv/bin/markitdown"
+if [ ! -x "$MARKITDOWN_BIN" ]; then
+  echo "Error: markitdown not installed. Run: doc.doc.sh install --plugin markitdown" >&2
+  exit 1
+fi
 _mkd_err_file="$(mktemp)"
 _mkd_exit=0
-if ! document_text="$(markitdown "$canonical_path" 2>"$_mkd_err_file")"; then
+if ! document_text="$("$MARKITDOWN_BIN" "$canonical_path" 2>"$_mkd_err_file")"; then
   _mkd_exit=$?
   _mkd_err_content="$(cat "$_mkd_err_file" 2>/dev/null)" || _mkd_err_content=""
   rm -f "$_mkd_err_file"
