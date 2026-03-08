@@ -19,16 +19,16 @@
 # --- Banner display for help (no screen-clear, FEATURE_0038) ---
 
 ui_show_help_banner() {
-  cat <<'BANNER'
-  ___     ___    ____      ____    ___    ____      __  __  ____    
- |  _ \  / _ \  / ___|    |  _ \  / _ \  / ___|    |  \/  ||  _ \   
- | | | || | | || |        | | | || | | || |        | |\/| || | | |  
- | |_| || |_| || |___  _  | |_| || |_| || |___  _  | |  | || |_| | 
- |____/  \___/  \____|(_) |____/  \___/  \____|(_) |_|  |_||____/  
+  # Resolve banner.txt relative to ui.sh (FEATURE_0039)
+  local _banner_dir
+  _banner_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local _banner_file="$_banner_dir/banner.txt"
 
-              ~ documents your documents in markdown ~ 
-
-BANNER
+  # Silent fallback if banner.txt is missing or unreadable
+  if [ -f "$_banner_file" ] && [ -r "$_banner_file" ]; then
+    cat "$_banner_file"
+    echo ""
+  fi
 }
 
 # --- Main help (Relocated from doc.doc.sh - FEATURE_0029, trimmed FEATURE_0038) ---
@@ -287,30 +287,36 @@ log_processed() {
   echo "Processed: $src -> $dst" >&2
 }
 
-# --- Banner display (FEATURE_0030) ---
+# --- Banner display (FEATURE_0030, externalised FEATURE_0039) ---
 
 ui_show_banner() {
   # Only display when stderr is a TTY
   [ -t 2 ] || return 0
 
-  # Clear screen and print ASCII art banner to stderr
+  # Resolve banner.txt relative to ui.sh (FEATURE_0039)
+  local _banner_dir
+  _banner_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local _banner_file="$_banner_dir/banner.txt"
+
+  # Silent fallback if banner.txt is missing or unreadable
+  [ -f "$_banner_file" ] && [ -r "$_banner_file" ] || return 0
+
+  local _banner_content
+  _banner_content="$(cat "$_banner_file")" || return 0
+
+  # Apply {{key}} substitution from arguments (key=value pairs)
+  local _arg
+  for _arg in "$@"; do
+    local _key="${_arg%%=*}"
+    local _val="${_arg#*=}"
+    if [ "$_key" != "$_arg" ]; then
+      _banner_content="${_banner_content//\{\{${_key}\}\}/${_val}}"
+    fi
+  done
+
+  # Clear screen and print banner to stderr
   printf '\033c' >&2
-  cat >&2 <<'BANNER'
-  ___     ___    ____      ____    ___    ____      __  __  ____    
- |  _ \  / _ \  / ___|    |  _ \  / _ \  / ___|    |  \/  ||  _ \   
- | | | || | | || |        | | | || | | || |        | |\/| || | | |  
- | |_| || |_| || |___  _  | |_| || |_| || |___  _  | |  | || |_| | 
- |____/  \___/  \____|(_) |____/  \___/  \____|(_) |_|  |_||____/  
-
-              ~ documents your documents in markdown ~ 
-
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
- ▓▓▓ [ PAPER STACK ] >> [ SCAN ] >> [ doc.doc.sh ] >> [ .MD SIDECAR ] ▓▓▓
- ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-BANNER
+  printf '%s\n' "$_banner_content" >&2
 }
 
 # --- Progress state struct (DEBTR_004) ---

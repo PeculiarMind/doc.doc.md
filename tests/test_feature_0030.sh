@@ -83,9 +83,10 @@ fi
 echo ""
 echo "--- Group 2: Banner content ---"
 
-banner_content=$(grep -A 30 'ui_show_banner' "$UI_SH")
+# Banner content is now in banner.txt (FEATURE_0039)
+banner_content=$(cat "$REPO_ROOT/doc.doc.md/components/banner.txt" 2>/dev/null)
 assert_contains "banner has ASCII art" "____/" "$banner_content"
-assert_contains "banner has tagline" "document your documents" "$banner_content"
+assert_contains "banner has tagline" "documents your documents" "$banner_content"
 assert_contains "banner has PAPER STACK" "PAPER STACK" "$banner_content"
 
 # =========================================
@@ -94,7 +95,9 @@ assert_contains "banner has PAPER STACK" "PAPER STACK" "$banner_content"
 echo ""
 echo "--- Group 3: Banner output to stderr ---"
 
-assert_contains "screen clear to stderr" ">&2" "$banner_content"
+# Screen clear and stderr output is in ui_show_banner function (FEATURE_0039)
+banner_fn=$(grep -A 30 'ui_show_banner()' "$UI_SH")
+assert_contains "screen clear to stderr" ">&2" "$banner_fn"
 
 # =========================================
 # Group 4: TTY gate

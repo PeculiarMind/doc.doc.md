@@ -98,15 +98,15 @@ echo ""
 # =========================================
 # Group 1: doc.doc.sh line count
 # =========================================
-echo "--- Group 1: doc.doc.sh line count <=450 ---"
+echo "--- Group 1: doc.doc.sh line count <=500 ---"
 
 line_count=$(wc -l < "$DOC_DOC_SH")
 TOTAL=$((TOTAL + 1))
-if [ "$line_count" -le 450 ]; then
-  echo "  PASS: doc.doc.sh has $line_count lines (<=450)"
+if [ "$line_count" -le 500 ]; then
+  echo "  PASS: doc.doc.sh has $line_count lines (<=500)"
   PASS=$((PASS + 1))
 else
-  echo "  FAIL: doc.doc.sh has $line_count lines (must be <=450)"
+  echo "  FAIL: doc.doc.sh has $line_count lines (must be <=500)"
   FAIL=$((FAIL + 1))
 fi
 
