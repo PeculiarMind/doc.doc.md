@@ -6,7 +6,6 @@
 [![Last Commit](https://img.shields.io/github/last-commit/PeculiarMind/doc.doc.md)](https://github.com/PeculiarMind/doc.doc.md/commits)
 [![GitHub Stars](https://img.shields.io/github/stars/PeculiarMind/doc.doc.md?style=social)](https://github.com/PeculiarMind/doc.doc.md/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/PeculiarMind/doc.doc.md)](https://github.com/PeculiarMind/doc.doc.md/issues)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/PeculiarMind/doc.doc.md/blob/main/README.md#contributing)
 
 **Transform your document collections into organized, searchable markdown files.**
 
