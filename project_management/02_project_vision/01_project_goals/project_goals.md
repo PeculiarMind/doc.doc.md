@@ -12,7 +12,8 @@ The script supports a variety of commands and options for customizing document p
 
 Document processing is executed using the `doc.doc.sh process` command. This command runs different phases:
 
-1. **Validation Phase**: Validates the input parameters and verifies if active plugins are installed and available for execution.
+1. **Validation Phase**: Validates the input parameters and verifies if active plugins are installed and available for execution.  
+1.1. if any active plugin is not installed, the process (if running in interactive mode) should print a failure message for that plugin and asks the user if they want to continue without that plugin, abort the process or install the plugin. If the user choosed to continue without the plugin, the process should proceed with the remaining plugins. If the user choosed to abort, the process should exit with a non-zero exit code. If the user choosed to install the plugin, the process should attempt to install the plugin and if the installation is successful, it should proceed with the remaining plugins. If the installation fails, it should print an error message, and the an advice how to install the plugin (e.g. sudo doc.doc.sh install --plugin <plugin_name>) and exit with a non-zero exit code.
 2. **Planning Phase**: Determines the execution order of active plugins based on their dependencies and prepares the execution plan.
 3. **Input Gathering Phase**: Collects the documents from the specified input directory, applying the include and exclude filters to determine which documents will be processed. Include filters are evaluated first to build the candidate set of files (all files if no include filters are given); exclude filters are then applied to reduce that candidate set. Exclude filters can only remove files — they can never add files back or override the include result in a permissive direction.
 4. **Document Processing Phase**: Executes the active plugins in the determined order, passing each discovered document and parameters to each plugin. The output from each plugin is collected by the script and processed to generate the final markdown files after all plugins have been executed for the document.
@@ -106,7 +107,7 @@ Activates a plugin, making it available for use in document processing.
 Deactivates a plugin, making it unavailable for use in document processing.
 
 **Command:** `doc.doc.sh install --plugin <plugin_name>`  
-Installs a plugin, making it available for activation.
+Installs a plugin, making it available for activation. The install command first validates that the specified plugin name is known. If the plugin name is not recognized, it prints an error message listing the available plugins and exits with a non-zero exit code. If the plugin is already installed, it prints an informational message and exits successfully without re-installing. If the plugin is recognized and not yet installed, the command attempts to install it. If the installation succeeds, it prints a success message. If the installation fails (e.g., due to missing system dependencies or insufficient permissions), it prints an error message describing the failure and an advice on how to resolve it (e.g., by retrying with elevated privileges: `sudo ./doc.doc.sh install --plugin <plugin_name>`) and exits with a non-zero exit code.
 
 **Command:** `doc.doc.sh installed --plugin <plugin_name>`  
 Checks if a plugin is installed.
@@ -125,45 +126,5 @@ Displays a tree view of the plugins, showing their dependencies and activation s
 doc.doc.sh executes active plugins in a specific order based on their dependencies. The execution order is determined by performing a topological sort on the plugin dependency graph. This ensures that plugins are executed in the correct sequence, with dependencies being executed before the plugins that depend on them. Each plugin receives the input parameters as a json object. Consequently plugins create output in the form of a json object that is written to stdout. This output will be consumed and processed by the doc.doc.md framework. 
 
 
-# TODOs
-
-1. create a bug that doc.doc.sh process in interactive process mode prints Errors like
-"Error: Plugin 'markitdown' failed for file: README-Screenshot-PNG.png" this is expected behavior for mimetypes that can not be handled by a specific plugin and should not be handled and printed out as an error. Instead, the framework should recognize that the plugin is not designed to handle that file type and simply skip it without printing an error message. The framework should only print error messages for actual errors that occur during plugin execution, such as a plugin crashing or encountering an unexpected issue while processing a file that it is designed to handle.
-
-2. create a feature that doc.doc.sh clears the screen before starting the interactive process mode to provide a cleaner and more focused user experience. This can be achieved by adding a command to clear the terminal screen at the beginning of the interactive process mode, ensuring that users can focus on the current processing tasks without distractions from previous output or commands.
-An ascii art could be printed after clearing the screen to add a touch of personality to the tool. This would enhance the user experience by providing a clear visual cue that the screen has been refreshed and that the user can now focus on the current processing tasks.  
-
-```bash                                                                          
-  ___     ___    ____      ____    ___    ____      __  __  ____    
- |  _ \  / _ \  / ___|    |  _ \  / _ \  / ___|    |  \/  ||  _ \   
- | | | || | | || |        | | | || | | || |        | |\/| || | | |  
- | |_| || |_| || |___  _  | |_| || |_| || |___  _  | |  | || |_| | 
- |____/  \___/  \____|(_) |____/  \___/  \____|(_) |_|  |_||____/  
-
-             ~ document your documents in markdown ~ 
-
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
-▓▓▓ [ PAPER STACK ] >> [ SCAN ] >> [ doc.doc.sh ] >> [ .MD SIDECAR ] ▓▓▓
-▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-```
-all other output from the interactive process mode should be printed below the ascii art, providing a clear separation between the user interface and the processing output. This would enhance the overall user experience by creating a visually appealing and organized layout for the interactive process mode.
-
-3. create a feature that doc.doc.sh allows to specify a custom base path, which is the assumed root directory for both input and output directories. This directory serves as the reference point for references in the generated markdown files. It is not intended to be used as the actual input or output directory. The purpose is to clearly separate the locations of 
-- doc.doc.sh (the script itself)
-- the input directory (where the source documents are located)
-- the output directory (where the generated markdown files will be saved)
-during the processing time from the directory structure used by the user during management time.
-
-E.g. the user could have the following directory structure:
-```bash
-/home/peculiarmind/documentstore/
-/usr/local/bin/doc.doc.md/
-/home/peculiarmind/doc.doc.out/
-/home/peculiarmind/doc.doc.out/.plugins/
-/home/peculiarmind/obsidianvault/attachments -(symlink)-> /home/peculiarmind/documentstore
-/home/peculiarmind/obsidianvault/documents   -(symlink)-> /home/peculiarmind/doc.doc.out
-```
-
-From obsidian vault perspective, the attachments and documents are located in the same directory structure below the obsidian vault. However, from doc.doc.sh perspective, the input directory is `/home/peculiarmind/documentstore` and the output directory is `/home/peculiarmind/doc.doc.out`. The base directory could be set to a relative path, such as `../attachments`. This path is intended to be used to resolve the references to the source documents relative to the generated markdown files, ensuring that the generated markdown files point to the correct locations of the attachments.
+## Setup 
+The setup command guides the user through the initial configuration of the doc.doc.md and its plugins. It checks for the presence of plugins. For every plugin found, it asks the user to activate or deactivate it, ensuring that only the desired plugins are enabled for use. The setup process also checks if the active and activated plugins are installed. If any active plugin is not installed, the setup process (if running in interactive mode) should print a failure message for that plugin and asks the user if they want to continue without that plugin, abort the setup or install the plugin. If the user choosed to continue without the plugin, the setup should proceed with the remaining plugins. If the user choosed to abort, the setup should exit with a non-zero exit code. If the user choosed to install the plugin, the setup should attempt to install the plugin and if the installation is successful, it should proceed with the remaining plugins. If the installation fails, it should print an error message, and then an advice how to install the plugin (e.g. `sudo ./doc.doc.sh install --plugin <plugin_name>` or `sudo ./doc.doc.sh setup`) and exit with a non-zero exit code.
