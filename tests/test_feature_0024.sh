@@ -86,8 +86,8 @@ echo ""
 # =========================================
 echo "--- Group 1: --echo flag recognized ---"
 
-# Check help text mentions --echo
-help_output=$(bash "$CLI" --help 2>&1)
+# Check help text mentions --echo (now in process --help, FEATURE_0038)
+help_output=$(bash "$CLI" process --help 2>&1)
 assert_contains "--echo in help text" "--echo" "$help_output"
 
 # =========================================

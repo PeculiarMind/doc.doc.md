@@ -29,6 +29,10 @@ doc.doc.md is a command-line tool that processes document collections in directo
 - **Interactive Setup**: `setup` command verifies dependencies and configures plugins interactively
 - **Custom Base Path**: `--base-path` parameter for controlling relative file references in rendered output
 - **Graceful Plugin Skipping**: Plugins silently skip unsupported file types (ADR-004) — no spurious error messages
+- **Plugin Validation Phase**: Before processing, validates that all active plugins are installed — with interactive resolution options (continue/abort/install) or hard error in non-interactive mode
+- **Actionable Error Guidance**: Clear recovery advice (including `sudo` tips) when plugin installation fails
+- **Per-Command Help**: Each command supports `--help` for detailed, command-specific usage; global `--help` shows a compact overview
+- **Externalised Banner**: ASCII art banner stored in `banner.txt` with `{{key}}` mustache placeholder support for dynamic content
 
 ## Installation
 

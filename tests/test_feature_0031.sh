@@ -88,7 +88,8 @@ echo ""
 # =========================================
 echo "--- Group 1: --base-path flag recognized ---"
 
-help_output=$(bash "$CLI" --help 2>&1)
+# --base-path is now in process --help (FEATURE_0038)
+help_output=$(bash "$CLI" process --help 2>&1)
 assert_contains "--base-path in help text" "--base-path" "$help_output"
 assert_contains "-b in help text" "-b" "$help_output"
 

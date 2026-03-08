@@ -86,8 +86,10 @@ output=$("$DOC_DOC_SH" --help 2>&1)
 exit_code=$?
 assert_exit_code "--help exits with 0" "0" "$exit_code"
 assert_contains "--help documents list command" "list" "$output"
-assert_contains "--help documents --plugin flag" "--plugin" "$output"
-assert_contains "--help documents --commands flag" "--commands" "$output"
+# --plugin and --commands now in list --help (FEATURE_0038)
+list_help=$("$DOC_DOC_SH" list --help 2>&1)
+assert_contains "list --help documents --plugin flag" "--plugin" "$list_help"
+assert_contains "list --help documents --commands flag" "--commands" "$list_help"
 
 echo ""
 

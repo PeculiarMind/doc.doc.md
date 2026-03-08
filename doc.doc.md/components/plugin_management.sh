@@ -251,6 +251,12 @@ _install_single_plugin() {
 
   if [ ! -d "$plugin_dir" ]; then
     echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    # List available plugins (FEATURE_0037)
+    local -a available
+    mapfile -t available < <(discover_all_plugins "$PLUGIN_DIR")
+    if [ ${#available[@]} -gt 0 ]; then
+      echo "Available plugins: ${available[*]}" >&2
+    fi
     exit 1
   fi
 
@@ -266,7 +272,7 @@ _install_single_plugin() {
   if [ -f "$installed_sh" ]; then
     local installed_output installed_val
     installed_output=$(bash "$installed_sh" 2>/dev/null) || true
-    installed_val=$(echo "$installed_output" | jq -r '.installed // "false"' 2>/dev/null) || installed_val="false"
+    installed_val=$(echo "$installed_output" | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || installed_val="false"
     if [ "$installed_val" = "true" ]; then
       echo "$plugin_name: already installed"
       return 0
@@ -280,10 +286,20 @@ _install_single_plugin() {
   fi
 
   echo "$plugin_name: installing..."
-  if bash "$install_sh"; then
+  local install_err_file
+  install_err_file=$(mktemp)
+  if bash "$install_sh" 2>"$install_err_file"; then
+    rm -f "$install_err_file"
     echo "$plugin_name: installed"
   else
+    local install_err
+    install_err=$(cat "$install_err_file" 2>/dev/null) || install_err=""
+    rm -f "$install_err_file"
+    if [ -n "$install_err" ]; then
+      echo "$install_err" >&2
+    fi
     echo "Error: Installation failed for plugin '$plugin_name'" >&2
+    echo "Tip: try re-running with elevated privileges: sudo ./doc.doc.sh install --plugin $plugin_name" >&2
     exit 1
   fi
 }
@@ -312,7 +328,7 @@ _install_all_plugins() {
     if [ -f "$installed_sh" ]; then
       local installed_output installed_val
       installed_output=$(bash "$installed_sh" 2>/dev/null) || true
-      installed_val=$(echo "$installed_output" | jq -r '.installed // "false"' 2>/dev/null) || installed_val="false"
+      installed_val=$(echo "$installed_output" | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || installed_val="false"
       if [ "$installed_val" = "true" ]; then
         already_installed=true
       fi
@@ -484,6 +500,12 @@ _list_plugins() {
 # --- List command ---
 
 cmd_list() {
+  # Handle --help (FEATURE_0038)
+  if [ "${1:-}" = "--help" ]; then
+    ui_usage_list
+    return 0
+  fi
+
   local plugin_info_script
   plugin_info_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugin_info.py"
 
@@ -755,7 +777,7 @@ cmd_setup() {
     local p_installed_sh="$PLUGIN_DIR/$pname/installed.sh"
     if [ -x "$p_installed_sh" ]; then
       local check
-      check=$(bash "$p_installed_sh" 2>/dev/null | jq -r '.installed // "true"' 2>/dev/null) || check="false"
+      check=$(bash "$p_installed_sh" 2>/dev/null | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || check="false"
       p_installed="$check"
     else
       p_installed="true"
@@ -790,11 +812,21 @@ cmd_setup() {
       if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
         local install_sh="$PLUGIN_DIR/$pname/install.sh"
         if [ -x "$install_sh" ]; then
-          if bash "$install_sh" >/dev/null 2>&1; then
+          local _setup_err_file
+          _setup_err_file=$(mktemp)
+          if bash "$install_sh" >/dev/null 2>"$_setup_err_file"; then
+            rm -f "$_setup_err_file"
             echo "  ✓ Plugin '$pname' installed" >&2
             deps_installed=$((deps_installed + 1))
           else
+            local _setup_err
+            _setup_err=$(cat "$_setup_err_file" 2>/dev/null) || _setup_err=""
+            rm -f "$_setup_err_file"
             echo "  ✗ Plugin '$pname' installation failed" >&2
+            if [ -n "$_setup_err" ]; then
+              echo "    $_setup_err" >&2
+            fi
+            echo "  Tip: sudo ./doc.doc.sh install --plugin $pname  or  sudo ./doc.doc.sh setup" >&2
             plugins_failed=$((plugins_failed + 1))
           fi
         else
@@ -841,7 +873,7 @@ cmd_setup() {
   fi
   echo "" >&2
 
-  if [ "$deps_failed" -gt 0 ]; then
+  if [ "$deps_failed" -gt 0 ] || [ "$plugins_failed" -gt 0 ]; then
     return 1
   fi
   return 0

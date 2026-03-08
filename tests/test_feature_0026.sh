@@ -226,7 +226,8 @@ rm -rf "$INPUT_DIR" "$OUTPUT_DIR"
 echo ""
 echo "--- Group 7: Help text documents new flags ---"
 
-help_output=$(bash "$CLI" --help 2>&1)
+# --progress and --no-progress now in process --help (FEATURE_0038)
+help_output=$(bash "$CLI" process --help 2>&1)
 assert_contains "help mentions --progress" "--progress" "$help_output"
 assert_contains "help mentions --no-progress" "--no-progress" "$help_output"
 
