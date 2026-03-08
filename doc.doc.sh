@@ -227,19 +227,69 @@ main() {
   done
   plugins=("${ordered_plugins[@]}")
 
-  # Validate that all active plugins are installed
+  # Validate that all active plugins are installed (FEATURE_0037 Validation Phase)
+  local -a _uninstalled_plugins=()
   for p in "${plugins[@]}"; do
     local p_descriptor="$PLUGIN_DIR/$p/descriptor.json"
     local p_installed_sh="$PLUGIN_DIR/$p/installed.sh"
     if [ -x "$p_installed_sh" ]; then
       local install_check
-      install_check=$(bash "$p_installed_sh" 2>/dev/null | jq -r '.installed // "true"' 2>/dev/null) || install_check="false"
+      install_check=$(bash "$p_installed_sh" 2>/dev/null | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || install_check="false"
       if [ "$install_check" = "false" ]; then
-        echo "Error: Plugin '$p' is active but not installed. Run: $(basename "$0") list --plugin $p --commands to see install options." >&2
-        exit 1
+        _uninstalled_plugins+=("$p")
       fi
     fi
   done
+
+  if [ ${#_uninstalled_plugins[@]} -gt 0 ]; then
+    # Non-interactive mode: hard error (CI-safe)
+    if ! [ -t 0 ]; then
+      echo "Error: The following active plugin(s) are not installed: ${_uninstalled_plugins[*]}" >&2
+      echo "Run: ./doc.doc.sh install --plugin <name>  or  ./doc.doc.sh setup" >&2
+      exit 1
+    fi
+    # Interactive mode: prompt for each uninstalled plugin
+    local -a _skip_plugins=()
+    for _up in "${_uninstalled_plugins[@]}"; do
+      printf "Plugin '%s' is not installed.\n" "$_up" >&2
+      printf "  [c] Continue without this plugin\n" >&2
+      printf "  [a] Abort\n" >&2
+      printf "  [i] Install now\n" >&2
+      printf "Choice [c/a/i]: " >&2
+      local _choice=""
+      read -r _choice </dev/tty 2>/dev/null || _choice="a"
+      case "$_choice" in
+        c|C)
+          _skip_plugins+=("$_up")
+          ;;
+        i|I)
+          local _up_install_sh="$PLUGIN_DIR/$_up/install.sh"
+          if [ -x "$_up_install_sh" ] && bash "$_up_install_sh"; then
+            echo "Plugin '$_up' installed successfully." >&2
+          else
+            echo "Error: Installation failed for plugin '$_up'" >&2
+            echo "Tip: sudo ./doc.doc.sh install --plugin $_up" >&2
+            exit 1
+          fi
+          ;;
+        *)
+          exit 1
+          ;;
+      esac
+    done
+    # Remove skipped plugins from the list
+    if [ ${#_skip_plugins[@]} -gt 0 ]; then
+      local -a _remaining_plugins=()
+      for p in "${plugins[@]}"; do
+        local _is_skipped=false
+        for _sp in "${_skip_plugins[@]}"; do
+          [ "$p" = "$_sp" ] && _is_skipped=true && break
+        done
+        [ "$_is_skipped" = false ] && _remaining_plugins+=("$p")
+      done
+      plugins=("${_remaining_plugins[@]}")
+    fi
+  fi
 
   # Split include/exclude args into MIME criteria and path criteria.
   # Path criteria: contain '**' (recursive globs like **/2024/**) or have no '/'
