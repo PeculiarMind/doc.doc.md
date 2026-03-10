@@ -9,7 +9,7 @@
 
 **Transform your document collections into organized, searchable markdown files.**
 
-doc.doc.md is a command-line tool that processes document collections in directory structures and generates markdown files for each document. Perfect for managing personal documents, home labs, or any collection where you want markdown-based organization without a complex document management system.
+doc.doc.md is a command-line tool that mirrors a directory of source documents and generates a structured set of templated  markdown descriptions — one per document. It is designed for individuals who want a lightweight, file-system based document management without the overhead of a full-fledged server based document management system.
 
 ---
 
