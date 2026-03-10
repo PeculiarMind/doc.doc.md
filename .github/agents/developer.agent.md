@@ -9,6 +9,7 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 ## Expertise
 - Feature implementation and refactoring
 - TDD coordination and test execution
+- Clean code principles and best practices
 - Architecture compliance coordination
 - License/security/README gate coordination
 - Agile board workflow
