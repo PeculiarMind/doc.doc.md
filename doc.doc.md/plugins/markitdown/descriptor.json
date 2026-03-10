@@ -2,7 +2,7 @@
   "name": "markitdown",
   "version": "1.0.0",
   "description": "A plugin that converts MS Office documents (docx, xlsx, pptx, doc, xls, ppt) to markdown text using the markitdown Python library.",
-  "active": true,
+  "active": false,
   "commands": {
     "process": {
       "description": "Convert an MS Office document to markdown text.",
