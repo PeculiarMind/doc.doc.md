@@ -22,11 +22,10 @@ source "$PLUGIN_EXEC_COMPONENT"
 source "$UI_COMPONENT"
 source "$TEMPLATES_COMPONENT"
 
-# Global MIME filter criteria (set by _split_filter_criteria, consumed by process_file)
+# Global MIME filter criteria (consumed by process_file in plugin_execution.sh)
 _MIME_INCLUDE_ARGS=()
 _MIME_EXCLUDE_ARGS=()
-
-# Process command state (set by _parse_process_args)
+# Process command state — set by _parse/_validate/_prepare/_split functions
 _PROC_INPUT_DIR=""
 _PROC_OUTPUT_DIR=""
 _PROC_TEMPLATE_FILE=""
@@ -35,19 +34,11 @@ _PROC_EXCLUDE_ARGS=()
 _PROC_PROGRESS_FLAG=""
 _PROC_ECHO_MODE=false
 _PROC_BASE_PATH=""
-
-# Process command derived state (set by _validate_process_inputs)
 _PROC_BASE_PATH_RESOLVED=""
 _PROC_CANONICAL_OUT=""
-
-# Active plugin list (set by _prepare_plugins)
 _PROC_PLUGINS=()
-
-# Path-only filter criteria (set by _split_filter_criteria)
 _PROC_PATH_INCLUDE_ARGS=()
 _PROC_PATH_EXCLUDE_ARGS=()
-
-# --- Private functions for the process command ---
 
 _parse_process_args() {
   _PROC_INPUT_DIR=""
@@ -347,11 +338,7 @@ _run_process_pipeline() {
     ui_progress_update phase "Process documents"
   fi
 
-  # Bracket tracking: print '[' only on first non-skipped result to handle
-  # the case where all files are MIME-filtered out (need to print '[]' then).
-  local first=true
-  local printed_bracket=false
-  local processed_count=0
+  local first=true printed_bracket=false processed_count=0
   for file_path in "${file_list[@]}"; do
     [ -n "$file_path" ] || continue
 
