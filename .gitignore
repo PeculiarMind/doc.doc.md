@@ -3,4 +3,4 @@
 **/*.pyc
 **/tests/out
 **/.venv
-
+doc.doc.md/plugins/test_plugin_*
