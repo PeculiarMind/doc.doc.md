@@ -4,3 +4,4 @@
 **/tests/out
 **/.venv
 doc.doc.md/plugins/test_plugin_*
+doc.doc.md/plugins/_test_*

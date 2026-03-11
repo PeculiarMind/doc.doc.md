@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$PLUGIN_DIR/../../components/plugin_input.sh"
+
 SUPPORTED_MIME_TYPES=(
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -17,33 +20,10 @@ SUPPORTED_MIME_TYPES=(
   "application/vnd.ms-powerpoint"
 )
 
-input_json="$(head -c 1048576)"
-file_path="$(echo "$input_json" | jq -r '.filePath // empty')"
-mime_type="$(echo "$input_json" | jq -r '.mimeType // empty')"
+plugin_read_input
+plugin_validate_filepath
 
-if [ -z "$file_path" ]; then
-  echo "Error: filePath is required" >&2
-  exit 1
-fi
-
-canonical_path="$(readlink -f "$file_path" 2>/dev/null || echo "")"
-if [ -z "$canonical_path" ]; then
-  echo "Error: Cannot resolve file path" >&2
-  exit 1
-fi
-
-case "$canonical_path" in
-  /proc/*|/dev/*|/sys/*|/etc/*)
-    echo "Error: Access to restricted path denied" >&2
-    exit 1
-    ;;
-esac
-
-if [ ! -f "$canonical_path" ]; then
-  echo "Error: File not found" >&2
-  exit 1
-fi
-
+mime_type="$(plugin_get_field "mimeType")"
 if [ -z "$mime_type" ]; then
   echo "Error: mimeType is required" >&2
   exit 1
@@ -63,7 +43,6 @@ if [ "$mime_supported" = false ]; then
 fi
 
 # Run markitdown from the plugin-local venv
-PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MARKITDOWN_BIN="$PLUGIN_DIR/.venv/bin/markitdown"
 if [ ! -x "$MARKITDOWN_BIN" ]; then
   echo "Error: markitdown not installed. Run: doc.doc.sh install --plugin markitdown" >&2
@@ -71,7 +50,7 @@ if [ ! -x "$MARKITDOWN_BIN" ]; then
 fi
 _mkd_err_file="$(mktemp)"
 _mkd_exit=0
-if ! document_text="$("$MARKITDOWN_BIN" "$canonical_path" 2>"$_mkd_err_file")"; then
+if ! document_text="$("$MARKITDOWN_BIN" "$PLUGIN_FILEPATH" 2>"$_mkd_err_file")"; then
   _mkd_exit=$?
   _mkd_err_content="$(cat "$_mkd_err_file" 2>/dev/null)" || _mkd_err_content=""
   rm -f "$_mkd_err_file"
