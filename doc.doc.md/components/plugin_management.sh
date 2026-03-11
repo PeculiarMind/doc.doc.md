@@ -430,10 +430,10 @@ _list_plugins() {
   done
 }
 
-# Shared jq expression for extracting parameters from a descriptor.
-# Shared jq fragment: produces arrays of [cmd, direction, param, type, required, default, desc].
+# Shared jq fragment: extracts parameter arrays from descriptor.json commands.
+# Produces arrays of [cmd, direction, param, type, required, default, desc].
 # Callers pipe through @tsv (or prepend plugin name before @tsv).
-_JQ_PARAMS_ARRAYS='
+_JQ_EXTRACT_PARAMS='
   .commands | to_entries[] |
   .key as $cmd |
   .value as $cmdval |
@@ -494,7 +494,7 @@ cmd_list() {
       for plugin_name in "${all_plugins[@]}"; do
         local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
         [ -f "$descriptor" ] || continue
-        jq -r ".name as \$plugin | $_JQ_PARAMS_ARRAYS | [(\$plugin)] + . | @tsv" "$descriptor" 2>/dev/null | sort
+        jq -r ".name as \$plugin | $_JQ_EXTRACT_PARAMS | [(\$plugin)] + . | @tsv" "$descriptor" 2>/dev/null | sort
       done
     } | python3 "$plugin_info_script" table
     return 0
@@ -542,7 +542,7 @@ cmd_list() {
     descriptor=$(_resolve_plugin_descriptor "$plugin_name")
     {
       printf 'COMMAND\tDIRECTION\tPARAMETER\tTYPE\tREQUIRED\tDEFAULT\tDESCRIPTION\n'
-      jq -r "$_JQ_PARAMS_ARRAYS | @tsv" "$descriptor" 2>/dev/null | sort
+      jq -r "$_JQ_EXTRACT_PARAMS | @tsv" "$descriptor" 2>/dev/null | sort
     } | python3 "$plugin_info_script" table
     exit 0
   fi

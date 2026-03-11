@@ -25,7 +25,7 @@ source "$TEMPLATES_COMPONENT"
 # Global MIME filter criteria (consumed by process_file in plugin_execution.sh)
 _MIME_INCLUDE_ARGS=()
 _MIME_EXCLUDE_ARGS=()
-# Process command state — set by _parse/_validate/_prepare/_split functions
+# Process command state (declared here for visibility; initialized by pipeline functions)
 _PROC_INPUT_DIR=""
 _PROC_OUTPUT_DIR=""
 _PROC_TEMPLATE_FILE=""
