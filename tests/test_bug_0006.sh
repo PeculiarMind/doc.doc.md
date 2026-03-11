@@ -94,7 +94,10 @@ else
 fi
 
 TOTAL=$((TOTAL + 1))
-if grep -q 'head -c 1048576' "$PLUGIN_SCRIPT"; then
+# Check for head -c 1048576 directly in the script or in its sourced shared module
+SHARED_INPUT="$REPO_ROOT/doc.doc.md/components/plugin_input.sh"
+if grep -q 'head -c 1048576' "$PLUGIN_SCRIPT" || \
+   { grep -q 'plugin_input\.sh' "$PLUGIN_SCRIPT" && [ -f "$SHARED_INPUT" ] && grep -q 'head -c 1048576' "$SHARED_INPUT"; }; then
   echo "  PASS: markitdown/main.sh uses head -c 1048576 for stdin"
   PASS=$((PASS + 1))
 else

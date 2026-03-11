@@ -54,7 +54,7 @@ plugin_validate_filepath() {
 
   # Reject restricted directories
   if [[ "$PLUGIN_FILEPATH" =~ $_RESTRICTED_PATH_PATTERN ]]; then
-    echo "Error: Cannot access the specified file" >&2
+    echo "Error: Access to restricted path denied" >&2
     exit 1
   fi
 
