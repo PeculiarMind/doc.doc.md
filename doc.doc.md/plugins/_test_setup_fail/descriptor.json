@@ -1,0 +1,9 @@
+{
+  "name": "_test_setup_fail",
+  "version": "0.0.1",
+  "description": "Test plugin for setup failure",
+  "active": true,
+  "commands": {
+    "process": { "command": "main.sh" }
+  }
+}
