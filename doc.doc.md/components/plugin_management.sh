@@ -35,14 +35,12 @@ discover_plugins() {
     [ -d "$dir" ] || continue
     local descriptor="$dir/descriptor.json"
     if [ -f "$descriptor" ]; then
-      # Validate descriptor has required fields
       if ! jq -e '.name and .version and .description and .commands' "$descriptor" >/dev/null 2>&1; then
         echo "Warning: Invalid descriptor in $(basename "$dir"), skipping" >&2
         continue
       fi
-      # Check plugin is active (.active defaults to true when absent; explicit false disables)
       local active
-      active=$(jq -r 'if .active == false then "false" else "true" end' "$descriptor")
+      active=$(get_plugin_active_status "$descriptor")
       if [ "$active" = "true" ]; then
         plugins+=("$(basename "$dir")")
       fi
@@ -54,16 +52,12 @@ discover_plugins() {
   printf '%s\n' "${plugins[@]}"
 }
 
-# Discover ALL plugins (active and inactive) in the plugin directory.
-# Returns plugin names sorted alphabetically.
 discover_all_plugins() {
   local plugin_dir="$1"
-
   if [ ! -d "$plugin_dir" ]; then
     echo "Error: Plugin directory not found: $plugin_dir" >&2
     return 1
   fi
-
   for dir in "$plugin_dir"/*/; do
     [ -d "$dir" ] || continue
     local descriptor="$dir/descriptor.json"
@@ -73,23 +67,17 @@ discover_all_plugins() {
   done | sort
 }
 
-# Get the activation status of a plugin from its descriptor.json.
-# Returns "true" if active (or absent), "false" if explicitly false.
 get_plugin_active_status() {
   local descriptor="$1"
   jq -r 'if .active == false then "false" else "true" end' "$descriptor"
 }
 
-# --- Activate command (FEATURE_0012) ---
+# --- Shared helpers to reduce duplication ---
 
-cmd_activate() {
+# Parse --plugin/-p argument from command args. Prints the plugin name.
+# Caller must handle --help before calling this function.
+_parse_plugin_arg() {
   local plugin_name=""
-
-  if [ "${1:-}" = "--help" ]; then
-    usage_activate
-    exit 0
-  fi
-
   while [ $# -gt 0 ]; do
     case "$1" in
       --plugin|-p)
@@ -108,7 +96,12 @@ cmd_activate() {
     echo "Error: --plugin / -p is required" >&2
     exit 1
   fi
+  echo "$plugin_name"
+}
 
+# Validate that a plugin directory and descriptor exist. Exits on error.
+_require_plugin_descriptor() {
+  local plugin_name="$1"
   local plugin_dir="$PLUGIN_DIR/$plugin_name"
   local descriptor="$plugin_dir/descriptor.json"
 
@@ -116,23 +109,40 @@ cmd_activate() {
     echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
     exit 1
   fi
-
   if [ ! -f "$descriptor" ]; then
     echo "Error: Plugin descriptor not found: $descriptor" >&2
     exit 1
   fi
+}
+
+# Set plugin active field to true or false. Used by cmd_activate/cmd_deactivate.
+_set_plugin_active() {
+  local plugin_name="$1"
+  local target_state="$2"  # "true" or "false"
+  local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
+
+  _require_plugin_descriptor "$plugin_name"
 
   local current_status
   current_status=$(get_plugin_active_status "$descriptor")
-  if [ "$current_status" = "true" ]; then
-    echo "plugin '$plugin_name' is already active"
+
+  if [ "$current_status" = "$target_state" ]; then
+    if [ "$target_state" = "true" ]; then
+      echo "plugin '$plugin_name' is already active"
+    else
+      echo "plugin '$plugin_name' is already inactive"
+    fi
     exit 0
   fi
 
   local tmp
   tmp=$(mktemp)
-  if jq '.active = true' "$descriptor" > "$tmp" && mv "$tmp" "$descriptor"; then
-    echo "plugin '$plugin_name' activated"
+  if jq ".active = $target_state" "$descriptor" > "$tmp" && mv "$tmp" "$descriptor"; then
+    if [ "$target_state" = "true" ]; then
+      echo "plugin '$plugin_name' activated"
+    else
+      echo "plugin '$plugin_name' deactivated"
+    fi
   else
     rm -f "$tmp"
     echo "Error: Could not update descriptor.json for plugin '$plugin_name'" >&2
@@ -140,64 +150,69 @@ cmd_activate() {
   fi
 }
 
-# --- Deactivate command (FEATURE_0013) ---
-
-cmd_deactivate() {
-  local plugin_name=""
-
-  if [ "${1:-}" = "--help" ]; then
-    usage_deactivate
-    exit 0
+# Check if a plugin is installed by running its installed.sh.
+# Returns "true" or "false" via stdout.
+_check_plugin_installed() {
+  local plugin_name="$1"
+  local installed_sh="$PLUGIN_DIR/$plugin_name/installed.sh"
+  if [ -f "$installed_sh" ]; then
+    local installed_output installed_val
+    installed_output=$(bash "$installed_sh" 2>/dev/null) || true
+    installed_val=$(echo "$installed_output" | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || installed_val="false"
+    echo "$installed_val"
+  else
+    echo "unknown"
   fi
+}
 
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      --plugin|-p)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
-        plugin_name="$2"
-        shift 2
-        ;;
-      *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
-        exit 1
-        ;;
-    esac
-  done
-
-  if [ -z "$plugin_name" ]; then
-    echo "Error: --plugin / -p is required" >&2
-    exit 1
-  fi
-
-  local plugin_dir="$PLUGIN_DIR/$plugin_name"
-  local descriptor="$plugin_dir/descriptor.json"
-
-  if [ ! -d "$plugin_dir" ]; then
+# Validate plugin dir + descriptor for cmd_list (with path traversal check).
+# Prints descriptor path on success; exits on failure.
+_resolve_plugin_descriptor() {
+  local plugin_name="$1"
+  local plugin_dir
+  plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
     echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
     exit 1
-  fi
-
+  }
+  local descriptor="$plugin_dir/descriptor.json"
   if [ ! -f "$descriptor" ]; then
     echo "Error: Plugin descriptor not found: $descriptor" >&2
     exit 1
   fi
-
-  local current_status
-  current_status=$(get_plugin_active_status "$descriptor")
-  if [ "$current_status" = "false" ]; then
-    echo "plugin '$plugin_name' is already inactive"
-    exit 0
-  fi
-
-  local tmp
-  tmp=$(mktemp)
-  if jq '.active = false' "$descriptor" > "$tmp" && mv "$tmp" "$descriptor"; then
-    echo "plugin '$plugin_name' deactivated"
-  else
-    rm -f "$tmp"
-    echo "Error: Could not update descriptor.json for plugin '$plugin_name'" >&2
+  if ! jq empty "$descriptor" 2>/dev/null; then
+    echo "Error: Plugin descriptor is not valid JSON: $descriptor" >&2
     exit 1
   fi
+  echo "$descriptor"
+}
+
+# Validate that a plugin path stays within PLUGIN_DIR (prevents path traversal).
+_validate_plugin_dir() {
+  local base_dir="$1" plugin_name="$2"
+  local raw_dir="$base_dir/$plugin_name"
+  local canonical_base canonical_dir
+  canonical_base="$(cd "$base_dir" 2>/dev/null && pwd -P)" || return 1
+  canonical_dir="$(cd "$raw_dir" 2>/dev/null && pwd -P)" || return 1
+  if [ "${canonical_dir#"$canonical_base/"}" = "$canonical_dir" ]; then
+    return 1
+  fi
+  printf '%s' "$canonical_dir"
+}
+
+# --- Activate / Deactivate commands ---
+
+cmd_activate() {
+  if [ "${1:-}" = "--help" ]; then usage_activate; exit 0; fi
+  local plugin_name
+  plugin_name=$(_parse_plugin_arg "$@")
+  _set_plugin_active "$plugin_name" true
+}
+
+cmd_deactivate() {
+  if [ "${1:-}" = "--help" ]; then usage_deactivate; exit 0; fi
+  local plugin_name
+  plugin_name=$(_parse_plugin_arg "$@")
+  _set_plugin_active "$plugin_name" false
 }
 
 # --- Install command (FEATURE_0011 + FEATURE_0014) ---
@@ -208,7 +223,6 @@ cmd_install() {
     exit 0
   fi
 
-  # Sub-command: install plugins --all (FEATURE_0011)
   if [ "${1:-}" = "plugins" ]; then
     shift
     if [ "${1:-}" != "--all" ]; then
@@ -219,28 +233,8 @@ cmd_install() {
     return $?
   fi
 
-  # Single plugin install (FEATURE_0014)
-  local plugin_name=""
-
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      --plugin|-p)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
-        plugin_name="$2"
-        shift 2
-        ;;
-      *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
-        exit 1
-        ;;
-    esac
-  done
-
-  if [ -z "$plugin_name" ]; then
-    echo "Error: --plugin / -p is required" >&2
-    exit 1
-  fi
-
+  local plugin_name
+  plugin_name=$(_parse_plugin_arg "$@")
   _install_single_plugin "$plugin_name"
 }
 
@@ -251,7 +245,6 @@ _install_single_plugin() {
 
   if [ ! -d "$plugin_dir" ]; then
     echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
-    # List available plugins (FEATURE_0037)
     local -a available
     mapfile -t available < <(discover_all_plugins "$PLUGIN_DIR")
     if [ ${#available[@]} -gt 0 ]; then
@@ -265,21 +258,12 @@ _install_single_plugin() {
     exit 1
   fi
 
-  local installed_sh="$plugin_dir/installed.sh"
-  local install_sh="$plugin_dir/install.sh"
-
-  # Check if already installed
-  if [ -f "$installed_sh" ]; then
-    local installed_output installed_val
-    installed_output=$(bash "$installed_sh" 2>/dev/null) || true
-    installed_val=$(echo "$installed_output" | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || installed_val="false"
-    if [ "$installed_val" = "true" ]; then
-      echo "$plugin_name: already installed"
-      return 0
-    fi
+  if [ "$(_check_plugin_installed "$plugin_name")" = "true" ]; then
+    echo "$plugin_name: already installed"
+    return 0
   fi
 
-  # Run install.sh
+  local install_sh="$plugin_dir/install.sh"
   if [ ! -f "$install_sh" ]; then
     echo "$plugin_name: no install.sh found, skipping"
     return 0
@@ -314,31 +298,16 @@ _install_all_plugins() {
   fi
 
   local failed=0
-
   for plugin_name in "${all_plugins[@]}"; do
     local plugin_dir="$PLUGIN_DIR/$plugin_name"
-    local descriptor="$plugin_dir/descriptor.json"
-    [ -f "$descriptor" ] || continue
+    [ -f "$plugin_dir/descriptor.json" ] || continue
 
-    local installed_sh="$plugin_dir/installed.sh"
-    local install_sh="$plugin_dir/install.sh"
-
-    # Check if already installed
-    local already_installed=false
-    if [ -f "$installed_sh" ]; then
-      local installed_output installed_val
-      installed_output=$(bash "$installed_sh" 2>/dev/null) || true
-      installed_val=$(echo "$installed_output" | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || installed_val="false"
-      if [ "$installed_val" = "true" ]; then
-        already_installed=true
-      fi
-    fi
-
-    if [ "$already_installed" = "true" ]; then
+    if [ "$(_check_plugin_installed "$plugin_name")" = "true" ]; then
       echo "$plugin_name: already installed"
       continue
     fi
 
+    local install_sh="$plugin_dir/install.sh"
     if [ ! -f "$install_sh" ]; then
       echo "$plugin_name: no install.sh found, skipping"
       continue
@@ -369,7 +338,6 @@ cmd_installed() {
   fi
 
   local plugin_name=""
-
   while [ $# -gt 0 ]; do
     case "$1" in
       --plugin|-p)
@@ -390,20 +358,16 @@ cmd_installed() {
   fi
 
   local plugin_dir="$PLUGIN_DIR/$plugin_name"
-  local descriptor="$plugin_dir/descriptor.json"
-
   if [ ! -d "$plugin_dir" ]; then
     echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
     exit 2
   fi
-
-  if [ ! -f "$descriptor" ]; then
-    echo "Error: Plugin descriptor not found: $descriptor" >&2
+  if [ ! -f "$plugin_dir/descriptor.json" ]; then
+    echo "Error: Plugin descriptor not found: $plugin_dir/descriptor.json" >&2
     exit 2
   fi
 
   local installed_sh="$plugin_dir/installed.sh"
-
   if [ ! -f "$installed_sh" ]; then
     echo "$plugin_name: no installed.sh found — assuming not installed"
     exit 1
@@ -442,65 +406,54 @@ cmd_tree() {
   return $?
 }
 
-# Validate that a plugin path stays within PLUGIN_DIR (prevents path traversal).
-# Usage: _validate_plugin_dir "$PLUGIN_DIR" "$plugin_name"
-# Returns 0 if valid, 1 if traversal detected. Prints canonical path on success.
-_validate_plugin_dir() {
-  local base_dir="$1" plugin_name="$2"
-  local raw_dir="$base_dir/$plugin_name"
-
-  local canonical_base canonical_dir
-  canonical_base="$(cd "$base_dir" 2>/dev/null && pwd -P)" || return 1
-  canonical_dir="$(cd "$raw_dir" 2>/dev/null && pwd -P)" || return 1
-
-  # Ensure resolved path is strictly inside the base directory
-  if [ "${canonical_dir#"$canonical_base/"}" = "$canonical_dir" ]; then
-    return 1
-  fi
-
-  printf '%s' "$canonical_dir"
-}
-
 # --- _list_plugins helper ---
 
 _list_plugins() {
-  local filter="$1"  # "all", "active", or "inactive"
-  local plugin_dir="$PLUGIN_DIR"
-
+  local filter="$1"
   local all_plugins
-  mapfile -t all_plugins < <(discover_all_plugins "$plugin_dir")
-
-  if [ ${#all_plugins[@]} -eq 0 ]; then
-    return 0
-  fi
+  mapfile -t all_plugins < <(discover_all_plugins "$PLUGIN_DIR")
+  [ ${#all_plugins[@]} -eq 0 ] && return 0
 
   for plugin_name in "${all_plugins[@]}"; do
-    local descriptor="$plugin_dir/$plugin_name/descriptor.json"
+    local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
     [ -f "$descriptor" ] || continue
     local active
     active=$(get_plugin_active_status "$descriptor")
     case "$filter" in
       all)
-        if [ "$active" = "true" ]; then
-          echo "$plugin_name  [active]"
-        else
-          echo "$plugin_name  [inactive]"
-        fi
+        if [ "$active" = "true" ]; then echo "$plugin_name  [active]"
+        else echo "$plugin_name  [inactive]"; fi
         ;;
-      active)
-        if [ "$active" = "true" ]; then echo "$plugin_name"; fi
-        ;;
-      inactive)
-        if [ "$active" = "false" ]; then echo "$plugin_name"; fi
-        ;;
+      active)   [ "$active" = "true" ]  && echo "$plugin_name" || true ;;
+      inactive) [ "$active" = "false" ] && echo "$plugin_name" || true ;;
     esac
   done
 }
 
+# Shared jq fragment: extracts parameter arrays from descriptor.json commands.
+# Produces arrays of [cmd, direction, param, type, required, default, desc].
+# Callers pipe through @tsv (or prepend plugin name before @tsv).
+_JQ_EXTRACT_PARAMS='
+  .commands | to_entries[] |
+  .key as $cmd |
+  .value as $cmdval |
+  (
+    ($cmdval.input // {} | to_entries[] |
+      [$cmd, "input", .key, .value.type,
+       (if .value.required then "required" else "optional" end),
+       (.value.default | if . != null then "default:\(.)" else "-" end),
+       .value.description]
+    ),
+    ($cmdval.output // {} | to_entries[] |
+      [$cmd, "output", .key, .value.type, "-", "-",
+       .value.description]
+    )
+  )
+'
+
 # --- List command ---
 
 cmd_list() {
-  # Handle --help (FEATURE_0038)
   if [ "${1:-}" = "--help" ]; then
     ui_usage_list
     return 0
@@ -509,17 +462,16 @@ cmd_list() {
   local plugin_info_script
   plugin_info_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugin_info.py"
 
-  # Handle 'plugins' sub-command (FEATURE_0008)
+  # Sub-command: list plugins [active|inactive]
   if [ "${1:-}" = "plugins" ]; then
     local filter="${2:-all}"
-    # Validate no extra arguments
     if [ $# -gt 2 ]; then
       echo "Error: Too many arguments for 'list plugins'. Use: list plugins [active|inactive]" >&2
       exit 1
     fi
     case "$filter" in
-      all|"")  _list_plugins "all" ;;
-      active)  _list_plugins "active" ;;
+      all|"")   _list_plugins "all" ;;
+      active)   _list_plugins "active" ;;
       inactive) _list_plugins "inactive" ;;
       *)
         echo "Error: Unknown filter '$filter'. Use: list plugins [active|inactive]" >&2
@@ -529,7 +481,7 @@ cmd_list() {
     return 0
   fi
 
-  # Handle 'parameters' sub-command (FEATURE_0018): list parameters for all plugins
+  # Sub-command: list parameters (all plugins)
   if [ "${1:-}" = "parameters" ]; then
     if [ $# -gt 1 ]; then
       echo "Error: Too many arguments for 'list parameters'. Use: list parameters" >&2
@@ -542,52 +494,21 @@ cmd_list() {
       for plugin_name in "${all_plugins[@]}"; do
         local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
         [ -f "$descriptor" ] || continue
-        jq -r '
-          .name as $plugin |
-          .commands | to_entries[] |
-          .key as $cmd |
-          .value as $cmdval |
-          (
-            ($cmdval.input // {} | to_entries[] |
-              [$plugin, $cmd, "input", .key, .value.type,
-               (if .value.required then "required" else "optional" end),
-               (.value.default | if . != null then "default:\(.)" else "-" end),
-               .value.description]
-            ),
-            ($cmdval.output // {} | to_entries[] |
-              [$plugin, $cmd, "output", .key, .value.type, "-", "-",
-               .value.description]
-            )
-          ) | @tsv
-        ' "$descriptor" 2>/dev/null | sort
+        jq -r ".name as \$plugin | $_JQ_EXTRACT_PARAMS | [(\$plugin)] + . | @tsv" "$descriptor" 2>/dev/null | sort
       done
     } | python3 "$plugin_info_script" table
     return 0
   fi
 
-  local show_commands=false
-  local show_parameters=false
-  local plugin_name=""
-
+  local show_commands=false show_parameters=false plugin_name=""
   while [ $# -gt 0 ]; do
     case "$1" in
       --plugin)
         [ $# -ge 2 ] || { echo "Error: --plugin requires an argument" >&2; exit 1; }
-        plugin_name="$2"
-        shift 2
-        ;;
-      --commands)
-        show_commands=true
-        shift
-        ;;
-      --parameters)
-        show_parameters=true
-        shift
-        ;;
-      --help)
-        usage
-        exit 0
-        ;;
+        plugin_name="$2"; shift 2 ;;
+      --commands)    show_commands=true; shift ;;
+      --parameters)  show_parameters=true; shift ;;
+      --help)        usage; exit 0 ;;
       *)
         echo "Error: Unknown option '$1'. Use --help for usage." >&2
         exit 1
@@ -600,79 +521,28 @@ cmd_list() {
     echo "Error: --parameters requires --plugin <name> to be specified" >&2
     exit 1
   fi
-
   if [ -n "$plugin_name" ] && [ "$show_commands" = false ] && [ "$show_parameters" = false ]; then
     echo "Error: --plugin requires --commands or --parameters to be specified" >&2
     exit 1
   fi
-
   if [ "$show_commands" = true ] && [ -z "$plugin_name" ]; then
     echo "Error: --commands requires --plugin <name> to be specified" >&2
     exit 1
   fi
 
   if [ "$show_commands" = true ] && [ -n "$plugin_name" ]; then
-    local plugin_dir
-    plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
-      echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
-      exit 1
-    }
-    local descriptor="$plugin_dir/descriptor.json"
-
-    # Validate descriptor exists and is valid JSON
-    if [ ! -f "$descriptor" ]; then
-      echo "Error: Plugin descriptor not found: $descriptor" >&2
-      exit 1
-    fi
-
-    if ! jq empty "$descriptor" 2>/dev/null; then
-      echo "Error: Plugin descriptor is not valid JSON: $descriptor" >&2
-      exit 1
-    fi
-
-    # Extract and print commands sorted alphabetically
-    jq -r '.commands | to_entries[] | "\(.key)\t\(.value.description)"' "$descriptor" \
-      | sort
+    local descriptor
+    descriptor=$(_resolve_plugin_descriptor "$plugin_name")
+    jq -r '.commands | to_entries[] | "\(.key)\t\(.value.description)"' "$descriptor" | sort
     exit 0
   fi
 
   if [ "$show_parameters" = true ] && [ -n "$plugin_name" ]; then
-    local plugin_dir
-    plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
-      echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
-      exit 1
-    }
-    local descriptor="$plugin_dir/descriptor.json"
-
-    if [ ! -f "$descriptor" ]; then
-      echo "Error: Plugin descriptor not found: $descriptor" >&2
-      exit 1
-    fi
-
-    if ! jq empty "$descriptor" 2>/dev/null; then
-      echo "Error: Plugin descriptor is not valid JSON: $descriptor" >&2
-      exit 1
-    fi
-
+    local descriptor
+    descriptor=$(_resolve_plugin_descriptor "$plugin_name")
     {
       printf 'COMMAND\tDIRECTION\tPARAMETER\tTYPE\tREQUIRED\tDEFAULT\tDESCRIPTION\n'
-      jq -r '
-        .commands | to_entries[] |
-        .key as $cmd |
-        .value as $cmdval |
-        (
-          ($cmdval.input // {} | to_entries[] |
-            [$cmd, "input", .key, .value.type,
-             (if .value.required then "required" else "optional" end),
-             (.value.default | if . != null then "default:\(.)" else "-" end),
-             .value.description]
-          ),
-          ($cmdval.output // {} | to_entries[] |
-            [$cmd, "output", .key, .value.type, "-", "-",
-             .value.description]
-          )
-        ) | @tsv
-      ' "$descriptor" 2>/dev/null | sort
+      jq -r "$_JQ_EXTRACT_PARAMS | @tsv" "$descriptor" 2>/dev/null | sort
     } | python3 "$plugin_info_script" table
     exit 0
   fi
@@ -690,18 +560,9 @@ cmd_setup() {
 
   while [ $# -gt 0 ]; do
     case "$1" in
-      -y|--yes)
-        auto_yes=true
-        shift
-        ;;
-      -n|--non-interactive)
-        non_interactive=true
-        shift
-        ;;
-      --help)
-        ui_usage_setup
-        exit 0
-        ;;
+      -y|--yes)           auto_yes=true; shift ;;
+      -n|--non-interactive) non_interactive=true; shift ;;
+      --help)             ui_usage_setup; exit 0 ;;
       *)
         echo "Error: Unknown option '$1'. Use --help for usage." >&2
         exit 1
@@ -709,11 +570,8 @@ cmd_setup() {
     esac
   done
 
-  local deps_satisfied=0
-  local deps_installed=0
-  local deps_failed=0
-  local plugins_activated=0
-  local plugins_failed=0
+  local deps_satisfied=0 deps_installed=0 deps_failed=0
+  local plugins_activated=0 plugins_failed=0
 
   # --- Section 1: Dependency checks ---
   echo "=== Dependency Check ===" >&2
@@ -728,7 +586,6 @@ cmd_setup() {
         deps_failed=$((deps_failed + 1))
         continue
       fi
-      # Attempt auto-install
       local install_ok=false
       if command -v apt-get >/dev/null 2>&1; then
         if apt-get install -y "$dep" >/dev/null 2>&1; then
@@ -761,27 +618,19 @@ cmd_setup() {
     while read -r pdir; do basename "$pdir"; done | sort
   )
 
-  # Print status table
   printf "  %-20s %-12s %-12s\n" "Plugin" "Installed" "Active" >&2
   printf "  %-20s %-12s %-12s\n" "------" "---------" "------" >&2
 
-  local -a plugins_to_install=()
-  local -a plugins_to_activate=()
+  local -a plugins_to_install=() plugins_to_activate=()
 
   for pname in "${all_plugins[@]}"; do
     local p_descriptor="$PLUGIN_DIR/$pname/descriptor.json"
     local p_active
     p_active=$(jq -r '.active // false' "$p_descriptor" 2>/dev/null) || p_active="false"
 
-    local p_installed="unknown"
-    local p_installed_sh="$PLUGIN_DIR/$pname/installed.sh"
-    if [ -x "$p_installed_sh" ]; then
-      local check
-      check=$(bash "$p_installed_sh" 2>/dev/null | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || check="false"
-      p_installed="$check"
-    else
-      p_installed="true"
-    fi
+    local p_installed
+    p_installed=$(_check_plugin_installed "$pname")
+    [ "$p_installed" = "unknown" ] && p_installed="true"
 
     printf "  %-20s %-12s %-12s\n" "$pname" "$p_installed" "$p_active" >&2
 
@@ -799,7 +648,6 @@ cmd_setup() {
   if [ "$non_interactive" = true ]; then
     echo "=== Non-interactive mode: skipping prompts ===" >&2
   else
-    # Install missing plugins
     for pname in "${plugins_to_install[@]+"${plugins_to_install[@]}"}"; do
       local answer="n"
       if [ "$auto_yes" = true ]; then
@@ -823,9 +671,7 @@ cmd_setup() {
             _setup_err=$(cat "$_setup_err_file" 2>/dev/null) || _setup_err=""
             rm -f "$_setup_err_file"
             echo "  ✗ Plugin '$pname' installation failed" >&2
-            if [ -n "$_setup_err" ]; then
-              echo "    $_setup_err" >&2
-            fi
+            [ -n "$_setup_err" ] && echo "    $_setup_err" >&2
             echo "  Tip: sudo ./doc.doc.sh install --plugin $pname  or  sudo ./doc.doc.sh setup" >&2
             plugins_failed=$((plugins_failed + 1))
           fi
@@ -836,7 +682,6 @@ cmd_setup() {
       fi
     done
 
-    # Activate inactive plugins
     for pname in "${plugins_to_activate[@]+"${plugins_to_activate[@]}"}"; do
       local answer="n"
       if [ "$auto_yes" = true ]; then
