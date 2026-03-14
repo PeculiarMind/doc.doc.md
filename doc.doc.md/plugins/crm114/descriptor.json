@@ -2,7 +2,7 @@
   "name": "crm114",
   "version": "1.0.0",
   "description": "A plugin that performs statistical text classification on documents using the CRM114 Discriminator. Stores classification models in pluginStorage.",
-  "active": true,
+  "active": false,
   "commands": {
     "process": {
       "description": "Classify document text using CRM114 and return category scores.",

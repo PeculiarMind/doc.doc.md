@@ -16,11 +16,37 @@ FAIL=0
 TOTAL=0
 
 TMPDIR_TEST=""
+_DEACTIVATED_PLUGINS=()
 
 cleanup() {
+  # Re-activate any plugins we deactivated for the test
+  for _p in "${_DEACTIVATED_PLUGINS[@]+"${_DEACTIVATED_PLUGINS[@]}"}"; do
+    local _desc="$BUILTIN_PLUGIN_DIR/$_p/descriptor.json"
+    if [ -f "$_desc" ]; then
+      local _tmp
+      _tmp=$(jq '.active = true' "$_desc") && echo "$_tmp" > "$_desc"
+    fi
+  done
   [ -n "$TMPDIR_TEST" ] && [ -d "$TMPDIR_TEST" ] && rm -rf "$TMPDIR_TEST"
 }
 trap cleanup EXIT
+
+# Deactivate plugins whose dependencies are not installed to avoid
+# interactive prompts or non-zero exits during 'process' invocations.
+for _plugin_name in markitdown ocrmypdf crm114; do
+  _inst_sh="$BUILTIN_PLUGIN_DIR/$_plugin_name/installed.sh"
+  _desc_json="$BUILTIN_PLUGIN_DIR/$_plugin_name/descriptor.json"
+  if [ -x "$_inst_sh" ] && [ -f "$_desc_json" ]; then
+    _is_active=$(jq -r '.active' "$_desc_json")
+    if [ "$_is_active" = "true" ]; then
+      _check=$(bash "$_inst_sh" 2>/dev/null | jq -r 'if .installed == false then "false" else "true" end' 2>/dev/null) || _check="false"
+      if [ "$_check" = "false" ]; then
+        _tmp=$(jq '.active = false' "$_desc_json") && echo "$_tmp" > "$_desc_json"
+        _DEACTIVATED_PLUGINS+=("$_plugin_name")
+      fi
+    fi
+  fi
+done
 
 assert_eq() {
   local test_name="$1" expected="$2" actual="$3"
