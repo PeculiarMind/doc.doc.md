@@ -3,8 +3,7 @@
 # Part of doc.doc.md architecture (Level 3: Bash Components)
 # Handles plugin discovery, descriptor.json parsing, installation-state
 # checking, and activation/deactivation state management.
-# Contains NO plugin invocation, stdin/stdout JSON I/O, or exit-code
-# classification logic.
+# Contains NO process-pipeline invocation logic (that belongs in plugin_execution.sh).
 #
 # Requires: plugin_info.py (sibling Python component) for tree rendering
 #           and table formatting in cmd_tree and cmd_list.
@@ -19,6 +18,7 @@
 #   cmd_installed                            - Check if a plugin is installed
 #   cmd_tree                                 - Display plugin dependency tree
 #   cmd_list                                 - List plugins and their parameters/commands
+#   cmd_run                                  - Invoke any plugin command declared in descriptor.json
 
 # --- Plugin discovery and validation ---
 
@@ -769,4 +769,151 @@ cmd_setup() {
     return 1
   fi
   return 0
+}
+
+# --- Run command (FEATURE_0043) ---
+# Invoke any command declared in a plugin's descriptor.json from the CLI.
+# Builds a JSON input object from flags and pipes it to the plugin script.
+# stdout/stderr and exit code are passed through directly.
+
+# Print global run help: static usage + dynamic plugin list.
+_run_global_help() {
+  ui_usage_run
+  echo "Available plugins:"
+  local -a all_plugins
+  mapfile -t all_plugins < <(discover_all_plugins "$PLUGIN_DIR")
+  for plugin_name in "${all_plugins[@]}"; do
+    local descriptor="$PLUGIN_DIR/$plugin_name/descriptor.json"
+    [ -f "$descriptor" ] || continue
+    local desc
+    desc=$(jq -r '.description // ""' "$descriptor" 2>/dev/null)
+    printf '  %-20s %s\n' "$plugin_name" "$desc"
+  done
+}
+
+# Print per-plugin help: plugin description + command list from descriptor.json.
+_run_plugin_help() {
+  local plugin_name="$1" descriptor="$2"
+  local plugin_desc
+  plugin_desc=$(jq -r '.description // ""' "$descriptor" 2>/dev/null)
+  echo "Plugin: $plugin_name"
+  echo ""
+  echo "$plugin_desc"
+  echo ""
+  echo "Commands:"
+  jq -r '.commands | to_entries[] | "  \(.key)\t\(.value.description // "")"' \
+    "$descriptor" 2>/dev/null | sort | column -t -s $'\t'
+}
+
+cmd_run() {
+  # No args or --help: print global help with plugin list and exit 0
+  if [ $# -eq 0 ] || [ "${1:-}" = "--help" ]; then
+    _run_global_help
+    return 0
+  fi
+
+  local plugin_name="$1"
+  shift
+
+  # Validate plugin name (security: prevent path traversal via _validate_plugin_dir)
+  local plugin_dir
+  plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
+    log_error "Plugin '$plugin_name' not found"
+    exit 1
+  }
+
+  local descriptor="$plugin_dir/descriptor.json"
+  if [ ! -f "$descriptor" ] || ! jq empty "$descriptor" 2>/dev/null; then
+    log_error "Plugin '$plugin_name' not found or has invalid descriptor"
+    exit 1
+  fi
+
+  # <pluginName> --help: print per-plugin command list and exit 0
+  if [ "${1:-}" = "--help" ]; then
+    _run_plugin_help "$plugin_name" "$descriptor"
+    return 0
+  fi
+
+  # Command name is required (and --help was not passed)
+  if [ $# -eq 0 ]; then
+    log_error "Command name is required. Use: run $plugin_name --help"
+    exit 1
+  fi
+
+  local command_name="$1"
+  shift
+
+  # Validate command name against descriptor.json (prevents arbitrary script execution)
+  local command_script
+  command_script=$(jq -r --arg cmd "$command_name" '.commands[$cmd].command // empty' \
+    "$descriptor" 2>/dev/null)
+  if [ -z "$command_script" ]; then
+    log_error "Command '$command_name' not found in plugin '$plugin_name'"
+    exit 1
+  fi
+
+  local script_path="$plugin_dir/$command_script"
+  if [ ! -f "$script_path" ]; then
+    log_error "Command script not found: $script_path"
+    exit 1
+  fi
+  if [ ! -x "$script_path" ]; then
+    log_error "Command script is not executable: $script_path"
+    exit 1
+  fi
+
+  # Parse flags: --file, --plugin-storage, --category, and -- key=value pairs
+  local file_path="" plugin_storage="" category=""
+  local -a extra_pairs=()
+  local in_extra=false
+
+  while [ $# -gt 0 ]; do
+    if [ "$in_extra" = true ]; then
+      extra_pairs+=("$1")
+      shift
+      continue
+    fi
+    case "$1" in
+      --file)
+        [ $# -ge 2 ] || { log_error "--file requires an argument"; exit 1; }
+        file_path="$2"; shift 2 ;;
+      --plugin-storage)
+        [ $# -ge 2 ] || { log_error "--plugin-storage requires an argument"; exit 1; }
+        plugin_storage="$2"; shift 2 ;;
+      --category)
+        [ $# -ge 2 ] || { log_error "--category requires an argument"; exit 1; }
+        category="$2"; shift 2 ;;
+      --)
+        in_extra=true; shift ;;
+      *)
+        log_error "Unknown option '$1'. Use: run $plugin_name $command_name --help"
+        exit 1 ;;
+    esac
+  done
+
+  # Build JSON input safely via jq (all values passed as --arg, never interpolated)
+  local json_input='{}'
+  if [ -n "$file_path" ]; then
+    json_input=$(printf '%s' "$json_input" | jq --arg v "$file_path" '. + {filePath: $v}')
+  fi
+  if [ -n "$plugin_storage" ]; then
+    json_input=$(printf '%s' "$json_input" | jq --arg v "$plugin_storage" '. + {pluginStorage: $v}')
+  fi
+  if [ -n "$category" ]; then
+    json_input=$(printf '%s' "$json_input" | jq --arg v "$category" '. + {category: $v}')
+  fi
+
+  # Merge extra key=value pairs (keys and values both passed via --arg, preventing injection)
+  for pair in "${extra_pairs[@]+"${extra_pairs[@]}"}"; do
+    local key="${pair%%=*}"
+    local val="${pair#*=}"
+    if [ "$key" = "$pair" ]; then
+      log_error "Invalid key=value pair: '$pair'. Expected format: key=value"
+      exit 1
+    fi
+    json_input=$(printf '%s' "$json_input" | jq --arg k "$key" --arg v "$val" '. + {($k): $v}')
+  done
+
+  # Invoke the plugin script: pipe JSON to stdin, pass through stdout/stderr/exit code
+  printf '%s\n' "$json_input" | bash "$script_path"
 }

@@ -453,6 +453,10 @@ main() {
     process)
       : # fall through to process logic below
       ;;
+    run)
+      cmd_run "$@"
+      exit $?
+      ;;
     list)
       cmd_list "$@"
       exit $?
