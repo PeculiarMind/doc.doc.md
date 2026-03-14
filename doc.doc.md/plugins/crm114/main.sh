@@ -26,12 +26,6 @@ if [ -z "$CANONICAL_STORAGE" ] || [ ! -d "$CANONICAL_STORAGE" ]; then
   exit 65
 fi
 
-# Reject path traversal attempts
-if [[ "$CANONICAL_STORAGE" =~ \.\. ]]; then
-  echo "Error: Path traversal detected in pluginStorage" >&2
-  exit 1
-fi
-
 # Find trained category models (.css files)
 shopt -s nullglob
 css_files=("$CANONICAL_STORAGE"/*.css)
