@@ -285,6 +285,41 @@ usage_installed()  { ui_usage_installed "$@"; }
 usage_tree()       { ui_usage_tree "$@"; }
 usage_setup()      { ui_usage_setup "$@"; }
 
+# --- Color helpers ---
+# Only emit ANSI codes when stderr is a real TTY, so piped/redirected output
+# stays clean.
+if [ -t 2 ]; then
+  UI_GREEN='\033[0;32m'
+  UI_RED='\033[0;31m'
+  UI_RESET='\033[0m'
+else
+  UI_GREEN=''
+  UI_RED=''
+  UI_RESET=''
+fi
+
+# ui_ok <text>   — return green-colored text on stdout (use inside $(...))
+ui_ok()   { printf "${UI_GREEN}%s${UI_RESET}" "$*"; }
+# ui_fail <text> — return red-colored text on stdout (use inside $(...))
+ui_fail() { printf "${UI_RED}%s${UI_RESET}" "$*"; }
+
+# ui_color_cell <value> <width>
+# Returns <value> colored (green=true, red=false) and space-padded to <width>
+# visual columns. Safe to use in printf columns since ANSI codes are excluded
+# from the padding calculation.
+ui_color_cell() {
+  local value="$1" width="$2"
+  local colored
+  case "$value" in
+    true)  colored="$(ui_ok "$value")" ;;
+    false) colored="$(ui_fail "$value")" ;;
+    *)     colored="$value" ;;
+  esac
+  local pad=$(( width - ${#value} ))
+  [ "$pad" -lt 0 ] && pad=0
+  printf '%s%*s' "$colored" "$pad" ''
+}
+
 # --- Logging helpers ---
 
 log_info() {

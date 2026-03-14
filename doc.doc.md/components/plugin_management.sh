@@ -578,10 +578,10 @@ cmd_setup() {
   local -a mandatory_deps=("jq" "column" "awk" "sed" "find" "python3" "file" "stat" "bash")
   for dep in "${mandatory_deps[@]}"; do
     if command -v "$dep" >/dev/null 2>&1; then
-      echo "  ✓ $dep — found" >&2
+      echo "  $(ui_ok '✓') $dep — found" >&2
       deps_satisfied=$((deps_satisfied + 1))
     else
-      echo "  ✗ $dep — missing" >&2
+      echo "  $(ui_fail '✗') $dep — missing" >&2
       if [ "$non_interactive" = true ]; then
         deps_failed=$((deps_failed + 1))
         continue
@@ -593,14 +593,61 @@ cmd_setup() {
         fi
       fi
       if [ "$install_ok" = true ]; then
-        echo "  ✓ $dep — installed" >&2
+        echo "  $(ui_ok '✓') $dep — installed" >&2
         deps_installed=$((deps_installed + 1))
       else
-        echo "  ✗ $dep — could not install automatically. Please install manually." >&2
+        echo "  $(ui_fail '✗') $dep — could not install automatically. Please install manually." >&2
         deps_failed=$((deps_failed + 1))
       fi
     fi
   done
+
+  if [ "$deps_failed" -gt 0 ] && [ "$non_interactive" = false ]; then
+    echo "" >&2
+    echo "Error: $deps_failed mandatory dependency(ies) missing and could not be installed." >&2
+    exit 1
+  fi
+
+  # --- Section 1b: Python library checks (libs declared by each component) ---
+  local -a python_libs=()
+  mapfile -t python_libs < <(
+    { type templates_required_python_libs >/dev/null 2>&1 && templates_required_python_libs; } || true
+  )
+  if command -v python3 >/dev/null 2>&1; then
+    for pylib in "${python_libs[@]}"; do
+      if python3 -c "import $pylib" >/dev/null 2>&1; then
+        echo "  $(ui_ok '✓') python3:$pylib — found" >&2
+        deps_satisfied=$((deps_satisfied + 1))
+      else
+        echo "  $(ui_fail '✗') python3:$pylib — missing" >&2
+        if [ "$non_interactive" = true ]; then
+          deps_failed=$((deps_failed + 1))
+          continue
+        fi
+        local py_install_ok=false
+        local pip_cmd=""
+        if command -v pip3 >/dev/null 2>&1; then
+          pip_cmd="pip3"
+        elif command -v pip >/dev/null 2>&1; then
+          pip_cmd="pip"
+        fi
+        if [ -n "$pip_cmd" ]; then
+          if $pip_cmd install "$pylib" >/dev/null 2>&1; then
+            py_install_ok=true
+          elif $pip_cmd install --break-system-packages "$pylib" >/dev/null 2>&1; then
+            py_install_ok=true
+          fi
+        fi
+        if [ "$py_install_ok" = true ]; then
+          echo "  $(ui_ok '✓') python3:$pylib — installed" >&2
+          deps_installed=$((deps_installed + 1))
+        else
+          echo "  $(ui_fail '✗') python3:$pylib — could not install automatically. Run: pip3 install $pylib" >&2
+          deps_failed=$((deps_failed + 1))
+        fi
+      fi
+    done
+  fi
 
   if [ "$deps_failed" -gt 0 ] && [ "$non_interactive" = false ]; then
     echo "" >&2
@@ -632,7 +679,7 @@ cmd_setup() {
     p_installed=$(_check_plugin_installed "$pname")
     [ "$p_installed" = "unknown" ] && p_installed="true"
 
-    printf "  %-20s %-12s %-12s\n" "$pname" "$p_installed" "$p_active" >&2
+    printf "  %-20s %s %s\n" "$pname" "$(ui_color_cell "$p_installed" 12)" "$(ui_color_cell "$p_active" 12)" >&2
 
     if [ "$p_installed" = "false" ]; then
       plugins_to_install+=("$pname")
@@ -664,19 +711,19 @@ cmd_setup() {
           _setup_err_file=$(mktemp)
           if bash "$install_sh" >/dev/null 2>"$_setup_err_file"; then
             rm -f "$_setup_err_file"
-            echo "  ✓ Plugin '$pname' installed" >&2
+            echo "  $(ui_ok '✓') Plugin '$pname' installed" >&2
             deps_installed=$((deps_installed + 1))
           else
             local _setup_err
             _setup_err=$(cat "$_setup_err_file" 2>/dev/null) || _setup_err=""
             rm -f "$_setup_err_file"
-            echo "  ✗ Plugin '$pname' installation failed" >&2
+            echo "  $(ui_fail '✗') Plugin '$pname' installation failed" >&2
             [ -n "$_setup_err" ] && echo "    $_setup_err" >&2
             echo "  Tip: sudo ./doc.doc.sh install --plugin $pname  or  sudo ./doc.doc.sh setup" >&2
             plugins_failed=$((plugins_failed + 1))
           fi
         else
-          echo "  ✗ Plugin '$pname' has no install script" >&2
+          echo "  $(ui_fail '✗') Plugin '$pname' has no install script" >&2
           plugins_failed=$((plugins_failed + 1))
         fi
       fi
@@ -696,10 +743,10 @@ cmd_setup() {
         local tmp_desc
         tmp_desc=$(mktemp)
         if jq '.active = true' "$p_descriptor" > "$tmp_desc" 2>/dev/null && mv "$tmp_desc" "$p_descriptor"; then
-          echo "  ✓ Plugin '$pname' activated" >&2
+          echo "  $(ui_ok '✓') Plugin '$pname' activated" >&2
           plugins_activated=$((plugins_activated + 1))
         else
-          echo "  ✗ Plugin '$pname' activation failed" >&2
+          echo "  $(ui_fail '✗') Plugin '$pname' activation failed" >&2
           rm -f "$tmp_desc"
           plugins_failed=$((plugins_failed + 1))
         fi

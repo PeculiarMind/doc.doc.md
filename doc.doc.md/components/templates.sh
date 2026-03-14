@@ -20,3 +20,9 @@ render_template_json() {
   local result_json="$2"
   python3 "$(dirname "${BASH_SOURCE[0]}")/mustache_render.py" "$template" "$result_json"
 }
+
+# templates_required_python_libs outputs the Python library names required by
+# the templating component. Called by cmd_setup to verify/install dependencies.
+templates_required_python_libs() {
+  echo "chevron"
+}
