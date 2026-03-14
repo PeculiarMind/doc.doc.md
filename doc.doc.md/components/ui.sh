@@ -12,9 +12,10 @@
 #   ui_usage_installed()          - Print installed sub-command help
 #   ui_usage_tree()               - Print tree sub-command help
 #   log_info <msg>             - Print informational message to stderr
-#   log_warn <msg>             - Print warning message to stderr
-#   log_error <msg>            - Print error message to stderr
-#   log_processed <src> <dst>  - Print file-processed progress to stderr
+#   log_warn <msg>             - Print warning message (red) to stderr
+#   log_error <msg>            - Print error message (red) to stderr
+#   log_success <msg>          - Print success message (green) to stderr
+#   log_processed <src> <dst>  - Print file-processed progress (green) to stderr
 
 # --- Shared banner loader (FEATURE_0039) ---
 # Reads banner.txt relative to ui.sh, applies {{key}} substitutions from
@@ -286,9 +287,9 @@ usage_tree()       { ui_usage_tree "$@"; }
 usage_setup()      { ui_usage_setup "$@"; }
 
 # --- Color helpers ---
-# Only emit ANSI codes when stderr is a real TTY, so piped/redirected output
-# stays clean.
-if [ -t 2 ]; then
+# Only emit ANSI codes when stdout or stderr is a real TTY, so
+# piped/redirected output stays clean.
+if [ -t 1 ] || [ -t 2 ]; then
   UI_GREEN='\033[0;32m'
   UI_RED='\033[0;31m'
   UI_RESET='\033[0m'
@@ -327,16 +328,20 @@ log_info() {
 }
 
 log_warn() {
-  echo "Warning: $*" >&2
+  printf "${UI_RED}Warning:${UI_RESET} %s\n" "$*" >&2
 }
 
 log_error() {
-  echo "Error: $*" >&2
+  printf "${UI_RED}Error:${UI_RESET} %s\n" "$*" >&2
+}
+
+log_success() {
+  printf "${UI_GREEN}%s${UI_RESET}\n" "$*" >&2
 }
 
 log_processed() {
   local src="$1" dst="$2"
-  echo "Processed: $src -> $dst" >&2
+  printf "${UI_GREEN}Processed:${UI_RESET} %s -> %s\n" "$src" "$dst" >&2
 }
 
 # --- Banner display (FEATURE_0030, externalised FEATURE_0039) ---

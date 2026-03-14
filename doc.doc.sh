@@ -53,27 +53,27 @@ _parse_process_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
       -d|--input-directory)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "$1 requires an argument"; exit 1; }
         _PROC_INPUT_DIR="$2"
         shift 2
         ;;
       -o|--output-directory)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "$1 requires an argument"; exit 1; }
         _PROC_OUTPUT_DIR="$2"
         shift 2
         ;;
       -t|--template)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "$1 requires an argument"; exit 1; }
         _PROC_TEMPLATE_FILE="$2"
         shift 2
         ;;
       -i)
-        [ $# -ge 2 ] || { echo "Error: -i requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "-i requires an argument"; exit 1; }
         _PROC_INCLUDE_ARGS+=("$2")
         shift 2
         ;;
       -e)
-        [ $# -ge 2 ] || { echo "Error: -e requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "-e requires an argument"; exit 1; }
         _PROC_EXCLUDE_ARGS+=("$2")
         shift 2
         ;;
@@ -90,7 +90,7 @@ _parse_process_args() {
         shift
         ;;
       -b|--base-path)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "$1 requires an argument"; exit 1; }
         _PROC_BASE_PATH="$2"
         shift 2
         ;;
@@ -99,7 +99,7 @@ _parse_process_args() {
         exit 0
         ;;
       *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        log_error "Unknown option '$1'. Use --help for usage."
         exit 1
         ;;
     esac
@@ -108,34 +108,34 @@ _parse_process_args() {
 
 _validate_process_inputs() {
   if [ -z "$_PROC_INPUT_DIR" ]; then
-    echo "Error: Input directory is required (-d <dir>)" >&2
+    log_error "Input directory is required (-d <dir>)"
     usage >&2
     exit 1
   fi
 
   if [ ! -d "$_PROC_INPUT_DIR" ]; then
-    echo "Error: Input directory does not exist: $_PROC_INPUT_DIR" >&2
+    log_error "Input directory does not exist: $_PROC_INPUT_DIR"
     exit 1
   fi
 
   if [ ! -r "$_PROC_INPUT_DIR" ]; then
-    echo "Error: Input directory is not readable: $_PROC_INPUT_DIR" >&2
+    log_error "Input directory is not readable: $_PROC_INPUT_DIR"
     exit 1
   fi
 
   if [ "$_PROC_ECHO_MODE" = true ] && [ -n "$_PROC_OUTPUT_DIR" ]; then
-    echo "Error: --echo and -o are mutually exclusive" >&2
+    log_error "--echo and -o are mutually exclusive"
     exit 1
   fi
 
   if [ "$_PROC_ECHO_MODE" = false ] && [ -z "$_PROC_OUTPUT_DIR" ]; then
-    echo "Error: Output directory is required (-o <dir>)" >&2
+    log_error "Output directory is required (-o <dir>)"
     usage >&2
     exit 1
   fi
 
   if [ ! -f "$_PROC_TEMPLATE_FILE" ]; then
-    echo "Error: Template file not found: $_PROC_TEMPLATE_FILE" >&2
+    log_error "Template file not found: $_PROC_TEMPLATE_FILE"
     exit 1
   fi
 
@@ -143,19 +143,19 @@ _validate_process_inputs() {
   if [ -n "$_PROC_BASE_PATH" ]; then
     _PROC_BASE_PATH_RESOLVED="$(readlink -f "$_PROC_BASE_PATH" 2>/dev/null || echo "")"
     if [ -z "$_PROC_BASE_PATH_RESOLVED" ] || [ ! -d "$_PROC_BASE_PATH_RESOLVED" ]; then
-      echo "Error: Base path does not exist or is not a directory: $_PROC_BASE_PATH" >&2
+      log_error "Base path does not exist or is not a directory: $_PROC_BASE_PATH"
       exit 1
     fi
   fi
 
   _PROC_CANONICAL_OUT=""
   if [ "$_PROC_ECHO_MODE" = false ]; then
-    mkdir -p "$_PROC_OUTPUT_DIR" || { echo "Error: Cannot create output directory: $_PROC_OUTPUT_DIR" >&2; exit 1; }
+    mkdir -p "$_PROC_OUTPUT_DIR" || { log_error "Cannot create output directory: $_PROC_OUTPUT_DIR"; exit 1; }
     _PROC_CANONICAL_OUT="$(readlink -f "$_PROC_OUTPUT_DIR")"
   fi
 
   if [ ! -f "$FILTER_SCRIPT" ]; then
-    echo "Error: Filter engine not found: $FILTER_SCRIPT" >&2
+    log_error "Filter engine not found: $FILTER_SCRIPT"
     exit 1
   fi
 }
@@ -165,7 +165,7 @@ _prepare_plugins() {
   mapfile -t plugins < <(discover_plugins "$PLUGIN_DIR")
 
   if [ ${#plugins[@]} -eq 0 ]; then
-    echo "Error: No active plugins found in $PLUGIN_DIR" >&2
+    log_error "No active plugins found in $PLUGIN_DIR"
     exit 1
   fi
 
@@ -177,7 +177,7 @@ _prepare_plugins() {
     fi
   done
   if [ "$file_plugin_found" = false ]; then
-    echo "Error: file plugin must be active and installed to run the process command." >&2
+    log_error "file plugin must be active and installed to run the process command."
     exit 1
   fi
 
@@ -202,7 +202,7 @@ _prepare_plugins() {
 
   if [ ${#_uninstalled_plugins[@]} -gt 0 ]; then
     if ! [ -t 0 ]; then
-      echo "Error: The following active plugin(s) are not installed: ${_uninstalled_plugins[*]}" >&2
+      log_error "The following active plugin(s) are not installed: ${_uninstalled_plugins[*]}"
       echo "Run: ./doc.doc.sh install --plugin <name>  or  ./doc.doc.sh setup" >&2
       exit 1
     fi
@@ -223,9 +223,9 @@ _prepare_plugins() {
         i|I)
           local _up_install_sh="$PLUGIN_DIR/$_up/install.sh"
           if [ -x "$_up_install_sh" ] && bash "$_up_install_sh"; then
-            echo "Plugin '$_up' installed successfully." >&2
+            log_success "Plugin '$_up' installed successfully."
           else
-            echo "Error: Installation failed for plugin '$_up'" >&2
+            log_error "Installation failed for plugin '$_up'"
             echo "Tip: sudo ./doc.doc.sh install --plugin $_up" >&2
             exit 1
           fi
@@ -397,12 +397,12 @@ _run_process_pipeline() {
     local canonical_sidecar
     canonical_sidecar="$(readlink -f "$sidecar_dir" 2>/dev/null)"
     if [ -z "$canonical_sidecar" ]; then
-      echo "Error: Cannot resolve sidecar path for '$file_path'" >&2
+      log_error "Cannot resolve sidecar path for '$file_path'"
       continue
     fi
 
     if [[ "$canonical_sidecar" != "${_PROC_CANONICAL_OUT}" && "$canonical_sidecar" != "${_PROC_CANONICAL_OUT}/"* ]]; then
-      echo "Error: path traversal detected for '$file_path'" >&2
+      log_error "path traversal detected for '$file_path'"
       continue
     fi
 
@@ -482,7 +482,7 @@ main() {
       exit $?
       ;;
     *)
-      echo "Error: Unknown command '$command'. Use --help for usage." >&2
+      log_error "Unknown command '$command'. Use --help for usage."
       exit 1
       ;;
   esac

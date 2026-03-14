@@ -29,13 +29,13 @@ run_plugin() {
   local command_script
   command_script=$(jq -r '.commands.process.command // empty' "$descriptor")
   if [ -z "$command_script" ]; then
-    echo "Error: No process command defined for plugin '$plugin_name'" >&2
+    log_error "No process command defined for plugin '$plugin_name'"
     return 1
   fi
 
   local script_path="$plugin_dir/$command_script"
   if [ ! -x "$script_path" ]; then
-    echo "Error: Plugin script not found or not executable: $plugin_name/$command_script" >&2
+    log_error "Plugin script not found or not executable: $plugin_name/$command_script"
     return 1
   fi
 
@@ -72,13 +72,13 @@ run_plugin() {
 
   # Any other non-zero exit is a plugin error
   if [ "$plugin_exit" -ne 0 ]; then
-    echo "Error: Plugin '$plugin_name' failed for file: $(basename "$file_path")" >&2
+    log_error "Plugin '$plugin_name' failed for file: $(basename "$file_path")"
     return 1
   fi
 
   # Validate output is valid JSON
   if ! echo "$plugin_output" | jq empty 2>/dev/null; then
-    echo "Error: Plugin '$plugin_name' returned invalid JSON for file: $(basename "$file_path")" >&2
+    log_error "Plugin '$plugin_name' returned invalid JSON for file: $(basename "$file_path")"
     return 1
   fi
 

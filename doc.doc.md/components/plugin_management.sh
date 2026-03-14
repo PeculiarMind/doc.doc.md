@@ -27,7 +27,7 @@ discover_plugins() {
   local plugins=()
 
   if [ ! -d "$plugin_dir" ]; then
-    echo "Error: Plugin directory not found: $plugin_dir" >&2
+    log_error "Plugin directory not found: $plugin_dir"
     return 1
   fi
 
@@ -36,7 +36,7 @@ discover_plugins() {
     local descriptor="$dir/descriptor.json"
     if [ -f "$descriptor" ]; then
       if ! jq -e '.name and .version and .description and .commands' "$descriptor" >/dev/null 2>&1; then
-        echo "Warning: Invalid descriptor in $(basename "$dir"), skipping" >&2
+        log_warn "Invalid descriptor in $(basename "$dir"), skipping"
         continue
       fi
       local active
@@ -45,7 +45,7 @@ discover_plugins() {
         plugins+=("$(basename "$dir")")
       fi
     else
-      echo "Warning: No descriptor.json in $(basename "$dir"), skipping" >&2
+      log_warn "No descriptor.json in $(basename "$dir"), skipping"
     fi
   done
 
@@ -55,7 +55,7 @@ discover_plugins() {
 discover_all_plugins() {
   local plugin_dir="$1"
   if [ ! -d "$plugin_dir" ]; then
-    echo "Error: Plugin directory not found: $plugin_dir" >&2
+    log_error "Plugin directory not found: $plugin_dir"
     return 1
   fi
   for dir in "$plugin_dir"/*/; do
@@ -81,19 +81,19 @@ _parse_plugin_arg() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --plugin|-p)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "$1 requires an argument"; exit 1; }
         plugin_name="$2"
         shift 2
         ;;
       *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        log_error "Unknown option '$1'. Use --help for usage."
         exit 1
         ;;
     esac
   done
 
   if [ -z "$plugin_name" ]; then
-    echo "Error: --plugin / -p is required" >&2
+    log_error "--plugin / -p is required"
     exit 1
   fi
   echo "$plugin_name"
@@ -106,11 +106,11 @@ _require_plugin_descriptor() {
   local descriptor="$plugin_dir/descriptor.json"
 
   if [ ! -d "$plugin_dir" ]; then
-    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    log_error "Plugin '$plugin_name' not found in $PLUGIN_DIR"
     exit 1
   fi
   if [ ! -f "$descriptor" ]; then
-    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    log_error "Plugin descriptor not found: $descriptor"
     exit 1
   fi
 }
@@ -128,9 +128,9 @@ _set_plugin_active() {
 
   if [ "$current_status" = "$target_state" ]; then
     if [ "$target_state" = "true" ]; then
-      echo "plugin '$plugin_name' is already active"
+      echo "$(ui_ok "plugin '$plugin_name' is already active")"
     else
-      echo "plugin '$plugin_name' is already inactive"
+      echo "$(ui_fail "plugin '$plugin_name' is already inactive")"
     fi
     exit 0
   fi
@@ -139,13 +139,13 @@ _set_plugin_active() {
   tmp=$(mktemp)
   if jq ".active = $target_state" "$descriptor" > "$tmp" && mv "$tmp" "$descriptor"; then
     if [ "$target_state" = "true" ]; then
-      echo "plugin '$plugin_name' activated"
+      echo "$(ui_ok "plugin '$plugin_name' activated")"
     else
-      echo "plugin '$plugin_name' deactivated"
+      echo "$(ui_fail "plugin '$plugin_name' deactivated")"
     fi
   else
     rm -f "$tmp"
-    echo "Error: Could not update descriptor.json for plugin '$plugin_name'" >&2
+    log_error "Could not update descriptor.json for plugin '$plugin_name'"
     exit 1
   fi
 }
@@ -171,16 +171,16 @@ _resolve_plugin_descriptor() {
   local plugin_name="$1"
   local plugin_dir
   plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
-    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    log_error "Plugin '$plugin_name' not found in $PLUGIN_DIR"
     exit 1
   }
   local descriptor="$plugin_dir/descriptor.json"
   if [ ! -f "$descriptor" ]; then
-    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    log_error "Plugin descriptor not found: $descriptor"
     exit 1
   fi
   if ! jq empty "$descriptor" 2>/dev/null; then
-    echo "Error: Plugin descriptor is not valid JSON: $descriptor" >&2
+    log_error "Plugin descriptor is not valid JSON: $descriptor"
     exit 1
   fi
   echo "$descriptor"
@@ -226,7 +226,7 @@ cmd_install() {
   if [ "${1:-}" = "plugins" ]; then
     shift
     if [ "${1:-}" != "--all" ]; then
-      echo "Error: Expected '--all' after 'plugins'. Use --help for usage." >&2
+      log_error "Expected '--all' after 'plugins'. Use --help for usage."
       exit 1
     fi
     _install_all_plugins
@@ -244,7 +244,7 @@ _install_single_plugin() {
   local descriptor="$plugin_dir/descriptor.json"
 
   if [ ! -d "$plugin_dir" ]; then
-    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    log_error "Plugin '$plugin_name' not found in $PLUGIN_DIR"
     local -a available
     mapfile -t available < <(discover_all_plugins "$PLUGIN_DIR")
     if [ ${#available[@]} -gt 0 ]; then
@@ -254,12 +254,12 @@ _install_single_plugin() {
   fi
 
   if [ ! -f "$descriptor" ]; then
-    echo "Error: Plugin descriptor not found: $descriptor" >&2
+    log_error "Plugin descriptor not found: $descriptor"
     exit 1
   fi
 
   if [ "$(_check_plugin_installed "$plugin_name")" = "true" ]; then
-    echo "$plugin_name: already installed"
+    echo "$(ui_ok "$plugin_name: already installed")"
     return 0
   fi
 
@@ -274,7 +274,7 @@ _install_single_plugin() {
   install_err_file=$(mktemp)
   if bash "$install_sh" 2>"$install_err_file"; then
     rm -f "$install_err_file"
-    echo "$plugin_name: installed"
+    echo "$(ui_ok "$plugin_name: installed")"
   else
     local install_err
     install_err=$(cat "$install_err_file" 2>/dev/null) || install_err=""
@@ -282,7 +282,7 @@ _install_single_plugin() {
     if [ -n "$install_err" ]; then
       echo "$install_err" >&2
     fi
-    echo "Error: Installation failed for plugin '$plugin_name'" >&2
+    log_error "Installation failed for plugin '$plugin_name'"
     echo "Tip: try re-running with elevated privileges: sudo ./doc.doc.sh install --plugin $plugin_name" >&2
     exit 1
   fi
@@ -303,7 +303,7 @@ _install_all_plugins() {
     [ -f "$plugin_dir/descriptor.json" ] || continue
 
     if [ "$(_check_plugin_installed "$plugin_name")" = "true" ]; then
-      echo "$plugin_name: already installed"
+      echo "$(ui_ok "$plugin_name: already installed")"
       continue
     fi
 
@@ -315,15 +315,15 @@ _install_all_plugins() {
 
     echo "$plugin_name: installing..."
     if bash "$install_sh"; then
-      echo "$plugin_name: installed"
+      echo "$(ui_ok "$plugin_name: installed")"
     else
-      echo "Error: Installation failed for plugin '$plugin_name'" >&2
+      log_error "Installation failed for plugin '$plugin_name'"
       failed=$((failed + 1))
     fi
   done
 
   if [ "$failed" -gt 0 ]; then
-    echo "Error: $failed plugin(s) failed to install" >&2
+    log_error "$failed plugin(s) failed to install"
     return 1
   fi
   return 0
@@ -341,35 +341,35 @@ cmd_installed() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --plugin|-p)
-        [ $# -ge 2 ] || { echo "Error: $1 requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "$1 requires an argument"; exit 1; }
         plugin_name="$2"
         shift 2
         ;;
       *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        log_error "Unknown option '$1'. Use --help for usage."
         exit 2
         ;;
     esac
   done
 
   if [ -z "$plugin_name" ]; then
-    echo "Error: --plugin / -p is required" >&2
+    log_error "--plugin / -p is required"
     exit 2
   fi
 
   local plugin_dir="$PLUGIN_DIR/$plugin_name"
   if [ ! -d "$plugin_dir" ]; then
-    echo "Error: Plugin '$plugin_name' not found in $PLUGIN_DIR" >&2
+    log_error "Plugin '$plugin_name' not found in $PLUGIN_DIR"
     exit 2
   fi
   if [ ! -f "$plugin_dir/descriptor.json" ]; then
-    echo "Error: Plugin descriptor not found: $plugin_dir/descriptor.json" >&2
+    log_error "Plugin descriptor not found: $plugin_dir/descriptor.json"
     exit 2
   fi
 
   local installed_sh="$plugin_dir/installed.sh"
   if [ ! -f "$installed_sh" ]; then
-    echo "$plugin_name: no installed.sh found — assuming not installed"
+    echo "$(ui_fail "$plugin_name: no installed.sh found — assuming not installed")"
     exit 1
   fi
 
@@ -378,10 +378,10 @@ cmd_installed() {
   installed_val=$(echo "$installed_output" | jq -r '.installed // "false"' 2>/dev/null) || installed_val="false"
 
   if [ "$installed_val" = "true" ]; then
-    echo "$plugin_name: installed"
+    echo "$(ui_ok "$plugin_name: installed")"
     exit 0
   else
-    echo "$plugin_name: not installed"
+    echo "$(ui_fail "$plugin_name: not installed")"
     exit 1
   fi
 }
@@ -398,7 +398,7 @@ cmd_tree() {
   plugin_info_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugin_info.py"
 
   if [ ! -f "$plugin_info_script" ]; then
-    echo "Error: plugin_info.py not found: $plugin_info_script" >&2
+    log_error "plugin_info.py not found: $plugin_info_script"
     exit 1
   fi
 
@@ -421,8 +421,8 @@ _list_plugins() {
     active=$(get_plugin_active_status "$descriptor")
     case "$filter" in
       all)
-        if [ "$active" = "true" ]; then echo "$plugin_name  [active]"
-        else echo "$plugin_name  [inactive]"; fi
+        if [ "$active" = "true" ]; then echo "$plugin_name  $(ui_ok '[active]')"
+        else echo "$plugin_name  $(ui_fail '[inactive]')"; fi
         ;;
       active)   [ "$active" = "true" ]  && echo "$plugin_name" || true ;;
       inactive) [ "$active" = "false" ] && echo "$plugin_name" || true ;;
@@ -466,7 +466,7 @@ cmd_list() {
   if [ "${1:-}" = "plugins" ]; then
     local filter="${2:-all}"
     if [ $# -gt 2 ]; then
-      echo "Error: Too many arguments for 'list plugins'. Use: list plugins [active|inactive]" >&2
+      log_error "Too many arguments for 'list plugins'. Use: list plugins [active|inactive]"
       exit 1
     fi
     case "$filter" in
@@ -474,7 +474,7 @@ cmd_list() {
       active)   _list_plugins "active" ;;
       inactive) _list_plugins "inactive" ;;
       *)
-        echo "Error: Unknown filter '$filter'. Use: list plugins [active|inactive]" >&2
+        log_error "Unknown filter '$filter'. Use: list plugins [active|inactive]"
         exit 1
         ;;
     esac
@@ -484,7 +484,7 @@ cmd_list() {
   # Sub-command: list parameters (all plugins)
   if [ "${1:-}" = "parameters" ]; then
     if [ $# -gt 1 ]; then
-      echo "Error: Too many arguments for 'list parameters'. Use: list parameters" >&2
+      log_error "Too many arguments for 'list parameters'. Use: list parameters"
       exit 1
     fi
     local all_plugins
@@ -504,13 +504,13 @@ cmd_list() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --plugin)
-        [ $# -ge 2 ] || { echo "Error: --plugin requires an argument" >&2; exit 1; }
+        [ $# -ge 2 ] || { log_error "--plugin requires an argument"; exit 1; }
         plugin_name="$2"; shift 2 ;;
       --commands)    show_commands=true; shift ;;
       --parameters)  show_parameters=true; shift ;;
       --help)        usage; exit 0 ;;
       *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        log_error "Unknown option '$1'. Use --help for usage."
         exit 1
         ;;
     esac
@@ -518,15 +518,15 @@ cmd_list() {
 
   # Validate flag combinations
   if [ "$show_parameters" = true ] && [ -z "$plugin_name" ]; then
-    echo "Error: --parameters requires --plugin <name> to be specified" >&2
+    log_error "--parameters requires --plugin <name> to be specified"
     exit 1
   fi
   if [ -n "$plugin_name" ] && [ "$show_commands" = false ] && [ "$show_parameters" = false ]; then
-    echo "Error: --plugin requires --commands or --parameters to be specified" >&2
+    log_error "--plugin requires --commands or --parameters to be specified"
     exit 1
   fi
   if [ "$show_commands" = true ] && [ -z "$plugin_name" ]; then
-    echo "Error: --commands requires --plugin <name> to be specified" >&2
+    log_error "--commands requires --plugin <name> to be specified"
     exit 1
   fi
 
@@ -564,7 +564,7 @@ cmd_setup() {
       -n|--non-interactive) non_interactive=true; shift ;;
       --help)             ui_usage_setup; exit 0 ;;
       *)
-        echo "Error: Unknown option '$1'. Use --help for usage." >&2
+        log_error "Unknown option '$1'. Use --help for usage."
         exit 1
         ;;
     esac
@@ -604,7 +604,7 @@ cmd_setup() {
 
   if [ "$deps_failed" -gt 0 ] && [ "$non_interactive" = false ]; then
     echo "" >&2
-    echo "Error: $deps_failed mandatory dependency(ies) missing and could not be installed." >&2
+    log_error "$deps_failed mandatory dependency(ies) missing and could not be installed."
     exit 1
   fi
 
@@ -651,7 +651,7 @@ cmd_setup() {
 
   if [ "$deps_failed" -gt 0 ] && [ "$non_interactive" = false ]; then
     echo "" >&2
-    echo "Error: $deps_failed mandatory dependency(ies) missing and could not be installed." >&2
+    log_error "$deps_failed mandatory dependency(ies) missing and could not be installed."
     exit 1
   fi
 
@@ -761,7 +761,7 @@ cmd_setup() {
   echo "  Dependencies installed: $deps_installed" >&2
   echo "  Plugins activated: $plugins_activated" >&2
   if [ "$deps_failed" -gt 0 ] || [ "$plugins_failed" -gt 0 ]; then
-    echo "  Failures: $((deps_failed + plugins_failed))" >&2
+    echo "  $(ui_fail "Failures: $((deps_failed + plugins_failed))")" >&2
   fi
   echo "" >&2
 
