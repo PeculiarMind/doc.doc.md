@@ -18,6 +18,14 @@ The project structure and organization are inspired by the **PeculiarMind/ProTem
 - **License**: ProTemp.AI is available under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license.
 - **Author**: PeculiarMind
 
+## asciiart-text
+
+The ASCII art logo displayed in the CLI banner was generated using the **asciiart-text** online tool.
+
+- **Tool**: [https://budavariam.github.io/asciiart-text/](https://budavariam.github.io/asciiart-text/)
+- **GitHub**: [https://github.com/budavariam](https://github.com/budavariam)
+- **Author**: Mátyás Budavári
+
 ## markitdown
 
 The `markitdown` plugin uses the **markitdown** Python library to convert MS Office documents to markdown.
