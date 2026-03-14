@@ -104,7 +104,7 @@ Implement a `crm114` plugin that performs statistical text classification on doc
 ## Dependencies
 
 ### Blocking Items
-- **REQ_0029** must be accepted and the `pluginStorage` attribute must be passed by doc.doc.md to plugin invocations before this feature can be fully tested end-to-end
+- **FEATURE_0041** (Plugin Storage Plumbing) must be implemented first — it delivers the `pluginStorage` attribute injection into plugin JSON input that this feature depends on
 
 ### Blocks These Features
 None
