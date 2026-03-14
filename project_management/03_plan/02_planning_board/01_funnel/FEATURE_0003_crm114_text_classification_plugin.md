@@ -28,238 +28,78 @@ Implement a `crm114` plugin that performs statistical text classification on doc
 **What this delivers:**
 - `crm114` plugin that classifies a file's text content and returns the classification result and confidence score
 - Persistent CRM114 models stored in `pluginStorage` (`.doc.doc.md/crm114/` under the output folder)
-- Training commands (`learn`, `unlearn`) to build and refine per-category models from raw text
+- Interactive `train` command: manages categories in `pluginStorage`, iterates documents via `doc.doc.sh process` (full pipeline), displays file path and first 100 words per document, asks per-document/category (y → `csslearn`, n → `cssunlearn` anti-training)
+- Manual `learn`/`unlearn` commands for non-interactive direct model manipulation
 - `listCategories` command to inspect which categories have trained models in `pluginStorage`
 - Standard plugin commands: `process`, `install`, `installed`
 - Reference implementation for stateful plugins using `pluginStorage`
-
-## Acceptance Criteria
-
-### crm114 Plugin - process Command (main.sh)
-
-- [ ] `doc.doc.md/plugins/crm114/main.sh` is executable (`chmod +x`)
-- [ ] Script reads JSON input from stdin
-- [ ] Script parses JSON to extract `filePath` and `pluginStorage` parameters
-- [ ] Script validates that `filePath` is provided and file exists
-- [ ] Script validates that `pluginStorage` is provided and is a valid directory path
-- [ ] Script creates the `pluginStorage` directory if it does not already exist
-- [ ] Script uses CRM114 `.css` model files located in `pluginStorage/` for classification
-- [ ] If no model files exist yet, script initializes empty CRM114 `.css` files in `pluginStorage/`
-- [ ] Script classifies the text content of the file using `crm114`
-- [ ] Script outputs valid JSON to stdout with these fields:
-  - `classification` (string): The winning class label (e.g., `"spam"`, `"good"`, or custom trained label)
-  - `confidence` (number): Classification confidence as a value between 0.0 and 1.0
-  - `modelInitialized` (boolean): `true` if models already existed, `false` if they were freshly initialized
-- [ ] Script handles errors gracefully (file not found, crm114 not installed, invalid JSON input, unreadable file)
-- [ ] Script exits with code 0 on success, 1 on error
-- [ ] Script logs errors to stderr (not stdout)
-- [ ] Script never writes classification state outside of `pluginStorage`
-
-**Example interaction:**
-```bash
-echo '{"filePath":"/path/to/doc.txt","pluginStorage":"/out/.doc.doc.md/crm114"}' | ./main.sh
-# Output: {"classification":"good","confidence":0.87,"modelInitialized":false}
-```
-
-### crm114 Plugin - listCategories Command (list_categories.sh)
-
-- [ ] `doc.doc.md/plugins/crm114/list_categories.sh` is executable (`chmod +x`)
-- [ ] Script reads JSON input from stdin
-- [ ] Script parses JSON to extract `pluginStorage` parameter
-- [ ] Script validates that `pluginStorage` is provided
-- [ ] Script scans `pluginStorage/` for `*.css` files and derives category names by stripping the `.css` extension
-- [ ] Script outputs valid JSON to stdout with this field:
-  - `categories` (array of strings): sorted list of known category names; empty array `[]` if no models exist yet
-- [ ] Script exits with code 0 on success, 1 on error
-- [ ] Script logs errors to stderr (not stdout)
-
-**Example interaction:**
-```bash
-echo '{"pluginStorage":"/out/.doc.doc.md/crm114"}' | ./list_categories.sh
-# Output: {"categories":["good","spam"]}
-```
-
-### crm114 Plugin - learn Command (learn.sh)
-
-- [ ] `doc.doc.md/plugins/crm114/learn.sh` is executable (`chmod +x`)
-- [ ] Script reads JSON input from stdin
-- [ ] Script parses JSON to extract `category`, `textContent`, and `pluginStorage` parameters
-- [ ] Script validates that all three parameters are provided and non-empty
-- [ ] Script validates that `pluginStorage` is provided
-- [ ] Script creates `pluginStorage` directory if it does not already exist
-- [ ] If `pluginStorage/<category>.css` does not exist, script initializes it with `cssutil -b` before learning
-- [ ] Script trains the `<category>.css` model with the provided `textContent` using `crm114`
-- [ ] Script outputs valid JSON to stdout with these fields:
-  - `success` (boolean): `true` if learning succeeded
-  - `category` (string): the category that was trained
-  - `message` (string): human-readable status message
-- [ ] Script exits with code 0 on success, 1 on error
-- [ ] Script logs errors to stderr (not stdout)
-- [ ] Training data is written exclusively to `pluginStorage/<category>.css`
-
-**Example interaction:**
-```bash
-echo '{"category":"spam","textContent":"Buy cheap meds now!","pluginStorage":"/out/.doc.doc.md/crm114"}' | ./learn.sh
-# Output: {"success":true,"category":"spam","message":"Learned 1 example for category spam"}
-```
-
-### crm114 Plugin - unlearn Command (unlearn.sh)
-
-- [ ] `doc.doc.md/plugins/crm114/unlearn.sh` is executable (`chmod +x`)
-- [ ] Script reads JSON input from stdin
-- [ ] Script parses JSON to extract `category`, `textContent`, and `pluginStorage` parameters
-- [ ] Script validates that all three parameters are provided and non-empty
-- [ ] Script validates that `pluginStorage/<category>.css` exists; if not, returns error
-- [ ] Script removes the provided `textContent` from the `<category>.css` model using `crm114` unlearn
-- [ ] Script outputs valid JSON to stdout with these fields:
-  - `success` (boolean): `true` if unlearning succeeded
-  - `category` (string): the category that was updated
-  - `message` (string): human-readable status message
-- [ ] Script exits with code 0 on success, 1 on error
-- [ ] Script logs errors to stderr (not stdout)
-
-**Example interaction:**
-```bash
-echo '{"category":"spam","textContent":"Buy cheap meds now!","pluginStorage":"/out/.doc.doc.md/crm114"}' | ./unlearn.sh
-# Output: {"success":true,"category":"spam","message":"Unlearned 1 example from category spam"}
-```
-
-### crm114 Plugin - installed Command (installed.sh)
-
-- [ ] `doc.doc.md/plugins/crm114/installed.sh` is executable
-- [ ] Script checks if `crm114` command is available on the system
-- [ ] Script outputs valid JSON to stdout:
-  - `installed` (boolean): `true` if `crm114` is available, `false` otherwise
-- [ ] Script exits with code 0 (always — reporting status, not failing)
-
-**Example interaction:**
-```bash
-./installed.sh
-# Output: {"installed":true}
-```
-
-### crm114 Plugin - install Command (install.sh)
-
-- [ ] `doc.doc.md/plugins/crm114/install.sh` is executable
-- [ ] Script checks if `crm114` or `crm` is already available
-- [ ] If already available, outputs success immediately
-- [ ] If not available, attempts installation via system package manager (`apt`, `brew`, or equivalent)
-- [ ] Script outputs valid JSON to stdout:
-  - `success` (boolean): `true` if `crm114` or `crm` is available/installed, `false` otherwise
-  - `message` (string): Human-readable status message
-- [ ] Script exits with code 0 on success, 1 if installation could not be completed
-
-**Example interaction:**
-```bash
-./install.sh
-# Output: {"success":true,"message":"crm114 installed successfully"}
-```
-
-### Plugin Descriptor
-
-- [ ] `doc.doc.md/plugins/crm114/descriptor.json` exists and is valid JSON
-- [ ] Descriptor declares `pluginStorage` as a required input parameter of type `string` on the `process` command
-- [ ] Descriptor declares `filePath` as a required input parameter of type `string` on the `process` command
-- [ ] Descriptor declares all output fields (`classification`, `confidence`, `modelInitialized`) with correct types
-- [ ] Descriptor declares `listCategories` command with `pluginStorage` as required input and `categories` (array) as output
-- [ ] Descriptor declares `learn` command with `category` (string), `textContent` (string), and `pluginStorage` (string) as required inputs, and `success` (boolean), `category` (string), `message` (string) as outputs
-- [ ] Descriptor declares `unlearn` command with `category` (string), `textContent` (string), and `pluginStorage` (string) as required inputs, and `success` (boolean), `category` (string), `message` (string) as outputs
-- [ ] Descriptor declares `install` and `installed` commands with correct output fields
-
-### State Storage
-
-- [ ] All CRM114 model/database files (`.css`) are written exclusively to `pluginStorage`
-- [ ] No state files are written to the plugin directory itself or anywhere else
-- [ ] The plugin works correctly when `pluginStorage` points to different paths (portability verified)
-- [ ] Model files persist across multiple invocations and are reused
-
-### Code Quality
-
-- [ ] All scripts use `#!/bin/bash` shebang
-- [ ] Scripts follow bash best practices (shellcheck passes)
-- [ ] JSON parsing uses `jq` for reliability
-- [ ] JSON output generation uses `jq` for correct formatting
-- [ ] Error messages are clear and actionable
-- [ ] Scripts include comments explaining CRM114-specific logic
-- [ ] `pluginStorage` path is never hardcoded or constructed — always taken from the input JSON
-
-## Scope
-
-### In Scope
-✅ crm114 plugin implementation (main.sh, list_categories.sh, learn.sh, unlearn.sh, install.sh, installed.sh, descriptor.json)  
-✅ JSON stdin/stdout communication  
-✅ `pluginStorage` integration per REQ_0029  
-✅ CRM114 model file initialization and reuse from `pluginStorage`  
-✅ Per-category model creation via `learn` command  
-✅ Per-category model refinement via `unlearn` command  
-✅ Category discovery via `listCategories` command  
-✅ Error handling and input validation  
-✅ Classification result and confidence score output  
-
-### Out of Scope
-❌ Bulk/batch learning from files (single `textContent` string per call only)  
-❌ Cross-platform Windows support  
-❌ Bulk classification or batch mode  
-❌ Integration with any output template variables (future enhancement)  
-
-## Technical Requirements
-
-### Architecture Compliance
-
-- **ADR-003**: JSON stdin/stdout plugin communication
-  - Read input as JSON from stdin
-  - Write output as JSON to stdout
-  - Use lowerCamelCase parameter names
-  - Never output non-JSON to stdout (errors to stderr only)
-
-- **REQ_0029 — Plugin State Storage**:
-  - Accept `pluginStorage` from the JSON input — never construct or assume this path
-  - All CRM114 `.css` database files stored in `pluginStorage/`
-  - Create `pluginStorage` directory if it does not exist
-
-- **Plugin Descriptor Contract**:
-  - Declare `pluginStorage` as a required `string` input in `descriptor.json`
-  - Match all input/output parameter names and types exactly
-
-### Implementation Details
-
-**Model Initialization:**
-- CRM114 requires pre-created `.css` files before it can classify or learn
-- `learn.sh` initializes `pluginStorage/<category>.css` with `cssutil -b` if it does not exist
-- `main.sh` (process) initializes any missing `.css` files found in `pluginStorage/` before classifying
-
-**Classification Invocation (`main.sh`):**
-- Pipe file content to `crm114` using a classification CRM script
-- Parse CRM114's stdout for the winning class and pR (probability ratio) score
-- Convert pR score to a 0.0–1.0 confidence value
-- Categories are discovered dynamically from `*.css` files in `pluginStorage/`
-
-**Learning Invocation (`learn.sh`):**
-- Initialize `pluginStorage/<category>.css` with `cssutil -b` if absent
-- Pipe `textContent` to `crm114` learn command targeting `<category>.css`
-- CRM114 learn invocation: `echo "$textContent" | crm114 learn.crm -- --learnto <category>.css`
-
-**Unlearning Invocation (`unlearn.sh`):**
-- Validate `pluginStorage/<category>.css` exists (error if not)
-- Pipe `textContent` to `crm114` unlearn command targeting `<category>.css`
-- CRM114 unlearn invocation: `echo "$textContent" | crm114 learn.crm -- --unlearnfrom <category>.css`
-
-**Category Listing (`list_categories.sh`):**
-- Glob `pluginStorage/*.css` and strip the `.css` suffix from each filename
-- Return sorted array of category names via `jq -n`
-
-**Storage Layout inside `pluginStorage`:**
-```
-<pluginStorage>/
-  <category>.css    # One CRM114 model file per category (e.g. spam.css, good.css)
-  classify.crm      # CRM114 classification script (written by plugin on first run)
-  learn.crm         # CRM114 learn/unlearn script (written by plugin on first run)
-```
 
 ### Required Tools
 - bash 4.0+
 - jq (JSON processor)
 - crm114 (CRM114 Discriminator — installable via `apt install crm114` or `brew install crm114`)
+
+## Acceptance Criteria
+
+### process Command
+- [ ] Accepts `filePath` (required) and `pluginStorage` (required) as JSON fields on stdin
+- [ ] Classifies document text using CRM114 and returns a `categories` JSON object
+- [ ] `categories` maps category name → raw CRM114 pR value (float); only categories with pR > 0 are included
+- [ ] If no trained categories exist in `pluginStorage`, plugin exits with code 65 (skip — ADR-004)
+- [ ] If the document yields no extractable text, plugin exits with code 65
+
+### train Command (Interactive Mode)
+- [ ] **Step 1 — Category management**: lists existing categories found in `pluginStorage`
+- [ ] If no categories exist, prompts user to enter one or more initial category names
+- [ ] If categories exist, prompts user to optionally add new category names
+- [ ] **Step 2 — Document labeling loop**: iterates over documents in the input directory using `doc.doc.sh process` (full pipeline) to extract text
+- [ ] Displays the file path and first 100 words of extracted text before each labeling prompt
+- [ ] Per document/category pair, prompts user with y/n:
+  - [ ] "y" → runs `csslearn` to train the category model with the document text
+  - [ ] "n" → runs `cssunlearn` to anti-train (remove) the document text from the category model
+- [ ] All `.css` model files are read from and written to `pluginStorage` exclusively
+
+### learn / unlearn Commands
+- [ ] `learn` trains a specified category model with text provided via stdin (non-interactive)
+- [ ] `unlearn` removes text from a specified category model (non-interactive)
+
+### listCategories Command
+- [ ] Lists all category names that have a trained `.css` model in `pluginStorage`
+
+### install / installed Commands
+- [ ] `install` installs the `crm114` system dependency
+- [ ] `installed` exits 0 if `crm114` is available on PATH, non-zero otherwise
+
+### Storage and Security
+- [ ] All `.css` model files stored exclusively under `pluginStorage`; no state written elsewhere
+- [ ] `pluginStorage` path is validated to prevent path traversal before any file I/O (REQ_SEC_005)
+- [ ] All JSON input is validated before processing (REQ_SEC_009)
+
+## Scope
+
+### In Scope
+- Interactive `train` command integrating with `doc.doc.sh process` (full pipeline) for text extraction
+- Statistical text classification per category using CRM114 `.css` databases
+- `categories` output with raw pR scores (float), filtered to pR > 0
+- `pluginStorage` as the sole state persistence mechanism
+- `listCategories`, `learn`, `unlearn`, `install`, `installed` commands
+- Reference implementation for stateful plugins using `pluginStorage`
+
+### Out of Scope
+- GUI or web interface for training
+- Score normalization or probability calibration
+- Multi-label classification strategies beyond per-category pR scoring
+- Non-CRM114 classification backends
+
+## Technical Requirements
+
+- CRM114 binaries (`csslearn`, `cssunlearn`, `crmclassify`) must be available on PATH
+- `.css` database files stored at `<pluginStorage>/<categoryName>.css`
+- Text content passed to CRM114 commands via stdin (no temporary files)
+- `pluginStorage` path validated (no `..` path segments) before any file I/O
+- JSON input/output follows the plugin I/O protocol (stdin → stdout)
+- Exit code 65 (ADR-004) used for intentional skips
+- `train` command invokes `doc.doc.sh process` as a subprocess for text extraction (loose coupling)
 
 ## Dependencies
 
