@@ -20,6 +20,7 @@ doc.doc.md is a command-line tool that mirrors a directory of source documents a
 - **Advanced Filtering**: Powerful include/exclude logic with AND/OR operators for extensions, glob patterns, and MIME types
 - **Language-Agnostic Plugin System**: Extensible architecture supporting plugins in any language (Bash, Python, compiled binaries)
 - **Template-Based Output**: Full control over the structure of generated markdown files
+- **Full Mustache Template Engine**: Templates support the full Mustache specification — variables, conditionals (`{{#section}}`), inverted sections (`{{^section}}`), loops over arrays, comments (`{{! comment}}`), and unescaped interpolation (`{{{raw}}}`) via a Python rendering engine
 - **Unix Pipeline Architecture**: Efficient file processing using standard Unix pipes and streams
 - **Simple CLI**: Straightforward command-line interface with clear options
 - **Interactive Progress Display**: Live-updating ASCII progress bar when running in a terminal, with TTY auto-detection
@@ -30,6 +31,7 @@ doc.doc.md is a command-line tool that mirrors a directory of source documents a
 - **Graceful Plugin Skipping**: Plugins silently skip unsupported file types (ADR-004) — no spurious error messages
 - **Plugin Validation Phase**: Before processing, validates that all active plugins are installed — with interactive resolution options (continue/abort/install) or hard error in non-interactive mode
 - **Actionable Error Guidance**: Clear recovery advice (including `sudo` tips) when plugin installation fails
+- **Plugin State Storage**: Stateful plugins receive an isolated `pluginStorage` directory for persisting data across invocations (e.g., classification models)
 - **Per-Command Help**: Each command supports `--help` for detailed, command-specific usage; global `--help` shows a compact overview
 - **Externalised Banner**: ASCII art banner stored in `banner.txt` with `{{key}}` mustache placeholder support for dynamic content
 
@@ -40,6 +42,7 @@ doc.doc.md is a command-line tool that mirrors a directory of source documents a
 - **Bash** shell environment (version 4.0+)
 - **jq** (JSON processor, used by built-in plugins)
 - **Python 3.12+** for advanced filtering and processing
+- **chevron** Python library for Mustache template rendering (`pip install chevron`)
 - **Git** (for cloning the repository)
 
 The tool uses a mixed Bash+Python architecture:
@@ -204,8 +207,13 @@ Each `.md` file contains metadata and content extracted from the original docume
 doc.doc.md/
 ├── doc.doc.sh              # Main script
 ├── doc.doc.md/             # Core directory
-│   ├── components/         # Reusable components (filter, plugins, UI)
+│   ├── components/         # Reusable components (filter, plugins, UI, templates)
 │   ├── plugins/            # Plugin directory
+│   │   ├── crm114/         # CRM114 text classification plugin
+│   │   │   ├── descriptor.json
+│   │   │   ├── main.sh
+│   │   │   ├── install.sh
+│   │   │   └── installed.sh
 │   │   ├── file/           # MIME type detection plugin
 │   │   │   ├── descriptor.json
 │   │   │   ├── main.sh
@@ -244,6 +252,7 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **stat**: Extracts file system metadata (size, owner, timestamps)
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
 - **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
+- **crm114**: Statistical text classification using the CRM114 Discriminator; stores trained models in `pluginStorage`; requires `crm114` system package (inactive by default)
 
 ### Plugin Architecture
 
@@ -395,7 +404,14 @@ Document processed on {{processingDate}}
 
 ### Template Variables
 
-Templates support variables populated by plugins. Variables use the `{{variableName}}` syntax (lowerCamelCase).
+Templates use the full **Mustache** specification, rendered by a Python engine. Variables use the `{{variableName}}` syntax (lowerCamelCase).
+
+Supported Mustache features:
+- `{{variable}}` — HTML-escaped interpolation
+- `{{{variable}}}` — unescaped (raw) interpolation
+- `{{#section}}...{{/section}}` — conditional sections / array loops
+- `{{^section}}...{{/section}}` — inverted sections (render when falsy)
+- `{{! comment }}` — comments (omitted from output)
 
 Example template using the stat plugin:
 

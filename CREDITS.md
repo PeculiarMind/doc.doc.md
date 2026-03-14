@@ -34,3 +34,13 @@ The `markitdown` plugin uses the **markitdown** Python library to convert MS Off
 - **License**: MIT License
 - **Author**: Microsoft Corporation
 - **Usage note**: `markitdown` is invoked as an external process (shell command). It is not imported, linked, or distributed with this project. No license propagation applies.
+
+## chevron
+
+The Mustache template engine uses the **chevron** Python library for full Mustache specification rendering.
+
+- **PyPI**: [https://pypi.org/project/chevron/](https://pypi.org/project/chevron/)
+- **GitHub Repository**: [https://github.com/noahmorrison/chevron](https://github.com/noahmorrison/chevron)
+- **License**: MIT License
+- **Author**: Noah Morrison
+- **Usage note**: `chevron` is imported as a Python library by `mustache_render.py`. The MIT license is compatible with this project's AGPL-3.0 license.
