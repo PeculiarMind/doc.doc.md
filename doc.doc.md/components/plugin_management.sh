@@ -796,6 +796,7 @@ _run_plugin_help() {
   local plugin_name="$1" descriptor="$2"
   local plugin_desc
   plugin_desc=$(jq -r '.description // ""' "$descriptor" 2>/dev/null)
+  ui_show_help_banner
   echo "Plugin: $plugin_name"
   echo ""
   echo "$plugin_desc"
@@ -810,6 +811,7 @@ _run_command_help() {
   local plugin_name="$1" command_name="$2" descriptor="$3"
   local cmd_desc
   cmd_desc=$(jq -r --arg cmd "$command_name" '.commands[$cmd].description // ""' "$descriptor" 2>/dev/null)
+  ui_show_help_banner
   echo "Plugin: $plugin_name"
   echo "Command: $command_name"
   echo ""
