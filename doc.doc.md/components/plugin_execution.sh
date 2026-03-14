@@ -7,10 +7,11 @@
 # Contains NO plugin discovery, descriptor loading, or activation state logic.
 #
 # Public Interface:
-#   run_plugin <name> <file_path> <plugin_base_dir> [context_json]
+#   run_plugin <name> <file_path> <plugin_base_dir> <output_dir> [context_json]
 #       - Invoke a plugin's process command with JSON I/O
+#       - If output_dir is non-empty, creates .doc.doc.md/<name>/ and injects pluginStorage
 #       - Returns the plugin's exit code (0 success, 65 skip, other = error)
-#   process_file <file_path> <plugin...>
+#   process_file <file_path> <output_dir> <plugin...>
 #       - Run a file through a sequence of plugins, merging JSON output
 
 # --- Plugin execution ---
@@ -19,7 +20,8 @@ run_plugin() {
   local plugin_name="$1"
   local file_path="$2"
   local plugin_base_dir="$3"
-  local context_json="${4:-}"
+  local output_dir="${4:-}"
+  local context_json="${5:-}"
   local plugin_dir="$plugin_base_dir/$plugin_name"
   local descriptor="$plugin_dir/descriptor.json"
 
@@ -42,6 +44,20 @@ run_plugin() {
   json_input=$(jq -n --arg filePath "$file_path" '{filePath: $filePath}')
   if [ -n "$context_json" ]; then
     json_input=$(printf '%s\n%s' "$json_input" "$context_json" | jq -s '.[0] * .[1]')
+  fi
+
+  # Inject pluginStorage if output directory is provided (REQ_0029)
+  if [ -n "$output_dir" ]; then
+    local storage_dir="$output_dir/.doc.doc.md/$plugin_name"
+    mkdir -p "$storage_dir"
+    local canonical_storage
+    canonical_storage="$(readlink -f "$storage_dir")"
+    local canonical_out
+    canonical_out="$(readlink -f "$output_dir")"
+    # Security: verify storage path is under output directory
+    if [[ "$canonical_storage" == "${canonical_out}"/* ]]; then
+      json_input=$(echo "$json_input" | jq --arg ps "$canonical_storage" '. + {pluginStorage: $ps}')
+    fi
   fi
 
   local plugin_output
@@ -73,7 +89,8 @@ run_plugin() {
 
 process_file() {
   local file_path="$1"
-  shift
+  local output_dir="$2"
+  shift 2
   local plugins=("$@")
 
   local combined_result
@@ -82,7 +99,7 @@ process_file() {
   for plugin_name in "${plugins[@]}"; do
     local plugin_output
     local plugin_rc=0
-    plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR" "$combined_result") || plugin_rc=$?
+    plugin_output=$(run_plugin "$plugin_name" "$file_path" "$PLUGIN_DIR" "$output_dir" "$combined_result") || plugin_rc=$?
 
     if [ "$plugin_rc" -eq 0 ]; then
       # Success: merge plugin output into combined result

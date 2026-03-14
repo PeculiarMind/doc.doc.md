@@ -9,33 +9,14 @@
 #       - Render a template file replacing {{key}} placeholders
 #         with values from the provided JSON string.
 #       - Derives {{fileName}} from the filePath key.
+#       - Uses full Mustache rendering via mustache_render.py (FEATURE_0040).
 
-# --- Template rendering (FEATURE_0019) ---
+# --- Template rendering (FEATURE_0019, FEATURE_0040) ---
 
-# render_template_json renders a template file replacing {{key}} placeholders
-# with values from the provided JSON string.
+# render_template_json renders a template file using the Mustache specification
+# via the companion Python script mustache_render.py.
 render_template_json() {
   local template="$1"
   local result_json="$2"
-  local content
-  content="$(cat "$template")"
-
-  # Iterate over keys; extract each value preserving all lines (fixes DEBTR_003 and BUG_0009)
-  while IFS= read -r key; do
-    [ -n "$key" ] || continue
-    local val
-    val="$(echo "$result_json" | jq -r --arg k "$key" '.[$k] // empty')"
-    content="${content//\{\{${key}\}\}/${val}}"
-  done < <(echo "$result_json" | jq -r 'keys[]')
-
-  # Derive fileName from filePath
-  local fp
-  fp=$(echo "$result_json" | jq -r '.filePath // empty')
-  if [ -n "$fp" ]; then
-    local fname
-    fname="$(basename "$fp")"
-    content="${content//\{\{fileName\}\}/${fname}}"
-  fi
-
-  printf '%s' "$content"
+  python3 "$(dirname "${BASH_SOURCE[0]}")/mustache_render.py" "$template" "$result_json"
 }

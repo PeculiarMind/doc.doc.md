@@ -1,0 +1,54 @@
+{
+  "name": "crm114",
+  "version": "1.0.0",
+  "description": "A plugin that performs statistical text classification on documents using the CRM114 Discriminator. Stores classification models in pluginStorage.",
+  "active": false,
+  "commands": {
+    "process": {
+      "description": "Classify document text using CRM114 and return category scores.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the file to be classified.",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Absolute path to the plugin's persistent storage directory.",
+          "required": true
+        }
+      },
+      "output": {
+        "categories": {
+          "type": "object",
+          "description": "Map of category name to CRM114 pR confidence score (float). Only categories with pR > 0 are included."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if crm114 and its tools are available on the system.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Indicates whether the crm114 tools are installed."
+        }
+      }
+    },
+    "install": {
+      "description": "Install the crm114 system dependency.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Indicates whether the crm114 tools were successfully installed."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message describing the installation result."
+        }
+      }
+    }
+  }
+}
