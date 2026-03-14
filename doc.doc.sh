@@ -350,7 +350,7 @@ _run_process_pipeline() {
     fi
 
     local result
-    result=$(process_file "$file_path" "${_PROC_PLUGINS[@]}")
+    result=$(process_file "$file_path" "$_PROC_CANONICAL_OUT" "${_PROC_PLUGINS[@]}")
     [ -n "$result" ] || continue
 
     local render_json="$result"
