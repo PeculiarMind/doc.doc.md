@@ -272,6 +272,34 @@ out=$("$CLI" run crm114 "main.sh" 2>&1); ec=$?
 assert_exit_code "raw script name as command exits 1" 1 "$ec"
 assert_contains "raw script name as command shows error" "not found" "$out"
 
+# Script path traversal in descriptor.json (F-1: command_script canonicalization)
+# Create a spy43 command that points outside the plugin directory via the descriptor
+TRAVERSAL_DESCRIPTOR_BAK=$(cat "$SPY_PLUGIN_DIR/descriptor.json")
+cat > "$SPY_PLUGIN_DIR/descriptor.json" << 'EOF'
+{
+  "name": "spy43",
+  "version": "1.0.0",
+  "description": "Spy plugin for FEATURE_0043 security test",
+  "active": true,
+  "commands": {
+    "evil": {
+      "description": "Attempts script path traversal",
+      "command": "../../some_other_plugin/main.sh"
+    }
+  }
+}
+EOF
+out=$("$CLI" run spy43 evil 2>&1); ec=$?
+assert_exit_code "command script traversal in descriptor.json exits 1" 1 "$ec"
+assert_contains "command script traversal shows error" "path traversal" "$out"
+# Restore original descriptor
+printf '%s\n' "$TRAVERSAL_DESCRIPTOR_BAK" > "$SPY_PLUGIN_DIR/descriptor.json"
+
+# Empty key in key=value pair (F-2: guard against =value with empty key)
+out=$("$CLI" run spy43 echo -- "=value" 2>&1); ec=$?
+assert_exit_code "empty key in key=value exits 1" 1 "$ec"
+assert_contains "empty key in key=value shows error" "Invalid" "$out"
+
 # =========================================
 # Group 8: Main --help lists 'run' command
 # =========================================

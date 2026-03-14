@@ -853,11 +853,25 @@ cmd_run() {
   fi
 
   local script_path="$plugin_dir/$command_script"
-  if [ ! -f "$script_path" ]; then
+  # Canonicalize script path and verify it stays within the plugin directory (REQ_SEC_005)
+  local canonical_script canonical_plugin
+  canonical_plugin="$(cd "$plugin_dir" 2>/dev/null && pwd -P)" || {
+    log_error "Cannot resolve plugin directory: $plugin_dir"
+    exit 1
+  }
+  canonical_script="$(cd "$(dirname "$script_path")" 2>/dev/null && pwd -P)/$(basename "$script_path")" 2>/dev/null || {
+    log_error "Command script not found: $script_path"
+    exit 1
+  }
+  if [ "${canonical_script#"$canonical_plugin/"}" = "$canonical_script" ]; then
+    log_error "Command script is outside plugin directory (path traversal blocked): $command_script"
+    exit 1
+  fi
+  if [ ! -f "$canonical_script" ]; then
     log_error "Command script not found: $script_path"
     exit 1
   fi
-  if [ ! -x "$script_path" ]; then
+  if [ ! -x "$canonical_script" ]; then
     log_error "Command script is not executable: $script_path"
     exit 1
   fi
@@ -907,7 +921,7 @@ cmd_run() {
   for pair in "${extra_pairs[@]+"${extra_pairs[@]}"}"; do
     local key="${pair%%=*}"
     local val="${pair#*=}"
-    if [ "$key" = "$pair" ]; then
+    if [ "$key" = "$pair" ] || [ -z "$key" ]; then
       log_error "Invalid key=value pair: '$pair'. Expected format: key=value"
       exit 1
     fi
@@ -915,5 +929,5 @@ cmd_run() {
   done
 
   # Invoke the plugin script: pipe JSON to stdin, pass through stdout/stderr/exit code
-  printf '%s\n' "$json_input" | bash "$script_path"
+  printf '%s\n' "$json_input" | bash "$canonical_script"
 }
