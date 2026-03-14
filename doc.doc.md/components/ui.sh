@@ -71,7 +71,7 @@ Commands:
 
 Examples:
   ./doc.doc.sh process -d /path/to/documents -o /path/to/output
-  ./doc.doc.sh run crm114 listCategories --plugin-storage /data/models
+  ./doc.doc.sh run crm114 listCategories -o /path/to/output
   ./doc.doc.sh list plugins
   ./doc.doc.sh install --plugin markitdown
   ./doc.doc.sh setup
@@ -137,18 +137,23 @@ Invoke a command declared in a plugin's descriptor.json directly from the CLI.
 Usage: ./doc.doc.sh run <pluginName> <commandName> [OPTIONS] [-- key=value...]
        ./doc.doc.sh run --help
        ./doc.doc.sh run <pluginName> --help
+       ./doc.doc.sh run <pluginName> <commandName> --help
 
 Arguments:
   <pluginName>             Name of the plugin to run a command from
   <commandName>            Name of the command (as declared in descriptor.json)
 
 Options:
+  -d <dir>                 Input directory (passed as 'inputDirectory' in JSON)
+  -o <dir>                 Output directory; derives pluginStorage automatically
+                           as <dir>/.doc.doc.md/<pluginName>/ (created if needed)
   --file <path>            Maps to the 'filePath' field in the JSON input
   --plugin-storage <dir>   Maps to the 'pluginStorage' field in the JSON input
+                           (overridden by -o when both are provided)
   --category <name>        Maps to the 'category' field in the JSON input
   --                       End of named options; remaining key=value pairs
                            are merged into the JSON input object
-  --help                   Show this help message
+  --help                   Show this help message (works at every level)
 
 Output:
   The plugin script's stdout is streamed directly to stdout.
@@ -159,13 +164,17 @@ Security:
   <pluginName> is validated against known plugin directories (no path traversal).
   <commandName> is validated against the plugin's descriptor.json (no arbitrary
   script execution). key=value pairs are JSON-encoded safely via jq.
+  -o directory is canonicalized via readlink -f; derived pluginStorage is
+  validated to remain under the output directory.
 
 Examples:
+  ./doc.doc.sh run crm114 listCategories -o /path/to/output
+  ./doc.doc.sh run crm114 learn -o /path/to/output --file /docs/spam.txt --category spam
+  ./doc.doc.sh run crm114 train -d /path/to/docs -o /path/to/output
   ./doc.doc.sh run crm114 listCategories --plugin-storage /data/models
-  ./doc.doc.sh run crm114 learn --plugin-storage /data/models --file /docs/spam.txt --category spam
-  ./doc.doc.sh run crm114 unlearn --plugin-storage /data/models --file /docs/spam.txt --category spam
   ./doc.doc.sh run --help
   ./doc.doc.sh run crm114 --help
+  ./doc.doc.sh run crm114 learn --help
 EOF
 }
 

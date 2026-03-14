@@ -917,8 +917,8 @@ cmd_run() {
     return 0
   fi
 
-  # Parse flags: --file, --plugin-storage, --category, and -- key=value pairs
-  local file_path="" plugin_storage="" category=""
+  # Parse flags: --file, --plugin-storage, --category, -d, -o, and -- key=value pairs
+  local file_path="" plugin_storage="" category="" input_dir="" output_dir=""
   local -a extra_pairs=()
   local in_extra=false
 
@@ -938,6 +938,12 @@ cmd_run() {
       --category)
         [ $# -ge 2 ] || { log_error "--category requires an argument"; exit 1; }
         category="$2"; shift 2 ;;
+      -d)
+        [ $# -ge 2 ] || { log_error "-d requires an argument"; exit 1; }
+        input_dir="$2"; shift 2 ;;
+      -o)
+        [ $# -ge 2 ] || { log_error "-o requires an argument"; exit 1; }
+        output_dir="$2"; shift 2 ;;
       --)
         in_extra=true; shift ;;
       *)
@@ -945,6 +951,34 @@ cmd_run() {
         exit 1 ;;
     esac
   done
+
+  # Validate -d (input directory) if provided
+  if [ -n "$input_dir" ]; then
+    if [ ! -d "$input_dir" ] || [ ! -r "$input_dir" ]; then
+      log_error "Input directory does not exist or is not readable: $input_dir"
+      exit 1
+    fi
+  fi
+
+  # Derive pluginStorage from -o if provided (FEATURE_0044, consistent with FEATURE_0041)
+  if [ -n "$output_dir" ]; then
+    local canonical_out
+    canonical_out="$(readlink -f "$output_dir")" || {
+      log_error "Cannot resolve output directory: $output_dir"
+      exit 1
+    }
+    local derived_storage="$canonical_out/.doc.doc.md/$plugin_name"
+    # Security: verify derived path is under output directory (REQ_SEC_005)
+    if [ "${derived_storage#"$canonical_out/"}" = "$derived_storage" ]; then
+      log_error "Derived pluginStorage is outside output directory (path traversal blocked)"
+      exit 1
+    fi
+    mkdir -p "$derived_storage"
+    if [ -n "$plugin_storage" ]; then
+      log_warn "-o derives pluginStorage automatically; ignoring --plugin-storage"
+    fi
+    plugin_storage="$derived_storage"
+  fi
 
   # Build JSON input safely via jq (all values passed as --arg, never interpolated)
   local json_input='{}'
@@ -956,6 +990,9 @@ cmd_run() {
   fi
   if [ -n "$category" ]; then
     json_input=$(printf '%s' "$json_input" | jq --arg v "$category" '. + {category: $v}')
+  fi
+  if [ -n "$input_dir" ]; then
+    json_input=$(printf '%s' "$json_input" | jq --arg v "$input_dir" '. + {inputDirectory: $v}')
   fi
 
   # Merge extra key=value pairs (keys and values both passed via --arg, preventing injection)
