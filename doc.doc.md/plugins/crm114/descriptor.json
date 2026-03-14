@@ -26,6 +26,102 @@
         }
       }
     },
+    "learn": {
+      "description": "Non-interactive: train a category model with the text of a document.",
+      "command": "learn.sh",
+      "input": {
+        "category": {
+          "type": "string",
+          "description": "Category name to train (alphanumeric, dash, underscore, dot only).",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Absolute path to the plugin's persistent storage directory.",
+          "required": true
+        },
+        "filePath": {
+          "type": "string",
+          "description": "Path to the document whose text is used for training.",
+          "required": true
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether training succeeded."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    },
+    "unlearn": {
+      "description": "Non-interactive: remove document text from a category model.",
+      "command": "unlearn.sh",
+      "input": {
+        "category": {
+          "type": "string",
+          "description": "Category name to unlearn from (alphanumeric, dash, underscore, dot only).",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Absolute path to the plugin's persistent storage directory.",
+          "required": true
+        },
+        "filePath": {
+          "type": "string",
+          "description": "Path to the document whose text is removed from the model.",
+          "required": true
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the unlearn operation succeeded."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    },
+    "listCategories": {
+      "description": "List all category names that have a trained .css model in pluginStorage.",
+      "command": "listCategories.sh",
+      "input": {
+        "pluginStorage": {
+          "type": "string",
+          "description": "Absolute path to the plugin's persistent storage directory.",
+          "required": true
+        }
+      },
+      "output": {
+        "categories": {
+          "type": "array",
+          "description": "List of category names with trained models. Empty array if none."
+        }
+      }
+    },
+    "train": {
+      "description": "Interactive training: iterate documents, display extracted text, and prompt y/n per document/category to csslearn or cssunlearn.",
+      "command": "train.sh",
+      "input": {
+        "pluginStorage": {
+          "type": "string",
+          "description": "Path to crm114 plugin storage directory (positional argument 1).",
+          "required": true
+        },
+        "input_dir": {
+          "type": "string",
+          "description": "Path to directory of documents to label (positional argument 2).",
+          "required": true
+        }
+      },
+      "output": {}
+    },
     "installed": {
       "description": "Check if crm114 and its tools are available on the system.",
       "command": "installed.sh",
