@@ -5,7 +5,8 @@
 - **Type:** Bug
 - **Created at:** 2026-03-14
 - **Created by:** Product Owner
-- **Status:** BACKLOG
+- **Status:** DONE
+- **Assigned to:** developer.agent
 
 ## TOC
 1. [Overview](#overview)
@@ -54,11 +55,11 @@ Actual: `Error: Unknown option '--help'. Use: run crm114 train --help`, exit 1
 
 ## Acceptance Criteria
 
-- [ ] `./doc.doc.sh run <plugin> <command> --help` prints the command's `description`, its declared input fields (names, types, required flag), and its declared output fields — all sourced from `descriptor.json`
-- [ ] Exit code is 0
-- [ ] The self-referential error message is removed
-- [ ] `./doc.doc.sh run --help` and `./doc.doc.sh run <plugin> --help` continue to work correctly
-- [ ] `tests/test_feature_0043.sh` (or a new `tests/test_bug_0014.sh`) verifies `--help` at all three levels exits 0 and prints expected text
+- [x] `./doc.doc.sh run <plugin> <command> --help` prints the command's `description`, its declared input fields (names, types, required flag), and its declared output fields — all sourced from `descriptor.json`
+- [x] Exit code is 0
+- [x] The self-referential error message is removed
+- [x] `./doc.doc.sh run --help` and `./doc.doc.sh run <plugin> --help` continue to work correctly
+- [x] `tests/test_feature_0043.sh` (or a new `tests/test_bug_0014.sh`) verifies `--help` at all three levels exits 0 and prints expected text
 
 ## Dependencies
 
