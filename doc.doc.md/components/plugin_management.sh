@@ -805,6 +805,41 @@ _run_plugin_help() {
     "$descriptor" 2>/dev/null | sort | column -t -s $'\t'
 }
 
+# Print per-command help: description, input fields, and output fields from descriptor.json.
+_run_command_help() {
+  local plugin_name="$1" command_name="$2" descriptor="$3"
+  local cmd_desc
+  cmd_desc=$(jq -r --arg cmd "$command_name" '.commands[$cmd].description // ""' "$descriptor" 2>/dev/null)
+  echo "Plugin: $plugin_name"
+  echo "Command: $command_name"
+  echo ""
+  echo "$cmd_desc"
+
+  # Input fields
+  local has_input
+  has_input=$(jq -r --arg cmd "$command_name" '.commands[$cmd].input // empty | length' "$descriptor" 2>/dev/null)
+  if [ -n "$has_input" ] && [ "$has_input" -gt 0 ] 2>/dev/null; then
+    echo ""
+    echo "Input fields:"
+    jq -r --arg cmd "$command_name" '
+      .commands[$cmd].input | to_entries[] |
+      "  \(.key)  (\(.value.type // "unknown"))  required=\(.value.required // false)  \(.value.description // "")"
+    ' "$descriptor" 2>/dev/null
+  fi
+
+  # Output fields
+  local has_output
+  has_output=$(jq -r --arg cmd "$command_name" '.commands[$cmd].output // empty | length' "$descriptor" 2>/dev/null)
+  if [ -n "$has_output" ] && [ "$has_output" -gt 0 ] 2>/dev/null; then
+    echo ""
+    echo "Output fields:"
+    jq -r --arg cmd "$command_name" '
+      .commands[$cmd].output | to_entries[] |
+      "  \(.key)  (\(.value.type // "unknown"))  \(.value.description // "")"
+    ' "$descriptor" 2>/dev/null
+  fi
+}
+
 cmd_run() {
   # No args or --help: print global help with plugin list and exit 0
   if [ $# -eq 0 ] || [ "${1:-}" = "--help" ]; then
@@ -874,6 +909,12 @@ cmd_run() {
   if [ ! -x "$canonical_script" ]; then
     log_error "Command script is not executable: $script_path"
     exit 1
+  fi
+
+  # <pluginName> <commandName> --help: print per-command details and exit 0
+  if [ "${1:-}" = "--help" ]; then
+    _run_command_help "$plugin_name" "$command_name" "$descriptor"
+    return 0
   fi
 
   # Parse flags: --file, --plugin-storage, --category, and -- key=value pairs
