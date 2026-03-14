@@ -531,6 +531,38 @@ Renders a dependency tree of all plugins. Active = green, inactive = red.
 
 ---
 
+### `run`
+
+Invoke any command declared in a plugin's `descriptor.json` directly from the CLI.
+
+```
+./doc.doc.sh run <pluginName> <commandName> [--plugin-storage <dir>] [--file <path>] [--category <name>] [-- key=value...]
+./doc.doc.sh run --help
+./doc.doc.sh run <pluginName> --help
+```
+
+| Form | Description |
+|------|-------------|
+| `run <plugin> <command>` | Execute the named command from the plugin's descriptor |
+| `run <plugin> <command> --file <path>` | Pass a file path to the command |
+| `run <plugin> <command> -- key=value` | Pass arbitrary key/value pairs to the command |
+| `run --help` | Show run command help |
+| `run <plugin> --help` | List commands available in the specified plugin |
+
+**Example:**
+
+```bash
+# List categories defined by the crm114 plugin
+./doc.doc.sh run crm114 listCategories
+
+# Run a plugin command against a specific file
+./doc.doc.sh run crm114 classify --file ~/Documents/report.pdf
+```
+
+Use `./doc.doc.sh list --plugin <name> --commands` to discover commands available in a plugin.
+
+---
+
 ## FAQ
 
 **Do I need to install plugins before activating them?**

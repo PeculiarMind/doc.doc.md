@@ -45,7 +45,7 @@
 6. For each discovered file: run plugin chain; apply MIME filter gate after `file` plugin; continue or skip.
 7. Report results to stdout (JSON) and progress/errors to stderr.
 
-**Implemented subcommands**: `process`, `list`, `activate`, `deactivate`, `install`, `installed`, `tree`.
+**Implemented subcommands**: `process`, `list`, `activate`, `deactivate`, `install`, `installed`, `tree`, `run`.
 
 ## Level 3: Component Detail
 

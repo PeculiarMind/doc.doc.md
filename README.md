@@ -197,6 +197,9 @@ Each `.md` file contains metadata and content extracted from the original docume
 ./doc.doc.sh install --plugin <name>         # Install plugin dependencies
 ./doc.doc.sh installed --plugin <name>       # Check if plugin is installed
 ./doc.doc.sh tree                            # Display plugin dependency tree
+./doc.doc.sh run <plugin> <command>          # Run a plugin command directly
+./doc.doc.sh run crm114 listCategories       # Example: invoke a plugin-defined command
+./doc.doc.sh run --help                      # Show run command help
 ./doc.doc.sh setup                           # Verify dependencies and configure plugins
 ./doc.doc.sh setup --yes                     # Auto-configure everything (non-interactive)
 ```

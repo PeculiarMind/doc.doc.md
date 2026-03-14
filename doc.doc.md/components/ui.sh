@@ -60,6 +60,7 @@ Usage: ./doc.doc.sh <command> [OPTIONS]
 
 Commands:
   process      Process files in the input directory through plugins
+  run          Invoke a command declared in a plugin's descriptor.json
   list         List information about plugins
   activate     Activate a plugin
   deactivate   Deactivate a plugin
@@ -70,6 +71,7 @@ Commands:
 
 Examples:
   ./doc.doc.sh process -d /path/to/documents -o /path/to/output
+  ./doc.doc.sh run crm114 listCategories --plugin-storage /data/models
   ./doc.doc.sh list plugins
   ./doc.doc.sh install --plugin markitdown
   ./doc.doc.sh setup
@@ -124,6 +126,46 @@ Examples:
   ./doc.doc.sh process -d /path/to/documents -o /path/to/output -t /path/to/template.md
   ./doc.doc.sh process -d /path/to/documents --echo
   ./doc.doc.sh process -d /path/to/documents -o /path/to/output -b /path/to/base
+EOF
+}
+
+ui_usage_run() {
+  ui_show_help_banner
+  cat <<'EOF'
+Invoke a command declared in a plugin's descriptor.json directly from the CLI.
+
+Usage: ./doc.doc.sh run <pluginName> <commandName> [OPTIONS] [-- key=value...]
+       ./doc.doc.sh run --help
+       ./doc.doc.sh run <pluginName> --help
+
+Arguments:
+  <pluginName>             Name of the plugin to run a command from
+  <commandName>            Name of the command (as declared in descriptor.json)
+
+Options:
+  --file <path>            Maps to the 'filePath' field in the JSON input
+  --plugin-storage <dir>   Maps to the 'pluginStorage' field in the JSON input
+  --category <name>        Maps to the 'category' field in the JSON input
+  --                       End of named options; remaining key=value pairs
+                           are merged into the JSON input object
+  --help                   Show this help message
+
+Output:
+  The plugin script's stdout is streamed directly to stdout.
+  The plugin script's stderr is streamed directly to stderr.
+  The exit code of 'run' matches the exit code of the plugin script.
+
+Security:
+  <pluginName> is validated against known plugin directories (no path traversal).
+  <commandName> is validated against the plugin's descriptor.json (no arbitrary
+  script execution). key=value pairs are JSON-encoded safely via jq.
+
+Examples:
+  ./doc.doc.sh run crm114 listCategories --plugin-storage /data/models
+  ./doc.doc.sh run crm114 learn --plugin-storage /data/models --file /docs/spam.txt --category spam
+  ./doc.doc.sh run crm114 unlearn --plugin-storage /data/models --file /docs/spam.txt --category spam
+  ./doc.doc.sh run --help
+  ./doc.doc.sh run crm114 --help
 EOF
 }
 
@@ -278,6 +320,7 @@ EOF
 # --- Backward-compatible aliases (FEATURE_0029) ---
 usage()            { ui_usage "$@"; }
 usage_process()    { ui_usage_process "$@"; }
+usage_run()        { ui_usage_run "$@"; }
 usage_list()       { ui_usage_list "$@"; }
 usage_activate()   { ui_usage_activate "$@"; }
 usage_deactivate() { ui_usage_deactivate "$@"; }
