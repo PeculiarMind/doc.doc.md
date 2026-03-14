@@ -252,7 +252,11 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **stat**: Extracts file system metadata (size, owner, timestamps)
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
 - **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
-- **crm114**: Statistical text classification using the CRM114 Discriminator; stores trained models in `pluginStorage`; requires `crm114` system package (inactive by default)
+- **crm114**: Statistical text classification using the CRM114 Discriminator; stores trained models in `pluginStorage`; requires `crm114` system package (inactive by default). Supports model management commands:
+  - **`train`** — Interactive training loop: iterates documents, shows file path and first 100 words, prompts y/n per document/category to `csslearn` or `cssunlearn`
+  - **`learn`** — Non-interactive: trains a category model with a document's text (`category`, `pluginStorage`, `filePath` via JSON stdin)
+  - **`unlearn`** — Non-interactive: removes a document's text from a category model (`category`, `pluginStorage`, `filePath` via JSON stdin)
+  - **`listCategories`** — Lists all category names with trained `.css` models in `pluginStorage` (`pluginStorage` via JSON stdin)
 
 ### Plugin Architecture
 
