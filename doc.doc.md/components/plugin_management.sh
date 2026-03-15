@@ -817,7 +817,20 @@ _run_command_help() {
   echo ""
   echo "$cmd_desc"
 
-  # Input fields
+  # Interactive commands with a "usage" block: show CLI flags instead of raw JSON fields
+  local usage_len
+  usage_len=$(jq -r --arg cmd "$command_name" '.commands[$cmd].usage // [] | length' "$descriptor" 2>/dev/null)
+  if [ -n "$usage_len" ] && [ "$usage_len" -gt 0 ] 2>/dev/null; then
+    echo ""
+    echo "Usage:"
+    jq -r --arg cmd "$command_name" '
+      .commands[$cmd].usage[] |
+      "  \(.flag)  \(.description // "")"
+    ' "$descriptor" 2>/dev/null
+    return 0
+  fi
+
+  # Input fields (non-interactive / no usage block)
   local has_input
   has_input=$(jq -r --arg cmd "$command_name" '.commands[$cmd].input // empty | length' "$descriptor" 2>/dev/null)
   if [ -n "$has_input" ] && [ "$has_input" -gt 0 ] 2>/dev/null; then

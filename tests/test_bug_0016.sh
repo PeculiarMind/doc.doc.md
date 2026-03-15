@@ -178,15 +178,26 @@ assert_contains "interactive help shows -o description" "Output directory" "$out
 assert_contains "interactive help shows -d description" "Input directory" "$out"
 
 # =========================================
-# Group 2: Interactive command help does NOT show raw JSON field names
+# Group 2: Interactive command help does NOT show raw JSON field names as input fields
 # =========================================
 echo ""
-echo "--- Group 2: interactive command help hides JSON field names ---"
+echo "--- Group 2: interactive command help hides JSON field names as input fields ---"
 
 out=$("$CLI" run spy16 interact --help 2>&1); ec=$?
-assert_not_contains "interactive help has no 'pluginStorage' as field" "pluginStorage" "$out"
-assert_not_contains "interactive help has no 'inputDirectory' as field" "inputDirectory" "$out"
+# The word 'pluginStorage' may appear in usage descriptions — check that
+# it does not appear as an "Input fields:" section entry
 assert_not_contains "interactive help has no 'Input fields:' header" "Input fields:" "$out"
+# inputDirectory should not appear since usage block replaces input rendering
+input_field_line=$(echo "$out" | grep -E '^\s+inputDirectory\s' || true)
+TOTAL=$((TOTAL + 1))
+if [ -z "$input_field_line" ]; then
+  echo "  PASS: interactive help has no inputDirectory input field entry"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: interactive help has no inputDirectory input field entry"
+  echo "    Found: $input_field_line"
+  FAIL=$((FAIL + 1))
+fi
 
 # =========================================
 # Group 3: Non-interactive command help still shows input/output fields

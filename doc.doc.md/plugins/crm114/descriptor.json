@@ -106,7 +106,7 @@
       }
     },
     "train": {
-      "description": "Interactive training: iterate documents, display extracted text, and prompt y/n per document/category to csslearn or cssunlearn.",
+      "description": "Interactive training: iterate documents, display extracted text, and prompt y/n per document/category to learn or unlearn.",
       "command": "train.sh",
       "interactive": true,
       "input": {
@@ -121,6 +121,16 @@
           "required": true
         }
       },
+      "usage": [
+        {
+          "flag": "-o <output-dir>",
+          "description": "Output directory. pluginStorage is derived as <output-dir>/.doc.doc.md/crm114/"
+        },
+        {
+          "flag": "-d <input-dir>",
+          "description": "Input directory containing documents to label."
+        }
+      ],
       "output": {}
     },
     "installed": {

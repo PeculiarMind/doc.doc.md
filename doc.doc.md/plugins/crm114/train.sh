@@ -2,7 +2,11 @@
 # crm114 plugin - train command (interactive)
 # Iterates documents in an input directory, displays file path and first 100
 # words of extracted text, and prompts the user y/n per document/category pair
-# to csslearn (y) or cssunlearn (n) the document into the category model.
+# to learn (y) or unlearn (n) the document into the category model.
+#
+# Uses `crm -e 'learn/unlearn ...'` instead of standalone css-learn/css-unlearn
+# binaries, so only the `crm` binary (shipped by the Debian crm114 package) is
+# required.
 #
 # Usage: train.sh <pluginStorage> <input_dir>
 #
@@ -120,12 +124,8 @@ echo "Categories for this session: ${categories[*]}"
 echo ""
 
 # Check CRM114 availability
-if ! command -v csslearn >/dev/null 2>&1; then
-  echo "Error: csslearn is not available — install crm114 first." >&2
-  exit 1
-fi
-if ! command -v cssunlearn >/dev/null 2>&1; then
-  echo "Error: cssunlearn is not available — install crm114 first." >&2
+if ! command -v crm >/dev/null 2>&1; then
+  echo "Error: crm is not available — install crm114 first." >&2
   exit 1
 fi
 
@@ -183,11 +183,11 @@ while IFS= read -r -d '' file_path; do
         y|Y)
           # Use raw file content for training (not rendered markdown)
           if [ -n "$raw_text" ]; then
-            if echo "$raw_text" | csslearn "$CSS_FILE" >/dev/null 2>&1; then
+            if echo "$raw_text" | crm '-{ learn <osb unique microgroom> ( '"$CSS_FILE"' ) }' >/dev/null 2>&1; then
               echo "    ✓ Learned into '$cat'"
               trained_count=$((trained_count + 1))
             else
-              echo "    ✗ csslearn failed for '$cat'" >&2
+              echo "    ✗ crm learn failed for '$cat'" >&2
             fi
           else
             echo "    ! No text content, skipping."
@@ -195,12 +195,12 @@ while IFS= read -r -d '' file_path; do
           break
           ;;
         n|N)
-          # cssunlearn: remove from model
+          # crm unlearn: remove from model
           if [ -f "$CSS_FILE" ] && [ -n "$raw_text" ]; then
-            if echo "$raw_text" | cssunlearn "$CSS_FILE" >/dev/null 2>&1; then
+            if echo "$raw_text" | crm '-{ unlearn <osb unique microgroom> ( '"$CSS_FILE"' ) }' >/dev/null 2>&1; then
               echo "    ✓ Unlearned from '$cat'"
             else
-              echo "    ✗ cssunlearn failed for '$cat'" >&2
+              echo "    ✗ crm unlearn failed for '$cat'" >&2
             fi
           else
             echo "    ! Model does not exist or no text, skipping unlearn."
