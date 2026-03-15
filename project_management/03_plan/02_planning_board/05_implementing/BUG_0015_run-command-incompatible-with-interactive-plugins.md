@@ -5,7 +5,8 @@
 - **Type:** Bug
 - **Created at:** 2026-03-14
 - **Created by:** Product Owner
-- **Status:** BACKLOG
+- **Status:** IMPLEMENTING
+- **Assigned to:** developer.agent
 
 ## TOC
 1. [Overview](#overview)

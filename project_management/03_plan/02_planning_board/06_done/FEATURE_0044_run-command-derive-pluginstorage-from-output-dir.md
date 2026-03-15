@@ -38,32 +38,33 @@ This feature makes `run` consistent with `process` by accepting `-d <input-dir>`
 ## Acceptance Criteria
 
 ### -d / -o flag support
-- [x] `./doc.doc.sh run <plugin> <command> -d <input-dir>` sets the input directory; passed as `inputDirectory` in the JSON input if the command declares it, otherwise ignored
-- [x] `./doc.doc.sh run <plugin> <command> -o <output-dir>` sets the output directory and causes `pluginStorage` to be derived and injected automatically
-- [x] `pluginStorage` is derived as `<canonical_output_dir>/.doc.doc.md/<pluginname>/` — identical to the FEATURE_0041 convention
-- [x] The `pluginStorage` directory is created (`mkdir -p`) before the plugin script is invoked if it does not yet exist
-- [x] `--plugin-storage <dir>` continues to work as an explicit override when `-o` is not provided
-- [x] If both `-o` and `--plugin-storage` are provided, `-o`-derived storage takes precedence and a warning is emitted to stderr
+- [ ] `./doc.doc.sh run <plugin> <command> -d <input-dir>` sets the input directory; passed as `inputDirectory` in the JSON input if the command declares it, otherwise ignored
+- [ ] `./doc.doc.sh run <plugin> <command> -o <output-dir>` sets the output directory and causes `pluginStorage` to be derived and injected automatically
+- [ ] `pluginStorage` is derived as `<canonical_output_dir>/.doc.doc.md/<pluginname>/` — identical to the FEATURE_0041 convention
+- [ ] The `pluginStorage` directory is created (`mkdir -p`) before the plugin script is invoked if it does not yet exist
+- [ ] `--plugin-storage <dir>` continues to work as an explicit override when `-o` is not provided
+- [ ] If both `-o` and `--plugin-storage` are provided, `-o`-derived storage takes precedence and a warning is emitted to stderr
 
 ### Path validation and security
-- [x] `<output-dir>` is canonicalized via `readlink -f` before constructing the `pluginStorage` path (REQ_SEC_005)
-- [x] The derived `pluginStorage` path is validated to be under the canonical output directory (no traversal)
-- [x] `<input-dir>` is validated to exist and be readable if provided
+- [ ] `<output-dir>` is canonicalized via `readlink -f` before constructing the `pluginStorage` path (REQ_SEC_005)
+- [ ] The derived `pluginStorage` path is validated to be under the canonical output directory (no traversal)
+- [ ] `<input-dir>` is validated to exist and be readable if provided
 
 ### Behaviour when -o is omitted
-- [x] If neither `-o` nor `--plugin-storage` is provided and the invoked command's `descriptor.json` declares a `pluginStorage` input field as required, an error is shown and exit code 1 is returned
-- [x] If the command does not declare `pluginStorage`, the field is omitted from the JSON input silently
+- [ ] If neither `-o` nor `--plugin-storage` is provided and the invoked command's `descriptor.json` declares a `pluginStorage` input field as required, an error is shown and exit code 1 is returned
+- [ ] If the command does not declare `pluginStorage`, the field is omitted from the JSON input silently
 
 ### Help text
-- [x] `./doc.doc.sh run --help` and `./doc.doc.sh run <plugin> --help` document `-d` and `-o` options
-- [x] `./doc.doc.sh run <plugin> <command> --help` notes that `-o` derives `pluginStorage` automatically
+- [ ] `./doc.doc.sh run --help` and `./doc.doc.sh run <plugin> --help` document `-d` and `-o` options
+- [ ] `./doc.doc.sh run <plugin> <command> --help` notes that `-o` derives `pluginStorage` automatically
+- [ ] The `pluginStorage` input field description in `descriptor.json` for all non-interactive crm114 commands is updated to note that `pluginStorage` is derived automatically from `-o <output-dir>` when using `doc.doc.sh run` (currently the description just says "Absolute path to the plugin's persistent storage directory" with no hint about `-o`)
 
 ### Tests
-- [x] `tests/test_feature_0044.sh` verifies that `-o` correctly derives and injects `pluginStorage`
-- [x] Test verifies that the `.doc.doc.md/<pluginname>/` directory is created under the output dir
-- [x] Test verifies that `--plugin-storage` still works as a manual override
-- [x] Test verifies error when neither `-o` nor `--plugin-storage` are provided for a command requiring `pluginStorage`
-- [x] All existing tests continue to pass
+- [ ] `tests/test_feature_0044.sh` verifies that `-o` correctly derives and injects `pluginStorage`
+- [ ] Test verifies that the `.doc.doc.md/<pluginname>/` directory is created under the output dir
+- [ ] Test verifies that `--plugin-storage` still works as a manual override
+- [ ] Test verifies error when neither `-o` nor `--plugin-storage` are provided for a command requiring `pluginStorage`
+- [ ] All existing tests continue to pass
 
 ## Scope
 
