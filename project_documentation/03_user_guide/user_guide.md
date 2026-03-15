@@ -549,15 +549,7 @@ Invoke any command declared in a plugin's `descriptor.json` directly from the CL
 | `run --help` | Show run command help |
 | `run <plugin> --help` | List commands available in the specified plugin |
 
-**Example:**
-
-```bash
-# List categories defined by the crm114 plugin
-./doc.doc.sh run crm114 listCategories
-
-# Run a plugin command against a specific file
-./doc.doc.sh run crm114 classify --file ~/Documents/report.pdf
-```
+Use `./doc.doc.sh run <plugin> --help` to see commands available in a plugin, or `./doc.doc.sh list --plugin <name> --commands` to list them.
 
 Use `./doc.doc.sh list --plugin <name> --commands` to discover commands available in a plugin.
 

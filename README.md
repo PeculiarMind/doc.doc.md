@@ -198,9 +198,7 @@ Each `.md` file contains metadata and content extracted from the original docume
 ./doc.doc.sh installed --plugin <name>       # Check if plugin is installed
 ./doc.doc.sh tree                            # Display plugin dependency tree
 ./doc.doc.sh run <plugin> <command>          # Run a plugin command directly
-./doc.doc.sh run crm114 listCategories -o /path/to/output  # Derive pluginStorage from -o
-./doc.doc.sh run crm114 train -d /docs -o /path/to/output  # Pass input and output dirs
-./doc.doc.sh run crm114 learn --help        # Show per-command help
+./doc.doc.sh run <plugin> <command> --help   # Show per-command help
 ./doc.doc.sh run --help                      # Show run command help
 ./doc.doc.sh setup                           # Verify dependencies and configure plugins
 ./doc.doc.sh setup --yes                     # Auto-configure everything (non-interactive)
@@ -214,11 +212,6 @@ doc.doc.md/
 ├── doc.doc.md/             # Core directory
 │   ├── components/         # Reusable components (filter, plugins, UI, templates)
 │   ├── plugins/            # Plugin directory
-│   │   ├── crm114/         # CRM114 text classification plugin
-│   │   │   ├── descriptor.json
-│   │   │   ├── main.sh
-│   │   │   ├── install.sh
-│   │   │   └── installed.sh
 │   │   ├── file/           # MIME type detection plugin
 │   │   │   ├── descriptor.json
 │   │   │   ├── main.sh
@@ -257,11 +250,6 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **stat**: Extracts file system metadata (size, owner, timestamps)
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
 - **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
-- **crm114**: Statistical text classification using the CRM114 Discriminator; stores trained models in `pluginStorage`; requires `crm114` system package (inactive by default). Supports model management commands:
-  - **`train`** — Interactive training loop: iterates documents, shows file path and first 100 words, prompts y/n per document/category to learn or unlearn. Uses `crm -e 'learn/unlearn ...'` (only the `crm` binary is required). Invoked via `./doc.doc.sh run crm114 train -d /docs -o /output`; receives `pluginStorage` and `inputDirectory` as positional arguments (stdin left free for user interaction)
-  - **`learn`** — Non-interactive: trains a category model with a document's text (`category`, `pluginStorage`, `filePath` via JSON stdin)
-  - **`unlearn`** — Non-interactive: removes a document's text from a category model (`category`, `pluginStorage`, `filePath` via JSON stdin)
-  - **`listCategories`** — Lists all category names with trained `.css` models in `pluginStorage` (`pluginStorage` via JSON stdin)
 
 ### Plugin Architecture
 

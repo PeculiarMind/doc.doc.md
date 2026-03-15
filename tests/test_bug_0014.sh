@@ -144,12 +144,6 @@ echo "--- Group 1: command-level --help exits 0 ---"
 out=$("$CLI" run spy14 greet --help 2>&1); ec=$?
 assert_exit_code "run spy14 greet --help exits 0" 0 "$ec"
 
-out=$("$CLI" run crm114 train --help 2>&1); ec=$?
-assert_exit_code "run crm114 train --help exits 0" 0 "$ec"
-
-out=$("$CLI" run crm114 learn --help 2>&1); ec=$?
-assert_exit_code "run crm114 learn --help exits 0" 0 "$ec"
-
 # =========================================
 # Group 2: command-level --help shows command description
 # =========================================
@@ -158,9 +152,6 @@ echo "--- Group 2: command-level --help shows description ---"
 
 out=$("$CLI" run spy14 greet --help 2>&1); ec=$?
 assert_contains "greet --help shows command description" "Say hello with customizable greeting" "$out"
-
-out=$("$CLI" run crm114 learn --help 2>&1); ec=$?
-assert_contains "learn --help shows command description" "train a category model" "$out"
 
 # =========================================
 # Group 3: command-level --help shows input fields
@@ -174,10 +165,6 @@ assert_contains "greet --help shows 'pluginStorage' input field" "pluginStorage"
 assert_contains "greet --help shows field type" "string" "$out"
 assert_contains "greet --help shows required flag" "required" "$out"
 
-out=$("$CLI" run crm114 learn --help 2>&1); ec=$?
-assert_contains "learn --help shows 'category' input field" "category" "$out"
-assert_contains "learn --help shows 'filePath' input field" "filePath" "$out"
-
 # =========================================
 # Group 4: command-level --help shows output fields
 # =========================================
@@ -186,9 +173,6 @@ echo "--- Group 4: command-level --help shows output fields ---"
 
 out=$("$CLI" run spy14 greet --help 2>&1); ec=$?
 assert_contains "greet --help shows 'greeting' output field" "greeting" "$out"
-
-out=$("$CLI" run crm114 learn --help 2>&1); ec=$?
-assert_contains "learn --help shows 'success' output field" "success" "$out"
 
 # =========================================
 # Group 5: command with no input/output fields declared
@@ -210,9 +194,6 @@ out=$("$CLI" run spy14 greet --help 2>&1); ec=$?
 assert_not_contains "greet --help has no Error: message" "Error:" "$out"
 assert_not_contains "greet --help has no 'Unknown option' message" "Unknown option" "$out"
 
-out=$("$CLI" run crm114 train --help 2>&1); ec=$?
-assert_not_contains "crm114 train --help has no Error: message" "Error:" "$out"
-
 # =========================================
 # Group 7: existing help levels still work
 # =========================================
@@ -222,10 +203,6 @@ echo "--- Group 7: existing help levels unaffected ---"
 out=$("$CLI" run --help 2>&1); ec=$?
 assert_exit_code "run --help still exits 0" 0 "$ec"
 assert_contains "run --help still shows Usage:" "Usage:" "$out"
-
-out=$("$CLI" run crm114 --help 2>&1); ec=$?
-assert_exit_code "run crm114 --help still exits 0" 0 "$ec"
-assert_contains "run crm114 --help still shows listCategories" "listCategories" "$out"
 
 # =========================================
 # Summary

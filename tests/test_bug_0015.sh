@@ -197,43 +197,10 @@ assert_not_contains "interactive command stdout has no JSON braces" "{" "$out"
 assert_not_contains "interactive command stdout has no 'pluginStorage' JSON key" '"pluginStorage"' "$out"
 
 # =========================================
-# Group 4: descriptor.json "interactive" field is respected
-# =========================================
-echo ""
-echo "--- Group 4: crm114 train descriptor has interactive field ---"
-
-# Check that crm114 descriptor now has interactive: true for train
-crm114_desc="$PLUGIN_DIR/crm114/descriptor.json"
-interactive_val=$(jq -r '.commands.train.interactive // "missing"' "$crm114_desc" 2>/dev/null)
-assert_eq "crm114 train has interactive: true" "true" "$interactive_val"
-
-# Check that input_dir has been renamed to inputDirectory
-input_dir_val=$(jq -r '.commands.train.input.input_dir // "missing"' "$crm114_desc" 2>/dev/null)
-assert_eq "crm114 train no longer has input_dir field" "missing" "$input_dir_val"
-
-inputDirectory_val=$(jq -r '.commands.train.input.inputDirectory // "missing"' "$crm114_desc" 2>/dev/null)
-assert_not_contains "crm114 train has inputDirectory field" "missing" "$inputDirectory_val"
-
-# Check descriptions no longer mention "positional argument"
-ps_desc=$(jq -r '.commands.train.input.pluginStorage.description' "$crm114_desc" 2>/dev/null)
-assert_not_contains "pluginStorage description no longer mentions positional" "positional" "$ps_desc"
-
-id_desc=$(jq -r '.commands.train.input.inputDirectory.description' "$crm114_desc" 2>/dev/null)
-assert_not_contains "inputDirectory description no longer mentions positional" "positional" "$id_desc"
-
-# =========================================
 # Group 5: Backward compatibility — existing non-interactive commands unaffected
 # =========================================
 echo ""
 echo "--- Group 5: backward compatibility ---"
-
-# crm114 learn (non-interactive) should still work with JSON
-out=$("$CLI" run crm114 learn --help 2>&1); ec=$?
-assert_exit_code "crm114 learn --help still exits 0" 0 "$ec"
-
-# crm114 listCategories (non-interactive) should still get JSON
-out=$("$CLI" run crm114 listCategories --help 2>&1); ec=$?
-assert_exit_code "crm114 listCategories --help still exits 0" 0 "$ec"
 
 # Feature 0043 and 0044 tests should still pass (run their core scenarios)
 out=$("$CLI" run spy15 batch --plugin-storage "$TEST_TMPDIR/output" --file "$TEST_TMPDIR/input/doc1.txt" 2>&1); ec=$?

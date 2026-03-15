@@ -33,7 +33,7 @@ trap cleanup EXIT
 
 # Deactivate plugins whose dependencies are not installed to avoid
 # interactive prompts or non-zero exits during 'process' invocations.
-for _plugin_name in markitdown ocrmypdf crm114; do
+for _plugin_name in markitdown ocrmypdf; do
   _inst_sh="$BUILTIN_PLUGIN_DIR/$_plugin_name/installed.sh"
   _desc_json="$BUILTIN_PLUGIN_DIR/$_plugin_name/descriptor.json"
   if [ -x "$_inst_sh" ] && [ -f "$_desc_json" ]; then

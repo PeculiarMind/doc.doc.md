@@ -71,7 +71,6 @@ Commands:
 
 Examples:
   ./doc.doc.sh process -d /path/to/documents -o /path/to/output
-  ./doc.doc.sh run crm114 listCategories -o /path/to/output
   ./doc.doc.sh list plugins
   ./doc.doc.sh install --plugin markitdown
   ./doc.doc.sh setup
@@ -168,13 +167,11 @@ Security:
   validated to remain under the output directory.
 
 Examples:
-  ./doc.doc.sh run crm114 listCategories -o /path/to/output
-  ./doc.doc.sh run crm114 learn -o /path/to/output --file /docs/spam.txt --category spam
-  ./doc.doc.sh run crm114 train -d /path/to/docs -o /path/to/output
-  ./doc.doc.sh run crm114 listCategories --plugin-storage /data/models
+  ./doc.doc.sh run <plugin> <command> -o /path/to/output
+  ./doc.doc.sh run <plugin> <command> --file /path/to/file
   ./doc.doc.sh run --help
-  ./doc.doc.sh run crm114 --help
-  ./doc.doc.sh run crm114 learn --help
+  ./doc.doc.sh run <plugin> --help
+  ./doc.doc.sh run <plugin> <command> --help
 EOF
 }
 

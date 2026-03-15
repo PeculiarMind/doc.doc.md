@@ -152,7 +152,6 @@ echo "--- Group 2: run --help ---"
 out=$("$CLI" run --help 2>&1); ec=$?
 assert_exit_code "run --help exits 0" 0 "$ec"
 assert_contains "run --help shows Usage:" "Usage:" "$out"
-assert_contains "run --help lists crm114 plugin" "crm114" "$out"
 assert_contains "run --help lists spy43 plugin" "spy43" "$out"
 
 # =========================================
@@ -166,12 +165,6 @@ assert_exit_code "run spy43 --help exits 0" 0 "$ec"
 assert_contains "run spy43 --help shows 'echo' command" "echo" "$out"
 assert_contains "run spy43 --help shows 'fail' command" "fail" "$out"
 assert_contains "run spy43 --help shows echo description" "Echo stdin JSON" "$out"
-
-out=$("$CLI" run crm114 --help 2>&1); ec=$?
-assert_exit_code "run crm114 --help exits 0" 0 "$ec"
-assert_contains "run crm114 --help shows listCategories" "listCategories" "$out"
-assert_contains "run crm114 --help shows learn" "learn" "$out"
-assert_contains "run crm114 --help shows unlearn" "unlearn" "$out"
 
 # =========================================
 # Group 4: Error cases
@@ -260,17 +253,6 @@ assert_exit_code "deep path traversal in plugin name exits 1" 1 "$ec"
 # Plugin name with slash (treated as path)
 out=$("$CLI" run "some/plugin" 2>&1); ec=$?
 assert_exit_code "plugin name with slash exits 1" 1 "$ec"
-
-# Command name that tries path traversal — validated against descriptor.json
-out=$("$CLI" run crm114 "../../malicious" 2>&1); ec=$?
-assert_exit_code "path traversal in command name exits 1" 1 "$ec"
-assert_contains "path traversal in command name shows error" "not found" "$out"
-
-# Command name not in descriptor.json (arbitrary script execution prevented)
-out=$("$CLI" run crm114 "main.sh" 2>&1); ec=$?
-# main.sh is the process command script, but "main.sh" is not a valid command name
-assert_exit_code "raw script name as command exits 1" 1 "$ec"
-assert_contains "raw script name as command shows error" "not found" "$out"
 
 # Script path traversal in descriptor.json (F-1: command_script canonicalization)
 # Create a spy43 command that points outside the plugin directory via the descriptor
