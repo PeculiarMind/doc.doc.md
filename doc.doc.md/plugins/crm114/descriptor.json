@@ -108,15 +108,16 @@
     "train": {
       "description": "Interactive training: iterate documents, display extracted text, and prompt y/n per document/category to csslearn or cssunlearn.",
       "command": "train.sh",
+      "interactive": true,
       "input": {
         "pluginStorage": {
           "type": "string",
-          "description": "Path to crm114 plugin storage directory (positional argument 1).",
+          "description": "Plugin storage directory. Derived automatically from -o <output-dir>.",
           "required": true
         },
-        "input_dir": {
+        "inputDirectory": {
           "type": "string",
-          "description": "Path to directory of documents to label (positional argument 2).",
+          "description": "Path to directory of documents to label.",
           "required": true
         }
       },

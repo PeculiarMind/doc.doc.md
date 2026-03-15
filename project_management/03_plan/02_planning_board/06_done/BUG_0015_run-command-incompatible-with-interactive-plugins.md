@@ -5,7 +5,8 @@
 - **Type:** Bug
 - **Created at:** 2026-03-14
 - **Created by:** Product Owner
-- **Status:** BACKLOG
+- **Status:** DONE
+- **Assigned to:** developer.agent
 
 ## TOC
 1. [Overview](#overview)
@@ -68,18 +69,18 @@ Actual: `Usage: train.sh <pluginStorage> <input_dir>`, exit 1
 
 ## Acceptance Criteria
 
-- [ ] `./doc.doc.sh run crm114 train -o ./tests/out -d ./tests/docs/` starts the interactive training session
-- [ ] `cmd_run` detects that a command is interactive (via a `descriptor.json` field, see below) and passes derived values as positional CLI arguments instead of piping JSON to stdin
-- [ ] Non-interactive commands continue to receive JSON via stdin unchanged
-- [ ] `descriptor.json` supports an `"interactive": true` field on a command entry to signal the positional-arg / interactive-stdin convention
-- [ ] When `"interactive": true`, `cmd_run` passes `pluginStorage` (derived from `-o`) and `inputDirectory` (from `-d`) as positional arguments in that order, and does NOT pipe JSON to stdin — leaving stdin free for user interaction
-- [ ] `tests/test_bug_0015.sh` verifies that a mock interactive plugin command is invoked with positional args when `"interactive": true` is set in its descriptor
+- [x] `./doc.doc.sh run crm114 train -o ./tests/out -d ./tests/docs/` starts the interactive training session
+- [x] `cmd_run` detects that a command is interactive (via a `descriptor.json` field, see below) and passes derived values as positional CLI arguments instead of piping JSON to stdin
+- [x] Non-interactive commands continue to receive JSON via stdin unchanged
+- [x] `descriptor.json` supports an `"interactive": true` field on a command entry to signal the positional-arg / interactive-stdin convention
+- [x] When `"interactive": true`, `cmd_run` passes `pluginStorage` (derived from `-o`) and `inputDirectory` (from `-d`) as positional arguments in that order, and does NOT pipe JSON to stdin — leaving stdin free for user interaction
+- [x] `tests/test_bug_0015.sh` verifies that a mock interactive plugin command is invoked with positional args when `"interactive": true` is set in its descriptor
 
 ### descriptor.json fixes (crm114 `train` command)
-- [ ] `"interactive": true` is added to the `train` command entry in `descriptor.json`
-- [ ] The `pluginStorage` input field description no longer mentions "positional argument 1" — it should describe the field semantically (e.g. "Plugin storage directory. Derived automatically from `-o <output-dir>`.")
-- [ ] The `input_dir` input field is renamed to `inputDirectory` (camelCase, consistent with all other commands) and its description no longer mentions "positional argument 2"
-- [ ] `./doc.doc.sh run crm114 train --help` reflects the corrected field names and descriptions
+- [x] `"interactive": true` is added to the `train` command entry in `descriptor.json`
+- [x] The `pluginStorage` input field description no longer mentions "positional argument 1" — it should describe the field semantically (e.g. "Plugin storage directory. Derived automatically from `-o <output-dir>`.")
+- [x] The `input_dir` input field is renamed to `inputDirectory` (camelCase, consistent with all other commands) and its description no longer mentions "positional argument 2"
+- [x] `./doc.doc.sh run crm114 train --help` reflects the corrected field names and descriptions
 
 ## Dependencies
 

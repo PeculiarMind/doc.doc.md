@@ -57,6 +57,7 @@ This feature makes `run` consistent with `process` by accepting `-d <input-dir>`
 ### Help text
 - [x] `./doc.doc.sh run --help` and `./doc.doc.sh run <plugin> --help` document `-d` and `-o` options
 - [x] `./doc.doc.sh run <plugin> <command> --help` notes that `-o` derives `pluginStorage` automatically
+- [x] The `pluginStorage` input field description in `descriptor.json` for all non-interactive crm114 commands is updated to note that `pluginStorage` is derived automatically from `-o <output-dir>` when using `doc.doc.sh run` (currently the description just says "Absolute path to the plugin's persistent storage directory" with no hint about `-o`)
 
 ### Tests
 - [x] `tests/test_feature_0044.sh` verifies that `-o` correctly derives and injects `pluginStorage`
