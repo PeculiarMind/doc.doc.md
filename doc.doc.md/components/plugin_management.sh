@@ -1008,6 +1008,17 @@ cmd_run() {
     json_input=$(printf '%s' "$json_input" | jq --arg k "$key" --arg v "$val" '. + {($k): $v}')
   done
 
-  # Invoke the plugin script: pipe JSON to stdin, pass through stdout/stderr/exit code
-  printf '%s\n' "$json_input" | bash "$canonical_script"
+  # Invoke the plugin script
+  # Check if command is interactive (BUG_0015): pass positional args, leave stdin free
+  local is_interactive
+  is_interactive=$(jq -r --arg cmd "$command_name" \
+    '.commands[$cmd].interactive // false' "$descriptor" 2>/dev/null)
+
+  if [ "$is_interactive" = "true" ]; then
+    # Interactive mode: pass pluginStorage and inputDirectory as positional args
+    bash "$canonical_script" "$plugin_storage" "$input_dir"
+  else
+    # Non-interactive mode: pipe JSON to stdin (existing behavior)
+    printf '%s\n' "$json_input" | bash "$canonical_script"
+  fi
 }
