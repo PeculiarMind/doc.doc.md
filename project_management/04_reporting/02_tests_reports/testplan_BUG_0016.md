@@ -52,3 +52,4 @@ Integration tests via `tests/test_bug_0016.sh` using a spy16 test plugin and crm
 
 | Date | Report | Result |
 |------|--------|--------|
+| 2026-03-15 | [TESTREP_022](TESTREP_022_BUG_0016_help_and_installed_check.md) | 37/37 pass |
