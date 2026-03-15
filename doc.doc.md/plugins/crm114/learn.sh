@@ -5,6 +5,9 @@
 #         filePath (required)
 # Output: {"success": true/false, "message": "..."} to stdout
 # Exit codes: 0 success, 1 error
+#
+# Uses `crm -e 'learn ...'` instead of standalone css-learn binary, so only
+# the `crm` binary (shipped by the Debian crm114 package) is required.
 
 set -euo pipefail
 
@@ -50,9 +53,9 @@ if [ -z "$CSS_DIR" ] || [ "$CSS_DIR" != "$CANONICAL_STORAGE" ]; then
   exit 1
 fi
 
-# Check csslearn availability
-if ! command -v csslearn >/dev/null 2>&1; then
-  jq -n '{success: false, message: "csslearn is not available — install crm114"}'
+# Check crm availability
+if ! command -v crm >/dev/null 2>&1; then
+  jq -n '{success: false, message: "crm is not available — install crm114"}'
   exit 1
 fi
 
@@ -63,10 +66,10 @@ if [ -z "$file_text" ]; then
   exit 1
 fi
 
-# Run csslearn: train the category model with the document text
-if echo "$file_text" | csslearn "$CSS_FILE" >/dev/null 2>&1; then
+# Run crm learn: train the category model with the document text
+if echo "$file_text" | crm '-{ learn <osb unique microgroom> ( '"$CSS_FILE"' ) }' >/dev/null 2>&1; then
   jq -n --arg cat "$CATEGORY" '{success: true, message: ("Trained category: " + $cat)}'
 else
-  jq -n --arg cat "$CATEGORY" '{success: false, message: ("csslearn failed for category: " + $cat)}'
+  jq -n --arg cat "$CATEGORY" '{success: false, message: ("crm learn failed for category: " + $cat)}'
   exit 1
 fi

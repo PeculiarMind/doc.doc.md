@@ -5,6 +5,9 @@
 #         filePath (required)
 # Output: {"success": true/false, "message": "..."} to stdout
 # Exit codes: 0 success, 1 error
+#
+# Uses `crm -e 'unlearn ...'` instead of standalone css-unlearn binary, so only
+# the `crm` binary (shipped by the Debian crm114 package) is required.
 
 set -euo pipefail
 
@@ -56,9 +59,9 @@ if [ ! -f "$CSS_FILE" ]; then
   exit 1
 fi
 
-# Check cssunlearn availability
-if ! command -v cssunlearn >/dev/null 2>&1; then
-  jq -n '{success: false, message: "cssunlearn is not available — install crm114"}'
+# Check crm availability
+if ! command -v crm >/dev/null 2>&1; then
+  jq -n '{success: false, message: "crm is not available — install crm114"}'
   exit 1
 fi
 
@@ -69,10 +72,10 @@ if [ -z "$file_text" ]; then
   exit 1
 fi
 
-# Run cssunlearn: remove the document text from the category model
-if echo "$file_text" | cssunlearn "$CSS_FILE" >/dev/null 2>&1; then
+# Run crm unlearn: remove the document text from the category model
+if echo "$file_text" | crm '-{ unlearn <osb unique microgroom> ( '"$CSS_FILE"' ) }' >/dev/null 2>&1; then
   jq -n --arg cat "$CATEGORY" '{success: true, message: ("Unlearned from category: " + $cat)}'
 else
-  jq -n --arg cat "$CATEGORY" '{success: false, message: ("cssunlearn failed for category: " + $cat)}'
+  jq -n --arg cat "$CATEGORY" '{success: false, message: ("crm unlearn failed for category: " + $cat)}'
   exit 1
 fi
