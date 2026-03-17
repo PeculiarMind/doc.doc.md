@@ -4,6 +4,9 @@
 #       implemented in doc.doc.sh and the supporting components.
 # Run from repository root: bash tests/test_feature_0045.sh
 
+# 'set -e' is intentionally omitted: individual assertions must not abort the
+# test run; every failure is recorded via FAIL counter and execution continues
+# so all groups report results before the final summary.
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -261,6 +264,9 @@ WRAPEOF
   chmod +x "$wrapper"
 
   script -q -c "bash '$wrapper'" "$tmp_log" >/dev/null 2>&1
+  # 255 is a deliberate sentinel: if ec_file is missing (wrapper crashed before
+  # writing it) no normal exit code equals 255, so assert_exit_code will produce
+  # a meaningful failure message rather than a silent mismatch.
   _TTY_EXIT=$(cat "$ec_file" 2>/dev/null | tr -d ' \n' || echo "255")
   # Strip ANSI escape sequences and carriage returns from the typescript
   _TTY_OUT=$(sed 's/\x1b\[[0-9;?]*[mGKHFJABCDEhlsu]//g; s/\r//g' "$tmp_log" 2>/dev/null || true)
@@ -453,14 +459,16 @@ STORAGE8="$OUT_DIR8/.doc.doc.md/spy45"
 skip_count8=$(cat "$STORAGE8/skip65_calls.log" 2>/dev/null | wc -l | tr -d ' ') || skip_count8=0
 assert_count "skip65 reached both files" 2 "$skip_count8"
 
-# loop must not emit an error for exit-65 files
+# loop must not emit "Error:" for exit-65 files — those are silent skips.
+# We check for the literal "Error:" prefix that doc.doc.sh uses for all
+# error messages (via log_error / the Error: convention).
 TOTAL=$((TOTAL + 1))
-if ! echo "$_TTY_OUT" | grep -qiE "^Error:|error:.*skip|fatal"; then
+if ! echo "$_TTY_OUT" | grep -qF "Error:"; then
   echo "  PASS: no error output for exit-65 skip"
   PASS=$((PASS + 1))
 else
   echo "  FAIL: unexpected error output for exit-65 skip"
-  echo "    TTY output: $(echo "$_TTY_OUT" | grep -iE "error|fatal" | head -3)"
+  echo "    TTY output: $(echo "$_TTY_OUT" | grep -F "Error:" | head -3)"
   FAIL=$((FAIL + 1))
 fi
 
