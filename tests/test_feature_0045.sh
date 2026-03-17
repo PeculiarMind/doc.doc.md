@@ -567,7 +567,7 @@ printf 'content\n' > "$DOCS_DIR12/nosidecar.txt"
 run_in_tty "bash '$CLI' loop -d '$DOCS_DIR12' -o '$OUT_DIR12' --plugin spy45 train"
 assert_exit_code "loop no-sidecar test exits 0 (TTY)" 0 "$_TTY_EXIT"
 
-sidecar_count12=$(find "$OUT_DIR12" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+sidecar_count12=$(find "$OUT_DIR12" -type f -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
 TOTAL=$((TOTAL + 1))
 if [ "$sidecar_count12" -eq 0 ]; then
   echo "  PASS: no sidecar .md files created by loop"
