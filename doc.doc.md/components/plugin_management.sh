@@ -1224,7 +1224,10 @@ cmd_loop() {
       continue  # Silent skip (exit 65 from pipeline — ADR-004)
     fi
 
-    # Inject pluginStorage (always provided by loop)
+    # Inject pluginStorage after pipeline execution so that pipeline plugins
+    # (which run without a storage dir) cannot influence this path, and so
+    # that any pipeline plugin that happens to set pluginStorage is overridden
+    # by the loop-derived canonical path.
     context_json=$(printf '%s' "$context_json" | \
       jq --arg ps "$plugin_storage" '. + {pluginStorage: $ps}')
 
