@@ -457,6 +457,10 @@ main() {
       cmd_run "$@"
       exit $?
       ;;
+    loop)
+      cmd_loop "$@"
+      exit $?
+      ;;
     list)
       cmd_list "$@"
       exit $?

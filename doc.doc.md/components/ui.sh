@@ -60,6 +60,7 @@ Usage: ./doc.doc.sh <command> [OPTIONS]
 
 Commands:
   process      Process files in the input directory through plugins
+  loop         Interactively iterate over documents, invoking a plugin command per file
   run          Invoke a command declared in a plugin's descriptor.json
   list         List information about plugins
   activate     Activate a plugin
@@ -323,6 +324,42 @@ Examples:
 EOF
 }
 
+ui_usage_loop() {
+  ui_show_help_banner
+  cat <<'EOF'
+Interactively iterate over every document in a directory, invoking a single
+plugin command for each file. Requires an interactive terminal (TTY).
+
+Usage: ./doc.doc.sh loop -d <docsDir> -o <outputDir> --plugin <pluginName> <command> [OPTIONS]
+
+Arguments:
+  <command>              Name of the plugin command to invoke per document
+                         (must be declared in the plugin's descriptor.json)
+
+Options:
+  -d <dir>               Input directory containing documents to iterate (required)
+  -o <dir>               Output directory; derives pluginStorage as
+                         <dir>/.doc.doc.md/<pluginName>/ (created if needed) (required)
+  --plugin <name>        Plugin whose command is invoked for each file (required)
+  --include <pattern>    Include filter (repeatable); only matching files are processed
+  --exclude <pattern>    Exclude filter (repeatable); matching files are skipped
+  --help                 Show this help message
+
+Behaviour:
+  - Requires an interactive terminal (TTY on stdout); exits 1 if none detected.
+  - Prints a startup banner once before iterating.
+  - Does NOT write sidecar .md files (unlike process).
+  - Plugin commands that exit 65 are silently skipped (ADR-004).
+  - Plugin commands that exit non-zero (≠65) log a warning and continue.
+  - pluginStorage and filePath are injected into the JSON passed to the command.
+
+Examples:
+  ./doc.doc.sh loop -d /path/to/docs -o /path/to/output --plugin myplugin train
+  ./doc.doc.sh loop -d /path/to/docs -o /path/to/output --plugin myplugin train --include '*.pdf'
+  ./doc.doc.sh loop -d /path/to/docs -o /path/to/output --plugin myplugin train --exclude '*.log'
+EOF
+}
+
 # --- Backward-compatible aliases (FEATURE_0029) ---
 usage()            { ui_usage "$@"; }
 usage_process()    { ui_usage_process "$@"; }
@@ -334,6 +371,7 @@ usage_install()    { ui_usage_install "$@"; }
 usage_installed()  { ui_usage_installed "$@"; }
 usage_tree()       { ui_usage_tree "$@"; }
 usage_setup()      { ui_usage_setup "$@"; }
+usage_loop()       { ui_usage_loop "$@"; }
 
 # --- Color helpers ---
 # Only emit ANSI codes when stdout or stderr is a real TTY, so
