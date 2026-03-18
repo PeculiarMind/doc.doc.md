@@ -1,0 +1,201 @@
+{
+  "name": "crm114",
+  "version": "1.0.0",
+  "description": "Statistical text classification plugin using the CRM114 Discriminator. Stores per-category CSS model files in pluginStorage.",
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Classify document text against all trained category models and return pR scores.",
+      "command": "process.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Path to the document file.",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Path to the plugin storage directory containing trained .css model files.",
+          "required": true
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Extracted text content of the document, provided by the pipeline.",
+          "required": false
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR-extracted text content, used when textContent is not available.",
+          "required": false
+        }
+      },
+      "output": {
+        "categories": {
+          "type": "array",
+          "description": "Array of objects with categoryName and pR score for each trained model."
+        }
+      }
+    },
+    "manageCategories": {
+      "description": "Interactive one-time category setup: list, add, and remove classification categories in pluginStorage.",
+      "command": "manageCategories.sh",
+      "interactive": true,
+      "usage": [
+        {
+          "flag": "-o <outputDir>",
+          "description": "Output directory; pluginStorage is derived from it as <outputDir>/.doc.doc.md/crm114/."
+        }
+      ]
+    },
+    "train": {
+      "description": "Per-document interactive labeling command (designed for doc.doc.sh loop). Displays file path and first 100 words, then prompts t/u/s per category.",
+      "command": "train.sh",
+      "interactive": true,
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Path to the document file.",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Path to the plugin storage directory.",
+          "required": true
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Extracted text content of the document.",
+          "required": false
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR-extracted text content.",
+          "required": false
+        }
+      }
+    },
+    "learn": {
+      "description": "Non-interactive: train a category model with text from the provided document.",
+      "command": "learn.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Path to the document file.",
+          "required": true
+        },
+        "category": {
+          "type": "string",
+          "description": "Category name to train (alphanumeric, dash, underscore, dot only).",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Path to the plugin storage directory.",
+          "required": true
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Text content to train on.",
+          "required": false
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR text content to train on.",
+          "required": false
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the training succeeded."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category that was trained."
+        }
+      }
+    },
+    "unlearn": {
+      "description": "Non-interactive: remove text from a category model.",
+      "command": "unlearn.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Path to the document file.",
+          "required": true
+        },
+        "category": {
+          "type": "string",
+          "description": "Category name to untrain (alphanumeric, dash, underscore, dot only).",
+          "required": true
+        },
+        "pluginStorage": {
+          "type": "string",
+          "description": "Path to the plugin storage directory.",
+          "required": true
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Text content to remove from the model.",
+          "required": false
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR text content to remove from the model.",
+          "required": false
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the untraining succeeded."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category that was untrained."
+        }
+      }
+    },
+    "listCategories": {
+      "description": "List all category names that have a trained .css model in pluginStorage.",
+      "command": "listCategories.sh",
+      "input": {
+        "pluginStorage": {
+          "type": "string",
+          "description": "Path to the plugin storage directory.",
+          "required": true
+        }
+      },
+      "output": {
+        "categories": {
+          "type": "array",
+          "description": "Array of category name strings; empty array if no trained models exist."
+        }
+      }
+    },
+    "install": {
+      "description": "Install the crm114 system dependency.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether installation succeeded."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if crm114 and required CRM114 tools (csslearn, cssunlearn) are installed and available.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Whether crm114 tools are installed and available on PATH."
+        }
+      }
+    }
+  }
+}

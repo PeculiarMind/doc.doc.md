@@ -5,7 +5,8 @@
 - **Type:** Feature
 - **Created at:** 2026-03-15
 - **Created by:** PeculiarMind
-- **Status:** BACKLOG
+- **Status:** IMPLEMENTING
+- **TDD Status:** DONE — `tests/test_feature_0046.sh` (94 passed, 0 failed, 9 skipped when crm114 not installed)
 
 
 ## TOC
