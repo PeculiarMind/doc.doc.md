@@ -202,6 +202,8 @@ Each `.md` file contains metadata and content extracted from the original docume
 ./doc.doc.sh run --help                      # Show run command help
 ./doc.doc.sh setup                           # Verify dependencies and configure plugins
 ./doc.doc.sh setup --yes                     # Auto-configure everything (non-interactive)
+./doc.doc.sh loop -d <docsDir> -o <outputDir> --plugin <name> <command>  # Iterate docs, run plugin command per document (interactive/TTY only)
+./doc.doc.sh loop --help                     # Show loop command help
 ```
 
 ## Project Structure

@@ -1035,3 +1035,213 @@ cmd_run() {
     printf '%s\n' "$json_input" | bash "$canonical_script"
   fi
 }
+
+# cmd_loop — Interactive Document Pipeline (FEATURE_0045)
+# Iterates over all files in a docs directory, invoking a plugin command
+# per file with pluginStorage and filePath injected into the JSON context.
+# Requires an interactive terminal (TTY); exits 1 otherwise.
+cmd_loop() {
+  # --help before TTY check so users can always view help without a TTY
+  if [ "${1:-}" = "--help" ]; then
+    ui_usage_loop
+    return 0
+  fi
+
+  # --- Argument parsing ---
+  local docs_dir="" output_dir="" plugin_name="" loop_command=""
+  local -a include_args=() exclude_args=()
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -d)
+        [ $# -ge 2 ] || { log_error "-d requires an argument"; exit 1; }
+        docs_dir="$2"; shift 2 ;;
+      -o)
+        [ $# -ge 2 ] || { log_error "-o requires an argument"; exit 1; }
+        output_dir="$2"; shift 2 ;;
+      --plugin)
+        [ $# -ge 2 ] || { log_error "--plugin requires an argument"; exit 1; }
+        plugin_name="$2"; shift 2 ;;
+      --include)
+        [ $# -ge 2 ] || { log_error "--include requires an argument"; exit 1; }
+        include_args+=("$2"); shift 2 ;;
+      --exclude)
+        [ $# -ge 2 ] || { log_error "--exclude requires an argument"; exit 1; }
+        exclude_args+=("$2"); shift 2 ;;
+      --help)
+        ui_usage_loop; return 0 ;;
+      --*|-*)
+        log_error "Unknown option '$1'. Use --help for usage."
+        exit 1 ;;
+      *)
+        if [ -z "$loop_command" ]; then
+          loop_command="$1"; shift
+        else
+          log_error "Unexpected argument '$1'. Use --help for usage."
+          exit 1
+        fi ;;
+    esac
+  done
+
+  # --- Validate required arguments ---
+  [ -n "$docs_dir" ]    || { log_error "-d <docsDir> is required. Use --help for usage."; exit 1; }
+  [ -n "$output_dir" ]  || { log_error "-o <outputDir> is required. Use --help for usage."; exit 1; }
+  [ -n "$plugin_name" ] || { log_error "--plugin <pluginName> is required. Use --help for usage."; exit 1; }
+  [ -n "$loop_command" ] || { log_error "<command> is required. Use --help for usage."; exit 1; }
+
+  # --- Validate plugin (path traversal guard) ---
+  local plugin_dir
+  plugin_dir="$(_validate_plugin_dir "$PLUGIN_DIR" "$plugin_name")" || {
+    log_error "Plugin '$plugin_name' not found"
+    exit 1
+  }
+
+  local descriptor="$plugin_dir/descriptor.json"
+  if [ ! -f "$descriptor" ] || ! jq empty "$descriptor" 2>/dev/null; then
+    log_error "Plugin '$plugin_name' not found or has invalid descriptor"
+    exit 1
+  fi
+
+  # --- Validate command exists in descriptor ---
+  local command_script
+  command_script=$(jq -r --arg cmd "$loop_command" \
+    '.commands[$cmd].command // empty' "$descriptor" 2>/dev/null)
+  if [ -z "$command_script" ]; then
+    log_error "Command '$loop_command' not found in plugin '$plugin_name'"
+    exit 1
+  fi
+
+  # Canonicalize script path; verify it stays within the plugin directory (REQ_SEC_005)
+  local canonical_plugin
+  canonical_plugin="$(cd "$plugin_dir" 2>/dev/null && pwd -P)" || {
+    log_error "Cannot resolve plugin directory: $plugin_dir"
+    exit 1
+  }
+  local script_path="$plugin_dir/$command_script"
+  local canonical_script
+  canonical_script="$(cd "$(dirname "$script_path")" 2>/dev/null && pwd -P)/$(basename "$script_path")" || {
+    log_error "Command script not found: $script_path"
+    exit 1
+  }
+  if [ "${canonical_script#"$canonical_plugin/"}" = "$canonical_script" ]; then
+    log_error "Command script is outside plugin directory (path traversal blocked)"
+    exit 1
+  fi
+  if [ ! -x "$canonical_script" ]; then
+    log_error "Command script is not executable: $script_path"
+    exit 1
+  fi
+
+  # --- Validate input directory ---
+  if [ ! -d "$docs_dir" ] || [ ! -r "$docs_dir" ]; then
+    log_error "Input directory does not exist or is not readable: $docs_dir"
+    exit 1
+  fi
+
+  # --- TTY check: loop requires an interactive terminal ---
+  if [ ! -t 1 ]; then
+    log_error "loop requires an interactive terminal; use --help for details"
+    exit 1
+  fi
+
+  # --- Create output directory and derive pluginStorage ---
+  mkdir -p "$output_dir" || { log_error "Cannot create output directory: $output_dir"; exit 1; }
+  local canonical_out
+  canonical_out="$(readlink -f "$output_dir")"
+  local plugin_storage="$canonical_out/.doc.doc.md/$plugin_name"
+  # Security: derived path must be under outputDir
+  if [ "${plugin_storage#"$canonical_out/"}" = "$plugin_storage" ]; then
+    log_error "Derived pluginStorage path traversal blocked"
+    exit 1
+  fi
+  mkdir -p "$plugin_storage"
+
+  # --- Determine minimal pipeline ---
+  # Read the command's declared input fields; skip plugins whose outputs are
+  # not needed (filePath and pluginStorage are always injected by loop itself).
+  local -a loop_pipeline=()
+  local needs_extra=false
+  local _field
+  while IFS= read -r _field; do
+    [ -n "$_field" ] || continue
+    case "$_field" in
+      filePath|pluginStorage) : ;;
+      *) needs_extra=true; break ;;
+    esac
+  done < <(jq -r --arg cmd "$loop_command" \
+    '.commands[$cmd].input // {} | keys[]' "$descriptor" 2>/dev/null || true)
+
+  if [ "$needs_extra" = true ]; then
+    # At minimum, run the file plugin (provides mimeType, fileName, hash, etc.)
+    loop_pipeline+=("file")
+  fi
+
+  # --- Print startup banner once ---
+  ui_show_help_banner
+  # Save cursor position just after the banner
+  printf '\033[s'
+
+  # --- Build file list via filter.py ---
+  local -a filter_args=()
+  for _inc in "${include_args[@]+"${include_args[@]}"}"; do
+    filter_args+=("--include" "$_inc")
+  done
+  for _exc in "${exclude_args[@]+"${exclude_args[@]}"}"; do
+    filter_args+=("--exclude" "$_exc")
+  done
+
+  local -a file_list
+  mapfile -t file_list < <(
+    find "$docs_dir" -type f | \
+    python3 "$FILTER_SCRIPT" "${filter_args[@]+"${filter_args[@]}"}"
+  )
+
+  # --- Process each file ---
+  for file_path in "${file_list[@]}"; do
+    [ -n "$file_path" ] || continue
+
+    # Build base JSON context
+    local context_json
+    context_json=$(jq -n --arg fp "$file_path" '{filePath: $fp}')
+
+    # Run minimal pipeline plugins (graceful degradation on failure)
+    local skip_file=false
+    for _pname in "${loop_pipeline[@]+"${loop_pipeline[@]}"}"; do
+      local _p_output="" _p_rc=0
+      _p_output=$(run_plugin "$_pname" "$file_path" "$PLUGIN_DIR" "" "$context_json") || _p_rc=$?
+      if [ "$_p_rc" -eq 65 ]; then
+        skip_file=true
+        break
+      elif [ "$_p_rc" -ne 0 ]; then
+        # Graceful degradation: continue with partial context
+        continue
+      else
+        context_json=$(printf '%s\n%s' "$context_json" "$_p_output" | jq -s '.[0] * .[1]')
+      fi
+    done
+
+    if [ "$skip_file" = true ]; then
+      continue  # Silent skip (exit 65 from pipeline — ADR-004)
+    fi
+
+    # Inject pluginStorage after pipeline execution so that pipeline plugins
+    # (which run without a storage dir) cannot influence this path, and so
+    # that any pipeline plugin that happens to set pluginStorage is overridden
+    # by the loop-derived canonical path.
+    context_json=$(printf '%s' "$context_json" | \
+      jq --arg ps "$plugin_storage" '. + {pluginStorage: $ps}')
+
+    # Reset cursor to just after banner, clear below to remove previous output
+    printf '\033[u\033[J'
+
+    # Invoke target plugin command
+    local cmd_rc=0
+    printf '%s\n' "$context_json" | bash "$canonical_script" || cmd_rc=$?
+
+    if [ "$cmd_rc" -eq 65 ]; then
+      : # Silent skip per ADR-004
+    elif [ "$cmd_rc" -ne 0 ]; then
+      log_warn "Command '$loop_command' failed (exit $cmd_rc) for: $(basename "$file_path"); continuing"
+    fi
+  done
+}
