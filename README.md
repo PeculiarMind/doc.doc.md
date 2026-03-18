@@ -230,9 +230,19 @@ doc.doc.md/
 │   │   │   ├── convert.sh
 │   │   │   ├── install.sh
 │   │   │   └── installed.sh
-│   │   └── markitdown/     # MS Office to markdown plugin
+│   │   ├── markitdown/     # MS Office to markdown plugin
+│   │   │   ├── descriptor.json
+│   │   │   ├── main.sh
+│   │   │   ├── install.sh
+│   │   │   └── installed.sh
+│   │   └── crm114/         # Statistical text classification plugin
 │   │       ├── descriptor.json
-│   │       ├── main.sh
+│   │       ├── process.sh
+│   │       ├── manageCategories.sh
+│   │       ├── train.sh
+│   │       ├── learn.sh
+│   │       ├── unlearn.sh
+│   │       ├── listCategories.sh
 │   │       ├── install.sh
 │   │       └── installed.sh
 │   └── templates/          # Template directory
@@ -252,6 +262,7 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **stat**: Extracts file system metadata (size, owner, timestamps)
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
 - **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
+- **crm114**: Statistical text classification plugin using the CRM114 Discriminator. Classifies documents against user-trained category models (stored as `.css` files in `pluginStorage`). Supports interactive category setup (`manageCategories`), per-document labeling (`train`, designed for `loop`), and non-interactive scripted training (`learn`/`unlearn`). Requires `apt install crm114` or `brew install crm114`.
 
 ### Plugin Architecture
 

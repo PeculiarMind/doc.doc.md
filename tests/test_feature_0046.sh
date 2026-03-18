@@ -9,7 +9,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CLI="$REPO_ROOT/doc.doc.sh"
-PLUGIN_DIR="$REPO_ROOT/doc.doc.md/plugins/crm114"
+CRM114_PLUGIN_DIR="$REPO_ROOT/doc.doc.md/plugins/crm114"
 
 PASS=0
 FAIL=0
@@ -145,59 +145,59 @@ echo ""
 echo "Group 1: Plugin structure validation"
 echo "---"
 
-assert_file_exists "descriptor.json exists" "$PLUGIN_DIR/descriptor.json"
-assert_file_exists "process.sh exists" "$PLUGIN_DIR/process.sh"
-assert_file_exists "manageCategories.sh exists" "$PLUGIN_DIR/manageCategories.sh"
-assert_file_exists "train.sh exists" "$PLUGIN_DIR/train.sh"
-assert_file_exists "learn.sh exists" "$PLUGIN_DIR/learn.sh"
-assert_file_exists "unlearn.sh exists" "$PLUGIN_DIR/unlearn.sh"
-assert_file_exists "listCategories.sh exists" "$PLUGIN_DIR/listCategories.sh"
-assert_file_exists "install.sh exists" "$PLUGIN_DIR/install.sh"
-assert_file_exists "installed.sh exists" "$PLUGIN_DIR/installed.sh"
+assert_file_exists "descriptor.json exists" "$CRM114_PLUGIN_DIR/descriptor.json"
+assert_file_exists "process.sh exists" "$CRM114_PLUGIN_DIR/process.sh"
+assert_file_exists "manageCategories.sh exists" "$CRM114_PLUGIN_DIR/manageCategories.sh"
+assert_file_exists "train.sh exists" "$CRM114_PLUGIN_DIR/train.sh"
+assert_file_exists "learn.sh exists" "$CRM114_PLUGIN_DIR/learn.sh"
+assert_file_exists "unlearn.sh exists" "$CRM114_PLUGIN_DIR/unlearn.sh"
+assert_file_exists "listCategories.sh exists" "$CRM114_PLUGIN_DIR/listCategories.sh"
+assert_file_exists "install.sh exists" "$CRM114_PLUGIN_DIR/install.sh"
+assert_file_exists "installed.sh exists" "$CRM114_PLUGIN_DIR/installed.sh"
 
-assert_executable "process.sh is executable" "$PLUGIN_DIR/process.sh"
-assert_executable "manageCategories.sh is executable" "$PLUGIN_DIR/manageCategories.sh"
-assert_executable "train.sh is executable" "$PLUGIN_DIR/train.sh"
-assert_executable "learn.sh is executable" "$PLUGIN_DIR/learn.sh"
-assert_executable "unlearn.sh is executable" "$PLUGIN_DIR/unlearn.sh"
-assert_executable "listCategories.sh is executable" "$PLUGIN_DIR/listCategories.sh"
-assert_executable "install.sh is executable" "$PLUGIN_DIR/install.sh"
-assert_executable "installed.sh is executable" "$PLUGIN_DIR/installed.sh"
+assert_executable "process.sh is executable" "$CRM114_PLUGIN_DIR/process.sh"
+assert_executable "manageCategories.sh is executable" "$CRM114_PLUGIN_DIR/manageCategories.sh"
+assert_executable "train.sh is executable" "$CRM114_PLUGIN_DIR/train.sh"
+assert_executable "learn.sh is executable" "$CRM114_PLUGIN_DIR/learn.sh"
+assert_executable "unlearn.sh is executable" "$CRM114_PLUGIN_DIR/unlearn.sh"
+assert_executable "listCategories.sh is executable" "$CRM114_PLUGIN_DIR/listCategories.sh"
+assert_executable "install.sh is executable" "$CRM114_PLUGIN_DIR/install.sh"
+assert_executable "installed.sh is executable" "$CRM114_PLUGIN_DIR/installed.sh"
 
 # Descriptor is valid JSON
-if [ -f "$PLUGIN_DIR/descriptor.json" ]; then
-  desc_valid=$(jq empty "$PLUGIN_DIR/descriptor.json" 2>&1)
+if [ -f "$CRM114_PLUGIN_DIR/descriptor.json" ]; then
+  desc_valid=$(jq empty "$CRM114_PLUGIN_DIR/descriptor.json" 2>&1)
   assert_eq "descriptor.json is valid JSON" "" "$desc_valid"
 
   assert_eq "plugin name is crm114" \
     "crm114" \
-    "$(jq -r '.name' "$PLUGIN_DIR/descriptor.json")"
+    "$(jq -r '.name' "$CRM114_PLUGIN_DIR/descriptor.json")"
 
   assert_eq "plugin is active" \
     "true" \
-    "$(jq -r '.active' "$PLUGIN_DIR/descriptor.json")"
+    "$(jq -r '.active' "$CRM114_PLUGIN_DIR/descriptor.json")"
 
   # All required commands are registered
   for cmd in process manageCategories train learn unlearn listCategories install installed; do
     assert_eq "command '$cmd' registered in descriptor" \
       "true" \
-      "$(jq -r --arg c "$cmd" 'if .commands[$c] then "true" else "false" end' "$PLUGIN_DIR/descriptor.json")"
+      "$(jq -r --arg c "$cmd" 'if .commands[$c] then "true" else "false" end' "$CRM114_PLUGIN_DIR/descriptor.json")"
   done
 
   # manageCategories and train are marked interactive
   assert_eq "manageCategories is interactive" \
     "true" \
-    "$(jq -r '.commands.manageCategories.interactive // false | tostring' "$PLUGIN_DIR/descriptor.json")"
+    "$(jq -r '.commands.manageCategories.interactive // false | tostring' "$CRM114_PLUGIN_DIR/descriptor.json")"
 
   assert_eq "train is interactive" \
     "true" \
-    "$(jq -r '.commands.train.interactive // false | tostring' "$PLUGIN_DIR/descriptor.json")"
+    "$(jq -r '.commands.train.interactive // false | tostring' "$CRM114_PLUGIN_DIR/descriptor.json")"
 
   # process, learn, unlearn, listCategories are NOT interactive
   for cmd in process learn unlearn listCategories install installed; do
     assert_eq "command '$cmd' is not interactive" \
       "false" \
-      "$(jq -r --arg c "$cmd" '.commands[$c].interactive // false | tostring' "$PLUGIN_DIR/descriptor.json")"
+      "$(jq -r --arg c "$cmd" '.commands[$c].interactive // false | tostring' "$CRM114_PLUGIN_DIR/descriptor.json")"
   done
 fi
 
@@ -208,8 +208,8 @@ echo ""
 echo "Group 2: installed.sh"
 echo "---"
 
-if [ -x "$PLUGIN_DIR/installed.sh" ]; then
-  out=$(bash "$PLUGIN_DIR/installed.sh" 2>&1)
+if [ -x "$CRM114_PLUGIN_DIR/installed.sh" ]; then
+  out=$(bash "$CRM114_PLUGIN_DIR/installed.sh" 2>&1)
   ec=$?
   assert_exit_code "installed.sh always exits 0" 0 "$ec"
   assert_json_valid "installed.sh returns valid JSON" "$out"
@@ -227,8 +227,8 @@ echo ""
 echo "Group 3: install.sh"
 echo "---"
 
-if [ -x "$PLUGIN_DIR/install.sh" ]; then
-  out=$(bash "$PLUGIN_DIR/install.sh" 2>&1)
+if [ -x "$CRM114_PLUGIN_DIR/install.sh" ]; then
+  out=$(bash "$CRM114_PLUGIN_DIR/install.sh" 2>&1)
   ec=$?
   assert_json_valid "install.sh returns valid JSON" "$out"
   assert_contains "install.sh has 'success' field" '"success"' "$out"
@@ -246,7 +246,7 @@ STORAGE_DIR="$TEST_DIR/storage"
 mkdir -p "$STORAGE_DIR"
 
 # Empty storage: returns empty array
-out=$(echo '{"pluginStorage": "'"$STORAGE_DIR"'"}' | bash "$PLUGIN_DIR/listCategories.sh" 2>&1)
+out=$(echo '{"pluginStorage": "'"$STORAGE_DIR"'"}' | bash "$CRM114_PLUGIN_DIR/listCategories.sh" 2>&1)
 ec=$?
 assert_exit_code "listCategories exits 0 with no models" 0 "$ec"
 assert_json_valid "listCategories returns valid JSON" "$out"
@@ -256,7 +256,7 @@ assert_eq "listCategories returns empty array when no models" \
 
 # With CSS files present
 touch "$STORAGE_DIR/news.css" "$STORAGE_DIR/sport.css" "$STORAGE_DIR/other.css"
-out=$(echo '{"pluginStorage": "'"$STORAGE_DIR"'"}' | bash "$PLUGIN_DIR/listCategories.sh" 2>&1)
+out=$(echo '{"pluginStorage": "'"$STORAGE_DIR"'"}' | bash "$CRM114_PLUGIN_DIR/listCategories.sh" 2>&1)
 ec=$?
 assert_exit_code "listCategories exits 0 with models present" 0 "$ec"
 assert_json_valid "listCategories returns valid JSON with models" "$out"
@@ -266,17 +266,17 @@ assert_contains "listCategories includes 'news'" '"news"' "$out"
 assert_contains "listCategories includes 'sport'" '"sport"' "$out"
 
 # Missing pluginStorage field
-out=$(echo '{}' | bash "$PLUGIN_DIR/listCategories.sh" 2>&1)
+out=$(echo '{}' | bash "$CRM114_PLUGIN_DIR/listCategories.sh" 2>&1)
 ec=$?
 assert_exit_code "listCategories exits 1 with missing pluginStorage" 1 "$ec"
 
 # Path traversal in pluginStorage
-out=$(echo '{"pluginStorage": "/tmp/../etc"}' | bash "$PLUGIN_DIR/listCategories.sh" 2>&1)
+out=$(echo '{"pluginStorage": "/tmp/../etc"}' | bash "$CRM114_PLUGIN_DIR/listCategories.sh" 2>&1)
 ec=$?
 assert_exit_code "listCategories rejects path traversal in pluginStorage" 1 "$ec"
 
 # Non-existent pluginStorage returns empty array (not an error)
-out=$(echo '{"pluginStorage": "'"$TEST_DIR/nonexistent"'"}' | bash "$PLUGIN_DIR/listCategories.sh" 2>&1)
+out=$(echo '{"pluginStorage": "'"$TEST_DIR/nonexistent"'"}' | bash "$CRM114_PLUGIN_DIR/listCategories.sh" 2>&1)
 ec=$?
 assert_exit_code "listCategories exits 0 with non-existent storage dir" 0 "$ec"
 cats_nonexist=$(echo "$out" | jq '.categories | length')
@@ -295,44 +295,44 @@ echo "This is test text about news" > "$TEST_DIR/test_doc.txt"
 
 # Missing category field
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "'"$LEARN_STORAGE"'", "textContent": "test text"}' \
-  | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
 ec=$?
 assert_exit_code "learn exits 1 with missing category" 1 "$ec"
 
 # Missing pluginStorage field
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "textContent": "test text"}' \
-  | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
 ec=$?
 assert_exit_code "learn exits 1 with missing pluginStorage" 1 "$ec"
 
 # Missing text (no textContent or ocrText)
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "pluginStorage": "'"$LEARN_STORAGE"'"}' \
-  | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
 ec=$?
 assert_exit_code "learn exits 1 with missing text content" 1 "$ec"
 
 # Path traversal in category name
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "../etc/passwd", "pluginStorage": "'"$LEARN_STORAGE"'", "textContent": "test"}' \
-  | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
 ec=$?
 assert_exit_code "learn rejects path traversal in category name" 1 "$ec"
 
 # Path traversal in pluginStorage
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "pluginStorage": "/tmp/../etc", "textContent": "test"}' \
-  | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
 ec=$?
 assert_exit_code "learn rejects path traversal in pluginStorage" 1 "$ec"
 
 # Invalid category name (shell metacharacters)
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news; rm -rf /", "pluginStorage": "'"$LEARN_STORAGE"'", "textContent": "test"}' \
-  | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
 ec=$?
 assert_exit_code "learn rejects category name with metacharacters" 1 "$ec"
 
 # Valid category name with CRM114 available
 if [ "$CRM114_AVAILABLE" = "true" ]; then
   out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "pluginStorage": "'"$LEARN_STORAGE"'", "textContent": "This is news about sports and politics"}' \
-    | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+    | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
   ec=$?
   assert_exit_code "learn succeeds with valid input and crm114 available" 0 "$ec"
   assert_json_valid "learn returns valid JSON on success" "$out"
@@ -359,38 +359,38 @@ mkdir -p "$UNLEARN_STORAGE"
 
 # Missing category field
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "'"$UNLEARN_STORAGE"'", "textContent": "test text"}' \
-  | bash "$PLUGIN_DIR/unlearn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/unlearn.sh" 2>&1)
 ec=$?
 assert_exit_code "unlearn exits 1 with missing category" 1 "$ec"
 
 # Missing pluginStorage field
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "textContent": "test text"}' \
-  | bash "$PLUGIN_DIR/unlearn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/unlearn.sh" 2>&1)
 ec=$?
 assert_exit_code "unlearn exits 1 with missing pluginStorage" 1 "$ec"
 
 # Missing text
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "pluginStorage": "'"$UNLEARN_STORAGE"'"}' \
-  | bash "$PLUGIN_DIR/unlearn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/unlearn.sh" 2>&1)
 ec=$?
 assert_exit_code "unlearn exits 1 with missing text" 1 "$ec"
 
 # Non-existent CSS file
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "nosuchcat", "pluginStorage": "'"$UNLEARN_STORAGE"'", "textContent": "test text"}' \
-  | bash "$PLUGIN_DIR/unlearn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/unlearn.sh" 2>&1)
 ec=$?
 assert_exit_code "unlearn exits 1 when CSS file does not exist" 1 "$ec"
 assert_json_valid "unlearn returns JSON error when CSS file missing" "$out"
 
 # Path traversal in category name
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "../etc/passwd", "pluginStorage": "'"$UNLEARN_STORAGE"'", "textContent": "test"}' \
-  | bash "$PLUGIN_DIR/unlearn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/unlearn.sh" 2>&1)
 ec=$?
 assert_exit_code "unlearn rejects path traversal in category name" 1 "$ec"
 
 # Path traversal in pluginStorage
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "news", "pluginStorage": "/tmp/../etc", "textContent": "test"}' \
-  | bash "$PLUGIN_DIR/unlearn.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/unlearn.sh" 2>&1)
 ec=$?
 assert_exit_code "unlearn rejects path traversal in pluginStorage" 1 "$ec"
 
@@ -405,32 +405,32 @@ PROCESS_STORAGE="$TEST_DIR/process_storage"
 
 # Exit 65 when pluginStorage does not exist
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "'"$TEST_DIR/nostorage"'", "textContent": "some text"}' \
-  | bash "$PLUGIN_DIR/process.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/process.sh" 2>&1)
 ec=$?
 assert_exit_code "process exits 65 when pluginStorage does not exist" 65 "$ec"
 
 # Exit 65 when no textContent (or empty)
 mkdir -p "$PROCESS_STORAGE"
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "'"$PROCESS_STORAGE"'", "textContent": ""}' \
-  | bash "$PLUGIN_DIR/process.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/process.sh" 2>&1)
 ec=$?
 assert_exit_code "process exits 65 when textContent is empty" 65 "$ec"
 
 # Exit 65 when no CSS files in storage
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "'"$PROCESS_STORAGE"'", "textContent": "some text"}' \
-  | bash "$PLUGIN_DIR/process.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/process.sh" 2>&1)
 ec=$?
 assert_exit_code "process exits 65 when no trained categories" 65 "$ec"
 
 # Missing pluginStorage field
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "textContent": "some text"}' \
-  | bash "$PLUGIN_DIR/process.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/process.sh" 2>&1)
 ec=$?
 assert_exit_code "process exits 1 with missing pluginStorage" 1 "$ec"
 
 # Path traversal in pluginStorage
 out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "/tmp/../etc", "textContent": "test"}' \
-  | bash "$PLUGIN_DIR/process.sh" 2>&1)
+  | bash "$CRM114_PLUGIN_DIR/process.sh" 2>&1)
 ec=$?
 assert_exit_code "process rejects path traversal in pluginStorage" 1 "$ec"
 
@@ -443,7 +443,7 @@ if [ "$CRM114_AVAILABLE" = "true" ]; then
   echo "This is sports news" | csslearn "$CLASSIFY_STORAGE/sport.css" 2>/dev/null || true
 
   out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "pluginStorage": "'"$CLASSIFY_STORAGE"'", "textContent": "politics and government news"}' \
-    | bash "$PLUGIN_DIR/process.sh" 2>&1)
+    | bash "$CRM114_PLUGIN_DIR/process.sh" 2>&1)
   ec=$?
   assert_exit_code "process exits 0 with trained categories and crm114" 0 "$ec"
   assert_json_valid "process returns valid JSON" "$out"
@@ -519,7 +519,7 @@ INVALID_CATS=(
 
 for bad_cat in "${INVALID_CATS[@]}"; do
   out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "'"$bad_cat"'", "pluginStorage": "'"$SEC_STORAGE"'", "textContent": "test"}' \
-    | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+    | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
   ec=$?
   assert_exit_code "learn rejects invalid category: '$bad_cat'" 1 "$ec"
 done
@@ -529,7 +529,7 @@ VALID_CATS=("news" "sport-news" "category_one" "cat.sub" "CatName123")
 for good_cat in "${VALID_CATS[@]}"; do
   # Just test that the error is NOT about invalid category name
   out=$(echo '{"filePath": "'"$TEST_DIR/test_doc.txt"'", "category": "'"$good_cat"'", "pluginStorage": "'"$SEC_STORAGE"'", "textContent": "test"}' \
-    | bash "$PLUGIN_DIR/learn.sh" 2>&1)
+    | bash "$CRM114_PLUGIN_DIR/learn.sh" 2>&1)
   ec=$?
   assert_not_contains "learn accepts valid category '$good_cat' (no sanitization error)" "invalid category" "$out"
 done
