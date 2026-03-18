@@ -36,17 +36,64 @@ if [[ "$PLUGIN_STORAGE" == *".."* ]]; then
 fi
 
 # Ensure storage exists
-if [ ! -d "$PLUGIN_STORAGE" ]; then
-  echo "No categories exist. Run 'doc.doc.sh run crm114 manageCategories -o <outputDir>' first." >&2
-  exit 65
-fi
+mkdir -p "$PLUGIN_STORAGE"
+
+# Helper: sanitize and validate category name (same rules as manageCategories)
+_validate_category_name() {
+  local name="$1"
+  if ! [[ "$name" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    return 1
+  fi
+  return 0
+}
+
+# Determine tty source (allow override for testing)
+_TTY_SOURCE="${CRM114_TTY_OVERRIDE:-/dev/tty}"
 
 # Find trained categories
 mapfile -t CSS_FILES < <(find "$PLUGIN_STORAGE" -maxdepth 1 -name "*.css" 2>/dev/null | sort)
 
+# If no categories exist, prompt for inline creation before labeling
 if [ "${#CSS_FILES[@]}" -eq 0 ]; then
-  echo "No categories exist. Run 'doc.doc.sh run crm114 manageCategories -o <outputDir>' first." >&2
-  exit 65
+  echo "" >&2
+  echo "No categories exist yet." >&2
+  echo "Enter one or more category names to create (one per line, empty line to finish):" >&2
+
+  if ! exec 3< "$_TTY_SOURCE" 2>/dev/null; then
+    echo "No terminal available for interactive category creation. Exiting." >&2
+    exit 65
+  fi
+
+  while IFS= read -r cat_name <&3; do
+    [ -z "$cat_name" ] && break
+    if ! _validate_category_name "$cat_name"; then
+      echo "  Invalid name '$cat_name'. Use only alphanumeric characters, dash, underscore, or dot." >&2
+      continue
+    fi
+    css_file="$PLUGIN_STORAGE/$cat_name.css"
+    if [ ! -f "$css_file" ]; then
+      _crm_init=$(mktemp /tmp/crm114_init_XXXXXX.crm)
+      cat > "$_crm_init" << CRMEOF
+window
+input (:mytext:)
+learn <osb> ($css_file) [:mytext:] //
+CRMEOF
+      printf ' ' | crm "$_crm_init" > /dev/null 2>&1 || touch "$css_file"
+      rm -f "$_crm_init"
+      echo "  Created category: $cat_name" >&2
+    else
+      echo "  Category '$cat_name' already exists." >&2
+    fi
+  done
+  exec 3<&-
+
+  # Re-scan for categories after inline creation
+  mapfile -t CSS_FILES < <(find "$PLUGIN_STORAGE" -maxdepth 1 -name "*.css" 2>/dev/null | sort)
+
+  if [ "${#CSS_FILES[@]}" -eq 0 ]; then
+    echo "No categories were created. Exiting." >&2
+    exit 65
+  fi
 fi
 
 # Build category names list
@@ -81,7 +128,7 @@ for cat_name in "${categories[@]}"; do
 
   printf "  Category [%s]: (t)rain / (u)ntrain / (s)kip [s]: " "$cat_name"
   choice=""
-  read -r choice < /dev/tty || choice="s"
+  read -r choice < "$_TTY_SOURCE" || choice="s"
   choice="${choice:-s}"
 
   case "$choice" in
