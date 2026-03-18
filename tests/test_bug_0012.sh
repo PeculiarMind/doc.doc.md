@@ -14,11 +14,23 @@ FAIL=0
 TOTAL=0
 
 TMPDIR_TEST=""
+VENV_BIN_DIR="$REPO_ROOT/doc.doc.md/plugins/markitdown/.venv/bin"
+VENV_HIDDEN=false
 
 cleanup() {
+  # Restore venv if hidden
+  if [ "$VENV_HIDDEN" = true ] && [ -d "${VENV_BIN_DIR}.bak" ]; then
+    mv "${VENV_BIN_DIR}.bak" "$VENV_BIN_DIR" 2>/dev/null || true
+  fi
   [ -n "$TMPDIR_TEST" ] && [ -d "$TMPDIR_TEST" ] && rm -rf "$TMPDIR_TEST"
 }
 trap cleanup EXIT
+
+# Temporarily hide the venv binary so PATH-based fakes are used
+if [ -d "$VENV_BIN_DIR" ]; then
+  mv "$VENV_BIN_DIR" "${VENV_BIN_DIR}.bak"
+  VENV_HIDDEN=true
+fi
 
 assert_eq() {
   local test_name="$1" expected="$2" actual="$3"

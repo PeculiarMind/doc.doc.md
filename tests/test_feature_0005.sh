@@ -291,7 +291,7 @@ assert_contains "error message in stderr" "Error" "$error_stderr"
 echo ""
 echo "--- main.sh with ocrmypdf (skipped if tools not installed) ---"
 
-if command -v ocrmypdf >/dev/null 2>&1; then
+if command -v ocrmypdf >/dev/null 2>&1 && command -v tesseract >/dev/null 2>&1; then
   # Find a real PDF for testing (use existing test file if available)
   test_pdf=""
   for candidate in /usr/share/doc/*/copyright \
