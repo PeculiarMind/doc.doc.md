@@ -302,6 +302,13 @@ _install_all_plugins() {
     local plugin_dir="$PLUGIN_DIR/$plugin_name"
     [ -f "$plugin_dir/descriptor.json" ] || continue
 
+    # Only install active plugins (inactive ones are intentionally skipped)
+    local plugin_active
+    plugin_active=$(get_plugin_active_status "$plugin_dir/descriptor.json")
+    if [ "$plugin_active" != "true" ]; then
+      continue
+    fi
+
     if [ "$(_check_plugin_installed "$plugin_name")" = "true" ]; then
       echo "$(ui_ok "$plugin_name: already installed")"
       continue

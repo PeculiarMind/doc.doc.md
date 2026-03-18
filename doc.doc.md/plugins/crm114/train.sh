@@ -59,10 +59,13 @@ if [ "${#CSS_FILES[@]}" -eq 0 ]; then
   echo "No categories exist yet." >&2
   echo "Enter one or more category names to create (one per line, empty line to finish):" >&2
 
-  if ! exec 3< "$_TTY_SOURCE" 2>/dev/null; then
+  # Check TTY source is available before attempting exec
+  if [ ! -r "$_TTY_SOURCE" ]; then
     echo "No terminal available for interactive category creation. Exiting." >&2
     exit 65
   fi
+
+  exec 3< "$_TTY_SOURCE"
 
   while IFS= read -r cat_name <&3; do
     [ -z "$cat_name" ] && break

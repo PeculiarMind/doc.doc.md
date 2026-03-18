@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CLI="$REPO_ROOT/doc.doc.sh"
 UI_SH="$REPO_ROOT/doc.doc.md/components/ui.sh"
+UI_PROGRESSBAR_SH="$REPO_ROOT/doc.doc.md/components/ui_progressbar.sh"
 
 PASS=0
 FAIL=0
@@ -89,11 +90,11 @@ echo "--- Group 1: Progress functions defined in ui.sh ---"
 
 for func in ui_progress_init ui_progress_update ui_progress_done; do
   TOTAL=$((TOTAL + 1))
-  if grep -q "^${func}()" "$UI_SH" 2>/dev/null; then
-    echo "  PASS: $func defined in ui.sh"
+  if grep -q "^${func}()" "$UI_SH" 2>/dev/null || grep -q "^${func}()" "$UI_PROGRESSBAR_SH" 2>/dev/null; then
+    echo "  PASS: $func defined in ui component"
     PASS=$((PASS + 1))
   else
-    echo "  FAIL: $func not defined in ui.sh"
+    echo "  FAIL: $func not defined in ui component"
     FAIL=$((FAIL + 1))
   fi
 done

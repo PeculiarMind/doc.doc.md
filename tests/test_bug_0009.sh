@@ -125,8 +125,8 @@ elif [ -f "$TEMPLATES_SH" ]; then
 fi
 
 assert_contains \
-  "render_template_json uses jq 'keys[]' for iteration" \
-  "jq -r 'keys[]'" \
+  "render_template_json delegates to mustache_render.py" \
+  "mustache_render.py" \
   "$func_body"
 
 assert_not_contains \
@@ -134,8 +134,8 @@ assert_not_contains \
   "to_entries[]" \
   "$func_body"
 
-assert_contains \
-  "render_template_json extracts values individually with jq --arg" \
+assert_not_contains \
+  "render_template_json does NOT use unsafe jq inline substitution" \
   'jq -r --arg k "$key"' \
   "$func_body"
 
@@ -230,8 +230,10 @@ assert_file_exists "sidecar created for data.txt" "$regr_sidecar"
 
 regr_content=$(cat "$regr_sidecar")
 
-assert_contains \
-  "unmatched placeholder {{noSuchKey}} left unchanged" \
+# With Mustache rendering (FEATURE_0040), unmatched placeholders are resolved
+# to empty strings (standard Mustache behavior), not left as raw {{key}}.
+assert_not_contains \
+  "unmatched placeholder {{noSuchKey}} resolved to empty (Mustache spec)" \
   "{{noSuchKey}}" \
   "$regr_content"
 

@@ -201,7 +201,7 @@ fi
 echo ""
 echo "--- Group 3: main.sh OCR processing (skipped if ocrmypdf not installed) ---"
 
-if command -v ocrmypdf >/dev/null 2>&1; then
+if command -v ocrmypdf >/dev/null 2>&1 && ocrmypdf --version >/dev/null 2>&1 && command -v tesseract >/dev/null 2>&1; then
   # PDF processing
   output=$(echo "{\"filePath\":\"$pdf_file\"}" | "$PLUGIN_DIR/main.sh" 2>/dev/null)
   exit_code=$?

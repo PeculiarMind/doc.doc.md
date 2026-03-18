@@ -122,33 +122,23 @@ build_train_json() {
 run_train_with_input() {
   local input_json="$1"
   local tty_input="$2"   # string to feed as if typed at /dev/tty
-  local fifo="$TEST_TMP/fake_tty"
-  mkfifo "$fifo"
-  # Feed tty_input into the FIFO in the background
-  printf '%s' "$tty_input" > "$fifo" &
-  local bg_pid=$!
-  # Run train.sh with the FIFO as its /dev/tty substitute
-  # We use the CRM114_TTY_OVERRIDE env var (see implementation)
+  local tty_file="$TEST_TMP/fake_tty_input"
+  # Use a regular file (reliable across all environments)
+  printf '%s' "$tty_input" > "$tty_file"
   local out
-  out=$(CRM114_TTY_OVERRIDE="$fifo" bash -c 'echo "$1" | bash "$0"' \
-        "$CRM114_PLUGIN_DIR/train.sh" "$input_json" 2>&1) || true
-  wait "$bg_pid" 2>/dev/null || true
-  rm -f "$fifo"
+  out=$(echo "$input_json" | CRM114_TTY_OVERRIDE="$tty_file" bash "$CRM114_PLUGIN_DIR/train.sh" 2>&1) || true
+  rm -f "$tty_file"
   echo "$out"
 }
 
 run_train_exit_code() {
   local input_json="$1"
   local tty_input="$2"
-  local fifo="$TEST_TMP/fake_tty"
-  mkfifo "$fifo"
-  printf '%s' "$tty_input" > "$fifo" &
-  local bg_pid=$!
+  local tty_file="$TEST_TMP/fake_tty_exit"
+  printf '%s' "$tty_input" > "$tty_file"
   local ec=0
-  CRM114_TTY_OVERRIDE="$fifo" bash -c 'echo "$1" | bash "$0"' \
-    "$CRM114_PLUGIN_DIR/train.sh" "$input_json" >/dev/null 2>&1 || ec=$?
-  wait "$bg_pid" 2>/dev/null || true
-  rm -f "$fifo"
+  echo "$input_json" | CRM114_TTY_OVERRIDE="$tty_file" bash "$CRM114_PLUGIN_DIR/train.sh" >/dev/null 2>&1 || ec=$?
+  rm -f "$tty_file"
   echo "$ec"
 }
 
