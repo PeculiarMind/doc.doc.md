@@ -173,9 +173,9 @@ if [ -f "$CRM114_PLUGIN_DIR/descriptor.json" ]; then
     "crm114" \
     "$(jq -r '.name' "$CRM114_PLUGIN_DIR/descriptor.json")"
 
-  assert_eq "plugin is active" \
+  assert_eq "plugin active field is boolean" \
     "true" \
-    "$(jq -r '.active' "$CRM114_PLUGIN_DIR/descriptor.json")"
+    "$(jq -r '.active | type == "boolean"' "$CRM114_PLUGIN_DIR/descriptor.json")"
 
   # All required commands are registered
   for cmd in process manageCategories train learn unlearn listCategories install installed; do

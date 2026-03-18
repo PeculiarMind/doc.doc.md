@@ -7,6 +7,8 @@
 
 set -euo pipefail
 
+_TTY_SOURCE="${CRM114_TTY_OVERRIDE:-/dev/tty}"
+
 PLUGIN_STORAGE="${1:-}"
 
 if [ -z "$PLUGIN_STORAGE" ]; then
@@ -54,7 +56,7 @@ if [ "${#existing[@]}" -eq 0 ]; then
   echo "No categories exist yet."
   echo ""
   echo "Enter one or more category names to create (one per line, empty line to finish):"
-  while IFS= read -r cat_name < /dev/tty; do
+  while IFS= read -r cat_name < "$_TTY_SOURCE"; do
     [ -z "$cat_name" ] && break
     if ! validate_category_name "$cat_name"; then
       echo "  Invalid name '$cat_name'. Use only alphanumeric characters, dash, underscore, or dot." >&2
@@ -85,7 +87,7 @@ else
 
   # Add new categories
   echo "Add new categories (one per line, empty line to skip):"
-  while IFS= read -r cat_name < /dev/tty; do
+  while IFS= read -r cat_name < "$_TTY_SOURCE"; do
     [ -z "$cat_name" ] && break
     if ! validate_category_name "$cat_name"; then
       echo "  Invalid name '$cat_name'. Use only alphanumeric characters, dash, underscore, or dot." >&2
@@ -113,7 +115,7 @@ CRMEOF
   mapfile -t current_cats < <(list_categories)
   if [ "${#current_cats[@]}" -gt 0 ]; then
     echo "Remove categories (enter name to delete, empty line to skip):"
-    while IFS= read -r cat_name < /dev/tty; do
+    while IFS= read -r cat_name < "$_TTY_SOURCE"; do
       [ -z "$cat_name" ] && break
       if ! validate_category_name "$cat_name"; then
         echo "  Invalid name '$cat_name'." >&2
@@ -125,7 +127,7 @@ CRMEOF
         continue
       fi
       printf "  Confirm delete '%s'? [y/N] " "$cat_name"
-      read -r confirm < /dev/tty
+      read -r confirm < "$_TTY_SOURCE"
       if [[ "$confirm" =~ ^[Yy]$ ]]; then
         rm -f "$css_file"
         echo "  Deleted category: $cat_name"

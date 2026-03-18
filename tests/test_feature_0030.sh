@@ -85,9 +85,9 @@ echo "--- Group 2: Banner content ---"
 
 # Banner content is now in banner.txt (FEATURE_0039)
 banner_content=$(cat "$REPO_ROOT/doc.doc.md/components/banner.txt" 2>/dev/null)
-assert_contains "banner has ASCII art" "____/" "$banner_content"
+assert_contains "banner has ASCII art" "█████" "$banner_content"
 assert_contains "banner has tagline" "documents your documents" "$banner_content"
-assert_contains "banner has PAPER STACK" "PAPER STACK" "$banner_content"
+assert_contains "banner has version info" "Ver." "$banner_content"
 
 # =========================================
 # Group 3: Banner goes to stderr

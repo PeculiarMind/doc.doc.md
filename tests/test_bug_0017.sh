@@ -284,7 +284,7 @@ echo ""
 echo "--- Test 4.1: manageCategories works independently ---"
 setup
 output=""
-output=$(printf '\n' | bash "$CRM114_PLUGIN_DIR/manageCategories.sh" "$TEST_TMP/storage" 2>&1) || true
+output=$(CRM114_TTY_OVERRIDE=/dev/null bash "$CRM114_PLUGIN_DIR/manageCategories.sh" "$TEST_TMP/storage" 2>&1) || true
 assert_contains "manageCategories shows management header" "Category Management" "$output"
 teardown
 
