@@ -51,27 +51,48 @@ if [ "${#CSS_FILES[@]}" -eq 0 ]; then
   exit 65
 fi
 
-# Classify text against all CSS files using crmclassify
-# crmclassify accepts multiple CSS files and outputs pR per file
-CLASSIFY_OUTPUT=$(printf '%s\n' "$TEXT" | crmclassify "${CSS_FILES[@]}" 2>/dev/null) || true
+# Build CSS file list for the CRM114 classify statement (pipe-separated paths)
+CSS_LIST=""
+for _css in "${CSS_FILES[@]}"; do
+  if [ -z "$CSS_LIST" ]; then
+    CSS_LIST="$_css"
+  else
+    CSS_LIST="$CSS_LIST | $_css"
+  fi
+done
 
-# Parse crmclassify output to extract per-category pR values
-# Format: lines like "Best match to <path>/<name>.css pR: <value>  <path>/<name2>.css pR: <value2>"
-# or:     "<path>/<name>.css: pR: <value>"
-# We extract all occurrences of "<something>.css pR: <value>" or "<something>.css: pR: <value>"
+# Build and run a temp CRM114 classify script.
+# The {classify...} block always populates :stats: regardless of which file wins.
+# crmclassify does not exist in the crm114 package; the crm interpreter is used instead.
+_CRM_CLASSIFY=$(mktemp /tmp/crm114_classify_XXXXXX.crm)
+trap 'rm -f "$_CRM_CLASSIFY"' EXIT
+cat > "$_CRM_CLASSIFY" << CRMEOF
+window
+input (:mytext:)
+isolate (:stats:)
+{
+  classify <osb> [:mytext:] // ($CSS_LIST) (:stats:)
+}
+output /:*:stats:\n/
+CRMEOF
+
+CLASSIFY_OUTPUT=$(printf '%s\n' "$TEXT" | crm "$_CRM_CLASSIFY" 2>/dev/null) || true
+
+# Parse CRM114 classify output to extract per-category pR values.
+# Per-category line format: "#N (/path/to/catname.css): features: N, hits: N, prob: X, pR:   X.XX"
+# Store regex in a variable: bash mis-parses ) in [^)] character class when inline in [[ =~ ]]
+_re='^#[0-9]+[[:space:]]\(([^)]+)\.css\):.*pR:[[:space:]]+([+-]?[0-9]+\.[0-9]+)'
 categories_json="[]"
 while IFS= read -r line; do
-  # Match patterns: "name.css pR: VALUE" or "name.css: pR: VALUE"
-  while [[ "$line" =~ ([^/[:space:]]+)\.css[[:space:]]*:?[[:space:]]*pR:[[:space:]]*([+-]?[0-9]+\.?[0-9]*) ]]; do
-    cat_name="${BASH_REMATCH[1]}"
+  if [[ "$line" =~ $_re ]]; then
+    css_path="${BASH_REMATCH[1]}"
     pr_value="${BASH_REMATCH[2]}"
+    cat_name=$(basename "$css_path")
     categories_json=$(printf '%s' "$categories_json" | jq \
       --arg name "$cat_name" \
       --argjson pr "$pr_value" \
       '. + [{"categoryName": $name, "pR": $pr}]')
-    # Consume the matched portion so we can continue scanning the line
-    line="${line#*"${BASH_REMATCH[0]}"}"
-  done
+  fi
 done <<< "$CLASSIFY_OUTPUT"
 
 jq -n --argjson cats "$categories_json" '{categories: $cats}'

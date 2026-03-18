@@ -87,29 +87,39 @@ for cat_name in "${categories[@]}"; do
   case "$choice" in
     t|T|train)
       if [ -n "$TEXT" ]; then
-        if command -v csslearn >/dev/null 2>&1; then
-          printf '%s\n' "$TEXT" | csslearn "$css_file" 2>/dev/null && \
-            echo "    → Trained '$cat_name'" || \
-            echo "    → csslearn failed for '$cat_name'" >&2
+        _crm_train=$(mktemp /tmp/crm114_train_XXXXXX.crm)
+        cat > "$_crm_train" << CRMEOF
+window
+input (:mytext:)
+learn <osb microgroom> ($css_file) [:mytext:] //
+CRMEOF
+        if printf '%s\n' "$TEXT" | crm "$_crm_train" > /dev/null 2>&1; then
+          echo "    → Trained '$cat_name'"
         else
-          echo "    → csslearn not available; cannot train" >&2
+          echo "    → crm114 learn failed for '$cat_name'" >&2
         fi
+        rm -f "$_crm_train"
       else
         echo "    → No text available for training" >&2
       fi
       ;;
     u|U|untrain)
       if [ -n "$TEXT" ]; then
-        if command -v cssunlearn >/dev/null 2>&1; then
-          if [ -f "$css_file" ]; then
-            printf '%s\n' "$TEXT" | cssunlearn "$css_file" 2>/dev/null && \
-              echo "    → Untrained '$cat_name'" || \
-              echo "    → cssunlearn failed for '$cat_name'" >&2
+        if [ -f "$css_file" ]; then
+          _crm_untrain=$(mktemp /tmp/crm114_untrain_XXXXXX.crm)
+          cat > "$_crm_untrain" << CRMEOF
+window
+input (:mytext:)
+learn <osb microgroom refute> ($css_file) [:mytext:] //
+CRMEOF
+          if printf '%s\n' "$TEXT" | crm "$_crm_untrain" > /dev/null 2>&1; then
+            echo "    → Untrained '$cat_name'"
           else
-            echo "    → No model file for '$cat_name' to untrain" >&2
+            echo "    → crm114 learn refute failed for '$cat_name'" >&2
           fi
+          rm -f "$_crm_untrain"
         else
-          echo "    → cssunlearn not available; cannot untrain" >&2
+          echo "    → No model file for '$cat_name' to untrain" >&2
         fi
       else
         echo "    → No text available for untraining" >&2

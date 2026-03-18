@@ -55,8 +55,17 @@ mkdir -p "$PLUGIN_STORAGE"
 
 CSS_FILE="$PLUGIN_STORAGE/$CATEGORY.css"
 
-# Run csslearn: feed text on stdin
-if ! printf '%s\n' "$TEXT" | csslearn "$CSS_FILE" 2>/dev/null; then
+# Build and run a temp CRM114 script: learn <osb microgroom> writes text into the CSS model.
+# crm (the CRM114 interpreter) is the correct binary; csslearn does not exist in the package.
+_CRM_LEARN=$(mktemp /tmp/crm114_learn_XXXXXX.crm)
+trap 'rm -f "$_CRM_LEARN"' EXIT
+cat > "$_CRM_LEARN" << CRMEOF
+window
+input (:mytext:)
+learn <osb microgroom> ($CSS_FILE) [:mytext:] //
+CRMEOF
+
+if ! printf '%s\n' "$TEXT" | crm "$_CRM_LEARN" > /dev/null 2>&1; then
   jq -n --arg cat "$CATEGORY" '{success: false, category: $cat}'
   exit 1
 fi

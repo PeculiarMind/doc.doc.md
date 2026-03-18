@@ -62,12 +62,15 @@ if [ "${#existing[@]}" -eq 0 ]; then
     fi
     css_file="$PLUGIN_STORAGE/$cat_name.css"
     if [ ! -f "$css_file" ]; then
-      # Initialize empty CSS file for csslearn
-      if command -v csslearn >/dev/null 2>&1; then
-        printf '' | csslearn "$css_file" 2>/dev/null || touch "$css_file"
-      else
-        touch "$css_file"
-      fi
+      # Initialize CSS model file via crm interpreter (csslearn does not exist in the package)
+      _crm_init=$(mktemp /tmp/crm114_init_XXXXXX.crm)
+      cat > "$_crm_init" << CRMEOF
+window
+input (:mytext:)
+learn <osb> ($css_file) [:mytext:] //
+CRMEOF
+      printf ' ' | crm "$_crm_init" > /dev/null 2>&1 || touch "$css_file"
+      rm -f "$_crm_init"
       echo "  Created category: $cat_name"
     else
       echo "  Category '$cat_name' already exists."
@@ -90,11 +93,15 @@ else
     fi
     css_file="$PLUGIN_STORAGE/$cat_name.css"
     if [ ! -f "$css_file" ]; then
-      if command -v csslearn >/dev/null 2>&1; then
-        printf '' | csslearn "$css_file" 2>/dev/null || touch "$css_file"
-      else
-        touch "$css_file"
-      fi
+      # Initialize CSS model file via crm interpreter (csslearn does not exist in the package)
+      _crm_init=$(mktemp /tmp/crm114_init_XXXXXX.crm)
+      cat > "$_crm_init" << CRMEOF
+window
+input (:mytext:)
+learn <osb> ($css_file) [:mytext:] //
+CRMEOF
+      printf ' ' | crm "$_crm_init" > /dev/null 2>&1 || touch "$css_file"
+      rm -f "$_crm_init"
       echo "  Created category: $cat_name"
     else
       echo "  Category '$cat_name' already exists."

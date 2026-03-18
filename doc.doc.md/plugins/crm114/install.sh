@@ -4,10 +4,8 @@
 # Output: JSON {"success": bool, "message": string} to stdout
 # Exit code: 0 on success or already installed, 1 if installation fails
 
-if command -v csslearn >/dev/null 2>&1 && \
-   command -v cssunlearn >/dev/null 2>&1 && \
-   command -v crmclassify >/dev/null 2>&1; then
-  jq -n '{success: true, message: "crm114 tools are already installed"}'
+if command -v crm >/dev/null 2>&1; then
+  jq -n '{success: true, message: "crm114 is already installed"}'
   exit 0
 fi
 
@@ -27,5 +25,5 @@ if command -v brew >/dev/null 2>&1; then
   fi
 fi
 
-jq -n '{success: false, message: "crm114 could not be installed automatically. Install manually: apt install crm114 (Debian/Ubuntu) or brew install crm114 (macOS)."}'
+jq -n '{success: false, message: "crm114 could not be installed automatically. Install manually: apt install crm114 (Debian/Ubuntu) or brew install crm114 (macOS). The package provides the crm interpreter binary."}'
 exit 1

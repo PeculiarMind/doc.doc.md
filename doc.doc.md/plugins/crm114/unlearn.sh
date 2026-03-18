@@ -58,8 +58,17 @@ if [ ! -f "$CSS_FILE" ]; then
   exit 1
 fi
 
-# Run cssunlearn: feed text on stdin
-if ! printf '%s\n' "$TEXT" | cssunlearn "$CSS_FILE" 2>/dev/null; then
+# Build and run a temp CRM114 script: learn <osb microgroom refute> removes text from the CSS model.
+# The 'refute' flag is the correct unlearn mechanism in CRM114 (cssunlearn does not exist).
+_CRM_UNLEARN=$(mktemp /tmp/crm114_unlearn_XXXXXX.crm)
+trap 'rm -f "$_CRM_UNLEARN"' EXIT
+cat > "$_CRM_UNLEARN" << CRMEOF
+window
+input (:mytext:)
+learn <osb microgroom refute> ($CSS_FILE) [:mytext:] //
+CRMEOF
+
+if ! printf '%s\n' "$TEXT" | crm "$_CRM_UNLEARN" > /dev/null 2>&1; then
   jq -n --arg cat "$CATEGORY" '{success: false, category: $cat}'
   exit 1
 fi
