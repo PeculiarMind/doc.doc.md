@@ -1,0 +1,69 @@
+{
+  "name": "wc",
+  "version": "1.0.0",
+  "description": "A plugin that counts lines, words, and characters in a document's pre-extracted text content using the Unix wc tool.",
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Count lines, words, and characters in the document's extracted text content.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the source document.",
+          "required": true
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Extracted text content from upstream plugins (e.g. markitdown)."
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR-extracted text from upstream plugins (e.g. ocrmypdf)."
+        },
+        "documentText": {
+          "type": "string",
+          "description": "Document text from upstream plugins."
+        }
+      },
+      "output": {
+        "lineCount": {
+          "type": "number",
+          "description": "Number of lines in the extracted text."
+        },
+        "wordCount": {
+          "type": "number",
+          "description": "Number of words in the extracted text."
+        },
+        "charCount": {
+          "type": "number",
+          "description": "Number of characters in the extracted text."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if the wc tool is available on the system.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Indicates whether wc is available."
+        }
+      }
+    },
+    "install": {
+      "description": "Report that wc is part of GNU coreutils and requires no installation.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Indicates whether wc is available."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    }
+  }
+}
