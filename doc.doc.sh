@@ -33,6 +33,7 @@ _PROC_ECHO_MODE=false
 _PROC_BASE_PATH=""
 _PROC_BASE_PATH_RESOLVED=""
 _PROC_CANONICAL_OUT=""
+_PROC_CANONICAL_IN=""
 _PROC_PLUGINS=()
 _PROC_PATH_INCLUDE_ARGS=()
 _PROC_PATH_EXCLUDE_ARGS=()
@@ -119,6 +120,8 @@ _validate_process_inputs() {
     log_error "Input directory is not readable: $_PROC_INPUT_DIR"
     exit 1
   fi
+
+  _PROC_CANONICAL_IN="$(readlink -f "$_PROC_INPUT_DIR")"
 
   if [ "$_PROC_ECHO_MODE" = true ] && [ -n "$_PROC_OUTPUT_DIR" ]; then
     log_error "--echo and -o are mutually exclusive"
@@ -309,7 +312,7 @@ _run_process_pipeline() {
 
   local -a file_list
   mapfile -t file_list < <(
-    find "$_PROC_INPUT_DIR" -type f | \
+    find "$_PROC_CANONICAL_IN" -type f | \
     python3 "$FILTER_SCRIPT" "${filter_args[@]+"${filter_args[@]}"}"
   )
 
@@ -334,7 +337,9 @@ _run_process_pipeline() {
   for file_path in "${file_list[@]}"; do
     [ -n "$file_path" ] || continue
 
-    local relative_path="${file_path#${_PROC_INPUT_DIR}/}"
+    local canonical_file
+    canonical_file="$(readlink -f "$file_path")"
+    local relative_path="${canonical_file#${_PROC_CANONICAL_IN}/}"
 
     if [ "$show_progress" = true ]; then
       ui_progress_update step "Execute plugins"
