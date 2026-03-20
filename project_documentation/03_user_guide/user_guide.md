@@ -61,10 +61,16 @@ chmod +x doc.doc.sh
 ### First Run
 
 ```bash
-./doc.doc.sh process -d ~/Documents
+./doc.doc.sh process -d ~/Documents -o ~/Documents-sidecar
 ```
 
-This processes every file in `~/Documents` and prints a JSON array to your terminal, one entry per file.
+This processes every file in `~/Documents`, writes one sidecar `.md` file per document into `~/Documents-sidecar`, and streams a JSON summary to stdout (when stdout is piped or redirected).
+
+To preview rendered output without writing files:
+
+```bash
+./doc.doc.sh process -d ~/Documents --echo
+```
 
 ---
 
@@ -73,15 +79,15 @@ This processes every file in `~/Documents` and prints a JSON array to your termi
 ### The `process` Command
 
 ```
-./doc.doc.sh process -d <directory> [options]
+./doc.doc.sh process -d <directory> -o <output-directory> [options]
 ```
 
-`-d` is the only required flag — it specifies the directory to scan.
+`-d` and `-o` are both required. Use `--echo` instead of `-o` for a dry-run that prints rendered markdown to stdout without writing files.
 
 **Example:**
 
 ```bash
-./doc.doc.sh process -d ~/Documents
+./doc.doc.sh process -d ~/Documents -o ~/Documents-sidecar
 ```
 
 ### What the Output Looks Like
@@ -115,18 +121,18 @@ The command streams a JSON array to stdout. Each entry represents one file and c
 
 > **Note:** `fileCreated` may be empty on Linux filesystems that do not store a creation (birth) time.
 
-### Saving the Output
+### Saving the JSON Output
 
-Redirect stdout to a file:
+When stdout is piped or redirected, the JSON array is written to stdout in addition to generating sidecar files. Redirect it to a file:
 
 ```bash
-./doc.doc.sh process -d ~/Documents > documents.json
+./doc.doc.sh process -d ~/Documents -o ~/Documents-sidecar > documents.json
 ```
 
 Or pipe it directly into `jq` for exploration:
 
 ```bash
-./doc.doc.sh process -d ~/Documents | jq '.[] | {name: .filePath, size: .fileSize}'
+./doc.doc.sh process -d ~/Documents -o ~/Documents-sidecar | jq '.[] | {name: .filePath, size: .fileSize}'
 ```
 
 ### Directory Mirroring
@@ -143,13 +149,13 @@ Use `-i` to specify which files to process. Without any `-i`, all files are cand
 
 ```bash
 # Only PDFs
-./doc.doc.sh process -d ~/Documents -i ".pdf"
+./doc.doc.sh process -d ~/Documents -o ~/out -i ".pdf"
 
 # PDFs or Word documents
-./doc.doc.sh process -d ~/Documents -i ".pdf,.docx"
+./doc.doc.sh process -d ~/Documents -o ~/out -i ".pdf,.docx"
 
 # Only files in a 2024 subdirectory
-./doc.doc.sh process -d ~/Documents -i "**/2024/**"
+./doc.doc.sh process -d ~/Documents -o ~/out -i "**/2024/**"
 ```
 
 ### Exclude Filters (`-e`)
@@ -158,10 +164,10 @@ Use `-e` to skip certain files from an otherwise matching set.
 
 ```bash
 # Exclude log files
-./doc.doc.sh process -d ~/Documents -e ".log"
+./doc.doc.sh process -d ~/Documents -o ~/out -e ".log"
 
 # Exclude anything in a temp or drafts subdirectory
-./doc.doc.sh process -d ~/Documents -e "**/temp/**" -e "**/drafts/**"
+./doc.doc.sh process -d ~/Documents -o ~/out -e "**/temp/**" -e "**/drafts/**"
 ```
 
 ### AND/OR Logic
@@ -172,13 +178,13 @@ Use `-e` to skip certain files from an otherwise matching set.
 
 ```bash
 # Must be .txt OR .md AND must be under a 2024 directory
-./doc.doc.sh process -d ~/Documents \
+./doc.doc.sh process -d ~/Documents -o ~/out \
   -i ".txt,.md" \
   -i "**/2024/**"
 
 # Excluded only if it matches .log AND is under temp
 # (a .log file outside of temp is kept; a temp file without .log extension is kept)
-./doc.doc.sh process -d ~/Documents \
+./doc.doc.sh process -d ~/Documents -o ~/out \
   -e ".log" \
   -e "**/temp/**"
 ```
@@ -189,13 +195,13 @@ Criteria containing `/` (but not `**`) are treated as MIME type criteria. The MI
 
 ```bash
 # Only plain-text files (by content, not extension)
-./doc.doc.sh process -d ~/Documents -i "text/plain"
+./doc.doc.sh process -d ~/Documents -o ~/out -i "text/plain"
 
 # Exclude all images
-./doc.doc.sh process -d ~/Documents -e "image/*"
+./doc.doc.sh process -d ~/Documents -o ~/out -e "image/*"
 
 # PDFs by MIME and extension, from 2024
-./doc.doc.sh process -d ~/Documents \
+./doc.doc.sh process -d ~/Documents -o ~/out \
   -i "application/pdf,.pdf" \
   -i "**/2024/**"
 ```
@@ -361,7 +367,7 @@ When you supply an output directory with `-o`, doc.doc.md renders one sidecar `.
 
 ```bash
 # Write one .md file per document alongside the originals
-./doc.doc.sh process -d ~/Documents -o ~/Documents/docs
+./doc.doc.sh process -d ~/Documents -o ~/Documents-sidecar
 
 # Use a custom template
 ./doc.doc.sh process -d ~/Documents -o ~/docs-out -t ~/my-template.md
@@ -376,7 +382,7 @@ When you supply an output directory with `-o`, doc.doc.md renders one sidecar `.
 # {{fileName}}
 
 
-{{#categories}}#{{.}} {{/categories}}
+{{#categories}}#{{categoryName}} {{/categories}}
 
 => [{{fileName}}]({{filePath}})
 
@@ -460,19 +466,21 @@ The opposite of a section block — renders the block only when `key` is falsy o
 {{/documentText}}
 ```
 
-#### List Iteration — `{{#list}}...{{/list}}` with `{{.}}`
+#### List Iteration — `{{#list}}...{{/list}}`
 
-When `key` is an array, a section block iterates over every item. Inside the block, `{{.}}` refers to the current item. Items can also be objects, in which case their keys are accessed directly.
+When `key` is an array, a section block iterates over every item. If items are objects, their keys are accessed directly by name.
 
 ```mustache
-{{#categories}}#{{.}} {{/categories}}
+{{#categories}}#{{categoryName}} {{/categories}}
 ```
 
-For an array value of `["work", "finance", "2024"]` this renders:
+For a `categories` value of `[{"categoryName": "work"}, {"categoryName": "finance"}]` this renders:
 
 ```
-#work #finance #2024 
+#work #finance 
 ```
+
+If items are plain strings, use `{{.}}` to refer to the current item.
 
 #### Comments — `{{! comment }}`
 
@@ -492,7 +500,7 @@ Comments are stripped from the rendered output and never appear in the final fil
 Catalogue all documents in a home folder:
 
 ```bash
-./doc.doc.sh process -d ~/Documents \
+./doc.doc.sh process -d ~/Documents -o ~/Documents-sidecar \
   -i ".pdf,.docx,.txt,.odt" \
   > ~/document-catalogue.json
 ```
@@ -503,12 +511,14 @@ Use `jq` to find all documents over 10 MB:
 cat ~/document-catalogue.json | jq '.[] | select(.fileSize > 10485760) | .filePath'
 ```
 
+> **Tip:** Keep the output directory outside the input tree (here `~/Documents-sidecar` vs `~/Documents`). If the output directory is nested inside the input directory, sidecar `.md` files will be picked up as input documents on subsequent runs.
+
 ### Home Lab Documentation
 
 Index all configuration files, ignoring backups:
 
 ```bash
-./doc.doc.sh process -d /etc/homelab \
+./doc.doc.sh process -d /etc/homelab -o /etc/homelab-sidecar \
   -i ".conf,.yaml,.yml,.toml,.ini" \
   -e "**/*.bak" \
   > homelab-config-index.json
@@ -523,21 +533,9 @@ Extract text from PDFs and images in a scanned archive:
 ./doc.doc.sh activate --plugin ocrmypdf
 
 # Process only supported OCR types
-./doc.doc.sh process -d ~/scanned-archive \
+./doc.doc.sh process -d ~/scanned-archive -o ~/scanned-archive-sidecar \
   -i "application/pdf,image/jpeg,image/png,image/tiff" \
   > scanned-archive-ocr.json
-```
-
-### Obsidian Integration
-
-Generate a JSON catalogue and use a script to populate Obsidian vault notes:
-
-```bash
-./doc.doc.sh process -d ~/vault-source > catalogue.json
-
-# Example: pipe into a Python or Node.js script that reads catalogue.json
-# and creates one .md file per entry in your Obsidian vault
-python3 scripts/to_obsidian.py < catalogue.json
 ```
 
 ---
@@ -670,9 +668,9 @@ Plugin failures are handled with graceful degradation — the pipeline continues
 No — the tool processes directories. To process a single file, put it in a temporary directory:
 
 ```bash
-mkdir /tmp/single && cp myfile.pdf /tmp/single
-./doc.doc.sh process -d /tmp/single
-rm -rf /tmp/single
+mkdir /tmp/single /tmp/single-out && cp myfile.pdf /tmp/single
+./doc.doc.sh process -d /tmp/single -o /tmp/single-out
+rm -rf /tmp/single /tmp/single-out
 ```
 
 **Why does my `.pdf` file have `mimeType: text/plain`?**

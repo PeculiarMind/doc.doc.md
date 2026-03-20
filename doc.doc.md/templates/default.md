@@ -1,4 +1,5 @@
 # {{fileName}}
+{{#categories}}#{{categoryName}} {{/categories}}
 
 => [{{fileName}}]({{filePath}})
 
@@ -9,7 +10,6 @@
 - **Modified**: {{fileModified}}
 - **Metadata Changed**: {{fileMetadataChanged}}
 - **MIME Type**: {{mimeType}}
-
 
 ## Content
 
