@@ -42,11 +42,14 @@ if [ "$mime_supported" = false ]; then
   exit 65
 fi
 
-# Run markitdown from the plugin-local venv
+# Run markitdown from the plugin-local venv, fall back to PATH
 MARKITDOWN_BIN="$PLUGIN_DIR/.venv/bin/markitdown"
 if [ ! -x "$MARKITDOWN_BIN" ]; then
-  echo "Error: markitdown not installed. Run: doc.doc.sh install --plugin markitdown" >&2
-  exit 1
+  MARKITDOWN_BIN="$(command -v markitdown 2>/dev/null || true)"
+  if [ -z "$MARKITDOWN_BIN" ] || [ ! -x "$MARKITDOWN_BIN" ]; then
+    echo "Error: markitdown not installed. Run: doc.doc.sh install --plugin markitdown" >&2
+    exit 1
+  fi
 fi
 _mkd_err_file="$(mktemp)"
 _mkd_exit=0

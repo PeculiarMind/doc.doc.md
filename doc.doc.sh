@@ -4,9 +4,7 @@
 # Uses Python filter engine for include/exclude logic (ADR-001).
 # Plugins communicate via JSON stdin/stdout (ADR-003).
 # Exit code: 0 on success, non-zero on errors
-
 set -euo pipefail
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_DIR="$SCRIPT_DIR/doc.doc.md/plugins"
 FILTER_SCRIPT="$SCRIPT_DIR/doc.doc.md/components/filter.py"
@@ -21,7 +19,6 @@ source "$PLUGIN_MGMT_COMPONENT"
 source "$PLUGIN_EXEC_COMPONENT"
 source "$UI_COMPONENT"
 source "$TEMPLATES_COMPONENT"
-
 # Global MIME filter criteria (consumed by process_file in plugin_execution.sh)
 _MIME_INCLUDE_ARGS=()
 _MIME_EXCLUDE_ARGS=()
@@ -439,7 +436,6 @@ _run_process_pipeline() {
 }
 
 # --- Entry point ---
-
 main() {
   if [ $# -eq 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     usage
@@ -501,5 +497,4 @@ main() {
   _split_filter_criteria
   _run_process_pipeline
 }
-
 main "$@"

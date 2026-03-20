@@ -284,8 +284,8 @@ echo "--- Group 6: integration tests (skipped if ocrmypdf not installed) ---"
 
 if [ ! -f "$PLUGIN_DIR/convert.sh" ]; then
   echo "  SKIP: convert.sh missing — skipping integration tests"
-elif ! command -v ocrmypdf >/dev/null 2>&1; then
-  echo "  SKIP: ocrmypdf not installed — skipping integration tests"
+elif ! command -v ocrmypdf >/dev/null 2>&1 || ! command -v tesseract >/dev/null 2>&1; then
+  echo "  SKIP: ocrmypdf/tesseract not installed — skipping integration tests"
 else
   # Find a real image for testing
   test_img=""

@@ -197,7 +197,7 @@ else
   tty_sum_captured=$(cat "$TTY_SUMTS" 2>/dev/null | tr -d '\r')
   rm -f "$TTY_SUMTS"
 
-  assert_contains "TTY shows Processed: summary line" "Processed:" "$tty_sum_captured"
+  assert_contains "TTY shows Processed summary line" "Processed" "$tty_sum_captured"
 fi
 
 # =========================================

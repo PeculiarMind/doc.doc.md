@@ -5,7 +5,7 @@
 - **Type:** Bug
 - **Created at:** 2026-03-18
 - **Created by:** Product Owner
-- **Status:** BACKLOG
+- **Status:** IMPLEMENTING
 
 ## Overview
 

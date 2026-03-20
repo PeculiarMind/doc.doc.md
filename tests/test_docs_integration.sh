@@ -183,7 +183,7 @@ assert_exit_code "process -d ./tests/docs exits 0" "0" "$main_exit"
 echo "$output" | jq '.' > /dev/null 2>&1
 assert_exit_code "stdout is valid JSON" "0" "$?"
 
-assert_json_count "JSON array has exactly 4 elements" "4" "$output"
+assert_json_count "JSON array has exactly 5 elements" "5" "$output"
 
 all_have_filepath=$(echo "$output" | jq '[.[] | has("filePath")] | all')
 assert_eq "all elements have filePath field" "true" "$all_have_filepath"
@@ -195,6 +195,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "--- Group 2: Per-file assertions ---"
 
+_assert_file_entry "README-MSWORD.docx"           "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 _assert_file_entry "README-PDF.pdf"             "application/pdf"
 _assert_file_entry "README-Screenshot-GIF.gif"  "image/gif"
 _assert_file_entry "README-Screenshot-JPG.jpg"  "image/jpeg"
@@ -219,7 +220,7 @@ assert_json_count "include .jpg → exactly 1 result" "1" \
 assert_json_count "include .png → exactly 1 result" "1" \
   "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i ".png" 2>/dev/null)"
 
-assert_json_count "exclude .gif,.jpg,.png → exactly 1 result (PDF)" "1" \
+assert_json_count "exclude .gif,.jpg,.png → exactly 2 results (PDF + DOCX)" "2" \
   "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -e ".gif,.jpg,.png" 2>/dev/null)"
 
 assert_json_count "include .gif,.jpg,.png → exactly 3 results" "3" \
@@ -242,7 +243,7 @@ assert_json_count "include image/jpeg → exactly 1 result" "1" \
 assert_json_count "include image/* → exactly 3 results (GIF, JPG, PNG)" "3" \
   "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -i "image/*" 2>/dev/null)"
 
-assert_json_count "exclude image/* → exactly 1 result (only PDF remains)" "1" \
+assert_json_count "exclude image/* → exactly 2 results (PDF + DOCX remain)" "2" \
   "$("$DOC_DOC_SH" process -d "$DOCS_DIR" -o "$OUTPUT_DIR" -e "image/*" 2>/dev/null)"
 
 echo ""
@@ -263,10 +264,10 @@ assert_not_contains "stderr does NOT contain ocrmypdf failure (plugin inactive)"
 echo "$output5" | jq '.' > /dev/null 2>&1
 assert_exit_code "stdout is valid JSON (ocrmypdf inactive)" "0" "$?"
 
-assert_json_count "JSON array has 4 elements (ocrmypdf inactive)" "4" "$output5"
+assert_json_count "JSON array has 5 elements (ocrmypdf inactive)" "5" "$output5"
 
 all_have_mimetype=$(echo "$output5" | jq '[.[] | has("mimeType")] | all')
-assert_eq "all 4 entries have mimeType (stat+file results present)" \
+assert_eq "all 5 entries have mimeType (stat+file results present)" \
   "true" "$all_have_mimetype"
 
 # ---------------------------------------------------------------------------

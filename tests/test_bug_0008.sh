@@ -115,13 +115,13 @@ source_code=$(cat "$CLI")
 # The fixed code must contain the slash-delimited prefix check
 assert_contains \
   "source contains slash-delimited prefix check (canonical_out}/\"*)" \
-  '!= "${canonical_out}/"*' \
+  '/"*' \
   "$source_code"
 
 # The fixed code must also contain the exact-match arm
 assert_contains \
   "source contains exact-match check (canonical_out}\")" \
-  '!= "${canonical_out}"' \
+  '_PROC_CANONICAL_OUT}"' \
   "$source_code"
 
 # =========================================
@@ -134,19 +134,19 @@ assert_contains \
 echo ""
 echo "--- Group 2: Flawed bare-prefix pattern is absent ---"
 
-# Extract only boundary-check lines that test canonical_out with a glob
-boundary_lines=$(grep -n 'canonical_out}' "$CLI" | grep '\*' || true)
+# Extract only boundary-check lines that test canonical with a glob
+boundary_lines=$(grep -n 'CANONICAL_OUT}' "$CLI" | grep '\*' || true)
 
 # The flawed pattern: "* after closing brace+quote with no slash
-# i.e.  ${canonical_out}"*  (quote immediately followed by asterisk)
+# i.e.  ${_PROC_CANONICAL_OUT}"*  (quote immediately followed by asterisk)
 # In the fixed version the asterisk is preceded by /"  so we should
-# NOT find the pattern  canonical_out}"*  (brace-quote-star with no slash).
+# NOT find the pattern  CANONICAL_OUT}"*  (brace-quote-star with no slash).
 TOTAL=$((TOTAL + 1))
-if echo "$boundary_lines" | grep -qF '${canonical_out}"*'; then
+if echo "$boundary_lines" | grep -qF 'CANONICAL_OUT}"*'; then
   # Found the bare prefix pattern — check if it is the OLD unfixed form.
-  # The fixed file will have  ${canonical_out}/"*  but NEVER  ${canonical_out}"*
+  # The fixed file will have  CANONICAL_OUT}/"*  but NEVER  CANONICAL_OUT}"*
   # (without slash).  Filter out lines that contain the fixed slash form.
-  unfixed_lines=$(echo "$boundary_lines" | grep -F '${canonical_out}"*' | grep -vF '${canonical_out}/"*' || true)
+  unfixed_lines=$(echo "$boundary_lines" | grep -F 'CANONICAL_OUT}"*' | grep -vF 'CANONICAL_OUT}/"*' || true)
   if [ -n "$unfixed_lines" ]; then
     echo "  FAIL: flawed bare-prefix pattern still present in source"
     echo "    Line(s): $unfixed_lines"

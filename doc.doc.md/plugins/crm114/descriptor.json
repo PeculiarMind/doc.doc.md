@@ -2,7 +2,7 @@
   "name": "crm114",
   "version": "1.0.0",
   "description": "Statistical text classification plugin using the CRM114 Discriminator. Stores per-category CSS model files in pluginStorage.",
-  "active": true,
+  "active": false,
   "commands": {
     "process": {
       "description": "Classify document text against all trained category models and return pR scores.",

@@ -302,6 +302,13 @@ _install_all_plugins() {
     local plugin_dir="$PLUGIN_DIR/$plugin_name"
     [ -f "$plugin_dir/descriptor.json" ] || continue
 
+    # Only install active plugins (inactive ones are intentionally skipped)
+    local plugin_active
+    plugin_active=$(get_plugin_active_status "$plugin_dir/descriptor.json")
+    if [ "$plugin_active" != "true" ]; then
+      continue
+    fi
+
     if [ "$(_check_plugin_installed "$plugin_name")" = "true" ]; then
       echo "$(ui_ok "$plugin_name: already installed")"
       continue
@@ -802,8 +809,10 @@ _run_plugin_help() {
   echo "$plugin_desc"
   echo ""
   echo "Commands:"
-  jq -r '.commands | to_entries[] | "  \(.key)\t\(.value.description // "")"' \
-    "$descriptor" 2>/dev/null | sort | column -t -s $'\t'
+  jq -r '.commands | to_entries[] | "\(.key)\t\(.value.description // "")"' \
+    "$descriptor" 2>/dev/null | sort | while IFS=$'\t' read -r _cmd _desc; do
+    printf "  %-16s %s\n" "$_cmd" "$_desc"
+  done
 }
 
 # Print per-command help: description, input fields, and output fields from descriptor.json.
