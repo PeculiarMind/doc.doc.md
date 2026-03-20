@@ -6,7 +6,7 @@
 - **Type:** Bug
 - **Created at:** 2026-03-20
 - **Created by:** product_owner
-- **Status:** BACKLOG
+- **Status:** DONE
 
 ## Overview
 

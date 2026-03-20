@@ -263,6 +263,7 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
 - **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
 - **crm114**: Statistical text classification plugin using the CRM114 Discriminator. Classifies documents against user-trained category models (stored as `.css` files in `pluginStorage`). Supports interactive category setup (`manageCategories`), per-document labeling (`train`, designed for `loop`), and non-interactive scripted training (`learn`/`unlearn`). Requires `apt install crm114` or `brew install crm114`.
+- **wc**: Counts lines, words, and characters in a document's pre-extracted text content (`textContent` → `ocrText` → `documentText` priority). Uses the standard `wc` command (GNU coreutils, no installation required).
 
 ### Plugin Architecture
 

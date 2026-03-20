@@ -10,6 +10,9 @@
 - **Modified**: {{fileModified}}
 - **Metadata Changed**: {{fileMetadataChanged}}
 - **MIME Type**: {{mimeType}}
+- **Words**: {{wordCount}}
+- **Lines**: {{lineCount}}
+- **Characters**: {{charCount}}
 
 ## Content
 
