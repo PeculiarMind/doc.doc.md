@@ -2,7 +2,7 @@
   "name": "ocrmypdf",
   "version": "1.1.0",
   "description": "A plugin that runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF, extracting plain text as JSON output.",
-  "active": false,
+  "active": true,
   "commands": {
     "process": {
       "description": "Run OCR on a PDF or image file and return extracted text.",

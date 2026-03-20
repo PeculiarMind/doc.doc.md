@@ -60,6 +60,26 @@ def _read_plugin(plugins_dir, plugin_name):
     }
 
 
+def _build_deps(plugin_info, all_plugins):
+    """Build a dependency map from plugin input/output declarations.
+
+    Plugin A depends on plugin B if any of B's declared output keys is also
+    one of A's declared input keys.
+    """
+    plugin_outputs = {name: set(plugin_info[name]["outputs"]) for name in all_plugins}
+    deps = {}
+    for name in all_plugins:
+        plugin_deps = []
+        for input_param in plugin_info[name]["inputs"]:
+            for other in all_plugins:
+                if other == name:
+                    continue
+                if input_param in plugin_outputs[other] and other not in plugin_deps:
+                    plugin_deps.append(other)
+        deps[name] = plugin_deps
+    return deps
+
+
 def _detect_cycle(plugin, deps, visited, in_stack):
     """DFS cycle detection. Returns True if a cycle is detected."""
     visited.add(plugin)
@@ -74,6 +94,34 @@ def _detect_cycle(plugin, deps, visited, in_stack):
 
     in_stack.discard(plugin)
     return False
+
+
+def _topo_sort(all_plugins, deps):
+    """Kahn's algorithm topological sort.
+
+    Returns a sorted list of plugin names, dependencies-first.
+    Raises ValueError if a cycle is detected (should not happen after
+    _detect_cycle validation).
+    """
+    in_degree = {name: 0 for name in all_plugins}
+    for name in all_plugins:
+        for dep in deps.get(name, []):
+            in_degree[name] += 1
+
+    queue = sorted(name for name in all_plugins if in_degree[name] == 0)
+    result = []
+    while queue:
+        node = queue.pop(0)
+        result.append(node)
+        # find plugins that depend on this node
+        for name in sorted(all_plugins):
+            if node in deps.get(name, []):
+                in_degree[name] -= 1
+                if in_degree[name] == 0:
+                    queue.append(name)
+    if len(result) != len(all_plugins):
+        raise ValueError("Cycle detected during topological sort")
+    return result
 
 
 def _render_label(name, active):
@@ -122,21 +170,8 @@ def run_tree(plugins_dir):
     if not all_plugins:
         return 0
 
-    # Collect output param names per plugin
-    plugin_outputs = {name: set(plugin_info[name]["outputs"]) for name in all_plugins}
-
-    # Build dependency map: plugin A depends on B if B's outputs match A's inputs
-    deps = {}
-    for name in all_plugins:
-        plugin_deps = []
-        for input_param in plugin_info[name]["inputs"]:
-            for other in all_plugins:
-                if other == name:
-                    continue
-                if input_param in plugin_outputs[other]:
-                    if other not in plugin_deps:
-                        plugin_deps.append(other)
-        deps[name] = plugin_deps
+    # Build dependency map from declared input/output keys
+    deps = _build_deps(plugin_info, all_plugins)
 
     # Detect circular dependencies
     visited = set()
@@ -162,6 +197,57 @@ def run_tree(plugins_dir):
     for i, name in enumerate(root_plugins):
         _print_tree(name, "", i == len(root_plugins) - 1, deps, plugin_info)
 
+    return 0
+
+
+def run_topo(plugins_dir, active_only=True):
+    """Topologically sort plugins in plugins_dir by input/output dependencies.
+
+    Prints each plugin name on its own line, dependencies first.
+    Returns 0 on success, 1 on error.
+    """
+    if not os.path.isdir(plugins_dir):
+        print(f"Error: Plugin directory not found: {plugins_dir}", file=sys.stderr)
+        return 1
+
+    plugin_names = sorted(
+        name for name in os.listdir(plugins_dir)
+        if os.path.isdir(os.path.join(plugins_dir, name))
+    )
+
+    plugin_info = {}
+    for name in plugin_names:
+        info = _read_plugin(plugins_dir, name)
+        if info is not None:
+            if active_only and not info["active"]:
+                continue
+            plugin_info[name] = info
+
+    all_plugins = sorted(plugin_info.keys())
+    if not all_plugins:
+        return 0
+
+    deps = _build_deps(plugin_info, all_plugins)
+
+    # Validate no cycles
+    visited = set()
+    for name in all_plugins:
+        if name not in visited:
+            if _detect_cycle(name, deps, visited, set()):
+                print(
+                    f"Error: Circular dependency detected involving plugin '{name}'",
+                    file=sys.stderr,
+                )
+                return 1
+
+    try:
+        ordered = _topo_sort(all_plugins, deps)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    for name in ordered:
+        print(name)
     return 0
 
 
@@ -212,6 +298,7 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: plugin_info.py tree <plugins_dir>", file=sys.stderr)
         print("       plugin_info.py table", file=sys.stderr)
+        print("       plugin_info.py topo <plugins_dir>", file=sys.stderr)
         sys.exit(1)
 
     mode = sys.argv[1]
@@ -223,8 +310,13 @@ def main():
         sys.exit(run_tree(sys.argv[2]))
     elif mode == "table":
         sys.exit(run_table())
+    elif mode == "topo":
+        if len(sys.argv) < 3:
+            print("Error: topo mode requires <plugins_dir>", file=sys.stderr)
+            sys.exit(1)
+        sys.exit(run_topo(sys.argv[2]))
     else:
-        print(f"Error: Unknown mode '{mode}'. Use 'tree' or 'table'.", file=sys.stderr)
+        print(f"Error: Unknown mode '{mode}'. Use 'tree', 'table', or 'topo'.", file=sys.stderr)
         sys.exit(1)
 
 

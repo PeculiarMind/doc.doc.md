@@ -355,14 +355,30 @@ A plugin runs with the same OS permissions as the `doc.doc.sh` process. It can:
 
 ## Templates
 
-### Current State
+When you supply an output directory with `-o`, doc.doc.md renders one sidecar `.md` file per processed document by applying a Mustache template to each file's JSON record. The default template lives at `doc.doc.md/templates/default.md`; you can supply your own with `-t`.
 
-doc.doc.md includes a default template at `doc.doc.md/templates/default.md`. Template-based markdown file generation is an upcoming feature. The `process` command currently outputs JSON to stdout, which you can pipe into any template engine or post-processing script.
+### Generating Sidecar Markdown Files
+
+```bash
+# Write one .md file per document alongside the originals
+./doc.doc.sh process -d ~/Documents -o ~/Documents/docs
+
+# Use a custom template
+./doc.doc.sh process -d ~/Documents -o ~/docs-out -t ~/my-template.md
+
+# Preview rendered output without writing files (dry-run)
+./doc.doc.sh process -d ~/Documents --echo
+```
 
 ### Default Template
 
 ```markdown
 # {{fileName}}
+
+
+{{#categories}}#{{.}} {{/categories}}
+
+=> [{{fileName}}]({{filePath}})
 
 ## File Metadata
 - **Size**: {{fileSize}} bytes
@@ -370,24 +386,102 @@ doc.doc.md includes a default template at `doc.doc.md/templates/default.md`. Tem
 - **Created**: {{fileCreated}}
 - **Modified**: {{fileModified}}
 - **Metadata Changed**: {{fileMetadataChanged}}
+- **MIME Type**: {{mimeType}}
+
+
+## Content
+
+### Extracted Text from File
+{{documentText}}  
+{{ocrText}}
 ```
 
 ### Template Variables
 
-Template variables use `{{variableName}}` syntax in lowerCamelCase. Variable names match the output field names from plugins exactly.
+Variable names match the JSON output field names from plugins exactly, and use lowerCamelCase.
 
-| Variable | Source plugin | Description |
-|----------|--------------|-------------|
-| `{{mimeType}}` | file | Detected MIME type |
-| `{{fileSize}}` | stat | File size in bytes |
-| `{{fileOwner}}` | stat | File owner username |
-| `{{fileCreated}}` | stat | Creation date |
-| `{{fileModified}}` | stat | Last modification date |
-| `{{fileMetadataChanged}}` | stat | Last metadata change date |
-| `{{ocrText}}` | ocrmypdf | Extracted OCR text |
-| `{{documentText}}` | markitdown | Extracted markdown content from MS Office documents |
+| Variable | Source | Description |
+|----------|--------|-------------|
+| `{{fileName}}` | derived | Basename of the file (derived automatically from `filePath`) |
+| `{{filePath}}` | core | Full path to the file |
+| `{{mimeType}}` | `file` plugin | Detected MIME type |
+| `{{fileSize}}` | `stat` plugin | File size in bytes |
+| `{{fileOwner}}` | `stat` plugin | File owner username |
+| `{{fileCreated}}` | `stat` plugin | Creation date (ISO 8601; may be empty on Linux) |
+| `{{fileModified}}` | `stat` plugin | Last modification date (ISO 8601) |
+| `{{fileMetadataChanged}}` | `stat` plugin | Last metadata change date (ISO 8601) |
+| `{{documentText}}` | `markitdown` plugin | Extracted content from MS Office documents, as markdown |
+| `{{ocrText}}` | `ocrmypdf` plugin | Full plain text extracted via OCR |
+| `{{categories}}` | `crm114` plugin | Array of classification category names |
 
 Custom plugins add their own variables using the same naming convention.
+
+### Supported Mustache Syntax
+
+Templates are rendered with the [chevron](https://github.com/noahmorrison/chevron) library, which implements the full [Mustache specification](https://mustache.github.io/mustache.5.html). The following constructs are supported.
+
+#### Variable Tags — `{{variable}}`
+
+Outputs the value of a key from the JSON record. The value is HTML-escaped by default.
+
+```mustache
+# {{fileName}}
+- **MIME**: {{mimeType}}
+- **Size**: {{fileSize}} bytes
+```
+
+#### Unescaped Variables — `{{{variable}}}` or `{{&variable}}`
+
+Outputs the value without HTML escaping. Use this when the plugin already returns HTML or when you know the content is safe.
+
+```mustache
+{{{documentText}}}
+{{&ocrText}}
+```
+
+#### Section Blocks — `{{#key}}...{{/key}}`
+
+Renders the block only if `key` is truthy (non-empty string, non-zero number, non-empty array, or non-false boolean). If `key` is absent or falsy the block is skipped entirely.
+
+```mustache
+{{#ocrText}}
+### OCR Text
+{{ocrText}}
+{{/ocrText}}
+```
+
+#### Inverted Sections — `{{^key}}...{{/key}}`
+
+The opposite of a section block — renders the block only when `key` is falsy or absent. Useful for fallback content.
+
+```mustache
+{{^documentText}}
+*No text content was extracted from this file.*
+{{/documentText}}
+```
+
+#### List Iteration — `{{#list}}...{{/list}}` with `{{.}}`
+
+When `key` is an array, a section block iterates over every item. Inside the block, `{{.}}` refers to the current item. Items can also be objects, in which case their keys are accessed directly.
+
+```mustache
+{{#categories}}#{{.}} {{/categories}}
+```
+
+For an array value of `["work", "finance", "2024"]` this renders:
+
+```
+#work #finance #2024 
+```
+
+#### Comments — `{{! comment }}`
+
+Comments are stripped from the rendered output and never appear in the final file.
+
+```mustache
+{{! TODO: add summary section once plugin is ready }}
+# {{fileName}}
+```
 
 ---
 
@@ -455,14 +549,20 @@ python3 scripts/to_obsidian.py < catalogue.json
 Process files in a directory through active plugins.
 
 ```
-./doc.doc.sh process -d <dir> [-i <criteria>] [-e <criteria>]
+./doc.doc.sh process -d <dir> [-o <dir>] [-t <file>] [-i <criteria>] [-e <criteria>] [--echo]
 ```
 
 | Flag | Required | Description |
 |------|----------|-------------|
 | `-d <dir>` | Yes | Input directory to scan recursively |
+| `-o <dir>` | No | Output directory for sidecar `.md` files; required unless `--echo` |
+| `-t <file>` | No | Mustache template file (defaults to `doc.doc.md/templates/default.md`) |
 | `-i <criteria>` | No | Include criteria (repeatable) |
 | `-e <criteria>` | No | Exclude criteria (repeatable) |
+| `-b <dir>` | No | Base path for computing relative file references in rendered output |
+| `--echo` | No | Print rendered markdown to stdout instead of writing files (dry-run); mutually exclusive with `-o` |
+| `--progress` | No | Force progress display even when stdout is not a TTY |
+| `--no-progress` | No | Suppress progress display even on a TTY |
 | `--help` | No | Show help |
 
 **Output:** JSON array to stdout (suppressed when stdout is a TTY and `-o` is given; human-readable summary on stderr instead — see [What the Output Looks Like](#what-the-output-looks-like)).

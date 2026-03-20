@@ -159,7 +159,9 @@ _validate_process_inputs() {
 
 _prepare_plugins() {
   local -a plugins
-  mapfile -t plugins < <(discover_plugins "$PLUGIN_DIR")
+  mapfile -t plugins < <(
+    python3 "$(dirname "${BASH_SOURCE[0]}")/doc.doc.md/components/plugin_info.py" topo "$PLUGIN_DIR" 2>/dev/null
+  )
 
   if [ ${#plugins[@]} -eq 0 ]; then
     log_error "No active plugins found in $PLUGIN_DIR"
@@ -177,13 +179,6 @@ _prepare_plugins() {
     log_error "file plugin must be active and installed to run the process command."
     exit 1
   fi
-
-  local -a ordered_plugins=("file")
-  for p in "${plugins[@]}"; do
-    [ "$p" != "file" ] || continue
-    ordered_plugins+=("$p")
-  done
-  plugins=("${ordered_plugins[@]}")
 
   local -a _uninstalled_plugins=()
   for p in "${plugins[@]}"; do

@@ -16,6 +16,7 @@ plugin_read_input
 FILE_PATH=$(plugin_get_field "filePath")
 PLUGIN_STORAGE=$(plugin_get_field "pluginStorage")
 TEXT_CONTENT=$(plugin_get_field "textContent")
+DOCUMENT_TEXT=$(plugin_get_field "documentText")
 OCR_TEXT=$(plugin_get_field "ocrText")
 
 # Validate required fields
@@ -105,8 +106,11 @@ for css_file in "${CSS_FILES[@]}"; do
   categories+=("$(basename "$css_file" .css)")
 done
 
-# Resolve text: prefer textContent, fall back to ocrText
+# Resolve text: prefer textContent, fall back to documentText, then ocrText
 TEXT="${TEXT_CONTENT:-}"
+if [ -z "$TEXT" ]; then
+  TEXT="${DOCUMENT_TEXT:-}"
+fi
 if [ -z "$TEXT" ]; then
   TEXT="${OCR_TEXT:-}"
 fi

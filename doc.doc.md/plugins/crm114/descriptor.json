@@ -2,7 +2,7 @@
   "name": "crm114",
   "version": "1.0.0",
   "description": "Statistical text classification plugin using the CRM114 Discriminator. Stores per-category CSS model files in pluginStorage.",
-  "active": false,
+  "active": true,
   "commands": {
     "process": {
       "description": "Classify document text against all trained category models and return pR scores.",
@@ -23,9 +23,14 @@
           "description": "Extracted text content of the document, provided by the pipeline.",
           "required": false
         },
+        "documentText": {
+          "type": "string",
+          "description": "Markdown text extracted by the markitdown plugin. Used when textContent is not available.",
+          "required": false
+        },
         "ocrText": {
           "type": "string",
-          "description": "OCR-extracted text content, used when textContent is not available.",
+          "description": "OCR-extracted text content, used when textContent and documentText are not available.",
           "required": false
         }
       },
