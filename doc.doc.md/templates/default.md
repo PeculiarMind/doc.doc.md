@@ -14,6 +14,7 @@
 - **Words**: {{wordCount}}
 - **Lines**: {{lineCount}}
 - **Characters**: {{charCount}}
+- **Coverage**: {{summaryCoveragePercent}}% (of first {{summaryMaxWords}} words)
 
 ## Summary
 {{summaryText}}

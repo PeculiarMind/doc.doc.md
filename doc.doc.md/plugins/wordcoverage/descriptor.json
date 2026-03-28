@@ -1,0 +1,63 @@
+{
+  "name": "wordcoverage",
+  "version": "1.0.0",
+  "description": "A plugin that calculates what percentage of a document's full text is represented by a given maximum word count.",
+  "active": true,
+  "dependencies": ["wc"],
+  "commands": {
+    "process": {
+      "description": "Calculate word coverage percentage from wordCount and maxWords.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the source document.",
+          "required": true
+        },
+        "wordCount": {
+          "type": "number",
+          "description": "Total word count from the wc plugin.",
+          "required": true
+        },
+        "maxWords": {
+          "type": "number",
+          "description": "Maximum word count threshold. Defaults to 100."
+        }
+      },
+      "output": {
+        "summaryMaxWords": {
+          "type": "number",
+          "description": "The effective maxWords threshold used."
+        },
+        "summaryCoveragePercent": {
+          "type": "number",
+          "description": "Coverage percentage (0.0-100.0)."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check availability (no external dependencies required).",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Always true — no external dependencies."
+        }
+      }
+    },
+    "install": {
+      "description": "Report that wordcoverage requires no external tools.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Always true — no external dependencies."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    }
+  }
+}
