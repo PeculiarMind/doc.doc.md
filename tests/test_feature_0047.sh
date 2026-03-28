@@ -450,10 +450,10 @@ if [ "$OTS_AVAILABLE" = "true" ]; then
     assert_eq "summaryLanguage is 'en'" "en" "$lang"
   else
     TOTAL=$((TOTAL + 1))
-    echo "  SKIP: en.xml dictionary not found"
+    echo "  SKIP: en.xml dictionary not found (exit code test)"
     SKIP=$((SKIP + 1))
     TOTAL=$((TOTAL + 1))
-    echo "  SKIP: en.xml dictionary not found"
+    echo "  SKIP: en.xml dictionary not found (summaryLanguage test)"
     SKIP=$((SKIP + 1))
   fi
 else

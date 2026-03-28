@@ -227,7 +227,7 @@ if [ "$LANGID_AVAILABLE" = "true" ]; then
   fi
 else
   echo ""
-  echo "--- Tests 4.1-4.2: SKIP (langid not installed) ---"
+  echo "--- Tests 4.1-4.2: SKIP (langid not installed, 3 assertions) ---"
   for _ in 1 2 3; do
     TOTAL=$((TOTAL + 1))
     SKIP=$((SKIP + 1))
