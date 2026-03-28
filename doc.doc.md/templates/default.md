@@ -14,6 +14,9 @@
 - **Lines**: {{lineCount}}
 - **Characters**: {{charCount}}
 
+## Summary
+{{summaryText}}
+
 ## Content
 
 ### Extracted Text from File
