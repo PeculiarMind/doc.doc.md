@@ -53,12 +53,14 @@ The plugin operates as a standard pipeline plugin: it receives pre-extracted tex
 - [ ] Selects text input using the following priority order: `textContent` → `ocrText` → `documentText`; uses the first non-empty field found
 - [ ] If none of those fields are present or all are empty, exits with code 65 (skip — ADR-004)
 - [ ] Accepts an optional `summaryRatio` field (integer, 1–100, percentage of sentences to retain); defaults to `20` if absent or invalid
-- [ ] Pipes the selected text to `ots --ratio <summaryRatio>` via stdin
+- [ ] Accepts an optional `languageCode` field (ISO 639-1 string). If present and `/usr/share/ots/<languageCode>.xml` exists, passes `--dic /usr/share/ots/<languageCode>.xml` to OTS. If absent or no matching dictionary exists, calls OTS without `--dic`.
+- [ ] Pipes the selected text to `ots --ratio <summaryRatio> [--dic <path>]` via stdin
 - [ ] Returns valid JSON to stdout:
 ```json
 {
   "summaryText": "<extracted summary sentences>",
-  "summaryRatio": <effective_ratio_used>
+  "summaryRatio": <effective_ratio_used>,
+  "summaryLanguage": "<languageCode used for dictionary lookup, or null if no dictionary was found>"
 }
 ```
 - [ ] If `ots` exits non-zero or produces empty output, the plugin exits with code 65 (skip — ADR-004) and logs a warning to stderr
@@ -75,11 +77,14 @@ The plugin operates as a standard pipeline plugin: it receives pre-extracted tex
 
 ### Dependency Declaration
 - [ ] `descriptor.json` declares `markitdown` and/or `ocrmypdf` as optional upstream dependencies (to signal that one of them should be active to provide text input)
-- [ ] The plugin activates and runs regardless of which upstream text-extraction plugin is present; it skips gracefully (exit 65) if no text is found in the pipeline context
+- [ ] `descriptor.json` declares `langid` as an optional upstream dependency (provides `languageCode` for dictionary selection)
+- [ ] The plugin activates and runs regardless of which upstream text-extraction or language-identification plugin is present; it skips gracefully (exit 65) if no text is found in the pipeline context
 
 ### Security
 - [ ] Text is passed to `ots` via stdin only; no temp files, no shell interpolation of document content (REQ_SEC_005)
 - [ ] `summaryRatio` input is validated as an integer in range 1–100 before use; invalid values are replaced with the default (no injection vector)
+- [ ] `languageCode` is validated as a 2-letter alphabetic string before being used to construct the dictionary path (no path traversal via `..` or special characters)
+- [ ] Dictionary path is always resolved as `/usr/share/ots/<languageCode>.xml` with existence check before use; the `languageCode` value is never directly interpolated into a shell command without validation
 - [ ] All JSON input is validated before processing (REQ_SEC_009)
 
 ### Tests
@@ -89,7 +94,11 @@ The plugin operates as a standard pipeline plugin: it receives pre-extracted tex
   - Skip (exit 65) when `ots` produces empty output
   - Custom `summaryRatio` is passed through correctly
   - Invalid `summaryRatio` falls back to default (20)
-  - `installed.sh` exits correctly based on `ots` availability
+  - When `languageCode` matches a known OTS dictionary (e.g. `de`), OTS is invoked with `--dic /usr/share/ots/de.xml` and `summaryLanguage` is set to `"de"`
+  - When `languageCode` is absent, OTS is invoked without `--dic` and `summaryLanguage` is `null`
+  - When `languageCode` is present but no dictionary exists for it (e.g. `zh`), OTS is invoked without `--dic` and `summaryLanguage` is `null`
+  - `languageCode` with invalid/malicious values (e.g. `../etc/passwd`) is rejected and treated as missing
+  - `installed.sh` exits 0 when `ots` is on PATH, non-zero otherwise
   - Tests skip gracefully when `ots` is not installed
 - [ ] All existing tests continue to pass
 
@@ -105,14 +114,21 @@ The plugin operates as a standard pipeline plugin: it receives pre-extracted tex
 
 ### Out of Scope
 - Abstractive summarization (OTS is extractive only)
-- Multi-language support beyond OTS's built-in dictionary support
+- Languages not covered by OTS's shipped dictionaries (plugin falls back to default)
 - Changes to other plugins or the core processing pipeline
 - Summary caching (OTS is fast enough to run on every `process` pass)
 
 ## Technical Requirements
 
 - `ots` binary must be available on PATH at runtime
-- Text is piped to `ots` via stdin using `echo "$text" | ots --ratio <n>`
+- OTS dictionary directory: `/usr/share/ots/` — dictionary files are named `<ISO-639-1-code>.xml` (e.g. `en.xml`, `de.xml`). Available language codes: `bg ca cs cy da de el en eo es et eu fi fr ga gl he hu ia id is it lv mi ms mt nl nn pl pt ro ru sv tl tr uk yi`.
+- Dictionary selection logic:
+  1. Extract `languageCode` from pipeline JSON (field provided by `langid` plugin)
+  2. Validate: must match `^[a-z]{2}$`; reject anything that does not match
+  3. Check existence: `[ -f "/usr/share/ots/${lang}.xml" ]`
+  4. If file exists: invoke `ots --ratio <n> --dic /usr/share/ots/${lang}.xml`; set `summaryLanguage` to the code
+  5. If absent or no match: invoke `ots --ratio <n>` without `--dic`; set `summaryLanguage` to `null`
+- Text is piped to `ots` via stdin: `echo "$text" | ots --ratio <n> [--dic <path>]`
 - No temporary files are created
 - `summaryRatio` must be validated as integer 1–100 before constructing the shell command
 - JSON output assembled via `jq` (no manual string concatenation)
@@ -121,7 +137,8 @@ The plugin operates as a standard pipeline plugin: it receives pre-extracted tex
 ## Dependencies
 
 - **ADR-004** (exit code 65 skip contract): skip behaviour when no text is available or OTS produces no output
-- `markitdown` or `ocrmypdf` plugin upstream in the pipeline (optional; plugin skips gracefully without them)
+- `markitdown` or `ocrmypdf` plugin upstream in the pipeline (optional; provides text input — plugin skips gracefully without them)
+- `langid` plugin upstream in the pipeline (optional; provides `languageCode` for dictionary selection — plugin runs in English-default mode without it)
 
 ## Related Links
 - Architecture Vision: `project_documentation/01_architecture/`

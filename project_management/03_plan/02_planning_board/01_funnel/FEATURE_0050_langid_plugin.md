@@ -23,7 +23,7 @@ The plugin operates as a standard stateless pipeline plugin: it receives pre-ext
 
 **Business Value:**
 - Adds automatic language detection to every sidecar `.md` file, enabling downstream filtering by language (e.g. process only English documents)
-- `languageCode` can be used by other pipeline plugins (e.g. `crm114`, `ots`) to select language-appropriate models or skip unsupported languages
+- `languageCode` can be used by other pipeline plugins (e.g. `ots`) to select language-appropriate processing — specifically, the `ots` plugin uses it to pick a matching dictionary from `/usr/share/ots/<languageCode>.xml` (ISO 639-1 codes align exactly with OTS's shipped dictionary filenames)
 - Purely stateless — no storage, no side effects; fits cleanly into the existing plugin pipeline
 - `langid.py` is a pure-Python wheel with no system-level dependencies beyond `pip`
 
@@ -120,6 +120,9 @@ The plugin operates as a standard stateless pipeline plugin: it receives pre-ext
 - **ocrmypdf plugin** (optional upstream): provides `ocrText`
 - **langid Python package** (`pip install langid`): runtime dependency
 - **ADR-004** (exit code 65 skip contract)
+
+**Downstream consumers:**
+- **ots plugin** (optional downstream): consumes `languageCode` to select an OTS stopword dictionary (`/usr/share/ots/<languageCode>.xml`). The ISO 639-1 codes returned by `langid.py` match OTS's dictionary filenames directly.
 
 ## Related Links
 - Architecture Vision: `project_documentation/01_architecture/`
