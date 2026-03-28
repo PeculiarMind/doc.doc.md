@@ -3,9 +3,6 @@
 ## Purpose
 Keeps README.md and other project documentation accurate and concise for users and contributors.
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Technical documentation
 - Project structure analysis
@@ -34,7 +31,7 @@ Load and follow the `communication-standards` skill.
 - Work item notes when applicable
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 
 ## Short Checklist
 - Verify install/setup steps

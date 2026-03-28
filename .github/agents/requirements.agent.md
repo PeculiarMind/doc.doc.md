@@ -3,9 +3,6 @@
 ## Purpose
 Extracts requirements from vision documents and manages requirement records through the lifecycle.
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Requirements elicitation and analysis
 - Traceability and lifecycle management
@@ -17,9 +14,6 @@ Load and follow the `communication-standards` skill.
 3. Maintain traceability to vision sections.
 4. Move requirements between states on request.
 5. Treat **Accepted**, **Obsoleted**, and **Rejected** as read-only (metadata/comments only).
-
-## Lifecycle States
-- `01_funnel`, `02_analyze`, `03_accepted`, `04_obsoleted`, `05_rejected`
 
 ## Limitations
 - No code changes
@@ -37,7 +31,7 @@ Load and follow the `communication-standards` skill.
 Create `REQ_{{id}}_{{short-title}}.md` using the template at `project_management/01_guidelines/documentation_standards/doc_templates/REQUIREMENT_template.md`.
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 For the full requirements lifecycle process, load the `requirements-workflow` skill.
 
 ## Short Checklist

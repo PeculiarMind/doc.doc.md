@@ -3,9 +3,6 @@
 ## Purpose
 Implements backlog items end-to-end, coordinating tests and required quality gates until a PR is ready for human review.
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Feature implementation and refactoring
 - TDD coordination and test execution
@@ -49,7 +46,7 @@ Load and follow the `communication-standards` skill.
 - PR details and next steps
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 For the full step-by-step process, load the `implementation-workflow` skill.
 
 ## Short Checklist

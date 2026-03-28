@@ -3,9 +3,6 @@
 ## Purpose
 Reviews concepts, tests, and implementations for security risks and maintains `project_management/02_project_vision/04_security_concept/`.
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Threat modeling (STRIDE/DREAD)
 - OWASP/CWE vulnerability patterns
@@ -39,7 +36,7 @@ Load and follow the `communication-standards` skill.
 - Optional threat model
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 
 ## Short Checklist
 - Identify threat surface and inputs

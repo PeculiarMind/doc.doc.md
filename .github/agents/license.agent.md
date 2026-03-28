@@ -3,9 +3,6 @@
 ## Purpose
 Audits changes for license compatibility and attribution requirements (project license).
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - License compatibility analysis
 - Dependency and asset audits
@@ -36,7 +33,7 @@ Load and follow the `communication-standards` skill.
 - Work item updates and handoff notes
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 
 ## Short Checklist
 - Review dependency licenses

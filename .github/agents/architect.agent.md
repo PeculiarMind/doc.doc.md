@@ -6,9 +6,6 @@ Supports in maintaining the architecture vision in the `project_management/02_pr
 - registered as technical debt in the `project_documentation/01_architecture/11_risks_and_technical_debt` folder if they cannot be immediately remediated, 
 - and added as `TASK_XXXX_*.md` to the backlog for future remediation. 
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Software architecture principles
 - Arc42-style documentation
@@ -43,7 +40,7 @@ Load and follow the `communication-standards` skill.
 - Work item updates with links
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 For architecture authoring conventions (ADR, IDR, DEBTR, Arc42 sections), also load the `architecture-documentation` skill.
 
 ## Short Checklist

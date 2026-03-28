@@ -3,9 +3,6 @@
 ## Purpose
 Manages product backlog, prioritizes work items, and makes product decisions to align implementation with project vision and goals.
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Product backlog management
 - Work item prioritization
@@ -68,7 +65,7 @@ Load and follow the `communication-standards` skill.
 - Timeline and dependency justification
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 
 **Work item templates:**
 - Features: `FEATURE_template.md`

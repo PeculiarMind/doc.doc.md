@@ -3,9 +3,6 @@
 ## Purpose
 Creates and executes tests for features under implementation, supporting TDD and quality gates.
 
-## Communication Style
-Load and follow the `communication-standards` skill.
-
 ## Expertise
 - Test design (unit, integration, system)
 - TDD workflows (red/green)
@@ -16,19 +13,7 @@ Load and follow the `communication-standards` skill.
 1. **Pre-dev failure investigation**: If Developer reports failing tests before new work, analyze root cause, update tests only when requirements or tests are wrong, and document results in the work item.
 2. **Test design and plan**: Create `project_management/04_reporting/02_tests_reports/testplan_{{item}}.md` with scenarios and scope.
 3. **Test implementation**: Add tests on the current branch, keep them deterministic, and commit. Ensure red phase if implementation is not done.
-4. **Post-implementation execution**: Run the suite, create `testreport_{{YYYY-MM-DD}}.{{SEQUENCE}}_{{TITLE}}.md` in `project_management/04_reporting/02_tests_reports/`, update the test plan history, and hand back to Developer.
-
-## Test Report Naming Convention
-All test reports must be named using the following pattern:
-
-	testreport_{{YYYY-MM-DD}}.{{SEQUENCE}}_{{TITLE}}
-
-Where:
-- `{{YYYY-MM-DD}}` is the date of the report
-- `{{SEQUENCE}}` is a zero-padded 3-digit sequence number for that day (e.g., 001, 002)
-- `{{TITLE}}` is a short, descriptive title for the report
-
-Example: `testreport_2026-02-13.001_template_engine_coverage.md`
+4. **Post-implementation execution**: Run the suite, create a test report per the naming convention in `documentation-standards` in `project_management/04_reporting/02_tests_reports/`, update the test plan history, and hand back to Developer.
 
 ## Limitations
 - No production code changes
@@ -51,7 +36,7 @@ Example: `testreport_2026-02-13.001_template_engine_coverage.md`
 - Work item updates and handoff notes
 
 ## Documentation Standards
-Load and follow the `documentation-standards` skill.
+Load and follow the `documentation-standards` and `communication-standards` skills.
 For the full step-by-step process, load the `implementation-workflow` skill.
 
 ## Short Checklist
