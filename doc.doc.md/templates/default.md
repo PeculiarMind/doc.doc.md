@@ -10,9 +10,14 @@
 - **Modified**: {{fileModified}}
 - **Metadata Changed**: {{fileMetadataChanged}}
 - **MIME Type**: {{mimeType}}
+- **Language**: {{languageCode}} (confidence: {{languageConfidence}})
 - **Words**: {{wordCount}}
 - **Lines**: {{lineCount}}
 - **Characters**: {{charCount}}
+- **Coverage**: {{summaryCoveragePercent}}% (of first {{summaryMaxWords}} words)
+
+## Summary
+{{summaryText}}
 
 ## Content
 

@@ -1,0 +1,77 @@
+{
+  "name": "ots",
+  "version": "1.0.0",
+  "description": "A plugin that produces an automatic extractive summary of a document's text content using OTS (Open Text Summarizer).",
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Summarize the document's extracted text content using OTS.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the source document.",
+          "required": true
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Extracted text content from upstream plugins (e.g. markitdown)."
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR-extracted text from upstream plugins (e.g. ocrmypdf)."
+        },
+        "documentText": {
+          "type": "string",
+          "description": "Document text from upstream plugins."
+        },
+        "summaryRatio": {
+          "type": "number",
+          "description": "Percentage of sentences to retain (1-100). Defaults to 20."
+        },
+        "languageCode": {
+          "type": "string",
+          "description": "ISO 639-1 language code for OTS dictionary selection (e.g. 'en', 'de'). Provided by the langid plugin."
+        }
+      },
+      "output": {
+        "summaryText": {
+          "type": "string",
+          "description": "Extracted summary sentences."
+        },
+        "summaryRatio": {
+          "type": "number",
+          "description": "The effective summary ratio used."
+        },
+        "summaryLanguage": {
+          "type": "string",
+          "description": "The language code used for dictionary lookup, or null if no dictionary was found."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if the ots tool is available on the system.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Indicates whether ots is available."
+        }
+      }
+    },
+    "install": {
+      "description": "Install OTS via the system package manager.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Indicates whether ots was installed successfully."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    }
+  }
+}
