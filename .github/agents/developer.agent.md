@@ -4,7 +4,7 @@
 Implements backlog items end-to-end, coordinating tests and required quality gates until a PR is ready for human review.
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Feature implementation and refactoring
@@ -49,7 +49,8 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 - PR details and next steps
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
+For the full step-by-step process, load the `implementation-workflow` skill.
 
 ## Short Checklist
 - Run full tests before work

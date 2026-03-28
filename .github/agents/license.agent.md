@@ -4,7 +4,7 @@
 Audits changes for license compatibility and attribution requirements (project license).
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - License compatibility analysis
@@ -36,7 +36,7 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 - Work item updates and handoff notes
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
 
 ## Short Checklist
 - Review dependency licenses

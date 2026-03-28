@@ -4,7 +4,7 @@
 Keeps README.md and other project documentation accurate and concise for users and contributors.
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Technical documentation
@@ -34,7 +34,7 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 - Work item notes when applicable
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
 
 ## Short Checklist
 - Verify install/setup steps

@@ -4,7 +4,7 @@
 Extracts requirements from vision documents and manages requirement records through the lifecycle.
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Requirements elicitation and analysis
@@ -37,7 +37,8 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 Create `REQ_{{id}}_{{short-title}}.md` using the template at `project_management/01_guidelines/documentation_standards/doc_templates/REQUIREMENT_template.md`.
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
+For the full requirements lifecycle process, load the `requirements-workflow` skill.
 
 ## Short Checklist
 - Verify next available `REQ_XXXX`

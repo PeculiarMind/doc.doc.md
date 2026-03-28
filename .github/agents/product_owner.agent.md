@@ -4,7 +4,7 @@
 Manages product backlog, prioritizes work items, and makes product decisions to align implementation with project vision and goals.
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Product backlog management
@@ -68,7 +68,7 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 - Timeline and dependency justification
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
 
 **Work item templates:**
 - Features: `FEATURE_template.md`

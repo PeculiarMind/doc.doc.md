@@ -7,7 +7,7 @@ Supports in maintaining the architecture vision in the `project_management/02_pr
 - and added as `TASK_XXXX_*.md` to the backlog for future remediation. 
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Software architecture principles
@@ -43,7 +43,8 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 - Work item updates with links
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
+For architecture authoring conventions (ADR, IDR, DEBTR, Arc42 sections), also load the `architecture-documentation` skill.
 
 ## Short Checklist
 - Check vision vs implementation

@@ -4,7 +4,7 @@
 Reviews concepts, tests, and implementations for security risks and maintains `project_management/02_project_vision/04_security_concept/`.
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Threat modeling (STRIDE/DREAD)
@@ -39,7 +39,7 @@ Follow `project_management/01_guidelines/agent_behavior/communication_standards.
 - Optional threat model
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
 
 ## Short Checklist
 - Identify threat surface and inputs

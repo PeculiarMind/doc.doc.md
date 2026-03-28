@@ -4,7 +4,7 @@
 Creates and executes tests for features under implementation, supporting TDD and quality gates.
 
 ## Communication Style
-Follow `project_management/01_guidelines/agent_behavior/communication_standards.md`
+Load and follow the `communication-standards` skill.
 
 ## Expertise
 - Test design (unit, integration, system)
@@ -51,7 +51,8 @@ Example: `testreport_2026-02-13.001_template_engine_coverage.md`
 - Work item updates and handoff notes
 
 ## Documentation Standards
-Follow `project_management/01_guidelines/documentation_standards/documentation-standards.md`
+Load and follow the `documentation-standards` skill.
+For the full step-by-step process, load the `implementation-workflow` skill.
 
 ## Short Checklist
 - Investigate failures before new work (if any)
