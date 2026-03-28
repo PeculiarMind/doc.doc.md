@@ -1,0 +1,65 @@
+{
+  "name": "langid",
+  "version": "1.0.0",
+  "description": "A plugin that detects the natural language of a document's text content using langid.py, returning an ISO 639-1 language code and confidence score.",
+  "active": true,
+  "commands": {
+    "process": {
+      "description": "Detect the language of the document's extracted text content.",
+      "command": "main.sh",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "The path to the source document.",
+          "required": true
+        },
+        "documentText": {
+          "type": "string",
+          "description": "Document text from upstream plugins."
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "OCR-extracted text from upstream plugins (e.g. ocrmypdf)."
+        },
+        "textContent": {
+          "type": "string",
+          "description": "Extracted text content from upstream plugins (e.g. markitdown)."
+        }
+      },
+      "output": {
+        "languageCode": {
+          "type": "string",
+          "description": "ISO 639-1 two-letter language code (e.g. 'en', 'de')."
+        },
+        "languageConfidence": {
+          "type": "number",
+          "description": "Log-probability confidence score from langid."
+        }
+      }
+    },
+    "installed": {
+      "description": "Check if the langid Python package is available.",
+      "command": "installed.sh",
+      "output": {
+        "installed": {
+          "type": "boolean",
+          "description": "Indicates whether langid is importable."
+        }
+      }
+    },
+    "install": {
+      "description": "Install the langid Python package via pip.",
+      "command": "install.sh",
+      "output": {
+        "success": {
+          "type": "boolean",
+          "description": "Indicates whether langid was installed successfully."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable status message."
+        }
+      }
+    }
+  }
+}
