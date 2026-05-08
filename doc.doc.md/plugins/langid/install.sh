@@ -1,17 +1,10 @@
 #!/bin/bash
 # langid plugin - install command
-# Installs the langid Python package via pip.
-# Output: JSON {"success": bool, "message": string} to stdout
-
-if python3 -c "import langid" >/dev/null 2>&1; then
-  jq -n '{success: true, message: "langid is already installed."}'
-  exit 0
-fi
-
-if pip install langid >/dev/null 2>&1 || pip3 install langid >/dev/null 2>&1; then
-  jq -n '{success: true, message: "langid installed successfully via pip."}'
-  exit 0
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$PLUGIN_DIR/.venv"
+if python3 -m venv "$VENV_DIR" >/dev/null 2>&1 && \
+   "$VENV_DIR/bin/pip" install langid >/dev/null 2>&1; then
+  jq -n '{"success": true, "message": "langid installed successfully."}'
 else
-  jq -n '{success: false, message: "Failed to install langid. Try: pip install langid"}'
-  exit 1
+  jq -n '{"success": false, "message": "Failed to install langid."}'
 fi

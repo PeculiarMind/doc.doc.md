@@ -42,9 +42,10 @@ assert_exit_code() {
   fi
 }
 
-# Check if langid is installed — tests that need it will skip if not
+# Check if langid is installed in venv — tests that need it will skip if not
 LANGID_AVAILABLE=false
-if python3 -c "import langid" >/dev/null 2>&1; then
+VENV_PYTHON="$LANGID_PLUGIN_DIR/.venv/bin/python3"
+if [ -x "$VENV_PYTHON" ] && "$VENV_PYTHON" -c "import langid" >/dev/null 2>&1; then
   LANGID_AVAILABLE=true
 fi
 
@@ -176,6 +177,45 @@ else
 fi
 
 # ============================================================
+# Group 2b: venv structure validation
+# ============================================================
+
+echo ""
+echo "=== Group 2b: venv structure ==="
+
+echo ""
+echo "--- Test 2b.1: .venv directory exists ---"
+TOTAL=$((TOTAL + 1))
+if [ "$LANGID_AVAILABLE" = "true" ]; then
+  if [ -d "$LANGID_PLUGIN_DIR/.venv" ]; then
+    echo "  PASS: .venv directory exists"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL: .venv directory missing"
+    FAIL=$((FAIL + 1))
+  fi
+else
+  echo "  SKIP: .venv check skipped (langid not installed)"
+  SKIP=$((SKIP + 1))
+fi
+
+echo ""
+echo "--- Test 2b.2: .venv/bin/python3 exists and is executable ---"
+TOTAL=$((TOTAL + 1))
+if [ "$LANGID_AVAILABLE" = "true" ]; then
+  if [ -x "$LANGID_PLUGIN_DIR/.venv/bin/python3" ]; then
+    echo "  PASS: .venv/bin/python3 exists and is executable"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL: .venv/bin/python3 missing or not executable"
+    FAIL=$((FAIL + 1))
+  fi
+else
+  echo "  SKIP: .venv/bin/python3 check skipped (langid not installed)"
+  SKIP=$((SKIP + 1))
+fi
+
+# ============================================================
 # Group 3: install.sh
 # ============================================================
 
@@ -188,9 +228,23 @@ ec=0
 output=$(bash "$LANGID_PLUGIN_DIR/install.sh" 2>&1) || ec=$?
 if [ "$LANGID_AVAILABLE" = "true" ]; then
   assert_exit_code "install.sh exits 0 (langid available)" "0" "$ec"
+
+  echo ""
+  echo "--- Test 3.2: .venv/bin/python3 exists after install ---"
+  TOTAL=$((TOTAL + 1))
+  if [ -x "$LANGID_PLUGIN_DIR/.venv/bin/python3" ]; then
+    echo "  PASS: .venv/bin/python3 exists and is executable after install"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL: .venv/bin/python3 missing after install"
+    FAIL=$((FAIL + 1))
+  fi
 else
   TOTAL=$((TOTAL + 1))
   echo "  SKIP: install.sh skipped (langid not installed)"
+  SKIP=$((SKIP + 1))
+  TOTAL=$((TOTAL + 1))
+  echo "  SKIP: .venv/bin/python3 check skipped (langid not installed)"
   SKIP=$((SKIP + 1))
 fi
 

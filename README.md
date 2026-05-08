@@ -261,11 +261,11 @@ Plugins extend doc.doc.md's functionality by extracting metadata and content fro
 - **file**: Detects MIME types using the standard `file` command — **always runs first** in the processing chain; must be installed and active
 - **stat**: Extracts file system metadata (size, owner, timestamps)
 - **ocrmypdf**: Runs OCR on PDF and image files (JPEG, PNG, TIFF, BMP, GIF) using OCRmyPDF; also converts images to searchable PDFs
-- **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; requires `pip install markitdown`
+- **markitdown**: Converts MS Office documents (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`) to markdown text using the `markitdown` Python library; install via `./doc.doc.sh install --plugin markitdown`
 - **crm114**: Statistical text classification plugin using the CRM114 Discriminator. Classifies documents against user-trained category models (stored as `.css` files in `pluginStorage`). Supports interactive category setup (`manageCategories`), per-document labeling (`train`, designed for `loop`), and non-interactive scripted training (`learn`/`unlearn`). Requires `apt install crm114` or `brew install crm114`.
 - **wc**: Counts lines, words, and characters in a document's pre-extracted text content (`textContent` → `ocrText` → `documentText` priority). Uses the standard `wc` command (GNU coreutils, no installation required).
 - **ots**: Produces an automatic extractive summary of a document's text content using [OTS (Open Text Summarizer)](https://github.com/neopunisher/Open-Text-Summarizer). Configurable summary ratio (1–100%, default 20%) and optional language-specific dictionary selection via `languageCode`. Requires `apt install ots`.
-- **langid**: Detects the natural language of a document's text content using [langid.py](https://github.com/saffsd/langid.py). Returns an ISO 639-1 language code and log-probability confidence score. Requires `pip install langid`.
+- **langid**: Detects the natural language of a document's text content using [langid.py](https://github.com/saffsd/langid.py). Returns an ISO 639-1 language code and log-probability confidence score. Install via `./doc.doc.sh install --plugin langid`.
 - **wordcoverage**: Calculates what percentage of a document's full text is represented by a given maximum word count. Uses `wordCount` from the `wc` plugin and an optional `maxWords` threshold (default 100). No external dependencies.
 
 ### Plugin Architecture

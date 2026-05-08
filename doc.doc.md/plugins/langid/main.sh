@@ -7,7 +7,15 @@
 
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../components/plugin_input.sh"
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$PLUGIN_DIR/../../components/plugin_input.sh"
+
+# Use venv python if available, otherwise fall back to system python3
+if [ -x "$PLUGIN_DIR/.venv/bin/python3" ]; then
+  PYTHON_BIN="$PLUGIN_DIR/.venv/bin/python3"
+else
+  PYTHON_BIN="python3"
+fi
 
 plugin_read_input
 
@@ -31,7 +39,7 @@ if [ -z "$TEXT" ]; then
 fi
 
 # Run langid via Python — text passed via stdin, never interpolated into shell command
-RESULT=$(printf '%s' "$TEXT" | python3 -c "
+RESULT=$(printf '%s' "$TEXT" | "$PYTHON_BIN" -c "
 import sys, json, langid
 text = sys.stdin.read()
 code, conf = langid.classify(text)

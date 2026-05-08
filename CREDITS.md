@@ -44,3 +44,14 @@ The Mustache template engine uses the **chevron** Python library for full Mustac
 - **License**: MIT License
 - **Author**: Noah Morrison
 - **Usage note**: `chevron` is imported as a Python library by `mustache_render.py`. The MIT license is compatible with this project's AGPL-3.0 license.
+
+## langid
+
+The `langid` plugin uses the **langid.py** Python library for language identification.
+
+- **PyPI**: [https://pypi.org/project/langid/](https://pypi.org/project/langid/)
+- **GitHub Repository**: [https://github.com/saffsd/langid.py](https://github.com/saffsd/langid.py)
+- **License**: BSD 2-Clause License
+- **Copyright**: Copyright 2011 Marco Lui <saffsd@gmail.com>. All rights reserved.
+- **Authors**: Marco Lui and Timothy Baldwin
+- **Usage note**: `langid` is installed into a plugin-local virtual environment (`.venv`) and invoked as a Python subprocess. It is not distributed with this project. The BSD 2-Clause license is compatible with this project's AGPL-3.0 license.
