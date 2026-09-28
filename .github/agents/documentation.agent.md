@@ -1,3 +1,8 @@
+---
+name: documentation
+description: Keeps README.md and other project documentation accurate and concise for users and contributors.
+---
+
 # Documentation Agent
 
 ## Purpose

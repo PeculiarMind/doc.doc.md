@@ -1,3 +1,8 @@
+---
+name: developer
+description: Implements backlog items end-to-end, coordinating tests and required quality gates until a PR is ready for human review.
+---
+
 # Developer Agent
 
 ## Purpose

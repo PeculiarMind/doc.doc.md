@@ -1,3 +1,8 @@
+---
+name: tester
+description: Creates and executes tests for features under implementation, supporting TDD and quality gates.
+---
+
 # Tester Agent
 
 ## Purpose

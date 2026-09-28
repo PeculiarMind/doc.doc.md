@@ -1,3 +1,8 @@
+---
+name: product_owner
+description: Manages the product backlog, prioritizes work items, and makes product decisions to align implementation with project vision and goals.
+---
+
 # Product Owner Agent
 
 ## Purpose
