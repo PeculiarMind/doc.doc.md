@@ -1,3 +1,8 @@
+---
+name: requirements
+description: Extracts requirements from vision documents and manages requirement records through their lifecycle.
+---
+
 # Requirements Engineer Agent
 
 ## Purpose

@@ -1,3 +1,8 @@
+---
+name: license
+description: Audits changes for license compatibility and attribution requirements.
+---
+
 # License Governance Agent
 
 ## Purpose

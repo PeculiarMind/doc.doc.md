@@ -1,3 +1,8 @@
+---
+name: architect
+description: Maintains architecture vision and documentation, and ensures implementation compliance with the architecture vision.
+---
+
 # Architect Agent
 
 ## Purpose
